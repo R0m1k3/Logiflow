@@ -409,21 +409,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/deliveries', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('🚚 PRODUCTION /api/deliveries POST - Raw body:', JSON.stringify(req.body, null, 2));
+      
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      console.log('🚚 PRODUCTION - User ID:', userId);
+      
       const deliveryData = {
         ...req.body,
         createdBy: userId,
       };
+      
+      console.log('🚚 PRODUCTION - Full delivery data before validation:', JSON.stringify(deliveryData, null, 2));
 
       const result = insertDeliverySchema.safeParse(deliveryData);
       if (!result.success) {
+        console.error('❌ PRODUCTION - Validation failed:', result.error.errors);
         return res.status(400).json({ message: "Invalid input", errors: result.error.errors });
       }
+      
+      console.log('✅ PRODUCTION - Validation passed. Data to insert:', JSON.stringify(result.data, null, 2));
 
       const delivery = await storage.createDelivery(result.data);
+      console.log('✅ PRODUCTION - Delivery created successfully:', { id: delivery.id, status: delivery.status });
       res.status(201).json(delivery);
     } catch (error) {
-      console.error("Error creating delivery:", error);
+      console.error("❌ PRODUCTION Error creating delivery:", error);
+      console.error("❌ PRODUCTION Error details:", {
+        message: error.message,
+        code: error.code,
+        constraint: error.constraint,
+        detail: error.detail
+      });
       res.status(500).json({ message: "Failed to create delivery" });
     }
   });

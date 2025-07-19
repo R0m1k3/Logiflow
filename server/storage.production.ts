@@ -973,26 +973,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDelivery(delivery: InsertDelivery): Promise<Delivery> {
-    const result = await pool.query(`
-      INSERT INTO deliveries (order_id, supplier_id, group_id, scheduled_date, quantity, unit, status, notes, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *
-    `, [
+    console.log('🚚 PRODUCTION createDelivery - Input data:', JSON.stringify(delivery, null, 2));
+    
+    const finalStatus = delivery.status || 'pending';
+    console.log('🚚 PRODUCTION createDelivery - Final status will be:', finalStatus);
+    
+    const params = [
       delivery.orderId,
       delivery.supplierId,
       delivery.groupId,
       delivery.scheduledDate,
       delivery.quantity,
       delivery.unit,
-      delivery.status || 'pending',
+      finalStatus,
       delivery.notes,
       delivery.createdBy
-    ]);
+    ];
+    console.log('🚚 PRODUCTION createDelivery - SQL params:', params);
+    
+    const result = await pool.query(`
+      INSERT INTO deliveries (order_id, supplier_id, group_id, scheduled_date, quantity, unit, status, notes, created_by)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `, params);
     
     const newDelivery = result.rows[0];
+    console.log('✅ PRODUCTION createDelivery - Delivery inserted:', {
+      id: newDelivery.id,
+      status: newDelivery.status,
+      orderId: newDelivery.order_id
+    });
     
     // Si la livraison est liée à une commande, mettre à jour le statut de la commande vers "planned"
     if (newDelivery.order_id) {
+      console.log('🔄 PRODUCTION createDelivery - Updating linked order status to planned');
       await pool.query(`
         UPDATE orders SET status = 'planned', updated_at = CURRENT_TIMESTAMP
         WHERE id = $1
