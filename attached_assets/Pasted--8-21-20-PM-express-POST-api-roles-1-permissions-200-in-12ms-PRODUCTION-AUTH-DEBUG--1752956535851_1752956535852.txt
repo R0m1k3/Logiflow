@@ -1,0 +1,202 @@
+}
+
+8:21:20 PM [express] POST /api/roles/1/permissions 200 in 12ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/roles/1/permissions',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: 'admin_local',
+
+  username: 'admin',
+
+  sessionId: '49CgzTUxVSzvnQCCj0UU5vRA2SZUhYeY',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/permissions',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: 'admin_local',
+
+  username: 'admin',
+
+  sessionId: '49CgzTUxVSzvnQCCj0UU5vRA2SZUhYeY',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔍 PRODUCTION Permissions API - User ID: admin_local
+
+🔍 PRODUCTION getRolePermissions() - Starting for role ID: 1
+
+❌ Error in PRODUCTION getRolePermissions: error: column rp.created_at does not exist
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async DatabaseStorage.getRolePermissions (file:///app/dist/index.js:3439:26)
+
+    at async file:///app/dist/index.js:5774:32 {
+
+  length: 199,
+
+  severity: 'ERROR',
+
+  code: '42703',
+
+  detail: undefined,
+
+  hint: 'Perhaps you meant to reference the column "p.created_at" or the column "r.created_at".',
+
+  position: '78',
+
+  internalPosition: undefined,
+
+  internalQuery: undefined,
+
+  where: undefined,
+
+  schema: undefined,
+
+  table: undefined,
+
+  column: undefined,
+
+  dataType: undefined,
+
+  constraint: undefined,
+
+  file: 'parse_relation.c',
+
+  line: '3685',
+
+  routine: 'errorMissingColumn'
+
+}
+
+🔍 ROLE PERMISSIONS DEBUG for role ID: 1
+
+📊 Total role permissions found: 0
+
+❌ NO ROLE PERMISSIONS FOUND AT ALL for role: 1
+
+8:21:20 PM [express] GET /api/roles/1/permissions 200 in 14ms
+
+👤 PRODUCTION Permissions API - User found: admin
+
+🔍 PRODUCTION Fetching all permissions...
+
+🔍 PRODUCTION getPermissions() - Starting query...
+
+📊 PRODUCTION getPermissions() - Total permissions found: 56
+
+📋 PRODUCTION Task permissions found: 5
+
+  - ID 56: tasks_assign -> "Assigner tâches"
+
+  - ID 53: tasks_create -> "Créer tâches"
+
+  - ID 55: tasks_delete -> "Supprimer tâches"
+
+  - ID 52: tasks_read -> "Voir tâches"
+
+  - ID 54: tasks_update -> "Modifier tâches"
+
+🏛️ PRODUCTION Admin permissions found: 3
+
+  - ID 40: nocodb_config_read -> "Voir config NocoDB"
+
+  - ID 41: nocodb_config_update -> "Modifier config NocoDB"
+
+  - ID 42: system_admin -> "Administration système"
+
+✅ PRODUCTION getPermissions() - Returning mapped result: 56
+
+📝 PRODUCTION Permissions fetched: 56 items
+
+🏷️ PRODUCTION Categories found: [
+
+  'administration',
+
+  'calendrier',
+
+  'commandes',
+
+  'commandes_clients',
+
+  'fournisseurs',
+
+  'gestion_dlc',
+
+  'gestion_roles',
+
+  'gestion_taches',
+
+  'livraisons',
+
+  'magasins',
+
+  'publicites',
+
+  'rapprochement',
+
+  'tableau_de_bord',
+
+  'utilisateurs'
+
+]
+
+📋 PRODUCTION Task permissions found: 5
+
+📋 PRODUCTION Task permissions details:
+
+  - ID: 56, Name: tasks_assign, DisplayName: "Assigner tâches", Category: gestion_taches
+
+  - ID: 53, Name: tasks_create, DisplayName: "Créer tâches", Category: gestion_taches
+
+  - ID: 55, Name: tasks_delete, DisplayName: "Supprimer tâches", Category: gestion_taches
+
+  - ID: 52, Name: tasks_read, DisplayName: "Voir tâches", Category: gestion_taches
+
+  - ID: 54, Name: tasks_update, DisplayName: "Modifier tâches", Category: gestion_taches
+
+8:21:20 PM [express] GET /api/permissions 304 in 34ms
+
+8:21:39 PM [express] HEAD /api/health 200 in 0ms
+
+8:22:09 PM [express] HEAD /api/health 200 in 0ms
+
+
+      
+      
+    

@@ -1820,7 +1820,6 @@ export class DatabaseStorage implements IStorage {
         SELECT 
           rp.role_id,
           rp.permission_id,
-          rp.created_at,
           p.id as p_id,
           p.name as p_name,
           p.display_name as p_display_name,
@@ -1844,7 +1843,6 @@ export class DatabaseStorage implements IStorage {
       const mappedResult = result.rows.map(row => ({
         roleId: row.role_id,
         permissionId: row.permission_id,
-        createdAt: null, // No created_at column in production
         permission: {
           id: row.p_id,
           name: row.p_name,
