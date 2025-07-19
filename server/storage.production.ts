@@ -2465,16 +2465,16 @@ export class DatabaseStorage implements IStorage {
       const result = await pool.query(query, params);
       return result.rows.map(row => ({
         id: row.id,
-        productName: row.product_name,
-        gencode: row.gencode,
-        dlcDate: this.formatDate(row.dlc_date),
-        dateType: row.date_type,
-        quantity: row.quantity,
-        unit: row.unit,
-        location: row.location,
-        status: row.status,
-        notes: row.notes,
-        alertThreshold: row.alert_threshold,
+        productName: row.product_name || row.name,
+        gencode: row.gencode || row.product_code,
+        dlcDate: this.formatDate(row.dlc_date || row.expiry_date),
+        dateType: row.date_type || 'DLC',
+        quantity: row.quantity || 1,
+        unit: row.unit || 'unité',
+        location: row.location || 'Magasin',
+        status: row.status || 'en_attente',
+        notes: row.notes || '',
+        alertThreshold: row.alert_threshold || 15,
         groupId: row.group_id,
         supplierId: row.supplier_id,
         createdBy: row.created_by,
@@ -2571,30 +2571,30 @@ export class DatabaseStorage implements IStorage {
       
       const result = await pool.query(`
         INSERT INTO dlc_products (
-          name, product_name, product_code, dlc_date, expiry_date, 
-          quantity, status, group_id, supplier_id, description, 
+          name, product_name, product_code, gencode, dlc_date, expiry_date, 
+          quantity, status, group_id, supplier_id, 
           created_by, created_at, updated_at, date_type, unit, 
           location, alert_threshold, notes
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), $12, $13, $14, $15, $16)
         RETURNING *
       `, [
-        finalProductName,                                // name (nouveau)
-        finalProductName,                                // product_name (ancien, NOT NULL)
+        finalProductName,                                // name
+        finalProductName,                                // product_name
         finalProductCode,                                // product_code
-        finalExpiryDate,                                 // dlc_date (nouveau)
-        finalExpiryDate,                                 // expiry_date (ancien, NOT NULL)
-        dlcProductData.quantity,                         // quantity
+        finalProductCode,                                // gencode
+        finalExpiryDate,                                 // dlc_date
+        finalExpiryDate,                                 // expiry_date
+        dlcProductData.quantity || 1,                    // quantity
         dlcProductData.status || 'en_attente',           // status
         dlcProductData.groupId,                          // group_id
         dlcProductData.supplierId,                       // supplier_id
-        dlcProductData.description || '',                // description
         dlcProductData.createdBy,                        // created_by
-        'DLC',                                           // date_type (NOT NULL)
-        'unité',                                         // unit (NOT NULL)
-        'Magasin',                                       // location (NOT NULL)
-        15,                                              // alert_threshold (NOT NULL)
-        dlcProductData.description || ''                 // notes
+        dlcProductData.dateType || 'DLC',                // date_type
+        dlcProductData.unit || 'unité',                  // unit
+        dlcProductData.location || 'Magasin',            // location
+        dlcProductData.alertThreshold || 15,             // alert_threshold
+        dlcProductData.notes || ''                       // notes
       ]);
 
       const row = result.rows[0];
@@ -2723,9 +2723,54 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDlcProduct(id: number): Promise<void> {
     try {
-      await pool.query('DELETE FROM dlc_products WHERE id = $1', [id]);
+      console.log('🗑️ Deleting DLC product with ID:', id);
+      const result = await pool.query('DELETE FROM dlc_products WHERE id = $1', [id]);
+      console.log('🗑️ DLC product deleted, rows affected:', result.rowCount);
     } catch (error) {
-      console.error("Error deleting DLC product:", error);
+      console.error("❌ Error deleting DLC product:", error);
+      throw error;
+    }
+  }
+
+  async validateDlcProduct(id: number, validatedBy: string): Promise<DlcProductFrontend> {
+    try {
+      console.log('✅ Validating DLC product:', { id, validatedBy });
+      const result = await pool.query(`
+        UPDATE dlc_products 
+        SET status = 'valide', validated_by = $1, validated_at = NOW(), updated_at = NOW()
+        WHERE id = $2
+        RETURNING *
+      `, [validatedBy, id]);
+
+      if (result.rows.length === 0) {
+        throw new Error('DLC Product not found');
+      }
+
+      const row = result.rows[0];
+      console.log('✅ DLC product validated:', row.id);
+
+      return {
+        id: row.id,
+        productName: row.product_name || row.name,
+        gencode: row.gencode || row.product_code,
+        dlcDate: this.formatDate(row.dlc_date || row.expiry_date),
+        dateType: row.date_type || 'DLC',
+        quantity: row.quantity || 1,
+        unit: row.unit || 'unité',
+        location: row.location || 'Magasin',
+        status: row.status,
+        notes: row.notes || '',
+        alertThreshold: row.alert_threshold || 15,
+        groupId: row.group_id,
+        supplierId: row.supplier_id,
+        createdBy: row.created_by,
+        validatedBy: row.validated_by,
+        validatedAt: this.formatDate(row.validated_at),
+        createdAt: this.formatDate(row.created_at),
+        updatedAt: this.formatDate(row.updated_at)
+      };
+    } catch (error) {
+      console.error("❌ Error validating DLC product:", error);
       throw error;
     }
   }

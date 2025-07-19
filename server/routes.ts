@@ -2165,7 +2165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/dlc-products/:id/validate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/dlc-products/:id/validate', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
