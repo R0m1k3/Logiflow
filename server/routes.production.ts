@@ -1810,7 +1810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // DLC validation route
+  // DLC validation routes (both POST and PUT for compatibility)
   app.post('/api/dlc-products/:id/validate', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -1826,6 +1826,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(dlcProduct);
     } catch (error) {
       console.error("Error validating DLC product:", error);
+      res.status(500).json({ message: "Failed to validate DLC product" });
+    }
+  });
+
+  app.put('/api/dlc-products/:id/validate', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      console.log('✅ PUT Validation request:', { id, userId });
+      
+      // Check if user has permission to validate
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
+        return res.status(403).json({ message: "Insufficient permissions to validate products" });
+      }
+
+      const dlcProduct = await storage.validateDlcProduct(id, userId);
+      console.log('✅ DLC product validated via PUT:', dlcProduct.id);
+      res.json(dlcProduct);
+    } catch (error) {
+      console.error("❌ Error validating DLC product via PUT:", error);
       res.status(500).json({ message: "Failed to validate DLC product" });
     }
   });
