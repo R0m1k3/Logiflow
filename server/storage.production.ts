@@ -2449,6 +2449,9 @@ export class DatabaseStorage implements IStorage {
           conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) <= CURRENT_DATE`);
         } else if (filters.status === 'en_cours') {
           conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE + INTERVAL '15 days'`);
+        } else if (filters.status === 'valides') {
+          // Pour les validés, on montre uniquement ceux avec le statut exact "valides"
+          conditions.push(`dlc.status = 'valides'`);
         } else {
           conditions.push(`dlc.status = $${paramIndex}`);
           params.push(filters.status);
