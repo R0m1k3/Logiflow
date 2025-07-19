@@ -191,6 +191,28 @@ button[aria-current="date"]:focus,
   --tw-ring-shadow: none !important;
 }
 
+/* Cibler toutes les variantes possibles du contour orange */
+button[aria-current="date"],
+button[data-today="true"],
+.rdp-day[aria-current="date"],
+.rdp-day_today,
+.rdp-button[aria-current="date"] {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-width: 0px !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+}
+
+/* Force suppression avec sélecteurs très spécifiques */
+.rounded-md button[aria-current="date"],
+.rounded-md .rdp-day_today,
+[role="gridcell"] button[aria-current="date"] {
+  border-color: transparent !important;
+  outline-color: transparent !important;
+}
+
 /* Force suppression contour sur focus */
 .rdp-day_today:focus-visible,
 .rdp-day_today:focus {
@@ -198,4 +220,29 @@ button[aria-current="date"]:focus,
   border: none !important;
   box-shadow: none !important;
   --tw-ring-shadow: none !important;
+}
+
+/* SUPPRESSION FORCÉE DU CONTOUR ORANGE - Ultime solution */
+* {
+  --tw-ring-offset-shadow: none !important;
+}
+
+button[aria-current="date"] {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: 0 0 0 0 transparent !important;
+  --tw-ring-shadow: 0 0 0 0 transparent !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* Override focus visible pour supprimer le contour orange système */
+*:focus-visible {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+}
+
+/* Suppression spécifique du ring orange sur tous les éléments */
+[class*="ring-"] {
+  --tw-ring-shadow: none !important;
+  box-shadow: none !important;
 }

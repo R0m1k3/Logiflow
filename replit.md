@@ -366,6 +366,13 @@ The application uses a sophisticated dual authentication approach:
 - **INTERFACE FONCTIONNELLE** - 2 tâches maintenant visibles et affichées correctement dans l'interface
 - **MODE DÉVELOPPEMENT RESTAURÉ** - Environnement automatique restauré après diagnostic réussi
 
+### July 19, 2025 - RÉSOLUTION DÉFINITIVE: Contour Orange Calendrier Supprimé
+- **PROBLÈME SUPERPOSITION IDENTIFIÉ** - Contour orange apparaissait par-dessus le style bleu de la date du jour
+- **CSS SPÉCIFIQUE AJOUTÉ** - Règles CSS ciblant pseudo-éléments ::before et ::after pour supprimer superposition
+- **STYLES TAILWIND FORCÉS** - Classes !important dans day_today pour override complet des styles par défaut
+- **VARIABLES CSS NEUTRALISÉES** - --tw-ring-color et --tw-ring-shadow forcées à transparent/none
+- **CONTOUR ORANGE SUPPRIMÉ DÉFINITIVEMENT** - Date du jour affiche maintenant uniquement fond bleu sans contour orange
+
 ### July 19, 2025 - CORRECTION FINALE: Base de Données Complètement Fonctionnelle
 - **SCRIPT D'INITIALISATION SQL CRÉÉ** - Script init.sql complet avec toutes les tables et colonnes requises pour une base de données complète
 - **BASE DE DONNÉES ENTIÈREMENT RECONSTRUITE** - Toutes les tables supprimées et recréées avec structure correcte (users, groups, suppliers, orders, deliveries, publicities, customer_orders, dlc_products, tasks, roles, permissions, sessions)
