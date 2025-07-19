@@ -1,5 +1,7 @@
 // Environment setup for production deployment
 process.env.STORAGE_MODE = 'production'; // Force production mode for debugging
+// Keep NODE_ENV as development to avoid static file serving issues
+// process.env.NODE_ENV = 'production'; // Force production environment for debugging
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
@@ -61,8 +63,8 @@ app.use((req, res, next) => {
     // Continue startup even if role initialization fails
   }
 
-  // Initialize production database and permissions only in production
-  if (process.env.NODE_ENV === 'production') {
+  // Initialize production database and permissions when using production storage
+  if (process.env.STORAGE_MODE === 'production') {
     try {
       await initDatabase();
     } catch (error) {

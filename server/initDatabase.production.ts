@@ -347,6 +347,16 @@ async function addMissingColumns() {
       console.log('✅ Added validated_at column to deliveries');
     }
 
+    // CRITICAL FIX: Corriger la contrainte deliveries_status_check pour permettre 'planned'
+    console.log('🔧 CRITICAL FIX: Correcting deliveries status constraint...');
+    try {
+      await pool.query('ALTER TABLE deliveries DROP CONSTRAINT IF EXISTS deliveries_status_check');
+      await pool.query("ALTER TABLE deliveries ADD CONSTRAINT deliveries_status_check CHECK (status IN ('pending', 'planned', 'delivered', 'cancelled'))");
+      console.log('✅ CRITICAL FIX: Deliveries status constraint corrected to allow planned status');
+    } catch (error) {
+      console.error('❌ Failed to fix deliveries constraint:', error);
+    }
+
     // Check and add MISSING columns to users table
     const columnsToAdd = [
       { name: 'name', type: 'VARCHAR(255)', default: null },
