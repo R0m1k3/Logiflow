@@ -847,7 +847,7 @@ export default function CustomerOrders() {
 
       {/* Create Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nouvelle Commande Client</DialogTitle>
           </DialogHeader>
@@ -861,7 +861,7 @@ export default function CustomerOrders() {
 
       {/* Edit Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifier la Commande</DialogTitle>
           </DialogHeader>
