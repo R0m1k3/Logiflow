@@ -386,7 +386,8 @@ export default function BLReconciliation() {
 
   const reconcileMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("PUT", `/api/deliveries/${id}`, {
+      console.log('🌐 API Request:', { url: `/api/deliveries/${id}`, method: "PUT", body: { reconciled: true } });
+      await apiRequest(`/api/deliveries/${id}`, "PUT", {
         reconciled: true,
       });
     },
@@ -403,6 +404,7 @@ export default function BLReconciliation() {
       });
     },
     onError: (error) => {
+      console.error('❌ Error reconciling delivery:', error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Non autorisé",
@@ -416,7 +418,7 @@ export default function BLReconciliation() {
       }
       toast({
         title: "Erreur",
-        description: "Impossible de valider le rapprochement",
+        description: `Impossible de valider le rapprochement: ${error.message}`,
         variant: "destructive",
       });
     },
