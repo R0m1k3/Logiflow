@@ -1352,7 +1352,7 @@ export class DatabaseStorage implements IStorage {
     const publicityData = await Promise.all(
       publicities.rows.map(async (pub) => {
         const participations = await pool.query(
-          'SELECT pp.group_id, g.name as group_name, g.color as group_color FROM publicity_participations pp LEFT JOIN groups g ON pp.group_id = g.id WHERE pp.publicity_id = $1', 
+          'SELECT pp.group_id, g.name as group_name, g.color as group_color, pp.created_at FROM publicity_participations pp LEFT JOIN groups g ON pp.group_id = g.id WHERE pp.publicity_id = $1', 
           [pub.id]
         );
         
