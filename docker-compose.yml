@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  app:
+  logiflow:
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,16 +9,16 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://logiflow_admin:LogiFlow2025!@postgres:5432/logiflow_db
+      DATABASE_URL: postgresql://logiflow_admin:LogiFlow2025!@logiflow-db:5432/logiflow_db
       SESSION_SECRET: LogiFlow_Super_Secret_Session_Key_2025_Production
       PORT: 3000
       USE_LOCAL_AUTH: "true"
     ports:
       - "3000:3000"
     networks:
-      - logiflow_network
+      - nginx_default
     depends_on:
-      postgres:
+      logiflow-db:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
@@ -27,7 +27,7 @@ services:
       retries: 3
       start_period: 40s
 
-  postgres:
+  logiflow-db:
     image: postgres:15-alpine
     restart: unless-stopped
     environment:
@@ -37,7 +37,7 @@ services:
     ports:
       - "5434:5432"
     networks:
-      - logiflow_network
+      - nginx_default
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
@@ -53,5 +53,5 @@ volumes:
     driver: local
 
 networks:
-  logiflow_network:
-    driver: bridge
+  nginx_default:
+    external: true
