@@ -243,13 +243,35 @@ export class DatabaseStorage implements IStorage {
     // Hash password if provided
     const hashedPassword = userData.password ? await hashPassword(userData.password) : null;
     
+    // Ensure username is not null - use email prefix or generate from name
+    let username = userData.username;
+    if (!username) {
+      if (userData.email) {
+        username = userData.email.split('@')[0];
+      } else if (userData.firstName && userData.lastName) {
+        username = `${userData.firstName.toLowerCase()}.${userData.lastName.toLowerCase()}`;
+      } else if (userData.name) {
+        username = userData.name.toLowerCase().replace(/\s+/g, '.');
+      } else {
+        username = `user_${nanoid(8)}`;
+      }
+    }
+    
+    console.log('🔍 PRODUCTION createUser - Generated username:', username, 'for data:', {
+      originalUsername: userData.username,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      name: userData.name
+    });
+    
     const result = await pool.query(`
       INSERT INTO users (id, username, email, name, first_name, last_name, profile_image_url, password, role, password_changed)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `, [
       userData.id || nanoid(),
-      userData.username,
+      username,
       userData.email,
       userData.name,
       userData.firstName,
