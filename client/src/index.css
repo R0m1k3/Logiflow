@@ -126,3 +126,18 @@
     background-color: var(--accent);
   }
 }
+
+/* Supprimer le contour orange de la date du jour dans le calendrier */
+.rdp-day_today {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+.rdp-day_today:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}

@@ -41,8 +41,12 @@ export default function Tasks() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // États locaux
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  // États locaux - initialiser avec la date locale sans problème de fuseau horaire
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const today = new Date();
+    // Créer une date locale sans décalage de fuseau horaire
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -163,28 +167,13 @@ export default function Tasks() {
     }
   };
 
-  // Debug des tâches - temporairement désactivé
-  // console.log('🔍 Tasks Debug - Current state:', {
-  //   tasksLength: tasks.length,
-  //   isLoading,
-  //   selectedDate: selectedDate.toISOString(),
-  //   user: user?.id,
-  //   selectedStoreId
-  // });
-
   // Filtrer les tâches
   const filteredTasks = tasks.filter((task: TaskWithRelations) => {
-    // Debug temporairement désactivé
-    // console.log('🔍 Task Filter Debug:', {
-    //   taskId: task.id,
-    //   title: task.title,
-    //   dueDate: task.dueDate,
-    //   status: task.status,
-    //   selectedDate: selectedDate.toISOString().split('T')[0]
-    // });
-
-    // Filtre par date sélectionnée
-    const isSelectedDate = task.dueDate ? isSameDay(new Date(task.dueDate), selectedDate) : false;
+    // Filtre par date sélectionnée - comparaison simple de chaînes de dates
+    const taskDateStr = task.dueDate ? task.dueDate.split('T')[0] : null;
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    const isSelectedDate = taskDateStr === selectedDateStr;
+    
     if (!isSelectedDate && task.status !== 'completed') {
       // Montrer aussi les tâches sans date d'échéance pour le jour courant
       if (!task.dueDate && isSameDay(selectedDate, new Date())) {
@@ -313,7 +302,7 @@ export default function Tasks() {
                   row: "flex w-full mt-2",
                   cell: "text-center text-sm p-0 relative flex-1 h-9 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
                   day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-                  day_today: "bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 border-0"
+                  day_today: "bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 !border-0 !ring-0 !outline-0"
                 }}
               />
             </CardContent>
