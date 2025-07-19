@@ -1088,6 +1088,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Set permissions for a role
+  app.post('/api/roles/:id/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        console.log("❌ ROLE PERMISSIONS UPDATE - Access denied, user role:", user?.role);
+        return res.status(403).json({ message: "Accès refusé - droits administrateur requis" });
+      }
+
+      const roleId = parseInt(req.params.id);
+      const { permissionIds } = req.body;
+      
+      console.log("🔄 PRODUCTION Updating role permissions for role ID:", roleId);
+      console.log("📝 PRODUCTION New permission IDs:", permissionIds);
+
+      if (!Array.isArray(permissionIds)) {
+        console.log("❌ PRODUCTION Invalid permissionIds format:", typeof permissionIds);
+        return res.status(400).json({ message: "permissionIds doit être un tableau" });
+      }
+
+      await storage.setRolePermissions(roleId, permissionIds);
+      
+      // Récupérer les nouvelles permissions pour confirmation
+      const updatedPermissions = await storage.getRolePermissions(roleId);
+      console.log("✅ PRODUCTION Role permissions updated successfully:", updatedPermissions.length, "permissions");
+      
+      res.json({ 
+        success: true, 
+        message: "Permissions mises à jour avec succès",
+        permissionCount: updatedPermissions.length 
+      });
+    } catch (error) {
+      console.error("❌ PRODUCTION Error updating role permissions:", error);
+      res.status(500).json({ message: "Erreur lors de la mise à jour des permissions" });
+    }
+  });
+
   // 🚨 ENDPOINT TEMPORAIRE DE DIAGNOSTIC PRODUCTION PERMISSIONS TÂCHES
   app.get('/api/debug/task-permissions', isAuthenticated, async (req: any, res) => {
     try {
