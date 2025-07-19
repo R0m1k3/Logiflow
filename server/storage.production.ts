@@ -1844,7 +1844,7 @@ export class DatabaseStorage implements IStorage {
       const mappedResult = result.rows.map(row => ({
         roleId: row.role_id,
         permissionId: row.permission_id,
-        createdAt: this.formatDate(row.created_at),
+        createdAt: null, // No created_at column in production
         permission: {
           id: row.p_id,
           name: row.p_name,
@@ -1876,22 +1876,27 @@ export class DatabaseStorage implements IStorage {
 
   async setRolePermissions(roleId: number, permissionIds: number[]): Promise<void> {
     try {
+      console.log("🔄 PRODUCTION setRolePermissions called:", { roleId, permissionIds });
+      
       // Delete existing permissions for this role
       await pool.query('DELETE FROM role_permissions WHERE role_id = $1', [roleId]);
+      console.log("✅ PRODUCTION Deleted existing role permissions for role:", roleId);
       
-      // Insert new permissions
+      // Insert new permissions (without created_at column since it doesn't exist in production)
       if (permissionIds.length > 0) {
         const values = permissionIds.map((permId, index) => 
-          `($1, $${index + 2}, CURRENT_TIMESTAMP)`
+          `($1, $${index + 2})`
         ).join(', ');
         
+        console.log("📝 PRODUCTION Inserting new permissions:", values);
         await pool.query(`
-          INSERT INTO role_permissions (role_id, permission_id, created_at)
+          INSERT INTO role_permissions (role_id, permission_id)
           VALUES ${values}
         `, [roleId, ...permissionIds]);
+        console.log("✅ PRODUCTION Successfully inserted", permissionIds.length, "permissions for role", roleId);
       }
     } catch (error) {
-      console.error("Error in setRolePermissions:", error);
+      console.error("❌ PRODUCTION Error in setRolePermissions:", error);
       throw error;
     }
   }

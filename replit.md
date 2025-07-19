@@ -320,6 +320,16 @@ The application uses a sophisticated dual authentication approach:
 - **DOCUMENTATION MISE À JOUR** - Problème documenté avec solution complète pour déploiements futurs
 - **INTERFACE OPÉRATIONNELLE** - Page Gestion des Rôles fonctionne en développement avec toutes catégories visibles
 
+### July 19, 2025 - CORRECTION CRITIQUE: Modifications Permissions Production & Création Utilisateur
+- **ERREUR SETROLEPERMISSIONS RÉSOLUE** - Suppression référence colonne "created_at" inexistante en table role_permissions production
+- **STORAGE PRODUCTION CORRIGÉ** - setRolePermissions() utilise INSERT (role_id, permission_id) sans created_at
+- **FORMULAIRE UTILISATEUR AMÉLIORÉ** - Ajout champ "Identifiant" obligatoire, prénom/nom/email rendus optionnels
+- **VALIDATION CLIENT CORRIGÉE** - Seuls identifiant et mot de passe sont obligatoires pour créer utilisateur
+- **GÉNÉRATION USERNAME AUTOMATIQUE** - Côté serveur génère username depuis email/nom si non fourni (résout erreur "username null")
+- **SCHÉMA BACKEND ÉTENDU** - insertUserSchema inclut maintenant password et name pour compatibilité complète
+- **ROUTE POST PERMISSIONS OPÉRATIONNELLE** - Modification permissions rôles maintenant fonctionnelle en production
+- **LOGS PRODUCTION DÉTAILLÉS** - Ajout traçabilité complète pour debugging setRolePermissions
+
 ### July 19, 2025 - CORRECTION FINALE: Base de Données Complètement Fonctionnelle
 - **SCRIPT D'INITIALISATION SQL CRÉÉ** - Script init.sql complet avec toutes les tables et colonnes requises pour une base de données complète
 - **BASE DE DONNÉES ENTIÈREMENT RECONSTRUITE** - Toutes les tables supprimées et recréées avec structure correcte (users, groups, suppliers, orders, deliveries, publicities, customer_orders, dlc_products, tasks, roles, permissions, sessions)
