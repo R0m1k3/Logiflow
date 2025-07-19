@@ -234,7 +234,7 @@ export default function DlcPage() {
     const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     // Afficher le bouton si le produit expire dans 15 jours ou moins, ou est déjà expiré
-    return (daysUntilExpiry <= 15 && product.status !== "valides");
+    return (daysUntilExpiry <= 15 && product.status !== "valide");
   };
 
   const getStatusBadge = (status: string, dlcDate: string | null) => {
@@ -247,7 +247,7 @@ export default function DlcPage() {
       return <Badge variant="destructive">Expiré</Badge>;
     } else if (status === "expires_soon" || daysUntilExpiry <= 15) { // 15 jours au lieu de 3
       return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Expire bientôt</Badge>;
-    } else if (status === "valides") {
+    } else if (status === "valide") {
       return <Badge variant="outline" className="bg-gray-100 text-gray-800">Validé</Badge>;
     } else {
       return <Badge variant="default" className="bg-green-100 text-green-800">Actif</Badge>;
@@ -686,7 +686,7 @@ export default function DlcPage() {
                   {filteredProducts.map((product) => (
                     <TableRow 
                       key={product.id} 
-                      className={product.status === "valides" ? "opacity-50 bg-gray-50" : ""}
+                      className={product.status === "valide" ? "opacity-60 bg-gray-50 dark:bg-gray-800" : ""}
                     >
                       <TableCell className="font-medium">{product.productName}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
