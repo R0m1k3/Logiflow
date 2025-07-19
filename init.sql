@@ -247,10 +247,8 @@ CREATE TABLE publicity_participations (
 INSERT INTO users (id, username, password, email, first_name, last_name, name, role) VALUES 
 ('1', 'admin', 'ffcaa5ca840c66a9d52c9c9c0b7c28aeb2b16d7174c8b3b4a6f49c1f7e61b1c3:1000:32:0d2b7b5e6e4c2b3b3e6d2a9b7c5e8f1a0c3d6f9b2e5c8a1d4f7b0a3e6c9f2e5b8', 'admin@logiflow.com', 'Admin', 'System', 'Admin System', 'admin');
 
-INSERT INTO groups (name, color) VALUES 
-('Magasin Principal', '#3b82f6'),
-('Magasin Secondaire', '#10b981'),
-('Entrepôt', '#f59e0b');
+-- Les magasins sont créés par les utilisateurs via l'interface
+-- Pas de magasins par défaut insérés automatiquement
 
 INSERT INTO suppliers (name, contact, phone) VALUES 
 ('Fournisseur Test 1', 'Jean Dupont', '01 23 45 67 89'),
@@ -301,8 +299,5 @@ SELECT u.id, r.id
 FROM users u, roles r 
 WHERE u.username = 'admin' AND r.name = 'admin';
 
--- Attribution de l'utilisateur admin au groupe principal
-INSERT INTO user_groups (user_id, group_id) 
-SELECT u.username, g.id 
-FROM users u, groups g 
-WHERE u.username = 'admin' AND g.name = 'Magasin Principal';
+-- Les assignations aux magasins se font via l'interface utilisateur
+-- Pas d'attribution automatique à un magasin par défaut

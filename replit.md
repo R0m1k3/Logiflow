@@ -330,6 +330,14 @@ The application uses a sophisticated dual authentication approach:
 - **ROUTE POST PERMISSIONS OPÉRATIONNELLE** - Modification permissions rôles maintenant fonctionnelle en production
 - **LOGS PRODUCTION DÉTAILLÉS** - Ajout traçabilité complète pour debugging setRolePermissions
 
+### July 19, 2025 - NETTOYAGE MAGASINS PAR DÉFAUT: Personnalisation Production Complète
+- **MAGASINS PAR DÉFAUT SUPPRIMÉS** - Suppression "Magasin Principal", "Magasin Secondaire" et "Entrepôt" de la base de données développement
+- **SCRIPTS INIT NETTOYÉS** - Modification init.sql pour ne plus créer automatiquement les magasins par défaut
+- **PRODUCTION PERSONNALISÉE** - Script initDatabase.production.ts configuré pour ne pas recréer magasins par défaut
+- **MAGASINS UTILISATEUR PRÉSERVÉS** - Frouard et Houdemont maintenant seuls magasins en base pour personnalisation complète
+- **AUTO-ATTRIBUTION CORRIGÉE** - Suppression attribution automatique admin au "Magasin Principal" inexistant
+- **FLEXIBILITÉ PRODUCTION** - Utilisateurs peuvent créer leurs propres magasins sans interférence des valeurs par défaut
+
 ### July 19, 2025 - CORRECTION FINALE: Base de Données Complètement Fonctionnelle
 - **SCRIPT D'INITIALISATION SQL CRÉÉ** - Script init.sql complet avec toutes les tables et colonnes requises pour une base de données complète
 - **BASE DE DONNÉES ENTIÈREMENT RECONSTRUITE** - Toutes les tables supprimées et recréées avec structure correcte (users, groups, suppliers, orders, deliveries, publicities, customer_orders, dlc_products, tasks, roles, permissions, sessions)
