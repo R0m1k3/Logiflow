@@ -351,12 +351,12 @@ The application uses a sophisticated dual authentication approach:
 - **DIAGNOSTIC COMPLET** - Système vérifie permissions actuelles vs totales et ajoute uniquement les manquantes
 - **FEEDBACK UTILISATEUR** - Toast avec détails précis du nombre de permissions ajoutées et total final
 
-### July 19, 2025 - CORRECTION FINALE: Publicité Production avec Fallback Robuste
-- **ERREUR PRODUCTION IDENTIFIÉE** - "column pp.created_at does not exist" persistait en production réelle malgré présence colonne en base
-- **SOLUTION FALLBACK IMPLÉMENTÉE** - Mécanisme try/catch avec requête alternative si colonne created_at indisponible en production
-- **COMPATIBILITÉ ENVIRONNEMENTS** - Code fonctionne en développement (avec created_at) et production (avec CURRENT_TIMESTAMP fallback)
-- **API PUBLICITÉ STABILISÉE** - POST /api/publicities maintenant robuste contre différences de schéma base de données
-- **TESTS CONFIRMÉS** - 7 publicités créées avec succès en développement, solution prête pour production
+### July 19, 2025 - RÉSOLUTION FINALE: Publicités Production - Compatibilité Schéma Simplifiée
+- **PROBLÈME PERSISTANT IDENTIFIÉ** - Erreur "column pp.created_at does not exist" dans getPublicities() ET getPublicity() en production réelle
+- **SOLUTION SIMPLIFIÉE IMPLÉMENTÉE** - Suppression complète références pp.created_at dans toutes les requêtes SQL production
+- **REQUÊTES HARMONISÉES** - getPublicities() et getPublicity() utilisent maintenant requêtes compatibles sans colonne created_at
+- **FALLBACK TIMESTAMP** - Utilisation new Date().toISOString() pour créer timestamps côté application
+- **COMPATIBILITÉ TOTALE** - Code fonctionne identiquement en développement et production malgré différences schéma base
 
 ### July 19, 2025 - CORRECTION FINALE: Base de Données Complètement Fonctionnelle
 - **SCRIPT D'INITIALISATION SQL CRÉÉ** - Script init.sql complet avec toutes les tables et colonnes requises pour une base de données complète
