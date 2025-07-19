@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Plus, Edit, Trash2, Phone, PhoneCall, Printer, Eye } from "lucide-react";
 import JsBarcode from 'jsbarcode';
 import { safeFormat, safeDate } from "@/lib/dateUtils";
@@ -659,7 +660,16 @@ export default function CustomerOrders() {
     }
   });
 
-
+  // Pagination
+  const {
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    paginatedData: paginatedOrders,
+    totalItems
+  } = usePagination(sortedOrders, 20);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -720,7 +730,7 @@ export default function CustomerOrders() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            Commandes ({sortedOrders.length})
+            Commandes ({totalItems})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -742,7 +752,7 @@ export default function CustomerOrders() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedOrders.map((order) => (
+                {paginatedOrders.map((order) => (
                   <TableRow
                     key={order.id}
                     className={isGrayedOut(order.status) ? "opacity-50" : ""}
@@ -841,6 +851,19 @@ export default function CustomerOrders() {
                 ))}
               </TableBody>
             </Table>
+          )}
+          
+          {/* Pagination */}
+          {totalItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+              className="mt-4 border-t border-gray-200 pt-4"
+            />
           )}
         </CardContent>
       </Card>

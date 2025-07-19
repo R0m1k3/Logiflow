@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { useStore } from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
@@ -189,6 +190,17 @@ export default function Deliveries() {
     return matchesSearch && matchesStatus;
   }) : [];
 
+  // Pagination
+  const {
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    paginatedData: paginatedDeliveries,
+    totalItems
+  } = usePagination(filteredDeliveries, 20);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -357,7 +369,7 @@ export default function Deliveries() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredDeliveries.map((delivery) => (
+                    {paginatedDeliveries.map((delivery) => (
                       <tr key={delivery.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -457,6 +469,17 @@ export default function Deliveries() {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Pagination */}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                className="mt-4 p-4 border-t border-gray-200"
+              />
             </div>
           </div>
         )}

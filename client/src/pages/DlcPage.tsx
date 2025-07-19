@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -390,6 +391,17 @@ export default function DlcPage() {
     return true;
   });
 
+  // Pagination
+  const {
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    paginatedData: paginatedProducts,
+    totalItems
+  } = usePagination(filteredProducts, 20);
+
   if (authLoading) {
     return <div className="flex justify-center items-center h-64">Chargement...</div>;
   }
@@ -654,7 +666,7 @@ export default function DlcPage() {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Produits DLC ({filteredProducts.length})</CardTitle>
+            <CardTitle>Produits DLC ({totalItems})</CardTitle>
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Exporter PDF
@@ -664,7 +676,7 @@ export default function DlcPage() {
         <CardContent>
           {productsLoading ? (
             <div className="flex justify-center items-center h-32">Chargement des produits...</div>
-          ) : filteredProducts.length === 0 ? (
+          ) : totalItems === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Aucun produit DLC trouvé
             </div>
@@ -683,7 +695,7 @@ export default function DlcPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.map((product) => (
+                  {paginatedProducts.map((product) => (
                     <TableRow 
                       key={product.id} 
                       className={product.status === "valide" ? "opacity-60 bg-gray-50 dark:bg-gray-800" : ""}
@@ -737,6 +749,19 @@ export default function DlcPage() {
                 </TableBody>
               </Table>
             </div>
+          )}
+          
+          {/* Pagination */}
+          {totalItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+              className="mt-4 border-t border-gray-200 pt-4"
+            />
           )}
         </CardContent>
       </Card>

@@ -6,6 +6,7 @@ import { safeFormat } from "@/lib/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -533,6 +534,17 @@ export default function BLReconciliation() {
     );
   }) : [];
 
+  // Pagination
+  const {
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    paginatedData: paginatedDeliveries,
+    totalItems
+  } = usePagination(filteredDeliveries, 20);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -633,7 +645,7 @@ export default function BLReconciliation() {
 
       {/* Table */}
       <div className="flex-1 overflow-auto p-4">
-        {filteredDeliveries.length === 0 ? (
+        {totalItems === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -682,7 +694,7 @@ export default function BLReconciliation() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredDeliveries.map((delivery: any) => {
+                  {paginatedDeliveries.map((delivery: any) => {
                     const difference = calculateDifference(
                       parseFloat(delivery.blAmount || '0'),
                       delivery.invoiceAmount ? parseFloat(delivery.invoiceAmount) : undefined
@@ -855,6 +867,19 @@ export default function BLReconciliation() {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination */}
+          {totalItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+              className="mt-4 border-t border-gray-200 pt-4"
+            />
+          )}
         </div>
       )}
     </div>
