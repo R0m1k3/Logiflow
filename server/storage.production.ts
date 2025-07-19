@@ -2775,37 +2775,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async validateDlcProduct(id: number, validatedBy: string): Promise<DlcProductFrontend> {
-    try {
-      const result = await pool.query(`
-        UPDATE dlc_products 
-        SET status = 'valides', validated_by = $1, validated_at = NOW(), updated_at = NOW()
-        WHERE id = $2
-        RETURNING *
-      `, [validatedBy, id]);
 
-      const row = result.rows[0];
-      return {
-        id: row.id,
-        name: row.name || row.product_name,
-        productCode: row.product_code || row.gencode,
-        dlcDate: this.formatDate(row.dlc_date || row.expiry_date),
-        quantity: row.quantity,
-        status: row.status,
-        groupId: row.group_id,
-        supplierId: row.supplier_id,
-        description: row.description || row.notes,
-        createdBy: row.created_by,
-        validatedBy: row.validated_by,
-        validatedAt: this.formatDate(row.validated_at),
-        createdAt: this.formatDate(row.created_at),
-        updatedAt: this.formatDate(row.updated_at)
-      };
-    } catch (error) {
-      console.error("Error validating DLC product:", error);
-      throw error;
-    }
-  }
 
   async getDlcStats(groupIds?: number[]): Promise<any> {
     try {
