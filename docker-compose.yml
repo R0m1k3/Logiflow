@@ -41,12 +41,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - ./migration-production.sql:/docker-entrypoint-initdb.d/02-migration.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U logiflow_admin -d logiflow_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
 volumes:
   postgres_data:
