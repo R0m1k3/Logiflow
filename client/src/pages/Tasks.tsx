@@ -60,18 +60,13 @@ export default function Tasks() {
       if (selectedStoreId) {
         params.append('storeId', selectedStoreId);
       }
-      console.log('🔍 Tasks Debug - Fetching:', `/api/tasks?${params.toString()}`);
       return fetch(`/api/tasks?${params.toString()}`, {
         credentials: 'include'
       }).then(res => {
-        console.log('🔍 Tasks Debug - Response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
-      }).then(data => {
-        console.log('🔍 Tasks Debug - Data received:', data.length, 'tasks:', data);
-        return data;
       });
     },
     enabled: !!user,
@@ -168,36 +163,39 @@ export default function Tasks() {
     }
   };
 
-  // Debug des tâches
-  console.log('🔍 Tasks Debug - Current state:', {
-    tasksLength: tasks.length,
-    isLoading,
-    selectedDate: selectedDate.toISOString(),
-    user: user?.id,
-    selectedStoreId
-  });
+  // Debug des tâches - temporairement désactivé
+  // console.log('🔍 Tasks Debug - Current state:', {
+  //   tasksLength: tasks.length,
+  //   isLoading,
+  //   selectedDate: selectedDate.toISOString(),
+  //   user: user?.id,
+  //   selectedStoreId
+  // });
 
   // Filtrer les tâches
   const filteredTasks = tasks.filter((task: TaskWithRelations) => {
-    console.log('🔍 Task Filter Debug:', {
-      taskId: task.id,
-      title: task.title,
-      dueDate: task.dueDate,
-      status: task.status,
-      selectedDate: selectedDate.toISOString().split('T')[0]
-    });
+    // Debug temporairement désactivé
+    // console.log('🔍 Task Filter Debug:', {
+    //   taskId: task.id,
+    //   title: task.title,
+    //   dueDate: task.dueDate,
+    //   status: task.status,
+    //   selectedDate: selectedDate.toISOString().split('T')[0]
+    // });
 
-    // TEMPORARY: Afficher toutes les tâches sans filtre de date pour debug
-    // Filtre par date sélectionnée
-    // const isSelectedDate = task.dueDate ? isSameDay(new Date(task.dueDate), selectedDate) : false;
-    // if (!isSelectedDate && task.status !== 'completed') {
-    //   // Montrer aussi les tâches sans date d'échéance pour le jour courant
-    //   if (!task.dueDate && isSameDay(selectedDate, new Date())) {
-    //     // Ok, montrer les tâches sans date pour aujourd'hui
-    //   } else {
-    //     return false;
-    //   }
-    // }
+    // Filtre par date sélectionnée - corrigé pour fonctionner correctement
+    const isSelectedDate = task.dueDate ? isSameDay(new Date(task.dueDate), selectedDate) : false;
+    const isToday = isSameDay(selectedDate, new Date());
+    
+    // Montrer les tâches qui correspondent à la date sélectionnée
+    // OU les tâches sans date d'échéance pour aujourd'hui seulement
+    if (!isSelectedDate) {
+      if (!task.dueDate && isToday) {
+        // Ok, montrer les tâches sans date pour aujourd'hui
+      } else {
+        return false;
+      }
+    }
 
     // Filtre par recherche
     if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
@@ -317,7 +315,8 @@ export default function Tasks() {
                   head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] flex-1 text-center",
                   row: "flex w-full mt-2",
                   cell: "text-center text-sm p-0 relative flex-1 h-9 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                  day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md"
+                  day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
+                  day_today: "bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
                 }}
               />
             </CardContent>
