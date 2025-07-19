@@ -847,42 +847,32 @@ export default function CustomerOrders() {
 
       {/* Create Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent 
-          className="max-w-2xl" 
-          style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
-        >
+        <DialogContent className="max-w-4xl max-h-[95vh]">
           <DialogHeader>
             <DialogTitle>Nouvelle Commande Client</DialogTitle>
           </DialogHeader>
-          <div style={{ overflowY: 'auto', flex: 1, paddingRight: '8px' }}>
-            <CustomerOrderForm
-              onSubmit={handleCreateOrder}
-              onCancel={() => setShowCreateModal(false)}
-              isLoading={createMutation.isPending}
-            />
-          </div>
+          <CustomerOrderForm
+            onSubmit={handleCreateOrder}
+            onCancel={() => setShowCreateModal(false)}
+            isLoading={createMutation.isPending}
+          />
         </DialogContent>
       </Dialog>
 
       {/* Edit Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent 
-          className="max-w-2xl" 
-          style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
-        >
+        <DialogContent className="max-w-4xl max-h-[95vh]">
           <DialogHeader>
             <DialogTitle>Modifier la Commande</DialogTitle>
           </DialogHeader>
-          <div style={{ overflowY: 'auto', flex: 1, paddingRight: '8px' }}>
-            {selectedOrder && (
-              <CustomerOrderForm
-                order={selectedOrder}
-                onSubmit={handleEditOrder}
-                onCancel={() => setShowEditModal(false)}
-                isLoading={updateMutation.isPending}
-              />
-            )}
-          </div>
+          {selectedOrder && (
+            <CustomerOrderForm
+              order={selectedOrder}
+              onSubmit={handleEditOrder}
+              onCancel={() => setShowEditModal(false)}
+              isLoading={updateMutation.isPending}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
