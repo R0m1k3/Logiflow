@@ -1125,6 +1125,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🚨 ENDPOINT TEMPORAIRE - CORRIGER PERMISSIONS ADMIN MANQUANTES
+  app.post('/api/admin/fix-permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seul l'admin peut corriger les permissions" });
+      }
+
+      console.log('🔧 PRODUCTION: Correction des permissions admin manquantes');
+      const { pool } = require('./initDatabase.production');
+      
+      // Récupérer l'ID du rôle admin
+      const adminRoleResult = await pool.query('SELECT id FROM roles WHERE name = $1', ['admin']);
+      if (adminRoleResult.rows.length === 0) {
+        throw new Error('Rôle admin non trouvé');
+      }
+      const adminRoleId = adminRoleResult.rows[0].id;
+      
+      // Récupérer toutes les permissions
+      const allPermissionsResult = await pool.query('SELECT id, name FROM permissions ORDER BY id');
+      const allPermissions = allPermissionsResult.rows;
+      
+      // Récupérer les permissions actuelles de l'admin
+      const currentPermissionsResult = await pool.query(
+        'SELECT permission_id FROM role_permissions WHERE role_id = $1', 
+        [adminRoleId]
+      );
+      const currentPermissionIds = new Set(currentPermissionsResult.rows.map(rp => rp.permission_id));
+      
+      // Identifier les permissions manquantes
+      const missingPermissions = allPermissions.filter(p => !currentPermissionIds.has(p.id));
+      
+      console.log(`📊 Admin actuel: ${currentPermissionIds.size} permissions sur ${allPermissions.length} totales`);
+      console.log(`⚠️ Permissions manquantes: ${missingPermissions.length}`);
+      
+      if (missingPermissions.length > 0) {
+        console.log('📋 Ajout des permissions manquantes:');
+        for (const perm of missingPermissions) {
+          await pool.query(`
+            INSERT INTO role_permissions (role_id, permission_id)
+            VALUES ($1, $2)
+            ON CONFLICT (role_id, permission_id) DO NOTHING
+          `, [adminRoleId, perm.id]);
+          console.log(`  ✅ Ajouté: ${perm.name}`);
+        }
+      }
+      
+      // Vérification finale
+      const finalCountResult = await pool.query(
+        'SELECT COUNT(*) as count FROM role_permissions WHERE role_id = $1', 
+        [adminRoleId]
+      );
+      const finalCount = finalCountResult.rows[0].count;
+      
+      res.json({
+        message: "Permissions admin corrigées avec succès",
+        before: currentPermissionIds.size,
+        after: parseInt(finalCount),
+        added: missingPermissions.length,
+        total: allPermissions.length
+      });
+    } catch (error) {
+      console.error('❌ Erreur correction permissions admin:', error);
+      res.status(500).json({ message: "Erreur lors de la correction des permissions" });
+    }
+  });
+
   // 🚨 ENDPOINT TEMPORAIRE DE DIAGNOSTIC PRODUCTION PERMISSIONS TÂCHES
   app.get('/api/debug/task-permissions', isAuthenticated, async (req: any, res) => {
     try {

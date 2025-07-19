@@ -338,13 +338,17 @@ The application uses a sophisticated dual authentication approach:
 - **AUTO-ATTRIBUTION CORRIGÉE** - Suppression attribution automatique admin au "Magasin Principal" inexistant
 - **FLEXIBILITÉ PRODUCTION** - Utilisateurs peuvent créer leurs propres magasins sans interférence des valeurs par défaut
 
-### July 19, 2025 - CORRECTION CRITIQUE: getRolePermissions Production Réparée
+### July 19, 2025 - CORRECTION CRITIQUE: getRolePermissions Production Réparée + Auto-Fix Admin
 - **ERREUR SQL IDENTIFIÉE** - Référence colonne `rp.created_at` inexistante dans table role_permissions production causait échec modification permissions
 - **REQUÊTE SQL CORRIGÉE** - Suppression `rp.created_at` du SELECT dans getRolePermissions() storage production
 - **MAPPING SIMPLIFIÉ** - Suppression champ createdAt du mapping des résultats pour éviter référence colonne manquante
 - **MODIFICATION PERMISSIONS OPÉRATIONNELLE** - Interface modification permissions maintenant fonctionnelle en production
 - **COCHES PERMISSIONS CORRIGÉES** - Cases à cocher s'affichent maintenant correctement après modification des permissions rôles
 - **STORAGE PRODUCTION STABILISÉ** - Toutes les méthodes storage production harmonisées avec structure base de données réelle
+- **AUTO-FIX ADMIN AJOUTÉ** - Route `/api/admin/fix-permissions` pour corriger automatiquement permissions admin manquantes
+- **BOUTON CORRECTION INTERFACE** - Bouton "🔧 Corriger Admin" dans gestion des rôles pour auto-assignation toutes permissions à l'administrateur
+- **DIAGNOSTIC COMPLET** - Système vérifie permissions actuelles vs totales et ajoute uniquement les manquantes
+- **FEEDBACK UTILISATEUR** - Toast avec détails précis du nombre de permissions ajoutées et total final
 
 ### July 19, 2025 - CORRECTION FINALE: Base de Données Complètement Fonctionnelle
 - **SCRIPT D'INITIALISATION SQL CRÉÉ** - Script init.sql complet avec toutes les tables et colonnes requises pour une base de données complète
