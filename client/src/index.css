@@ -164,7 +164,7 @@ button[aria-current="date"]:focus,
   ring: 0 !important;
 }
 
-/* Suppression complète de tous les contours possibles */
+/* Suppression spécifique du contour orange sur la date du jour */
 .rdp button,
 .rdp-day,
 .rdp-day_today,
@@ -172,4 +172,30 @@ button[aria-current="date"]:focus,
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+/* Cibler spécifiquement les pseudo-éléments qui créent le contour orange */
+.rdp-day_today::before,
+.rdp-day_today::after,
+.rdp-day_selected::before,
+.rdp-day_selected::after {
+  display: none !important;
+}
+
+/* Suppression de la bordure orange Tailwind */
+.bg-blue-600 {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-shadow: none !important;
+}
+
+/* Force suppression contour sur focus */
+.rdp-day_today:focus-visible,
+.rdp-day_today:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
 }
