@@ -1398,12 +1398,25 @@ export class DatabaseStorage implements IStorage {
     const publicity = publicityResult.rows[0];
     
     // Get participations with group information
-    const participationsResult = await pool.query(`
-      SELECT pp.group_id, g.name as group_name, g.color as group_color, pp.created_at
-      FROM publicity_participations pp 
-      LEFT JOIN groups g ON pp.group_id = g.id 
-      WHERE pp.publicity_id = $1
-    `, [id]);
+    // Use fallback approach for production environments with potential schema differences
+    let participationsResult;
+    try {
+      participationsResult = await pool.query(`
+        SELECT pp.group_id, g.name as group_name, g.color as group_color, pp.created_at
+        FROM publicity_participations pp 
+        LEFT JOIN groups g ON pp.group_id = g.id 
+        WHERE pp.publicity_id = $1
+      `, [id]);
+    } catch (error) {
+      // Fallback if created_at column doesn't exist in production
+      console.log('⚠️ Using fallback query without created_at column');
+      participationsResult = await pool.query(`
+        SELECT pp.group_id, g.name as group_name, g.color as group_color, CURRENT_TIMESTAMP as created_at
+        FROM publicity_participations pp 
+        LEFT JOIN groups g ON pp.group_id = g.id 
+        WHERE pp.publicity_id = $1
+      `, [id]);
+    }
     
     return {
       id: publicity.id,
