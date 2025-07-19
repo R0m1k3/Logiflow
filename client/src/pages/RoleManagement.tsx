@@ -600,37 +600,6 @@ export default function RoleManagement() {
                   >
                     🔄 Actualiser Permissions
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={async () => {
-                      try {
-                        console.log('🚨 Emergency SQL fix for production...');
-                        const response = await fetch('/api/debug/emergency-sql-fix', {
-                          method: 'POST',
-                          credentials: 'include',
-                          headers: {
-                            'Content-Type': 'application/json'
-                          }
-                        });
-                        const result = await response.json();
-                        console.log('✅ Emergency fix result:', result);
-                        
-                        if (result.success) {
-                          alert(`Corrections d'urgence appliquées:\n${result.fixes.join('\n')}\n\nActualisez la page.`);
-                          // Force refresh everything
-                          window.location.reload();
-                        } else {
-                          alert(`Erreur: ${result.message}`);
-                        }
-                      } catch (error) {
-                        console.error('❌ Emergency fix error:', error);
-                        alert('Erreur lors de l\'application des corrections d\'urgence');
-                      }
-                    }}
-                  >
-                    🚨 Fix SQL Urgence
-                  </Button>
                 </div>
               </div>
             </CardHeader>
