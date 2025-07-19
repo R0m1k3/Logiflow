@@ -183,14 +183,11 @@ export default function Tasks() {
     //   selectedDate: selectedDate.toISOString().split('T')[0]
     // });
 
-    // Filtre par date sélectionnée - corrigé pour fonctionner correctement
+    // Filtre par date sélectionnée
     const isSelectedDate = task.dueDate ? isSameDay(new Date(task.dueDate), selectedDate) : false;
-    const isToday = isSameDay(selectedDate, new Date());
-    
-    // Montrer les tâches qui correspondent à la date sélectionnée
-    // OU les tâches sans date d'échéance pour aujourd'hui seulement
-    if (!isSelectedDate) {
-      if (!task.dueDate && isToday) {
+    if (!isSelectedDate && task.status !== 'completed') {
+      // Montrer aussi les tâches sans date d'échéance pour le jour courant
+      if (!task.dueDate && isSameDay(selectedDate, new Date())) {
         // Ok, montrer les tâches sans date pour aujourd'hui
       } else {
         return false;
@@ -316,7 +313,7 @@ export default function Tasks() {
                   row: "flex w-full mt-2",
                   cell: "text-center text-sm p-0 relative flex-1 h-9 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
                   day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-                  day_today: "bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+                  day_today: "bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 border-0"
                 }}
               />
             </CardContent>
