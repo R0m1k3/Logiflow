@@ -712,8 +712,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied" });
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied - Admin role required", userRole: user.role });
       }
 
       const { participatingGroups, ...publicityData } = req.body;
@@ -734,7 +739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(completePublicity);
     } catch (error) {
       console.error("Error creating publicity:", error);
-      res.status(500).json({ message: "Failed to create publicity" });
+      res.status(500).json({ message: "Failed to create publicity", error: error.message });
     }
   });
 
