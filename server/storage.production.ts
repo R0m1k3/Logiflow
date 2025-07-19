@@ -2443,16 +2443,21 @@ export class DatabaseStorage implements IStorage {
       }
 
       if (filters?.status) {
+        console.log(`🔍 DLC Filter Debug - Requested status: ${filters.status}`);
         if (filters.status === 'expires_soon') {
-          conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) <= CURRENT_DATE + INTERVAL '15 days' AND COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE`);
+          // Produits qui expirent dans les 15 prochains jours (mais pas encore expirés)
+          conditions.push(`COALESCE(dlc.dlc_date, dlc.expiry_date) <= CURRENT_DATE + INTERVAL '15 days' AND COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE`);
         } else if (filters.status === 'expires') {
-          conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) <= CURRENT_DATE`);
+          // Produits déjà expirés
+          conditions.push(`COALESCE(dlc.dlc_date, dlc.expiry_date) < CURRENT_DATE`);
         } else if (filters.status === 'en_cours') {
-          conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE + INTERVAL '15 days'`);
+          // Produits encore valides (plus de 15 jours avant expiration)
+          conditions.push(`COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE + INTERVAL '15 days'`);
         } else if (filters.status === 'valides') {
-          // Pour les validés, on montre uniquement ceux avec le statut exact "valides"
+          // Produits avec statut exact "valides"
           conditions.push(`dlc.status = 'valides'`);
         } else {
+          // Filtrage par statut exact
           conditions.push(`dlc.status = $${paramIndex}`);
           params.push(filters.status);
           paramIndex++;
