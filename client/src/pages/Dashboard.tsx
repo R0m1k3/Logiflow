@@ -134,7 +134,7 @@ export default function Dashboard() {
 
   // Calculs pour les statistiques
   const pendingOrdersCount = Array.isArray(allOrders) ? allOrders.filter((order: any) => order.status === 'pending').length : 0;
-  const averageDeliveryTime = Math.round(stats?.averageDeliveryTime || 2);
+  const averageDeliveryTime = Math.round(stats?.averageDeliveryTime || 0);
   const deliveredThisMonth = Array.isArray(allDeliveries) ? allDeliveries.filter((delivery: any) => {
     const deliveryDate = safeDate(delivery.deliveredDate || delivery.createdAt);
     const now = new Date();
