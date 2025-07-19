@@ -60,13 +60,18 @@ export default function Tasks() {
       if (selectedStoreId) {
         params.append('storeId', selectedStoreId);
       }
+      console.log('🔍 Tasks Debug - Fetching:', `/api/tasks?${params.toString()}`);
       return fetch(`/api/tasks?${params.toString()}`, {
         credentials: 'include'
       }).then(res => {
+        console.log('🔍 Tasks Debug - Response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
+      }).then(data => {
+        console.log('🔍 Tasks Debug - Data received:', data.length, 'tasks:', data);
+        return data;
       });
     },
     enabled: !!user,
@@ -163,18 +168,36 @@ export default function Tasks() {
     }
   };
 
+  // Debug des tâches
+  console.log('🔍 Tasks Debug - Current state:', {
+    tasksLength: tasks.length,
+    isLoading,
+    selectedDate: selectedDate.toISOString(),
+    user: user?.id,
+    selectedStoreId
+  });
+
   // Filtrer les tâches
   const filteredTasks = tasks.filter((task: TaskWithRelations) => {
+    console.log('🔍 Task Filter Debug:', {
+      taskId: task.id,
+      title: task.title,
+      dueDate: task.dueDate,
+      status: task.status,
+      selectedDate: selectedDate.toISOString().split('T')[0]
+    });
+
+    // TEMPORARY: Afficher toutes les tâches sans filtre de date pour debug
     // Filtre par date sélectionnée
-    const isSelectedDate = task.dueDate ? isSameDay(new Date(task.dueDate), selectedDate) : false;
-    if (!isSelectedDate && task.status !== 'completed') {
-      // Montrer aussi les tâches sans date d'échéance pour le jour courant
-      if (!task.dueDate && isSameDay(selectedDate, new Date())) {
-        // Ok, montrer les tâches sans date pour aujourd'hui
-      } else {
-        return false;
-      }
-    }
+    // const isSelectedDate = task.dueDate ? isSameDay(new Date(task.dueDate), selectedDate) : false;
+    // if (!isSelectedDate && task.status !== 'completed') {
+    //   // Montrer aussi les tâches sans date d'échéance pour le jour courant
+    //   if (!task.dueDate && isSameDay(selectedDate, new Date())) {
+    //     // Ok, montrer les tâches sans date pour aujourd'hui
+    //   } else {
+    //     return false;
+    //   }
+    // }
 
     // Filtre par recherche
     if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
