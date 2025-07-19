@@ -58,6 +58,7 @@ export default function UsersPage() {
     email: "",
     firstName: "",
     lastName: "",
+    username: "",
     password: "",
     role: "employee" as const,
   });
@@ -403,15 +404,15 @@ export default function UsersPage() {
 
   const handleCreateUser = () => {
     setShowCreateModal(true);
-    setNewUser({ email: "", firstName: "", lastName: "", password: "", role: "employee" });
+    setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
     setUserGroups([]);
   };
 
   const handleSubmitCreateUser = async () => {
-    if (!newUser.email || !newUser.firstName || !newUser.lastName) {
+    if (!newUser.username || !newUser.username.trim()) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
+        description: "L'identifiant est obligatoire",
         variant: "destructive",
       });
       return;
@@ -1056,38 +1057,49 @@ export default function UsersPage() {
             </DialogHeader>
             
             <div className="space-y-4">
+              <div>
+                <Label htmlFor="identifier">Identifiant *</Label>
+                <Input
+                  id="identifier"
+                  value={newUser.username || ''}
+                  onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                  placeholder="Identifiant unique (ex: ff0292)"
+                  required
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Identifiant unique pour se connecter à l'application
+                </p>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="firstName">Prénom *</Label>
+                  <Label htmlFor="firstName">Prénom</Label>
                   <Input
                     id="firstName"
-                    value={newUser.firstName}
+                    value={newUser.firstName || ''}
                     onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
-                    placeholder="Prénom"
-                    required
+                    placeholder="Prénom (optionnel)"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Nom *</Label>
+                  <Label htmlFor="lastName">Nom</Label>
                   <Input
                     id="lastName"
-                    value={newUser.lastName}
+                    value={newUser.lastName || ''}
                     onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
-                    placeholder="Nom"
-                    required
+                    placeholder="Nom (optionnel)"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  value={newUser.email}
+                  value={newUser.email || ''}
                   onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                  placeholder="email@exemple.com"
-                  required
+                  placeholder="email@exemple.com (optionnel)"
                 />
               </div>
 
@@ -1160,7 +1172,7 @@ export default function UsersPage() {
                   variant="outline" 
                   onClick={() => {
                     setShowCreateModal(false);
-                    setNewUser({ email: "", firstName: "", lastName: "", role: "employee" });
+                    setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
                     setUserGroups([]);
                   }}
                 >
