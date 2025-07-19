@@ -2443,9 +2443,17 @@ export class DatabaseStorage implements IStorage {
       }
 
       if (filters?.status) {
-        conditions.push(`dlc.status = $${paramIndex}`);
-        params.push(filters.status);
-        paramIndex++;
+        if (filters.status === 'expires_soon') {
+          conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) <= CURRENT_DATE + INTERVAL '15 days' AND COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE`);
+        } else if (filters.status === 'expires') {
+          conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) <= CURRENT_DATE`);
+        } else if (filters.status === 'en_cours') {
+          conditions.push(`dlc.status != 'valides' AND COALESCE(dlc.dlc_date, dlc.expiry_date) > CURRENT_DATE + INTERVAL '15 days'`);
+        } else {
+          conditions.push(`dlc.status = $${paramIndex}`);
+          params.push(filters.status);
+          paramIndex++;
+        }
       }
 
       if (filters?.supplierId) {
