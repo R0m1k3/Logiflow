@@ -1,5 +1,5 @@
 // Environment setup for production deployment
-// process.env.STORAGE_MODE = 'production'; // Commented out for normal development
+process.env.STORAGE_MODE = 'production'; // Force production mode for debugging
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
