@@ -669,7 +669,7 @@ export default function CustomerOrders() {
     totalPages,
     paginatedData: paginatedOrders,
     totalItems
-  } = usePagination(sortedOrders, 20);
+  } = usePagination(sortedOrders, 10);
 
   return (
     <div className="container mx-auto p-6 space-y-6">

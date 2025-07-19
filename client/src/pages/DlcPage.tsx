@@ -400,7 +400,7 @@ export default function DlcPage() {
     totalPages,
     paginatedData: paginatedProducts,
     totalItems
-  } = usePagination(filteredProducts, 20);
+  } = usePagination(filteredProducts, 10);
 
   if (authLoading) {
     return <div className="flex justify-center items-center h-64">Chargement...</div>;

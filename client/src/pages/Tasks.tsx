@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
@@ -210,6 +211,17 @@ export default function Tasks() {
     return true;
   });
 
+  // Pagination
+  const {
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    paginatedData: paginatedTasks,
+    totalItems
+  } = usePagination(filteredTasks, 10);
+
   const getPriorityConfig = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -260,7 +272,7 @@ export default function Tasks() {
               Gestion des Tâches
             </h2>
             <p className="text-gray-600 mt-1">
-              {filteredTasks.length} tâche{filteredTasks.length !== 1 ? 's' : ''} pour le {format(selectedDate, 'dd MMMM yyyy', { locale: fr })}
+              {totalItems} tâche{totalItems !== 1 ? 's' : ''} pour le {format(selectedDate, 'dd MMMM yyyy', { locale: fr })}
             </p>
           </div>
           {canCreateTasks && (
@@ -392,7 +404,7 @@ export default function Tasks() {
 
           {/* Liste des tâches */}
           <div className="flex-1 overflow-y-auto p-6">
-            {filteredTasks.length === 0 ? (
+            {totalItems === 0 ? (
               <div className="text-center py-12">
                 <ListTodo className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -405,13 +417,13 @@ export default function Tasks() {
             ) : (
               <div className="space-y-4">
                 {/* Tâches en cours */}
-                {filteredTasks.filter(task => task.status === 'pending').length > 0 && (
+                {paginatedTasks.filter(task => task.status === 'pending').length > 0 && (
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                      Tâches en cours ({filteredTasks.filter(task => task.status === 'pending').length})
+                      Tâches en cours ({paginatedTasks.filter(task => task.status === 'pending').length})
                     </h4>
                     <div className="space-y-3">
-                      {filteredTasks
+                      {paginatedTasks
                         .filter(task => task.status === 'pending')
                         .map((task) => {
                           const priorityConfig = getPriorityConfig(task.priority);
@@ -485,13 +497,13 @@ export default function Tasks() {
                 )}
 
                 {/* Tâches terminées */}
-                {filteredTasks.filter(task => task.status === 'completed').length > 0 && (
+                {paginatedTasks.filter(task => task.status === 'completed').length > 0 && (
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-3 mt-8">
-                      Tâches terminées ({filteredTasks.filter(task => task.status === 'completed').length})
+                      Tâches terminées ({paginatedTasks.filter(task => task.status === 'completed').length})
                     </h4>
                     <div className="space-y-3">
-                      {filteredTasks
+                      {paginatedTasks
                         .filter(task => task.status === 'completed')
                         .map((task) => {
                           const priorityConfig = getPriorityConfig(task.priority);
@@ -549,6 +561,19 @@ export default function Tasks() {
                   </div>
                 )}
               </div>
+            )}
+            
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                className="mt-4 border-t border-gray-200 pt-4 mx-6"
+              />
             )}
           </div>
         </div>

@@ -543,7 +543,7 @@ export default function BLReconciliation() {
     totalPages,
     paginatedData: paginatedDeliveries,
     totalItems
-  } = usePagination(filteredDeliveries, 20);
+  } = usePagination(filteredDeliveries, 10);
 
   if (isLoading) {
     return (
