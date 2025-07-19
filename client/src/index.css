@@ -128,16 +128,48 @@
 }
 
 /* Supprimer le contour orange de la date du jour dans le calendrier */
-.rdp-day_today {
+button[aria-selected="true"][aria-current="date"],
+button[aria-current="date"],
+.rdp-day_today,
+.rdp-day_selected,
+[data-today="true"] {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  ring: none !important;
+  ring: 0 !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
 }
 
-.rdp-day_today:focus {
+button[aria-selected="true"][aria-current="date"]:focus,
+button[aria-current="date"]:focus,
+.rdp-day_today:focus,
+.rdp-day_selected:focus,
+[data-today="true"]:focus {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  ring: none !important;
+  ring: 0 !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
+}
+
+/* Cibler spécifiquement le calendrier dans Tasks */
+.rounded-md.border button[aria-current="date"],
+.rounded-md.border button[data-today],
+.rounded-md.border .rdp-day_today {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: 0 !important;
+}
+
+/* Suppression complète de tous les contours possibles */
+.rdp button,
+.rdp-day,
+.rdp-day_today,
+.rdp-day_selected {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
