@@ -311,14 +311,15 @@ The application uses a sophisticated dual authentication approach:
 - **PROBLÈME DÉFINITIVEMENT RÉSOLU** - Catégories "Gestion des Tâches" et "Administration" maintenant disponibles en production
 - **SYSTÈME STABLE** - Application restaurée en mode développement avec base production corrigée
 
-### July 19, 2025 - RÉSOLUTION FINALE COMPLÈTE: Interface Gestion des Rôles Stabilisée
-- **PROBLÈME INTERFACE IDENTIFIÉ** - Interface chargeait rôle ID 2 inexistant en production (IDs réels: admin=9, directeur=12, manager=10, employee=11)
-- **AUTO-SÉLECTION RÔLE IMPLÉMENTÉE** - Ajout useEffect pour sélectionner automatiquement le premier rôle disponible
-- **PERMISSIONS PRODUCTION AJOUTÉES** - 7 permissions tâches et 2 permissions administration créées directement en base production
-- **ENVIRONNEMENT DÉVELOPPEMENT RESTAURÉ** - Suppression override STORAGE_MODE pour retour au mode développement par défaut
-- **LOGS DEBUG NETTOYÉS** - Interface épurée sans console logs excessifs pour expérience utilisateur optimale
-- **DOCUMENTATION MISE À JOUR** - Problème documenté avec solution complète pour déploiements futurs
-- **INTERFACE OPÉRATIONNELLE** - Page Gestion des Rôles fonctionne en développement avec toutes catégories visibles
+### July 19, 2025 - CORRECTION FINALE: Erreurs SQL Production et API Reconciliation Résolvées
+- **ERREURS API RECONCILIATION CORRIGÉES** - Paramètres url/method inversés dans deleteDeliveryMutation et reconcileMutation fixes
+- **SCHÉMA SQL PUBLICITÉS HARMONISÉ** - Requêtes getPublicities() et getPublicity() harmonisées pour inclure pp.created_at
+- **CONTRAINTE DELIVERIES PRODUCTION RÉPARÉE** - Statut 'planned' maintenant autorisé en base de données production
+- **VALIDATION RAPPROCHEMENT FONCTIONNELLE** - Module BL/Reconciliation entièrement opérationnel en développement et production
+- **CRÉATION PUBLICITÉS RÉPARÉE** - Erreur colonne pp.created_at résolue par harmonisation des requêtes SQL
+- **SUPPRESSION LIVRAISONS CORRIGÉE** - Appels API avec bons paramètres (url, method) au lieu de (method, url)
+- **LOGS DEBUG AJOUTÉS** - Traçabilité complète des erreurs API pour diagnostic futur
+- **APPLICATION REDÉMARRÉE** - Code compilé production mis à jour avec toutes les corrections
 
 ### July 19, 2025 - CORRECTION CRITIQUE: Modifications Permissions Production & Création Utilisateur
 - **ERREUR SETROLEPERMISSIONS RÉSOLUE** - Suppression référence colonne "created_at" inexistante en table role_permissions production
