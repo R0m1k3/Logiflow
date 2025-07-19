@@ -426,7 +426,8 @@ export default function BLReconciliation() {
 
   const deleteDeliveryMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/deliveries/${id}`);
+      console.log('🌐 API Request:', { url: `/api/deliveries/${id}`, method: "DELETE" });
+      await apiRequest(`/api/deliveries/${id}`, "DELETE");
     },
     onSuccess: () => {
       toast({
@@ -441,6 +442,7 @@ export default function BLReconciliation() {
       });
     },
     onError: (error) => {
+      console.error('❌ Error deleting delivery:', error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Non autorisé",
@@ -454,7 +456,7 @@ export default function BLReconciliation() {
       }
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer la livraison",
+        description: `Impossible de supprimer la livraison: ${error.message}`,
         variant: "destructive",
       });
     },
