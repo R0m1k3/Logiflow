@@ -2480,6 +2480,16 @@ export class DatabaseStorage implements IStorage {
       console.log('🔍 getDlcProducts params:', params);
 
       const result = await pool.query(query, params);
+      
+      console.log(`🔍 getDlcProducts RESULT: Found ${result.rows.length} products`);
+      if (filters?.status) {
+        console.log(`🔍 Filter applied: ${filters.status} - Results:`, result.rows.map(r => ({
+          name: r.product_name,
+          status: r.status,
+          dlc_date: r.dlc_date,
+          calculated_days: r.dlc_date ? Math.ceil((new Date(r.dlc_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 'N/A'
+        })));
+      }
       return result.rows.map(row => ({
         id: row.id,
         productName: row.product_name || row.name,
