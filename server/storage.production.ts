@@ -2779,11 +2779,21 @@ export class DatabaseStorage implements IStorage {
 
   async getDlcStats(groupIds?: number[]): Promise<any> {
     try {
+      console.log('📊 DLC Stats - groupIds:', groupIds);
+      
+      // Query to get all products with date calculations
       let query = `
         SELECT 
           status,
+          dlc_date,
+          expiry_date,
           COUNT(*) as count,
-          SUM(quantity) as total_quantity
+          SUM(quantity) as total_quantity,
+          CASE 
+            WHEN COALESCE(dlc_date, expiry_date) < CURRENT_DATE THEN 'expired'
+            WHEN COALESCE(dlc_date, expiry_date) <= CURRENT_DATE + INTERVAL '15 days' THEN 'expiring_soon'
+            ELSE 'active'
+          END as calculated_status
         FROM dlc_products
       `;
       
@@ -2793,27 +2803,45 @@ export class DatabaseStorage implements IStorage {
         params.push(groupIds);
       }
       
-      query += ` GROUP BY status`;
+      query += ` GROUP BY status, dlc_date, expiry_date, calculated_status`;
+
+      console.log('📊 DLC Stats query:', query);
+      console.log('📊 DLC Stats params:', params);
 
       const result = await pool.query(query, params);
+      console.log('📊 DLC Stats raw result:', result.rows);
       
       const stats = {
-        en_attente: 0,
-        valides: 0,
-        expires: 0,
+        active: 0,
+        expiringSoon: 0,
+        expired: 0,
+        valide: 0,
+        en_cours: 0,
         total: 0,
         totalQuantity: 0
       };
 
       result.rows.forEach(row => {
-        stats[row.status] = parseInt(row.count);
-        stats.total += parseInt(row.count);
-        stats.totalQuantity += parseInt(row.total_quantity || 0);
+        const count = parseInt(row.count);
+        const quantity = parseInt(row.total_quantity || 0);
+        
+        // Compter uniquement par statut calculé (basé sur les dates) pour l'affichage frontend
+        if (row.calculated_status === 'expired') {
+          stats.expired += count;
+        } else if (row.calculated_status === 'expiring_soon') {
+          stats.expiringSoon += count;
+        } else if (row.calculated_status === 'active') {
+          stats.active += count;
+        }
+        
+        stats.total += count;
+        stats.totalQuantity += quantity;
       });
 
+      console.log('📊 DLC Stats final:', stats);
       return stats;
     } catch (error) {
-      console.error("Error fetching DLC stats:", error);
+      console.error("❌ Error fetching DLC stats:", error);
       throw error;
     }
   }
