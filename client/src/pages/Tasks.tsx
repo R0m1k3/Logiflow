@@ -54,7 +54,9 @@ export default function Tasks() {
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<TaskWithRelations | null>(null);
 
   // Fetch tasks
   const { data: tasks = [], isLoading } = useQuery({
@@ -137,13 +139,16 @@ export default function Tasks() {
     }
   };
 
-  const handleDeleteTask = async (taskId: number) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?")) {
-      return;
-    }
+  const handleDeleteClick = (task: TaskWithRelations) => {
+    setTaskToDelete(task);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
+      const response = await fetch(`/api/tasks/${taskToDelete.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -157,6 +162,9 @@ export default function Tasks() {
         title: "Succès",
         description: "Tâche supprimée avec succès",
       });
+      
+      setShowDeleteModal(false);
+      setTaskToDelete(null);
     } catch (error) {
       console.error("Error deleting task:", error);
       toast({
@@ -461,7 +469,7 @@ export default function Tasks() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleDeleteTask(task.id)}
+                                      onClick={() => handleDeleteClick(task)}
                                       className="text-red-600 hover:text-red-700"
                                     >
                                       <Trash2 className="w-4 h-4" />
@@ -526,7 +534,7 @@ export default function Tasks() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleDeleteTask(task.id)}
+                                      onClick={() => handleDeleteClick(task)}
                                       className="text-red-600 hover:text-red-700"
                                     >
                                       <Trash2 className="w-4 h-4" />
@@ -561,6 +569,45 @@ export default function Tasks() {
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmation de suppression */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Confirmer la suppression
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">
+              Êtes-vous sûr de vouloir supprimer la tâche "{taskToDelete?.title}" ?
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Cette action est irréversible.
+            </p>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setTaskToDelete(null);
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
