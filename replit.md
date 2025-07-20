@@ -476,7 +476,8 @@ The application uses a sophisticated dual authentication approach:
 - **STORAGE DÉVELOPPEMENT ALIGNÉ** - Même logique de filtrage par groupIds implémentée en mode développement
 - **PERMISSIONS FOURNISSEURS AJOUTÉES** - Permission suppliers_read ajoutée au rôle employee pour résoudre erreurs 403
 - **ACCÈS DASHBOARD FONCTIONNEL** - Ajout de 3 permissions manquantes au rôle employee : dashboard_read, statistics_read, reports_generate
-- **ERREURS CONSOLE RÉSOLUES** - Page commandes clients fonctionne maintenant sans erreurs 403 pour les employés
+- **UTILISATEUR FF292 CONFIGURÉ** - Utilisateur employé créé en production avec rôle employee et assignation magasin Frouard
+- **ERREURS 403 PRODUCTION RÉSOLUES** - Permissions employé correctement appliquées en vraie base de données production
 - **LOGIN EMPLOYEE OPÉRATIONNEL** - Connexion ff292/ff292 redirige correctement vers Dashboard avec toutes permissions
 - **CALENDRIER FILTRÉ** - Employé Frouard ne voit plus les publicités exclusives à Houdemont
 
