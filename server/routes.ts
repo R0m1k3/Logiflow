@@ -880,10 +880,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      // Schema création utilisateur SANS champs obligatoires pour résoudre le problème de production
+      // Schema création utilisateur avec email optionnel ou vide
       const createUserSchema = z.object({
         id: z.string().optional(),
-        email: z.string().email().optional(),
+        username: z.string().optional(),
+        email: z.string().email().or(z.literal("")).optional(),
         firstName: z.string().optional(),
         lastName: z.string().optional(),
         password: z.string().optional(),
