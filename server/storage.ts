@@ -1778,6 +1778,11 @@ export class DatabaseStorage implements IStorage {
       .orderBy(permissions.category, permissions.name);
   }
 
+  // Alias pour compatibilité avec l'API
+  async getUserPermissions(userId: string): Promise<Permission[]> {
+    return this.getUserEffectivePermissions(userId);
+  }
+
   // Task operations
   async getTasks(groupIds?: number[]): Promise<any[]> {
     const tasksQuery = db.query.tasks.findMany({

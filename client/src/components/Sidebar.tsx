@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuthSimple } from "@/hooks/useAuthSimple";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
   Store, 
@@ -74,55 +75,55 @@ export default function Sidebar() {
       path: "/dashboard", 
       label: "Tableau de bord", 
       icon: BarChart3, 
-      roles: ["admin", "manager", "employee", "directeur"] 
+      permission: "dashboard_read" 
     },
     { 
       path: "/calendar", 
       label: "Calendrier", 
       icon: Calendar, 
-      roles: ["admin", "manager", "employee", "directeur"] 
+      permission: "dashboard_read" // Calendrier fait partie du dashboard
     },
     { 
       path: "/orders", 
       label: "Commandes", 
       icon: Package, 
-      roles: ["admin", "manager", "directeur"] 
+      permission: "orders_read" 
     },
     { 
       path: "/deliveries", 
       label: "Livraisons", 
       icon: Truck, 
-      roles: ["admin", "manager", "directeur"] 
+      permission: "deliveries_read" 
     },
     { 
       path: "/bl-reconciliation", 
       label: "Rapprochement", 
       icon: FileText, 
-      roles: ["admin", "manager", "directeur"] 
+      permission: "deliveries_read" // Rapprochement lié aux livraisons
     },
     { 
       path: "/publicities", 
       label: "Publicités", 
       icon: Megaphone, 
-      roles: ["admin", "manager", "employee", "directeur"] 
+      permission: "publicities_read" 
     },
     { 
       path: "/customer-orders", 
       label: "Commandes Client", 
       icon: ShoppingCart, 
-      roles: ["admin", "manager", "employee", "directeur"] 
+      permission: "customer_orders_read" 
     },
     { 
       path: "/dlc", 
       label: "Gestion DLC", 
       icon: Clock, 
-      roles: ["admin", "manager", "employee", "directeur"] 
+      permission: "dlc_read" 
     },
     { 
       path: "/tasks", 
       label: "Tâches", 
       icon: ListTodo, 
-      roles: ["admin", "manager", "employee", "directeur"] 
+      permission: "tasks_read" 
     },
   ];
 
@@ -131,13 +132,13 @@ export default function Sidebar() {
       path: "/suppliers", 
       label: "Fournisseurs", 
       icon: Building, 
-      roles: ["admin", "manager", "directeur"] 
+      permission: "suppliers_read" 
     },
     { 
       path: "/groups", 
       label: "Magasins", 
       icon: Users, 
-      roles: ["admin", "manager", "directeur"] 
+      permission: "groups_read" 
     },
   ];
 
@@ -146,29 +147,53 @@ export default function Sidebar() {
       path: "/users", 
       label: "Utilisateurs", 
       icon: UserCog, 
-      roles: ["admin", "directeur"] 
+      permission: "users_read" 
     },
     { 
       path: "/roles", 
       label: "Gestion des Rôles", 
       icon: Shield, 
-      roles: ["admin", "directeur"] 
+      permission: "roles_read" 
     },
     { 
       path: "/nocodb-config", 
       label: "Configuration NocoDB", 
       icon: Database, 
-      roles: ["admin"] 
+      permission: "system_admin" 
     },
   ];
 
-  const hasPermission = (roles: string[]) => {
-    const hasRole = user?.role && roles.includes(user.role);
-    // Debug uniquement en développement pour éviter spam console
+  // Récupérer les permissions de l'utilisateur dynamiquement
+  const { data: userPermissions = [] } = useQuery({
+    queryKey: ['/api/user/permissions'],
+    queryFn: async () => {
+      const response = await fetch('/api/user/permissions', { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
+  // Fonction pour vérifier les permissions dynamiquement
+  const hasPermission = (requiredPermission: string) => {
+    // Admin a toujours accès
+    if (user?.role === 'admin') return true;
+    
+    // Vérifier si l'utilisateur a la permission spécifique
+    const hasSpecificPermission = userPermissions.some((perm: any) => 
+      perm.name === requiredPermission || perm.permission?.name === requiredPermission
+    );
+    
     if (import.meta.env.MODE === 'development') {
-      console.log('hasPermission check:', { userRole: user?.role, roles, hasRole });
+      console.log('Dynamic permission check:', { 
+        requiredPermission, 
+        userRole: user?.role, 
+        hasSpecificPermission,
+        userPermissions: userPermissions.length 
+      });
     }
-    return hasRole;
+    
+    return hasSpecificPermission;
   };
 
 
@@ -223,14 +248,9 @@ export default function Sidebar() {
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
-            const hasRolePermission = hasPermission(item.roles);
-            // console.log(`🔍 Menu item ${item.path} (${item.label}):`, { 
-            //   roles: item.roles, 
-            //   hasPermission: hasRolePermission,
-            //   userRole: user?.role 
-            // });
+            const hasRequiredPermission = hasPermission(item.permission);
             
-            if (!hasRolePermission) return null;
+            if (!hasRequiredPermission) return null;
             
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -254,7 +274,7 @@ export default function Sidebar() {
         </div>
 
         {/* Management Section */}
-        {managementItems.some(item => hasPermission(item.roles)) && (
+        {managementItems.some(item => hasPermission(item.permission)) && (
           <>
             <div className="mt-6 mb-2">
               <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -263,7 +283,7 @@ export default function Sidebar() {
             </div>
             <div className="space-y-1">
               {managementItems.map((item) => {
-                if (!hasPermission(item.roles)) return null;
+                if (!hasPermission(item.permission)) return null;
                 
                 const Icon = item.icon;
                 const active = isActive(item.path);
@@ -290,7 +310,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Administration Section */}
-      {adminItems.some(item => hasPermission(item.roles)) && (
+      {adminItems.some(item => hasPermission(item.permission)) && (
         <div className="border-t border-gray-200 py-4 px-3">
           <div className="mb-2">
             <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -299,7 +319,7 @@ export default function Sidebar() {
           </div>
           <div className="space-y-1">
             {adminItems.map((item) => {
-              if (!hasPermission(item.roles)) return null;
+              if (!hasPermission(item.permission)) return null;
               
               const Icon = item.icon;
               const active = isActive(item.path);
