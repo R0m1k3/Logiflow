@@ -30,33 +30,6 @@ setupMonitoringEndpoints(app);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Logging optimisé (sans détails de réponse sensibles)
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      // Logging sécurisé sans données sensibles
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      
-      // Ne pas logger les données sensibles
-      if (path.includes('/login') || path.includes('/password')) {
-        logLine += ' :: [SENSITIVE DATA HIDDEN]';
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
-
 (async () => {
   // Conditional imports based on environment
   let setupVite: any, serveStatic: any, log: any;
@@ -72,6 +45,33 @@ app.use((req, res, next) => {
     serveStatic = viteDev.serveStatic;
     log = viteDev.log;
   }
+
+  // Logging optimisé (sans détails de réponse sensibles)
+  app.use((req, res, next) => {
+    const start = Date.now();
+    const path = req.path;
+
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      if (path.startsWith("/api")) {
+        // Logging sécurisé sans données sensibles
+        let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+        
+        // Ne pas logger les données sensibles
+        if (path.includes('/login') || path.includes('/password')) {
+          logLine += ' :: [SENSITIVE DATA HIDDEN]';
+        }
+
+        if (logLine.length > 80) {
+          logLine = logLine.slice(0, 79) + "…";
+        }
+
+        log(logLine);
+      }
+    });
+
+    next();
+  });
 
   // Initialize roles and permissions on startup
   try {
