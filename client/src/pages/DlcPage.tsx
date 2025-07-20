@@ -433,7 +433,7 @@ export default function DlcPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button className="bg-orange-600 hover:bg-orange-700 text-white shadow-md">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
             <Plus className="w-4 h-4 mr-2" />
             Nouveau produit DLC
           </Button>
