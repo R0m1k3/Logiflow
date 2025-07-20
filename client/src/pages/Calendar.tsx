@@ -10,6 +10,7 @@ import CreateDeliveryModal from "@/components/modals/CreateDeliveryModal";
 import StatsPanel from "@/components/StatsPanel";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { useStore } from "@/components/Layout";
+import { hasPermission, canCreateOrders, canCreateDeliveries } from "@/lib/permissions";
 import { apiRequest } from "@/lib/queryClient";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -200,13 +201,15 @@ export default function Calendar() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          <Button
-            onClick={() => setShowQuickCreate(true)}
-            className="bg-accent hover:bg-orange-600 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau
-          </Button>
+          {(canCreateOrders(user?.role, user?.permissions) || canCreateDeliveries(user?.role, user?.permissions)) && (
+            <Button
+              onClick={() => setShowQuickCreate(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau
+            </Button>
+          )}
         </div>
       </div>
 
