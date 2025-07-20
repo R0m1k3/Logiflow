@@ -711,31 +711,69 @@ export class DatabaseStorage implements IStorage {
 
   // Publicity operations
   async getPublicities(year?: number, groupIds?: number[]): Promise<PublicityWithRelations[]> {
-    const query = db.select({
-      id: publicities.id,
-      pubNumber: publicities.pubNumber,
-      designation: publicities.designation,
-      startDate: publicities.startDate,
-      endDate: publicities.endDate,
-      year: publicities.year,
-      createdBy: publicities.createdBy,
-      createdAt: publicities.createdAt,
-      updatedAt: publicities.updatedAt,
-      creator: {
-        id: users.id,
-        username: users.username,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        role: users.role
+    let query;
+    
+    if (groupIds && groupIds.length > 0) {
+      // Filter by participating groups - join with participations table
+      query = db.select({
+        id: publicities.id,
+        pubNumber: publicities.pubNumber,
+        designation: publicities.designation,
+        startDate: publicities.startDate,
+        endDate: publicities.endDate,
+        year: publicities.year,
+        createdBy: publicities.createdBy,
+        createdAt: publicities.createdAt,
+        updatedAt: publicities.updatedAt,
+        creator: {
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          role: users.role
+        }
+      })
+      .from(publicities)
+      .innerJoin(users, eq(publicities.createdBy, users.id))
+      .innerJoin(publicityParticipations, eq(publicities.id, publicityParticipations.publicityId))
+      .where(inArray(publicityParticipations.groupId, groupIds))
+      .orderBy(desc(publicities.createdAt));
+      
+      if (year) {
+        query = query.where(and(
+          inArray(publicityParticipations.groupId, groupIds),
+          eq(publicities.year, year)
+        ));
       }
-    })
-    .from(publicities)
-    .innerJoin(users, eq(publicities.createdBy, users.id))
-    .orderBy(desc(publicities.createdAt));
+    } else {
+      // No group filter - get all publicities (admin view)
+      query = db.select({
+        id: publicities.id,
+        pubNumber: publicities.pubNumber,
+        designation: publicities.designation,
+        startDate: publicities.startDate,
+        endDate: publicities.endDate,
+        year: publicities.year,
+        createdBy: publicities.createdBy,
+        createdAt: publicities.createdAt,
+        updatedAt: publicities.updatedAt,
+        creator: {
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          role: users.role
+        }
+      })
+      .from(publicities)
+      .innerJoin(users, eq(publicities.createdBy, users.id))
+      .orderBy(desc(publicities.createdAt));
 
-    if (year) {
-      query.where(eq(publicities.year, year));
+      if (year) {
+        query = query.where(eq(publicities.year, year));
+      }
     }
 
     const results = await query;

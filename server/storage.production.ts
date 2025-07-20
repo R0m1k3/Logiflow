@@ -1375,17 +1375,46 @@ export class DatabaseStorage implements IStorage {
 
   // Publicities methods
   async getPublicities(year?: number, groupIds?: number[]): Promise<any[]> {
-    // Filtre par année si spécifiée
+    // Base query avec filtres appropriés
     let whereClause = '';
     let params = [];
+    let paramIndex = 1;
     
-    if (year) {
-      whereClause = 'WHERE year = $1';
-      params.push(year);
+    // Construction de la requête selon les filtres
+    if (groupIds && groupIds.length > 0) {
+      // Si groupIds spécifié, récupérer seulement les publicités où les magasins participent
+      const groupPlaceholders = groupIds.map(() => `$${paramIndex++}`).join(',');
+      let baseQuery = `
+        SELECT DISTINCT p.* FROM publicities p
+        INNER JOIN publicity_participations pp ON p.id = pp.publicity_id
+        WHERE pp.group_id IN (${groupPlaceholders})
+      `;
+      params.push(...groupIds);
+      
+      if (year) {
+        baseQuery += ` AND p.year = $${paramIndex++}`;
+        params.push(year);
+      }
+      
+      whereClause = baseQuery + ' ORDER BY p.start_date DESC';
+    } else {
+      // Sans groupIds, récupérer toutes les publicités (admin)
+      if (year) {
+        whereClause = 'WHERE year = $1 ORDER BY start_date DESC';
+        params.push(year);
+      } else {
+        whereClause = 'ORDER BY start_date DESC';
+      }
+      whereClause = `SELECT * FROM publicities ${whereClause}`;
     }
     
-    const publicities = await pool.query(`SELECT * FROM publicities ${whereClause} ORDER BY start_date DESC`, params);
-    console.log('🎯 getPublicities debug:', { year, whereClause, publicityCount: publicities.rows.length });
+    const publicities = await pool.query(whereClause, params);
+    console.log('🎯 getPublicities debug:', { 
+      year, 
+      groupIds, 
+      publicityCount: publicities.rows.length,
+      query: whereClause.replace(/\$\d+/g, '?')
+    });
     
     // Pour chaque publicité, récupérer ses participations
     const publicityData = await Promise.all(
