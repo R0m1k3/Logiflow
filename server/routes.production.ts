@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/groups', isAuthenticated, async (req: any, res) => {
+  app.post('/api/groups', isAuthenticated, requirePermission('groups_create'), async (req: any, res) => {
     try {
       console.log('🏪 POST /api/groups - Raw request received');
       console.log('📨 Request headers:', {
@@ -80,9 +80,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔐 User requesting group creation:', userId);
       
       const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        console.log('❌ Insufficient permissions for user:', { userId, userRole: user?.role });
-        return res.status(403).json({ message: "Insufficient permissions" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
       console.log('✅ User has permission to create group:', user.role);
 
@@ -112,12 +111,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/groups/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/groups/:id', isAuthenticated, requirePermission('groups_update'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const id = parseInt(req.params.id);
@@ -134,12 +133,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/groups/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/groups/:id', isAuthenticated, requirePermission('groups_delete'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const id = parseInt(req.params.id);
@@ -495,14 +494,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management routes
-  app.get('/api/users', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users', isAuthenticated, requirePermission('users_read'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
       
-      // ✅ CORRECTION: Permettre aux admins ET managers de voir les utilisateurs (nécessaire pour la gestion des rôles)
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Access denied" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       // 🔧 CORRECTION CRITIQUE: Utiliser getUsersWithRolesAndGroups() au lieu de getUsers() pour l'affichage des rôles
@@ -519,12 +517,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/users', isAuthenticated, async (req: any, res) => {
+  app.post('/api/users', isAuthenticated, requirePermission('users_create'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const userData = req.body;
@@ -1425,11 +1423,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/roles/:id/permissions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/roles/:id/permissions', isAuthenticated, requirePermission('roles_update'), async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Insufficient permissions" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const roleId = parseInt(req.params.id);
@@ -1444,11 +1442,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User-Role association routes (AJOUTÉ POUR PRODUCTION)
-  app.get('/api/users/:userId/roles', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/:userId/roles', isAuthenticated, requirePermission('users_read'), async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Insufficient permissions" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       const userId = req.params.userId;
