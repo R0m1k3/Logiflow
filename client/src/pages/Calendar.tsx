@@ -14,6 +14,7 @@ import { hasPermission, canCreateOrders, canCreateDeliveries } from "@/lib/permi
 import { apiRequest } from "@/lib/queryClient";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
+import type { PublicityWithRelations } from "@shared/schema";
 
 export default function Calendar() {
   const { user } = useAuthUnified();
@@ -103,6 +104,39 @@ export default function Calendar() {
     },
   });
 
+  // Fetch publicities for the current month/year
+  const { data: publicities = [], isLoading: loadingPublicities } = useQuery<PublicityWithRelations[]>({
+    queryKey: ['/api/publicities', currentDate.getFullYear(), selectedStoreId],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        year: currentDate.getFullYear().toString()
+      });
+      if (selectedStoreId && user?.role === 'admin') {
+        params.append('storeId', selectedStoreId.toString());
+      }
+      
+      const url = `/api/publicities?${params.toString()}`;
+      console.log('📅 Calendar fetching publicities:', {
+        url,
+        year: currentDate.getFullYear(),
+        selectedStoreId,
+        userRole: user?.role
+      });
+      
+      const response = await fetch(url, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch publicities');
+      }
+      
+      const data = await response.json();
+      console.log('📅 Calendar publicities received:', Array.isArray(data) ? data.length : 'NOT_ARRAY', 'items');
+      return Array.isArray(data) ? data : [];
+    },
+  });
+
   const navigateMonth = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
     if (direction === 'prev') {
@@ -139,7 +173,7 @@ export default function Calendar() {
     setShowCreateDelivery(true);
   };
 
-  const isLoading = loadingOrders || loadingDeliveries;
+  const isLoading = loadingOrders || loadingDeliveries || loadingPublicities;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -224,6 +258,8 @@ export default function Calendar() {
             currentDate={currentDate}
             orders={orders}
             deliveries={deliveries}
+            publicities={publicities}
+            userRole={user?.role || 'employee'}
             onDateClick={handleDateClick}
             onItemClick={handleItemClick}
           />

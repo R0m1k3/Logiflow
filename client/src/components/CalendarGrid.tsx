@@ -1,14 +1,16 @@
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, isToday } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, isToday, isWithinInterval, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { safeDate } from "@/lib/dateUtils";
 import { Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { OrderWithRelations, DeliveryWithRelations } from "@shared/schema";
+import type { OrderWithRelations, DeliveryWithRelations, PublicityWithRelations } from "@shared/schema";
 
 interface CalendarGridProps {
   currentDate: Date;
   orders: OrderWithRelations[];
   deliveries: DeliveryWithRelations[];
+  publicities: PublicityWithRelations[];
+  userRole: string;
   onDateClick: (date: Date) => void;
   onItemClick: (item: any, type: 'order' | 'delivery') => void;
 }
@@ -17,6 +19,8 @@ export default function CalendarGrid({
   currentDate,
   orders,
   deliveries,
+  publicities,
+  userRole,
   onDateClick,
   onItemClick,
 }: CalendarGridProps) {
@@ -118,6 +122,25 @@ export default function CalendarGrid({
     return { orders: dayOrders, deliveries: dayDeliveries };
   };
 
+  // Get publicities for a specific date
+  const getPublicitiesForDate = (date: Date) => {
+    if (!publicities || !Array.isArray(publicities)) return [];
+    
+    return publicities.filter(publicity => {
+      if (!publicity.startDate || !publicity.endDate) return false;
+      
+      try {
+        const startDate = parseISO(publicity.startDate);
+        const endDate = parseISO(publicity.endDate);
+        
+        return isWithinInterval(date, { start: startDate, end: endDate });
+      } catch (error) {
+        console.warn('Error parsing publicity dates:', publicity);
+        return false;
+      }
+    });
+  };
+
   const formatQuantity = (quantity: number, unit: string) => {
     return `${quantity}${unit === 'palettes' ? 'P' : 'C'}`;
   };
@@ -139,6 +162,7 @@ export default function CalendarGrid({
           const isCurrentMonth = isSameMonth(date, currentDate);
           const isTodayDate = isToday(date);
           const { orders: dayOrders, deliveries: dayDeliveries } = getItemsForDate(date);
+          const dayPublicities = getPublicitiesForDate(date);
           
           return (
             <div
@@ -153,13 +177,65 @@ export default function CalendarGrid({
               onClick={() => onDateClick(date)}
             >
               <div className="p-2">
-                <span className={`text-sm font-medium ${
-                  isTodayDate 
-                    ? "text-blue-700 font-semibold" 
-                    : isCurrentMonth ? "text-gray-900" : "text-gray-400"
-                }`}>
-                  {format(date, 'd')}
-                </span>
+                {/* Date and Publicities */}
+                <div className="flex items-start justify-between">
+                  <span className={`text-sm font-medium ${
+                    isTodayDate 
+                      ? "text-blue-700 font-semibold" 
+                      : isCurrentMonth ? "text-gray-900" : "text-gray-400"
+                  }`}>
+                    {format(date, 'd')}
+                  </span>
+                  
+                  {/* Publicities Display */}
+                  {dayPublicities.length > 0 && (
+                    <div className="flex flex-col items-end space-y-1">
+                      {dayPublicities.map((publicity) => {
+                        // Filter participations based on user role
+                        let relevantParticipations = publicity.participations || [];
+                        
+                        if (userRole !== 'admin') {
+                          // For non-admin users, only show publicities where their store participates
+                          relevantParticipations = relevantParticipations.filter(p => 
+                            // This would need to be matched against user's assigned stores
+                            // For now, show all since we don't have user store info here
+                            true
+                          );
+                        }
+                        
+                        if (relevantParticipations.length === 0 && userRole !== 'admin') {
+                          return null; // Don't show publicity if user's store doesn't participate
+                        }
+                        
+                        return (
+                          <div key={publicity.id} className="flex items-center space-x-1">
+                            {/* Store color dots for admin */}
+                            {userRole === 'admin' && relevantParticipations.length > 0 && (
+                              <div className="flex space-x-1">
+                                {relevantParticipations.map((participation, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="w-2 h-2 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: participation.group?.color || '#666' }}
+                                    title={participation.group?.name || 'Magasin'}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Publicity number */}
+                            <span 
+                              className="text-xs font-medium text-purple-600 bg-purple-100 px-1 rounded"
+                              title={publicity.designation}
+                            >
+                              {publicity.pubNumber}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
                 
                 {/* Orders and Deliveries */}
                 <div className="mt-1 space-y-1">
