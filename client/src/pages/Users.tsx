@@ -499,16 +499,34 @@ export default function UsersPage() {
     e.preventDefault();
     if (!selectedUser) return;
 
-    const updates: any = {
-      username: editForm.username,
-      firstName: editForm.firstName,
-      lastName: editForm.lastName,
-      email: editForm.email,
-      // Rôle géré uniquement dans Administration > Gestion des Rôles
-    };
+    // Validation minimale : seul l'identifiant est obligatoire
+    if (!editForm.username.trim()) {
+      toast({
+        title: "Erreur",
+        description: "L'identifiant est obligatoire",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    const updates: any = {};
+    
+    // Toujours inclure l'identifiant (obligatoire)
+    updates.username = editForm.username.trim();
+    
+    // Inclure les champs optionnels seulement s'ils sont remplis
+    if (editForm.firstName && editForm.firstName.trim()) {
+      updates.firstName = editForm.firstName.trim();
+    }
+    if (editForm.lastName && editForm.lastName.trim()) {
+      updates.lastName = editForm.lastName.trim();
+    }
+    if (editForm.email && editForm.email.trim()) {
+      updates.email = editForm.email.trim();
+    }
+    
     // Only include password if it's not empty
-    if (editForm.password.trim()) {
+    if (editForm.password && editForm.password.trim()) {
       updates.password = editForm.password;
     }
 
@@ -917,23 +935,21 @@ export default function UsersPage() {
             <form onSubmit={handleSubmitEdit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="edit-firstName">Prénom *</Label>
+                  <Label htmlFor="edit-firstName">Prénom</Label>
                   <Input
                     id="edit-firstName"
                     value={editForm.firstName}
                     onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
                     placeholder="Prénom"
-                    required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-lastName">Nom *</Label>
+                  <Label htmlFor="edit-lastName">Nom</Label>
                   <Input
                     id="edit-lastName"
                     value={editForm.lastName}
                     onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
                     placeholder="Nom"
-                    required
                   />
                 </div>
               </div>
@@ -950,14 +966,13 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <Label htmlFor="edit-email">Email *</Label>
+                <Label htmlFor="edit-email">Email</Label>
                 <Input
                   id="edit-email"
                   type="email"
                   value={editForm.email}
                   onChange={(e) => setEditForm({...editForm, email: e.target.value})}
                   placeholder="email@exemple.com"
-                  required
                 />
               </div>
 
@@ -971,7 +986,7 @@ export default function UsersPage() {
                   placeholder="Laisser vide pour ne pas changer"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Minimum 6 caractères. Laissez vide pour conserver le mot de passe actuel.
+                  Minimum 4 caractères. Laissez vide pour conserver le mot de passe actuel.
                 </p>
               </div>
 
