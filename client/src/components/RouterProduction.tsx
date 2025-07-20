@@ -63,6 +63,7 @@ function RouterProduction() {
   return (
     <Layout>
       <Switch>
+        <Route path="/" component={Dashboard} />
         <Route path="/calendar" component={Calendar} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/orders" component={Orders} />
