@@ -375,6 +375,9 @@ export default function Tasks() {
                                       <span>
                                         Assigné à: {task.assignedTo}
                                       </span>
+                                      <span>
+                                        Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                                      </span>
                                     </div>
                                   </div>
                                   
@@ -449,6 +452,9 @@ export default function Tasks() {
                                     <div className="flex items-center gap-4 text-xs text-gray-500">
                                       <span>
                                         Assigné à: {task.assignedTo}
+                                      </span>
+                                      <span>
+                                        Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                                       </span>
                                       {task.completedAt && (
                                         <span>

@@ -389,6 +389,15 @@ The application uses a sophisticated dual authentication approach:
 - **DONNÉES DE TEST INTÉGRÉES** - 3 magasins, 2 fournisseurs, rôles et permissions complètement configurés
 - **APPLICATION PRÊTE POUR UTILISATION** - Toutes les sections accessibles sans erreur 404 ou 500
 
+### July 20, 2025 - INTERFACE TÂCHES SIMPLIFIÉE: Suppression Échéances et Ajout Date Création
+- **CHAMP ÉCHÉANCE SUPPRIMÉ** - Suppression complète des références aux dates d'échéance dans l'interface des tâches
+- **CALENDRIER ET NAVIGATION RETIRÉS** - Interface simplifiée sans calendrier ni navigation par date
+- **FORMULAIRE ÉPURÉ** - Suppression du champ date d'échéance dans le formulaire de création/modification
+- **FILTRAGE OPTIMISÉ** - Logique de filtrage nettoyée, suppression des références dueDate
+- **DATE CRÉATION AJOUTÉE** - Affichage de la date de création à côté du champ "Assigné à" pour toutes les tâches
+- **SIDEBAR SIMPLIFIÉE** - Conservation uniquement des filtres (recherche, statut, priorité) sans calendrier
+- **IMPORTS NETTOYÉS** - Suppression des imports inutilisés liés au calendrier et navigation par date
+
 ### July 20, 2025 - DOCUMENTATION COMPLÈTE: README et Finalisation Projet
 - **README.MD CRÉÉ** - Documentation complète de l'application LogiFlow avec toutes les fonctionnalités détaillées
 - **ARCHITECTURE DOCUMENTÉE** - Description complète du stack technique (React, Express, PostgreSQL, TypeScript)
