@@ -1232,16 +1232,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Route pour récupérer les permissions d'un utilisateur - CRITIQUE POUR SIDEBAR DYNAMIQUE
   app.get('/api/user/permissions', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('🔍 PRODUCTION - Fetching permissions for user:', req.user.claims ? req.user.claims.sub : req.user.id);
+      // PRODUCTION FIX: Utiliser l'ID de session au lieu de l'ID de base de données pour user_roles
+      const sessionUserId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const databaseUserId = req.user.id;
       
-      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      console.log('🔍 PRODUCTION PERMISSIONS DEBUG:', { 
+        sessionUserId, 
+        databaseUserId, 
+        username: req.user.username,
+        role: req.user.role 
+      });
       
       // Utiliser directement des requêtes SQL comme dans le reste du code production
       
-      // Récupérer l'utilisateur
-      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      // Récupérer l'utilisateur avec l'ID de base de données
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [databaseUserId]);
       if (userResult.rows.length === 0) {
-        console.log('❌ PRODUCTION - User not found:', userId);
+        console.log('❌ PRODUCTION - User not found:', databaseUserId);
         return res.status(404).json({ message: 'User not found' });
       }
       
@@ -1259,7 +1266,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(allPermissionsResult.rows);
       }
       
-      // Pour les autres rôles, récupérer leurs permissions spécifiques via les rôles
+      // PRODUCTION FIX: Chercher avec l'ID de session pour user_roles
+      console.log('🔍 PRODUCTION - Searching permissions for session_id:', sessionUserId);
+      
+      // Debug: vérifier si l'utilisateur existe dans user_roles
+      const userRolesDebug = await pool.query(`
+        SELECT ur.user_id, ur.role_id, r.name as role_name
+        FROM user_roles ur 
+        INNER JOIN roles r ON ur.role_id = r.id 
+        WHERE ur.user_id = $1::text
+      `, [sessionUserId]);
+      
+      console.log('🔍 PRODUCTION - User roles found:', userRolesDebug.rows);
+      
+      // Pour les autres rôles, récupérer leurs permissions spécifiques via les rôles avec l'ID de session
       const userPermissionsResult = await pool.query(`
         SELECT DISTINCT p.id, p.name, p.display_name as "displayName", p.description, p.category, p.action, p.resource, p.is_system as "isSystem", p.created_at as "createdAt"
         FROM permissions p
@@ -1267,9 +1287,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         INNER JOIN user_roles ur ON rp.role_id = ur.role_id
         WHERE ur.user_id = $1::text
         ORDER BY p.category, p.name
-      `, [userId]);
+      `, [sessionUserId]);
       
       console.log('📝 PRODUCTION - User permissions found:', userPermissionsResult.rows.length);
+      console.log('🔍 PRODUCTION - Sample permissions:', userPermissionsResult.rows.slice(0, 3).map(p => p.name));
       res.json(userPermissionsResult.rows);
     } catch (error) {
       console.error('PRODUCTION Error fetching user permissions:', error);
