@@ -475,7 +475,12 @@ export class DatabaseStorage implements IStorage {
     
     query += ' ORDER BY name';
     
+    console.log('🔍 Storage getSuppliers:', { query, params, dlcOnly });
     const result = await pool.query(query, params);
+    console.log('🔍 Storage getSuppliers result:', { 
+      rowCount: result.rows.length,
+      rows: result.rows.map(r => ({ id: r.id, name: r.name, has_dlc: r.has_dlc }))
+    });
     
     // Map snake_case to camelCase for frontend compatibility
     return result.rows.map(row => ({

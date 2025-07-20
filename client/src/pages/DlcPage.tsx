@@ -63,6 +63,12 @@ export default function DlcPage() {
     queryFn: () => apiRequest("/api/suppliers?dlc=true"),
     enabled: !authLoading,
   });
+  
+  // Debug log suppliers
+  console.log('🔍 DLC Page - Suppliers fetched:', { 
+    count: suppliers.length, 
+    suppliers: suppliers.map(s => ({ id: s.id, name: s.name, hasDlc: s.hasDlc })) 
+  });
 
   // Fetch DLC products
   const { data: dlcProducts = [], isLoading: productsLoading } = useQuery({

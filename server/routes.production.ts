@@ -155,7 +155,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Check if DLC filter is requested
       const dlcOnly = req.query.dlc === 'true';
+      console.log('🏪 Suppliers API called:', { dlcOnly, query: req.query });
+      
       const suppliers = await storage.getSuppliers(dlcOnly);
+      console.log('🏪 Suppliers returned:', { 
+        count: suppliers.length, 
+        dlcOnly,
+        suppliers: suppliers.map(s => ({ id: s.id, name: s.name, hasDlc: s.hasDlc })) 
+      });
+      
       res.json(suppliers);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
