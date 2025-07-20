@@ -179,11 +179,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       console.log('🔐 User requesting supplier creation:', userId);
       
-      const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        console.log('❌ Insufficient permissions for user:', { userId, userRole: user?.role });
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
       // Permission check handled by middleware
       console.log('✅ User has permission to create supplier (verified by middleware)');
 
@@ -215,11 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_update'), async (req: any, res) => {
     try {
-      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
+      // Permission check handled by middleware
 
       const id = parseInt(req.params.id);
       const result = insertSupplierSchema.partial().safeParse(req.body);
@@ -237,11 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_delete'), async (req: any, res) => {
     try {
-      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
+      // Permission check handled by middleware
 
       const id = parseInt(req.params.id);
       await storage.deleteSupplier(id);
