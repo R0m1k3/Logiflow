@@ -104,7 +104,7 @@ export default function Sidebar() {
       path: "/publicities", 
       label: "Publicités", 
       icon: Megaphone, 
-      roles: ["admin", "manager"] 
+      roles: ["admin", "manager", "employee"] 
     },
     { 
       path: "/customer-orders", 
