@@ -9,12 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest } from "@/lib/queryClient";
 import { insertTaskSchema, Task, Group } from "@shared/schema";
@@ -26,7 +21,7 @@ type TaskWithRelations = Task & {
   group: { id: number; name: string; color: string; };
 };
 
-// Schéma simplifié sans magasin (date d'échéance incluse)
+// Schéma simplifié sans magasin et sans date d'échéance
 const taskFormSchema = insertTaskSchema.omit({
   id: true,
   createdAt: true,
@@ -34,8 +29,7 @@ const taskFormSchema = insertTaskSchema.omit({
   completedAt: true,
   createdBy: true,
   groupId: true,
-}).extend({
-  dueDate: z.string().optional(), // Date optionnelle au format string
+  dueDate: true, // Suppression du champ échéance
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -122,7 +116,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
       priority: task?.priority || "medium",
       status: task?.status || "pending",
       assignedTo: task?.assignedTo || "",
-      dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+
     },
   });
 
@@ -196,7 +190,6 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
         priority: data.priority,
         status: data.status,
         assignedTo: data.assignedTo,
-        dueDate: data.dueDate || null,
       };
       updateMutation.mutate(submitData);
     } else {
@@ -376,24 +369,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
           )}
         />
 
-        {/* Date d'échéance */}
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                  placeholder="Sélectionner une date"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
         {/* Boutons d'action */}
         <div className="flex justify-end space-x-3 pt-6">

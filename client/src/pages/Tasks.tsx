@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,9 +14,6 @@ import {
   ListTodo, 
   Plus, 
   Search, 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon,
   Circle,
   Clock,
   AlertTriangle,
@@ -25,7 +21,7 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
-import { format, addDays, subDays, startOfDay, endOfDay, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import TaskForm from "@/components/tasks/TaskForm";
 import { Task } from "@shared/schema";
@@ -42,12 +38,7 @@ export default function Tasks() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // États locaux - initialiser avec la date locale sans problème de fuseau horaire
-  const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    const today = new Date();
-    // Créer une date locale sans décalage de fuseau horaire
-    return new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  });
+  // États locaux
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -93,17 +84,7 @@ export default function Tasks() {
     enabled: !!user,
   });
 
-  const handlePreviousDay = () => {
-    setSelectedDate(prev => subDays(prev, 1));
-  };
 
-  const handleNextDay = () => {
-    setSelectedDate(prev => addDays(prev, 1));
-  };
-
-  const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-  };
 
   const handleEditTask = (task: TaskWithRelations) => {
     setSelectedTask(task);
@@ -178,20 +159,6 @@ export default function Tasks() {
 
   // Filtrer les tâches
   const filteredTasks = tasks.filter((task: TaskWithRelations) => {
-    // Filtre par date sélectionnée - comparaison simple de chaînes de dates
-    const taskDateStr = task.dueDate ? task.dueDate.split('T')[0] : null;
-    const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    const isSelectedDate = taskDateStr === selectedDateStr;
-    
-    if (!isSelectedDate && task.status !== 'completed') {
-      // Montrer aussi les tâches sans date d'échéance pour le jour courant
-      if (!task.dueDate && isSameDay(selectedDate, new Date())) {
-        // Ok, montrer les tâches sans date pour aujourd'hui
-      } else {
-        return false;
-      }
-    }
-
     // Filtre par recherche
     if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
         !task.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -272,7 +239,7 @@ export default function Tasks() {
               Gestion des Tâches
             </h2>
             <p className="text-gray-600 mt-1">
-              {totalItems} tâche{totalItems !== 1 ? 's' : ''} pour le {format(selectedDate, 'dd MMMM yyyy', { locale: fr })}
+              {totalItems} tâche{totalItems !== 1 ? 's' : ''} trouvée{totalItems !== 1 ? 's' : ''}
             </p>
           </div>
           {canCreateTasks && (
@@ -297,39 +264,10 @@ export default function Tasks() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar avec calendrier */}
+        {/* Sidebar avec filtres */}
         <div className="w-80 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center">
-                <CalendarIcon className="w-5 h-5 mr-2" />
-                Calendrier
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                locale={fr}
-                className="rounded-md border w-full"
-                classNames={{
-                  months: "flex flex-col space-y-4 w-full",
-                  month: "space-y-4 w-full",
-                  table: "w-full border-collapse",
-                  head_row: "flex w-full",
-                  head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem] flex-1 text-center",
-                  row: "flex w-full mt-2",
-                  cell: "text-center text-sm p-0 relative flex-1 h-9 [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                  day: "h-9 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md",
-                  day_today: "bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 !border-0 !outline-0 !ring-0 !shadow-none focus:!border-0 focus:!outline-0 focus:!ring-0 [&:focus]:!border-0 [&:focus]:!outline-0 [&:focus]:!ring-0"
-                }}
-              />
-            </CardContent>
-          </Card>
-
           {/* Filtres */}
-          <Card className="mt-4">
+          <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">Filtres</CardTitle>
             </CardHeader>
@@ -385,23 +323,6 @@ export default function Tasks() {
 
         {/* Zone principale avec les tâches */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Navigation de dates */}
-          <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-            <Button variant="ghost" onClick={handlePreviousDay}>
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Jour précédent
-            </Button>
-            
-            <h3 className="text-lg font-semibold">
-              {format(selectedDate, 'EEEE dd MMMM yyyy', { locale: fr })}
-            </h3>
-            
-            <Button variant="ghost" onClick={handleNextDay}>
-              Jour suivant
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-
           {/* Liste des tâches */}
           <div className="flex-1 overflow-y-auto p-6">
             {totalItems === 0 ? (
@@ -411,7 +332,7 @@ export default function Tasks() {
                   Aucune tâche
                 </h3>
                 <p className="text-gray-600">
-                  Aucune tâche trouvée pour cette date avec les filtres sélectionnés.
+                  Aucune tâche trouvée avec les filtres sélectionnés.
                 </p>
               </div>
             ) : (
@@ -454,11 +375,6 @@ export default function Tasks() {
                                       <span>
                                         Assigné à: {task.assignedTo}
                                       </span>
-                                      {task.dueDate && (
-                                        <span>
-                                          Échéance: {format(new Date(task.dueDate), 'dd/MM/yyyy HH:mm', { locale: fr })}
-                                        </span>
-                                      )}
                                     </div>
                                   </div>
                                   
