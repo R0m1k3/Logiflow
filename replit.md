@@ -419,7 +419,9 @@ The application uses a sophisticated dual authentication approach:
 ### July 20, 2025 - CORRECTION ERREURS DOCKER ET OPTIMISATIONS BASE DE DONNÉES
 - **ERREURS POSTGRESQL RÉSOLUES** - Configuration pool PostgreSQL optimisée avec timeouts augmentés et pool réduit
 - **SYSTÈME RETRY AJOUTÉ** - Retry automatique avec backoff exponentiel pour les requêtes qui échouent  
-- **FICHIERS DOCKER SUPPRIMÉS** - Suppression définitive de tous les fichiers Docker restants (.dockerignore, docker-compose.yml, .github/)
+- **CONFIGURATION DOCKER CORRIGÉE** - Port 3000 configuré pour production, détection automatique environnement Docker
+- **ENDPOINT SANTÉ AJOUTÉ** - Route /api/health pour vérifications Docker avec statut et environnement
+- **MIGRATION PRODUCTION CRÉÉE** - Script migration-production.sql pour optimiser connexions PostgreSQL en production
 - **GESTION ERREUR ROBUSTE** - Détection automatique des erreurs de connexion vs erreurs métier
 - **PERFORMANCE AMÉLIORÉE** - Plus d'erreurs 500 de timeout de connexion base de données
 

@@ -38,7 +38,7 @@ RUN echo "=== BUILD VERIFICATION ===" && \
     ls -la dist/public/index.html
 
 # Build backend avec tous les modules externes
-RUN npx esbuild server/index.production.ts \
+RUN npx esbuild server/index.ts \
     --platform=node \
     --bundle \
     --format=esm \

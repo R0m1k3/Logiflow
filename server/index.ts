@@ -1,7 +1,11 @@
 // Environment setup for production deployment
-process.env.STORAGE_MODE = 'production'; // Force production mode for debugging
-// Keep NODE_ENV as development to avoid static file serving issues
-// process.env.NODE_ENV = 'production'; // Force production environment for debugging
+// Auto-detect environment based on Docker/container deployment
+if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production') {
+  process.env.STORAGE_MODE = 'production';
+  console.log('🐳 Running in Docker production mode');
+} else {
+  console.log('🔧 Running in development mode');
+}
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
@@ -73,6 +77,16 @@ app.use((req, res, next) => {
     }
   }
 
+  // Health check endpoint for Docker
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      storageMode: process.env.STORAGE_MODE || 'development'
+    });
+  });
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -92,10 +106,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Port configuration: 5000 for development, 3000 for production
+  const port = process.env.PORT || (process.env.NODE_ENV === 'production' ? 3000 : 5000);
   server.listen({
     port,
     host: "0.0.0.0",
