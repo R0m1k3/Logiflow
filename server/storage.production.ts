@@ -342,6 +342,9 @@ export class DatabaseStorage implements IStorage {
       if (userData.email && !userData.email.includes('@')) {
         throw new Error('L\'email doit être valide');
       }
+      if (userData.password && userData.password.length < 4) {
+        throw new Error('Le mot de passe doit contenir au moins 4 caractères');
+      }
     
     const fields = [];
     const values = [];

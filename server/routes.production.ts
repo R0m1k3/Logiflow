@@ -607,8 +607,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      if (cleanedUserData.password && cleanedUserData.password.length < 6) {
-        return res.status(400).json({ message: "Le mot de passe doit contenir au moins 6 caractères" });
+      if (cleanedUserData.password && cleanedUserData.password.length < 4) {
+        return res.status(400).json({ message: "Le mot de passe doit contenir au moins 4 caractères" });
       }
       
       const updatedUser = await storage.updateUser(id, cleanedUserData);
