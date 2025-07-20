@@ -74,55 +74,55 @@ export default function Sidebar() {
       path: "/dashboard", 
       label: "Tableau de bord", 
       icon: BarChart3, 
-      roles: ["admin", "manager", "employee"] 
+      roles: ["admin", "manager", "employee", "directeur"] 
     },
     { 
       path: "/calendar", 
       label: "Calendrier", 
       icon: Calendar, 
-      roles: ["admin", "manager", "employee"] 
+      roles: ["admin", "manager", "employee", "directeur"] 
     },
     { 
       path: "/orders", 
       label: "Commandes", 
       icon: Package, 
-      roles: ["admin", "manager"] 
+      roles: ["admin", "manager", "directeur"] 
     },
     { 
       path: "/deliveries", 
       label: "Livraisons", 
       icon: Truck, 
-      roles: ["admin", "manager"] 
+      roles: ["admin", "manager", "directeur"] 
     },
     { 
       path: "/bl-reconciliation", 
       label: "Rapprochement", 
       icon: FileText, 
-      roles: ["admin", "manager"] 
+      roles: ["admin", "manager", "directeur"] 
     },
     { 
       path: "/publicities", 
       label: "Publicités", 
       icon: Megaphone, 
-      roles: ["admin", "manager", "employee"] 
+      roles: ["admin", "manager", "employee", "directeur"] 
     },
     { 
       path: "/customer-orders", 
       label: "Commandes Client", 
       icon: ShoppingCart, 
-      roles: ["admin", "manager", "employee"] 
+      roles: ["admin", "manager", "employee", "directeur"] 
     },
     { 
       path: "/dlc", 
       label: "Gestion DLC", 
       icon: Clock, 
-      roles: ["admin", "manager", "employee"] 
+      roles: ["admin", "manager", "employee", "directeur"] 
     },
     { 
       path: "/tasks", 
       label: "Tâches", 
       icon: ListTodo, 
-      roles: ["admin", "manager", "employee"] 
+      roles: ["admin", "manager", "employee", "directeur"] 
     },
   ];
 
@@ -131,13 +131,13 @@ export default function Sidebar() {
       path: "/suppliers", 
       label: "Fournisseurs", 
       icon: Building, 
-      roles: ["admin", "manager"] 
+      roles: ["admin", "manager", "directeur"] 
     },
     { 
       path: "/groups", 
       label: "Magasins", 
       icon: Users, 
-      roles: ["admin", "manager"] 
+      roles: ["admin", "manager", "directeur"] 
     },
   ];
 
@@ -146,13 +146,13 @@ export default function Sidebar() {
       path: "/users", 
       label: "Utilisateurs", 
       icon: UserCog, 
-      roles: ["admin"] 
+      roles: ["admin", "directeur"] 
     },
     { 
       path: "/roles", 
       label: "Gestion des Rôles", 
       icon: Shield, 
-      roles: ["admin"] 
+      roles: ["admin", "directeur"] 
     },
     { 
       path: "/nocodb-config", 
