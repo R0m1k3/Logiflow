@@ -130,12 +130,18 @@ export default function CalendarGrid({
       if (!publicity.startDate || !publicity.endDate) return false;
       
       try {
-        // Assurer que les dates sont traitées en UTC pour éviter les problèmes de fuseau horaire
-        const startDate = new Date(publicity.startDate + 'T00:00:00.000Z');
-        const endDate = new Date(publicity.endDate + 'T23:59:59.999Z');
-        const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        // Utiliser parseISO pour une compatibilité maximale
+        const startDate = parseISO(publicity.startDate);
+        const endDate = parseISO(publicity.endDate);
         
-        const isWithinPeriod = currentDate >= startDate && currentDate <= endDate;
+        // Créer une date normalisée pour la comparaison (minuit local)
+        const currentDateNormalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        
+        // Normaliser les dates de début et fin (minuit local)
+        const startDateNormalized = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+        const endDateNormalized = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+        
+        const isWithinPeriod = currentDateNormalized >= startDateNormalized && currentDateNormalized <= endDateNormalized;
         
         // Debug logs pour diagnostiquer le problème  
         if (publicity.pubNumber && (
@@ -144,9 +150,9 @@ export default function CalendarGrid({
             publicity.designation?.includes('Test Final')
         )) {
           console.log(`🎯 Publicity ${publicity.pubNumber} debug:`, {
-            currentDate: format(currentDate, 'yyyy-MM-dd'),
-            startDate: format(startDate, 'yyyy-MM-dd'),
-            endDate: format(endDate, 'yyyy-MM-dd'),
+            currentDate: format(currentDateNormalized, 'yyyy-MM-dd'),
+            startDate: format(startDateNormalized, 'yyyy-MM-dd'),
+            endDate: format(endDateNormalized, 'yyyy-MM-dd'),
             isWithinPeriod,
             originalStartDate: publicity.startDate,
             originalEndDate: publicity.endDate

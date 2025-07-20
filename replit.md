@@ -487,7 +487,8 @@ The application uses a sophisticated dual authentication approach:
 - **LOGIQUE PARTICIPATION STRICTE** - Publicités sans magasins participants ne s'affichent pour personne (admin inclus)
 - **INTÉGRATION SEAMLESS** - Publicités intégrées naturellement avec commandes et livraisons existantes dans le calendrier
 - **UX OPTIMISÉE** - Tooltips avec nom du magasin au survol des points colorés et désignation de la publicité
-- **DÉTECTION PÉRIODE AUTOMATIQUE** - Utilisation d'isWithinInterval pour détecter les publicités actives sur chaque date
+- **DÉTECTION PÉRIODE CORRIGÉE** - Logique de dates normalisées pour résoudre problèmes d'affichage sur période complète
+- **COMPATIBILITÉ PRODUCTION** - Correction erreurs parseISO en production avec normalisation des dates à minuit local
 - **RESPONSIVE DESIGN** - Affichage adaptatif qui préserve la lisibilité même avec plusieurs publicités par jour
 
 ### July 20, 2025 - RÉSOLUTION FINALE: Filtres DLC Production Entièrement Fonctionnels
