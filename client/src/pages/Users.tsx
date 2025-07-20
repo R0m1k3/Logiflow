@@ -578,9 +578,14 @@ export default function UsersPage() {
     }
   };
 
-  const getInitials = (firstName?: string, lastName?: string) => {
-    if (!firstName && !lastName) return "U";
-    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
+  const getInitials = (firstName?: string, lastName?: string, username?: string) => {
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    }
+    if (firstName) return firstName[0].toUpperCase();
+    if (lastName) return lastName[0].toUpperCase();
+    if (username) return username[0].toUpperCase();
+    return "U";
   };
 
   const canManage = user?.role === 'admin';
@@ -709,13 +714,17 @@ export default function UsersPage() {
                                 />
                               ) : (
                                 <span className="text-white font-medium">
-                                  {getInitials(userData.firstName, userData.lastName)}
+                                  {getInitials(userData.firstName, userData.lastName, userData.username)}
                                 </span>
                               )}
                             </div>
                             <div>
                               <div className="text-sm font-medium text-gray-900 flex items-center">
-                                {(userData.firstName && userData.lastName) ? `${userData.firstName} ${userData.lastName}` : userData.name || 'Nom non renseigné'}
+                                {(userData.firstName && userData.lastName) ? `${userData.firstName} ${userData.lastName}` : 
+                                 userData.firstName ? userData.firstName :
+                                 userData.lastName ? userData.lastName :
+                                 userData.name ? userData.name :
+                                 userData.username || 'Utilisateur'}
                                 {userData.id === user?.id && (
                                   <Badge variant="outline" className="ml-2 text-xs">Vous</Badge>
                                 )}

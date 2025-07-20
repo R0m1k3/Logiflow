@@ -450,6 +450,16 @@ The application uses a sophisticated dual authentication approach:
 - **SCHÉMA VALIDATION ÉPURÉ** - validateDeliverySchema simplifié sans champ blAmount
 - **UX AMÉLIORÉE** - Interface de validation plus claire et focalisée sur l'essentiel
 
+### July 20, 2025 - CORRECTIONS FINALES: Affichage Utilisateurs et Validation Optionnelle
+- **AFFICHAGE NOMS UTILISATEURS CORRIGÉ** - Liste utilisateurs utilise firstName + lastName au lieu du champ name obsolète
+- **FALLBACK INTELLIGENT IMPLÉMENTÉ** - Affichage prioritaire : prénom+nom → prénom seul → nom seul → name → username
+- **INITIALES DYNAMIQUES** - Génération d'initiales à partir de prénom/nom ou username si non disponible
+- **VALIDATION PRODUCTION ASSOUPLIE** - Prénom, nom et email optionnels en modification d'utilisateur (production)
+- **HARMONISATION DEV/PROD** - Validation identique entre développement et production pour modification utilisateur
+- **BASE DONNÉES TESTÉE** - Utilisateur admin avec prénom "Michael" nom "SCHAL" et utilisateur ff292 sans nom/prénom
+- **INTERFACE COHÉRENTE** - Modales création et modification harmonisées entre environnements
+- **CHAMPS OPTIONNELS CONFIRMÉS** - Plus d'erreurs de validation forcée pour prénom/nom/email en production
+
 ### July 20, 2025 - DOCUMENTATION COMPLÈTE: README et Finalisation Projet
 - **README.MD CRÉÉ** - Documentation complète de l'application LogiFlow avec toutes les fonctionnalités détaillées
 - **ARCHITECTURE DOCUMENTÉE** - Description complète du stack technique (React, Express, PostgreSQL, TypeScript)

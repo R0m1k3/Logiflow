@@ -623,14 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Aucune donnée valide à mettre à jour" });
       }
       
-      // Validation des champs obligatoires seulement si ils sont fournis et non vides
-      if (cleanedUserData.firstName && !cleanedUserData.firstName.trim()) {
-        return res.status(400).json({ message: "Le prénom ne peut pas être vide" });
-      }
-      
-      if (cleanedUserData.lastName && !cleanedUserData.lastName.trim()) {
-        return res.status(400).json({ message: "Le nom ne peut pas être vide" });
-      }
+      // Les prénoms et noms sont optionnels - pas de validation d'obligation
       
       if (cleanedUserData.email) {
         if (!cleanedUserData.email.includes('@')) {

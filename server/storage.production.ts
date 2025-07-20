@@ -339,16 +339,8 @@ export class DatabaseStorage implements IStorage {
       }
       console.log('✅ User found:', existingUser.username);
       
-      // Validation des champs obligatoires seulement si fournis
-      if (userData.firstName !== undefined && (!userData.firstName || !userData.firstName.trim())) {
-        throw new Error('Le prénom ne peut pas être vide');
-      }
-      if (userData.lastName !== undefined && (!userData.lastName || !userData.lastName.trim())) {
-        throw new Error('Le nom ne peut pas être vide');
-      }
-      if (userData.email !== undefined && (!userData.email || !userData.email.trim())) {
-        throw new Error('L\'email ne peut pas être vide');
-      }
+      // Validation optionnelle : permettre les champs vides pour prénom, nom et email
+      // Ne valider que si les champs sont fournis ET non vides
       if (userData.email && !userData.email.includes('@')) {
         throw new Error('L\'email doit être valide');
       }
