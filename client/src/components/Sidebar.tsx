@@ -44,9 +44,23 @@ export default function Sidebar() {
     }
   };
 
-  const getInitials = (firstName?: string, lastName?: string) => {
-    if (!firstName && !lastName) return "U";
-    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
+  const getInitials = (firstName?: string, lastName?: string, username?: string) => {
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    }
+    if (firstName) {
+      return firstName[0].toUpperCase();
+    }
+    if (lastName) {
+      return lastName[0].toUpperCase();
+    }
+    if (username && username.length >= 2) {
+      return username.substring(0, 2).toUpperCase();
+    }
+    if (username) {
+      return username[0].toUpperCase();
+    }
+    return "U";
   };
 
   const isActive = (path: string) => {
@@ -313,17 +327,28 @@ export default function Sidebar() {
       {/* User Profile & Logout */}
       <div className="border-t border-gray-200 p-4">
         <div className="flex items-center space-x-3 mb-3">
-          <div className="h-8 w-8 bg-gray-100 flex items-center justify-center">
+          <div className="h-8 w-8 bg-gray-100 flex items-center justify-center rounded-full">
             <span className="text-xs font-medium text-gray-700">
-              {getInitials(user?.firstName, user?.lastName)}
+              {getInitials(user?.firstName, user?.lastName, user?.username)}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">
-              {user?.firstName} {user?.lastName}
+              {(() => {
+                if (user?.firstName && user?.lastName) {
+                  return `${user.firstName} ${user.lastName}`;
+                }
+                if (user?.firstName && user.firstName.trim()) {
+                  return user.firstName;
+                }
+                if (user?.lastName && user.lastName.trim()) {
+                  return user.lastName;
+                }
+                return user?.username || 'Utilisateur';
+              })()}
             </p>
             <p className="text-xs text-gray-500 truncate">
-              {user?.email}
+              {user?.email || user?.username}
             </p>
           </div>
         </div>
