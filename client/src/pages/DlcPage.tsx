@@ -415,15 +415,13 @@ export default function DlcPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header avec titre et bouton */}
-      <div className="p-6 pb-0">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Gestion DLC</h1>
-            <p className="text-muted-foreground">Gestion des dates limites de consommation</p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Gestion DLC</h1>
+          <p className="text-muted-foreground">Gestion des dates limites de consommation</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -563,10 +561,10 @@ export default function DlcPage() {
             </Form>
           </DialogContent>
         </Dialog>
-        </div>
+      </div>
 
-        {/* Filters */}
-        <Card>
+      {/* Filters */}
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
@@ -616,65 +614,64 @@ export default function DlcPage() {
             </div>
           </div>
         </CardContent>
-        </Card>
+      </Card>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Produits Actifs</CardTitle>
-              <Package className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-              <p className="text-xs text-muted-foreground">Produits en cours</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Expire Bientôt</CardTitle>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-orange-600" />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={printExpiringSoon}
-                  className="h-6 w-6 p-0 hover:bg-orange-100"
-                >
-                  <FileText className="h-3 w-3 text-orange-600" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</div>
-              <p className="text-xs text-muted-foreground">Dans les 15 prochains jours</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Expirés</CardTitle>
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={printExpired}
-                  className="h-6 w-6 p-0 hover:bg-red-100"
-                >
-                  <FileText className="h-3 w-3 text-red-600" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.expired}</div>
-              <p className="text-xs text-muted-foreground">Nécessitent une action</p>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Produits Actifs</CardTitle>
+            <Package className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+            <p className="text-xs text-muted-foreground">Produits en cours</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Expire Bientôt</CardTitle>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-orange-600" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={printExpiringSoon}
+                className="h-6 w-6 p-0 hover:bg-orange-100"
+              >
+                <FileText className="h-3 w-3 text-orange-600" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</div>
+            <p className="text-xs text-muted-foreground">Dans les 15 prochains jours</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Expirés</CardTitle>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={printExpired}
+                className="h-6 w-6 p-0 hover:bg-red-100"
+              >
+                <FileText className="h-3 w-3 text-red-600" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.expired}</div>
+            <p className="text-xs text-muted-foreground">Nécessitent une action</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Products Table Section avec overflow */}
-      <div className="flex-1 overflow-y-auto p-6 pt-0">
+      {/* Products Table Section */}
+      <div>
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
