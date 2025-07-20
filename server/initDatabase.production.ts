@@ -1072,4 +1072,79 @@ async function ensureDlcPermissionsExist() {
   }
 }
 
-export { pool };
+async function ensureEmployeePermissions() {
+  try {
+    console.log('🔧 CRITICAL FIX: Ensuring employee permissions...');
+    
+    const requiredEmployeePermissions = [
+      'suppliers_read',
+      'dashboard_read', 
+      'statistics_read',
+      'reports_generate'
+    ];
+    
+    for (const permissionName of requiredEmployeePermissions) {
+      await pool.query(`
+        INSERT INTO role_permissions (role_id, permission_id)
+        SELECT r.id, p.id
+        FROM roles r, permissions p
+        WHERE r.name = 'employee' AND p.name = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM role_permissions rp2
+          WHERE rp2.role_id = r.id AND rp2.permission_id = p.id
+        )
+      `, [permissionName]);
+    }
+    
+    // Auto-create employee user ff292 if not exists
+    console.log('🔧 CRITICAL FIX: Ensuring employee user ff292...');
+    
+    try {
+      const employeeUser = await pool.query(`
+        INSERT INTO users (id, username, email, password, first_name, last_name, role, password_changed, created_at, updated_at)
+        VALUES ('ff292_employee', 'ff292', 'ff292@logiflow.com', 'ff292', 'Employee', 'Frouard', 'employee', false, NOW(), NOW())
+        ON CONFLICT (username) DO UPDATE SET
+          email = EXCLUDED.email,
+          password = EXCLUDED.password,
+          first_name = EXCLUDED.first_name,
+          last_name = EXCLUDED.last_name,
+          role = EXCLUDED.role
+        RETURNING id
+      `);
+      
+      const userId = employeeUser.rows[0]?.id || 'ff292_employee';
+      
+      // Assign employee role
+      await pool.query(`
+        INSERT INTO user_roles (user_id, role_id, assigned_by, assigned_at)
+        SELECT $1, r.id, 'admin_local', NOW()
+        FROM roles r
+        WHERE r.name = 'employee'
+        AND NOT EXISTS (
+          SELECT 1 FROM user_roles ur
+          WHERE ur.user_id = $1 AND ur.role_id = r.id
+        )
+      `, [userId]);
+      
+      // Assign to Frouard group
+      await pool.query(`
+        INSERT INTO user_groups (user_id, group_id, created_at)
+        SELECT $1, g.id, NOW()
+        FROM groups g
+        WHERE g.name = 'Frouard'
+        AND NOT EXISTS (
+          SELECT 1 FROM user_groups ug
+          WHERE ug.user_id = $1 AND ug.group_id = g.id
+        )
+      `, [userId]);
+    } catch (error) {
+      console.log('📝 Employee user might already exist, continuing...');
+    }
+    
+    console.log('✅ CRITICAL FIX: Employee permissions and user ensured');
+  } catch (error) {
+    console.error('❌ Error ensuring employee permissions:', error);
+  }
+}
+
+export { pool, ensureEmployeePermissions };

@@ -136,6 +136,9 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
   if (process.env.STORAGE_MODE === 'production') {
     try {
       await initDatabase();
+      // CRITICAL FIX: Auto-fix employee permissions on every startup
+      const { ensureEmployeePermissions } = await import('./initDatabase.production');
+      await ensureEmployeePermissions();
     } catch (error) {
       console.error("Failed to initialize production database:", error);
       // Continue startup even if production initialization fails
