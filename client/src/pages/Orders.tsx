@@ -224,9 +224,9 @@ export default function Orders() {
   const canDelete = user?.role === 'admin' || user?.role === 'manager';
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm">
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
@@ -250,7 +250,7 @@ export default function Orders() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-50 border-b border-gray-200 p-4">
+      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-64">
             <div className="relative">

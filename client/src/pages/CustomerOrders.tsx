@@ -672,8 +672,7 @@ export default function CustomerOrders() {
   } = usePagination(sortedOrders, 10);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="container mx-auto p-6 pb-0 space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Commandes Client</h1>
         <Button onClick={() => setShowCreateModal(true)}>
@@ -726,10 +725,8 @@ export default function CustomerOrders() {
           </div>
         </CardContent>
       </Card>
-      </div>
 
-      {/* Orders Table avec overflow */}
-      <div className="flex-1 overflow-y-auto container mx-auto px-6 pb-6">
+      {/* Orders Table */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
@@ -971,7 +968,6 @@ export default function CustomerOrders() {
         confirmText="Supprimer"
         isLoading={deleteMutation.isPending}
       />
-      </div>
     </div>
   );
 }
