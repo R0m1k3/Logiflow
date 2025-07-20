@@ -151,7 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Suppliers routes
-  app.get('/api/suppliers', isAuthenticated, requirePermission('suppliers_read'), async (req: any, res) => {
+  app.get('/api/suppliers', isAuthenticated, async (req: any, res) => {
     try {
       // Check if DLC filter is requested
       const dlcOnly = req.query.dlc === 'true';
@@ -171,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/suppliers', isAuthenticated, requirePermission('suppliers_create'), async (req: any, res) => {
+  app.post('/api/suppliers', isAuthenticated, async (req: any, res) => {
     try {
       console.log('🚚 POST /api/suppliers - Raw request received');
       console.log('📨 Request headers:', {
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_update'), async (req: any, res) => {
+  app.put('/api/suppliers/:id', isAuthenticated, async (req: any, res) => {
     try {
       // Permission check handled by middleware
 
@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_delete'), async (req: any, res) => {
+  app.delete('/api/suppliers/:id', isAuthenticated, async (req: any, res) => {
     try {
       // Permission check handled by middleware
 
