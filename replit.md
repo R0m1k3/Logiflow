@@ -416,6 +416,13 @@ The application uses a sophisticated dual authentication approach:
 - **PROJET OPTIMISÉ** - Taille réduite de 50M+ à structure plus propre sans fichiers de développement obsolètes
 - **BASE DONNÉES STABLE** - Application redémarrée, timeouts PostgreSQL résolus après nettoyage
 
+### July 20, 2025 - OPTIMISATION MODALE VALIDATION LIVRAISONS
+- **CHAMP MONTANT BL SUPPRIMÉ** - Suppression du champ "Montant BL (€)" de la modale de validation des livraisons
+- **PROCESSUS SIMPLIFIÉ** - La modale ne demande plus que le numéro de bon de livraison obligatoire
+- **WORKFLOW OPTIMISÉ** - Le montant sera géré uniquement dans le module de rapprochement BL/Factures
+- **SCHÉMA VALIDATION ÉPURÉ** - validateDeliverySchema simplifié sans champ blAmount
+- **UX AMÉLIORÉE** - Interface de validation plus claire et focalisée sur l'essentiel
+
 ### July 20, 2025 - DOCUMENTATION COMPLÈTE: README et Finalisation Projet
 - **README.MD CRÉÉ** - Documentation complète de l'application LogiFlow avec toutes les fonctionnalités détaillées
 - **ARCHITECTURE DOCUMENTÉE** - Description complète du stack technique (React, Express, PostgreSQL, TypeScript)
