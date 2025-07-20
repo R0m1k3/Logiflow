@@ -422,6 +422,8 @@ The application uses a sophisticated dual authentication approach:
 - **CONFIGURATION DOCKER CORRIGÉE** - Port 3000 configuré pour production, détection automatique environnement Docker
 - **ENDPOINT SANTÉ AJOUTÉ** - Route /api/health pour vérifications Docker avec statut et environnement
 - **MIGRATION PRODUCTION CRÉÉE** - Script migration-production.sql pour optimiser connexions PostgreSQL en production
+- **IMPORTS VITE CONDITIONNELS** - server/vite.production.ts créé pour éviter erreur "Cannot find package 'vite'" en production
+- **BUILD DOCKER OPTIMISÉ** - Séparation complète entre environnement développement (Vite) et production (fichiers statiques)
 - **GESTION ERREUR ROBUSTE** - Détection automatique des erreurs de connexion vs erreurs métier
 - **PERFORMANCE AMÉLIORÉE** - Plus d'erreurs 500 de timeout de connexion base de données
 

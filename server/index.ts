@@ -9,7 +9,6 @@ if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'product
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import { setupSecurityHeaders, setupRateLimiting, setupInputSanitization } from "./security";
 import { setupCompression } from "./cache";
 import { monitor, setupMonitoringEndpoints } from "./monitoring";
@@ -59,6 +58,21 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Conditional imports based on environment
+  let setupVite: any, serveStatic: any, log: any;
+
+  if (process.env.NODE_ENV === "production" || process.env.DOCKER_ENV === "production") {
+    const viteProduction = await import("./vite.production.js");
+    setupVite = viteProduction.setupVite;
+    serveStatic = viteProduction.serveStatic;
+    log = viteProduction.log;
+  } else {
+    const viteDev = await import("./vite.js");
+    setupVite = viteDev.setupVite;
+    serveStatic = viteDev.serveStatic;
+    log = viteDev.log;
+  }
+
   // Initialize roles and permissions on startup
   try {
     await initRolesAndPermissions();
@@ -100,7 +114,7 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development" && !process.env.DOCKER_ENV) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
