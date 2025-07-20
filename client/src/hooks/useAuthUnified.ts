@@ -4,8 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 // Hook d'authentification unifié qui s'adapte automatiquement
 // En production utilise fetch direct, en développement utilise React Query
 export function useAuthUnified() {
-  // FORCE PRODUCTION MODE pour test des filtres DLC
-  const isDevelopment = false;
+  // Détection d'environnement plus robuste
+  const isDevelopment = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname.includes('replit.dev')) &&
+     import.meta.env.DEV === true;
 
   // Debug logging pour comprendre l'environnement
   console.log('🔍 Auth Environment Debug:', {

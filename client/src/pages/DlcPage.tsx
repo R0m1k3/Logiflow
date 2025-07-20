@@ -241,18 +241,23 @@ export default function DlcPage() {
   const getStatusBadge = (status: string, dlcDate: string | null) => {
     if (!dlcDate) return <Badge variant="outline">Non défini</Badge>;
     
-    // Calculer les jours jusqu'à expiration
+    // LOGIQUE SIMPLIFIÉE ET COHÉRENTE :
+    // 1. Si le statut en base est "valides", afficher "Validé" (peu importe la date)
+    // 2. Sinon, calculer selon la date d'expiration
+    
+    if (status === "valides") {
+      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Validé</Badge>;
+    }
+    
+    // Pour tous les autres statuts, calculer selon la date
     const today = new Date();
     const expiry = new Date(dlcDate);
     const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    // La logique basée sur les dates prime sur le statut base de données
     if (daysUntilExpiry < 0) {
       return <Badge variant="destructive">Expiré</Badge>;
     } else if (daysUntilExpiry <= 15) {
       return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Expire bientôt</Badge>;
-    } else if (status === "valides") {
-      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Validé</Badge>;
     } else {
       return <Badge variant="default" className="bg-green-100 text-green-800">Actif</Badge>;
     }
