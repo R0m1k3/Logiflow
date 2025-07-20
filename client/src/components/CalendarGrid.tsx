@@ -130,10 +130,30 @@ export default function CalendarGrid({
       if (!publicity.startDate || !publicity.endDate) return false;
       
       try {
-        const startDate = parseISO(publicity.startDate);
-        const endDate = parseISO(publicity.endDate);
+        // Assurer que les dates sont traitées en UTC pour éviter les problèmes de fuseau horaire
+        const startDate = new Date(publicity.startDate + 'T00:00:00.000Z');
+        const endDate = new Date(publicity.endDate + 'T23:59:59.999Z');
+        const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
         
-        return isWithinInterval(date, { start: startDate, end: endDate });
+        const isWithinPeriod = currentDate >= startDate && currentDate <= endDate;
+        
+        // Debug logs pour diagnostiquer le problème  
+        if (publicity.pubNumber && (
+            publicity.pubNumber.includes('2512') || 
+            publicity.pubNumber === 'FINAL-TEST' ||
+            publicity.designation?.includes('Test Final')
+        )) {
+          console.log(`🎯 Publicity ${publicity.pubNumber} debug:`, {
+            currentDate: format(currentDate, 'yyyy-MM-dd'),
+            startDate: format(startDate, 'yyyy-MM-dd'),
+            endDate: format(endDate, 'yyyy-MM-dd'),
+            isWithinPeriod,
+            originalStartDate: publicity.startDate,
+            originalEndDate: publicity.endDate
+          });
+        }
+        
+        return isWithinPeriod;
       } catch (error) {
         console.warn('Error parsing publicity dates:', publicity);
         return false;
