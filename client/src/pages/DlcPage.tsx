@@ -415,13 +415,14 @@ export default function DlcPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Gestion DLC</h1>
-          <p className="text-muted-foreground">Gestion des dates limites de consommation</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="p-6 pb-0">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Gestion DLC</h1>
+            <p className="text-muted-foreground">Gestion des dates limites de consommation</p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -561,6 +562,7 @@ export default function DlcPage() {
             </Form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Filters */}
@@ -670,109 +672,111 @@ export default function DlcPage() {
         </Card>
       </div>
 
-      {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Produits DLC ({totalItems})</CardTitle>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Exporter PDF
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {productsLoading ? (
-            <div className="flex justify-center items-center h-32">Chargement des produits...</div>
-          ) : totalItems === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Aucun produit DLC trouvé
+      {/* Products Table Section avec overflow */}
+      <div className="flex-1 overflow-y-auto p-6 pt-0">
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Produits DLC ({totalItems})</CardTitle>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Exporter PDF
+              </Button>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Produit</TableHead>
-                    <TableHead>Code EAN13</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Date d'expiration</TableHead>
-                    <TableHead>Fournisseur</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedProducts.map((product) => (
-                    <TableRow 
-                      key={product.id} 
-                      className={product.status === "valide" ? "opacity-60 bg-gray-50 dark:bg-gray-800" : ""}
-                    >
-                      <TableCell className="font-medium">{product.productName}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {product.gencode || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="uppercase">
-                          {product.dateType}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {product.dlcDate ? format(new Date(product.dlcDate), "dd/MM/yyyy", { locale: fr }) : 'Date non définie'}
-                      </TableCell>
-                      <TableCell>{product.supplier?.name || 'Non défini'}</TableCell>
-                      <TableCell>{getStatusBadge(product.status, product.dlcDate)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(product)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          {shouldShowValidateButton(product) && (user?.role === 'admin' || user?.role === 'manager') && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => handleValidate(product.id)}
-                              disabled={validateMutation.isPending}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDelete(product.id)}
-                            disabled={deleteMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+          </CardHeader>
+          <CardContent>
+            {productsLoading ? (
+              <div className="flex justify-center items-center h-32">Chargement des produits...</div>
+            ) : totalItems === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Aucun produit DLC trouvé
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Produit</TableHead>
+                      <TableHead>Code EAN13</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date d'expiration</TableHead>
+                      <TableHead>Fournisseur</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-          
-          {/* Pagination */}
-          {totalItems > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={setItemsPerPage}
-              className="mt-4 border-t border-gray-200 pt-4"
-            />
-          )}
-        </CardContent>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedProducts.map((product) => (
+                      <TableRow 
+                        key={product.id} 
+                        className={product.status === "valide" ? "opacity-60 bg-gray-50 dark:bg-gray-800" : ""}
+                      >
+                        <TableCell className="font-medium">{product.productName}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {product.gencode || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="uppercase">
+                            {product.dateType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {product.dlcDate ? format(new Date(product.dlcDate), "dd/MM/yyyy", { locale: fr }) : 'Date non définie'}
+                        </TableCell>
+                        <TableCell>{product.supplier?.name || 'Non défini'}</TableCell>
+                        <TableCell>{getStatusBadge(product.status, product.dlcDate)}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(product)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            {shouldShowValidateButton(product) && (user?.role === 'admin' || user?.role === 'manager') && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleValidate(product.id)}
+                                disabled={validateMutation.isPending}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(product.id)}
+                              disabled={deleteMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+            
+            {/* Pagination */}
+            {totalItems > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                className="mt-4 border-t border-gray-200 pt-4"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Modal de confirmation de suppression */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

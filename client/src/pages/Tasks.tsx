@@ -265,7 +265,7 @@ export default function Tasks() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar avec filtres */}
-        <div className="w-80 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto">
+        <div className="w-80 bg-gray-50 border-r border-gray-200 p-4 flex-shrink-0">
           {/* Filtres */}
           <Card>
             <CardHeader className="pb-4">
@@ -322,9 +322,9 @@ export default function Tasks() {
         </div>
 
         {/* Zone principale avec les tâches */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           {/* Liste des tâches */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="p-6">
             {totalItems === 0 ? (
               <div className="text-center py-12">
                 <ListTodo className="w-12 h-12 text-gray-400 mx-auto mb-4" />

@@ -311,7 +311,7 @@ export default function Deliveries() {
       </div>
 
       {/* Deliveries List */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-hidden flex flex-col">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
@@ -336,7 +336,7 @@ export default function Deliveries() {
             )}
           </div>
         ) : (
-          <div className="p-6">
+          <div className="flex-1 overflow-y-auto p-6">
             <div className="bg-white border border-gray-200 shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
