@@ -372,12 +372,24 @@ export default function UsersPage() {
   const filteredUsers = Array.isArray(users) ? users.filter(u => {
     const matchesSearch = u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          u.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          u.email?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRole = roleFilter === "all" || u.role === roleFilter;
     
     return matchesSearch && matchesRole;
   }) : [];
+
+  // Debug: Log user data to understand structure
+  if (Array.isArray(users) && users.length > 0) {
+    console.log('🧪 Debug Users Data:', users.map(u => ({
+      id: u.id,
+      username: u.username,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      name: u.name
+    })));
+  }
 
   const getRoleIcon = (role: string) => {
     const { iconClass } = getRoleTailwindClasses(role);
@@ -720,11 +732,21 @@ export default function UsersPage() {
                             </div>
                             <div>
                               <div className="text-sm font-medium text-gray-900 flex items-center">
-                                {(userData.firstName && userData.lastName) ? `${userData.firstName} ${userData.lastName}` : 
-                                 userData.firstName ? userData.firstName :
-                                 userData.lastName ? userData.lastName :
-                                 userData.name ? userData.name :
-                                 userData.username || 'Utilisateur'}
+{(() => {
+                                  if (userData.firstName && userData.lastName) {
+                                    return `${userData.firstName} ${userData.lastName}`;
+                                  }
+                                  if (userData.firstName && userData.firstName.trim()) {
+                                    return userData.firstName;
+                                  }
+                                  if (userData.lastName && userData.lastName.trim()) {
+                                    return userData.lastName;
+                                  }
+                                  if (userData.name && userData.name.trim()) {
+                                    return userData.name;
+                                  }
+                                  return userData.username || 'Utilisateur';
+                                })()}
                                 {userData.id === user?.id && (
                                   <Badge variant="outline" className="ml-2 text-xs">Vous</Badge>
                                 )}
