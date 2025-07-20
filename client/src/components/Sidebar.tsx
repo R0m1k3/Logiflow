@@ -25,10 +25,7 @@ export default function Sidebar() {
   const { user, isLoading, error } = useAuthSimple();
   const [location] = useLocation();
 
-  // Debug logging pour production
-  console.log('Sidebar - User:', user);
-  console.log('Sidebar - isLoading:', isLoading);
-  console.log('Sidebar - error:', error);
+  // Les logs de debug seront ajoutés après la définition de userPermissions
 
   const handleLogout = async () => {
     try {
@@ -188,6 +185,16 @@ export default function Sidebar() {
     refetchInterval: false
   });
 
+  // Debug logging pour production - après définition userPermissions
+  console.log('🔍 SIDEBAR DIAGNOSTIC - User:', user?.username, user?.role);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - isLoading:', isLoading);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - error:', error);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - userPermissions length:', userPermissions?.length);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - permissionsLoading:', permissionsLoading);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - permissionsError:', permissionsError);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - Environment:', window.location.hostname);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - First 3 permissions:', userPermissions?.slice(0, 3));
+
   // Fonction pour vérifier les permissions dynamiquement
   const hasPermission = (requiredPermission: string) => {
     // Si l'utilisateur n'est pas chargé, ne pas afficher les menus
@@ -295,7 +302,8 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
-          {menuItems.map((item) => {
+
+          {menuItems.map((item, index) => {
             const hasRequiredPermission = hasPermission(item.permission);
             
             if (!hasRequiredPermission) return null;
