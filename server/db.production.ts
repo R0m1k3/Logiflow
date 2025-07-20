@@ -6,9 +6,12 @@ import * as schema from '../shared/schema';
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: false, // Docker internal connection doesn't need SSL
-  max: 20, // Maximum number of connections
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  max: 10, // Reduced pool size for stability
+  idleTimeoutMillis: 60000, // Increased idle timeout
+  connectionTimeoutMillis: 10000, // Increased connection timeout
+  acquireTimeoutMillis: 60000, // Wait time for acquiring connection
+  maxUses: 7500, // Limit connection reuse
+  allowExitOnIdle: true // Allow pool to close when idle
 });
 
 export const db = drizzle(pool, { schema });

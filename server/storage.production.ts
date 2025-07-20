@@ -37,6 +37,36 @@ import type {
 
 // Production storage implementation using raw PostgreSQL queries
 export class DatabaseStorage implements IStorage {
+  // Helper method for retrying failed queries
+  private async retryQuery<T>(
+    queryFn: () => Promise<T>, 
+    maxRetries: number = 3,
+    delay: number = 1000
+  ): Promise<T> {
+    let lastError: Error;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await queryFn();
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`Query attempt ${attempt}/${maxRetries} failed:`, error.message);
+        
+        // Don't retry if it's not a connection error
+        if (!error.message.includes('connection') && !error.message.includes('timeout')) {
+          throw error;
+        }
+        
+        if (attempt < maxRetries) {
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2; // Exponential backoff
+        }
+      }
+    }
+    
+    throw lastError;
+  }
   // Helper method to safely format dates to ISO strings
   private formatDate(date: any): string | null {
     if (!date) return null;
@@ -80,8 +110,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-    return result.rows[0] || undefined;
+    return this.retryQuery(async () => {
+      const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+      return result.rows[0] || undefined;
+    });
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -103,24 +135,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserWithGroups(id: string): Promise<any> {
-    const user = await this.getUser(id);
-    if (!user) return undefined;
+    return this.retryQuery(async () => {
+      const user = await this.getUser(id);
+      if (!user) return undefined;
 
-    // Récupérer les groupes de l'utilisateur
-    const groupsResult = await pool.query(`
-      SELECT g.*, ug.user_id, ug.group_id 
-      FROM groups g 
-      JOIN user_groups ug ON g.id = ug.group_id 
-      WHERE ug.user_id = $1
-    `, [id]);
+      // Récupérer les groupes de l'utilisateur
+      const groupsResult = await pool.query(`
+        SELECT g.*, ug.user_id, ug.group_id 
+        FROM groups g 
+        JOIN user_groups ug ON g.id = ug.group_id 
+        WHERE ug.user_id = $1
+      `, [id]);
 
-    // Récupérer les rôles de l'utilisateur
-    const rolesResult = await pool.query(`
-      SELECT r.*, ur.assigned_by, ur.assigned_at
-      FROM roles r 
-      JOIN user_roles ur ON r.id = ur.role_id 
-      WHERE ur.user_id = $1
-    `, [id]);
+      // Récupérer les rôles de l'utilisateur
+      const rolesResult = await pool.query(`
+        SELECT r.*, ur.assigned_by, ur.assigned_at
+        FROM roles r 
+        JOIN user_roles ur ON r.id = ur.role_id 
+        WHERE ur.user_id = $1
+      `, [id]);
 
     return {
       ...user,
@@ -151,6 +184,7 @@ export class DatabaseStorage implements IStorage {
         }
       }))
     };
+    });
   }
 
   async getUsers(): Promise<User[]> {
