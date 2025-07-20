@@ -544,11 +544,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      const newUser = await storage.createUser(req.body);
+      const userData = req.body;
+      console.log('📝 POST /api/users - Request body:', userData);
+      
+      // Validation des champs obligatoires
+      if (!userData.username || userData.username.trim() === '') {
+        return res.status(400).json({ message: "L'identifiant est obligatoire" });
+      }
+      
+      if (!userData.password || userData.password.trim() === '') {
+        return res.status(400).json({ message: "Le mot de passe est obligatoire" });
+      }
+      
+      if (userData.password && userData.password.length < 4) {
+        return res.status(400).json({ message: "Le mot de passe doit contenir au moins 4 caractères" });
+      }
+      
+      if (userData.email && userData.email.trim() !== '' && !userData.email.includes('@')) {
+        return res.status(400).json({ message: "L'email doit être valide" });
+      }
+
+      const newUser = await storage.createUser(userData);
       res.status(201).json(newUser);
     } catch (error) {
       console.error("Error creating user:", error);
-      res.status(500).json({ message: "Failed to create user" });
+      
+      // Gestion des erreurs spécifiques
+      if (error.message && error.message.includes('unique constraint')) {
+        if (error.message.includes('email')) {
+          return res.status(400).json({ message: "Cet email est déjà utilisé par un autre utilisateur" });
+        }
+        if (error.message.includes('username')) {
+          return res.status(400).json({ message: "Ce nom d'utilisateur est déjà pris" });
+        }
+      }
+      
+      res.status(500).json({ message: "Erreur lors de la création de l'utilisateur" });
     }
   });
 

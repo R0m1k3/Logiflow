@@ -291,12 +291,22 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    console.log('🔍 PRODUCTION createUser - Generated username:', username, 'for data:', {
-      originalUsername: userData.username,
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      name: userData.name
+    // Utiliser l'email fourni ou null si vide (pas de génération automatique)
+    let email = userData.email;
+    if (!email || email.trim() === '') {
+      email = null;
+    }
+    
+    console.log('🔍 PRODUCTION createUser - Generated:', {
+      username,
+      email,
+      originalData: {
+        originalUsername: userData.username,
+        originalEmail: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        name: userData.name
+      }
     });
     
     const result = await pool.query(`
@@ -306,7 +316,7 @@ export class DatabaseStorage implements IStorage {
     `, [
       userData.id || nanoid(),
       username,
-      userData.email,
+      email,
       userData.name,
       userData.firstName,
       userData.lastName,
