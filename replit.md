@@ -470,6 +470,16 @@ The application uses a sophisticated dual authentication approach:
 - **TECHNOLOGIES LISTÉES** - Stack frontend (React, Vite, Shadcn/ui, TanStack Query) et backend (Express, PostgreSQL, Drizzle)
 - **MÉTRIQUES PERFORMANCE** - Documentation des optimisations et choix d'architecture
 
+### July 20, 2025 - FONCTIONNALITÉ CALENDRIER PUBLICITÉS: Affichage Intelligent avec Points Colorés Magasins
+- **AFFICHAGE PUBLICITÉS CALENDRIER INTÉGRÉ** - Numéros de publicité affichés en haut à droite de chaque jour du calendrier
+- **POINTS COLORÉS MAGASINS PARTICIPANTS** - Admins voient des points colorés indiquant les magasins participant à chaque publicité (Frouard=bleu, Houdemont=gris)
+- **FILTRAGE INTELLIGENT RÔLES** - Employés voient uniquement les publicités de leurs magasins assignés, admins voient toutes les publicités avec participants
+- **LOGIQUE PARTICIPATION STRICTE** - Publicités sans magasins participants ne s'affichent pour personne (admin inclus)
+- **INTÉGRATION SEAMLESS** - Publicités intégrées naturellement avec commandes et livraisons existantes dans le calendrier
+- **UX OPTIMISÉE** - Tooltips avec nom du magasin au survol des points colorés et désignation de la publicité
+- **DÉTECTION PÉRIODE AUTOMATIQUE** - Utilisation d'isWithinInterval pour détecter les publicités actives sur chaque date
+- **RESPONSIVE DESIGN** - Affichage adaptatif qui préserve la lisibilité même avec plusieurs publicités par jour
+
 ### July 20, 2025 - RÉSOLUTION FINALE: Filtres DLC Production Entièrement Fonctionnels
 - **CONFLIT LOGIQUE RÉSOLU** - Correction function getStatusBadge() qui écrasait incorrectement les statuts de base de données
 - **FILTRES DLC OPÉRATIONNELS** - Tous les filtres fonctionnent correctement : "Tous", "Validés", "Expire bientôt", "Expirés" 

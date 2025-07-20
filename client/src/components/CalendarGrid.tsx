@@ -194,6 +194,11 @@ export default function CalendarGrid({
                         // Filter participations based on user role
                         let relevantParticipations = publicity.participations || [];
                         
+                        // For ALL users (including admin): only show publicities that have participating stores
+                        if (relevantParticipations.length === 0) {
+                          return null; // Don't show publicity if no stores participate
+                        }
+                        
                         if (userRole !== 'admin') {
                           // For non-admin users, only show publicities where their store participates
                           relevantParticipations = relevantParticipations.filter(p => 
@@ -201,10 +206,11 @@ export default function CalendarGrid({
                             // For now, show all since we don't have user store info here
                             true
                           );
-                        }
-                        
-                        if (relevantParticipations.length === 0 && userRole !== 'admin') {
-                          return null; // Don't show publicity if user's store doesn't participate
+                          
+                          // Don't show publicity if user's store doesn't participate
+                          if (relevantParticipations.length === 0) {
+                            return null;
+                          }
                         }
                         
                         return (
