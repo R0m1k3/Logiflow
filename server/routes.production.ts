@@ -1294,17 +1294,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`  - ID: ${row.id}, Name: ${row.name}, DisplayName: "${row.display_name}", Category: ${row.category}`);
       });
       
-      // Vérifier aussi via le storage
-      const storagePermissions = await storage.getPermissions();
-      const storageTaskPermissions = storagePermissions.filter(p => p.category === 'gestion_taches');
-      console.log('📋 Task permissions via storage:', storageTaskPermissions.length);
+      // Ne plus utiliser storage pour éviter l'erreur "storage is not defined"
+      console.log('📋 Task permissions via database only (storage reference removed)');
       
       res.json({
         database: taskResult.rows,
-        storage: storageTaskPermissions,
         summary: {
           database_count: taskResult.rows.length,
-          storage_count: storageTaskPermissions.length,
           timestamp: new Date().toISOString()
         }
       });
