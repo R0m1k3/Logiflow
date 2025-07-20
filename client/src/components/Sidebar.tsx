@@ -167,44 +167,74 @@ export default function Sidebar() {
   const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery({
     queryKey: ['/api/user/permissions'],
     queryFn: async () => {
-      const response = await fetch('/api/user/permissions', { credentials: 'include' });
+      console.log('🔍 Fetching user permissions for user:', user?.username, user?.role);
+      const response = await fetch('/api/user/permissions', { 
+        credentials: 'include',
+        cache: 'no-cache' 
+      });
       if (!response.ok) {
-        console.error('Failed to fetch user permissions:', response.status);
+        console.error('❌ Failed to fetch user permissions:', response.status, response.statusText);
         return [];
       }
       const permissions = await response.json();
-      console.log('User permissions loaded:', permissions.length);
+      console.log('✅ User permissions loaded:', permissions.length, 'for role:', user?.role);
+      console.log('📋 First 3 permissions:', permissions.slice(0, 3).map((p: any) => p.name || p.permission?.name));
       return permissions;
     },
     enabled: !!user && !isLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1000, // 1 second pour debug
     refetchOnWindowFocus: false,
     retry: 3,
+    refetchInterval: false
   });
 
   // Fonction pour vérifier les permissions dynamiquement
   const hasPermission = (requiredPermission: string) => {
-    // Si les permissions sont en cours de chargement, ne pas afficher les menus
-    if (permissionsLoading || !user) return false;
+    // Si l'utilisateur n'est pas chargé, ne pas afficher les menus
+    if (!user) {
+      console.log('❌ Permission check failed: no user');
+      return false;
+    }
     
     // Admin a toujours accès
-    if (user.role === 'admin') return true;
+    if (user.role === 'admin') {
+      console.log('✅ Admin user - permission granted:', requiredPermission);
+      return true;
+    }
+    
+    // Si les permissions sont en cours de chargement, ne pas afficher les menus (sauf admin)
+    if (permissionsLoading) {
+      console.log('⏳ Permissions loading for:', user.role, requiredPermission);
+      return false;
+    }
+    
+    // Si erreur de chargement des permissions, ne pas afficher
+    if (permissionsError) {
+      console.log('❌ Permissions error:', permissionsError, 'for:', requiredPermission);
+      return false;
+    }
     
     // Si pas de permissions chargées pour un non-admin, ne pas afficher
-    if (!userPermissions || userPermissions.length === 0) return false;
+    if (!userPermissions || userPermissions.length === 0) {
+      console.log('❌ No permissions loaded for role:', user.role, 'required:', requiredPermission);
+      return false;
+    }
     
     // Vérifier si l'utilisateur a la permission spécifique
     const hasSpecificPermission = userPermissions.some((perm: any) => 
       perm.name === requiredPermission || perm.permission?.name === requiredPermission
     );
     
-    console.log('Permission check:', { 
+    const result = {
       requiredPermission, 
       userRole: user?.role, 
       hasSpecificPermission,
       totalPermissions: userPermissions.length,
-      permissionsLoading
-    });
+      permissionsLoading,
+      permissionsError: !!permissionsError
+    };
+    
+    console.log(hasSpecificPermission ? '✅' : '❌', 'Permission check:', result);
     
     return hasSpecificPermission;
   };

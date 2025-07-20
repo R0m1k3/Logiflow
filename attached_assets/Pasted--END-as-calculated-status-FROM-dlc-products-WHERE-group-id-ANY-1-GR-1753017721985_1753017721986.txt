@@ -1,0 +1,204 @@
+         END as calculated_status
+
+        FROM dlc_products
+
+       WHERE group_id = ANY($1) GROUP BY status, dlc_date, expiry_date, calculated_status
+
+📊 DLC Stats params: [ [ 1 ] ]
+
+📦 Orders API called with: {
+
+  startDate: undefined,
+
+  endDate: undefined,
+
+  storeId: undefined,
+
+  storeIdType: 'undefined',
+
+  userRole: 'directeur',
+
+  fullQuery: {}
+
+}
+
+📦 Non-admin filtering with groupIds: [ 1 ]
+
+📦 Fetching all orders with groupIds: [ 1 ]
+
+📦 getOrders production called with groupIds: [ 1 ]
+
+📦 SQL Query: {
+
+  whereClause: ' WHERE o.group_id = ANY($1)',
+
+  params: [ [ 1 ] ],
+
+  query: 'SELECT o.* FROM orders o  WHERE o.group_id = ANY($1) ORDER BY o.created_at DESC'
+
+}
+
+Customer orders - User assigned stores: { groupIds: [ 1 ] }
+
+📊 Monthly stats query params: {
+
+  year: 2025,
+
+  month: 7,
+
+  startDate: '2025-07-01',
+
+  endDate: '2025-07-31',
+
+  groupIds: [ 1 ],
+
+  whereClause: ' AND group_id = ANY($3)'
+
+}
+
+📊 DLC Stats raw result: []
+
+📊 DLC Stats final: {
+
+  active: 0,
+
+  expiringSoon: 0,
+
+  expired: 0,
+
+  valide: 0,
+
+  en_cours: 0,
+
+  total: 0,
+
+  totalQuantity: 0
+
+}
+
+DLC Stats returned: {
+
+  active: 0,
+
+  expiringSoon: 0,
+
+  expired: 0,
+
+  valide: 0,
+
+  en_cours: 0,
+
+  total: 0,
+
+  totalQuantity: 0
+
+}
+
+1:21:45 PM [express] GET /api/dlc-products/stats 304 in 290ms
+
+Customer orders returned from storage: 0 items
+
+🚚 Deliveries API called with: {
+
+  startDate: undefined,
+
+  endDate: undefined,
+
+  storeId: undefined,
+
+  withBL: undefined,
+
+  userRole: 'directeur'
+
+}
+
+🚚 Non-admin filtering deliveries with groupIds: [ 1 ]
+
+🚚 Fetching all deliveries with groupIds: [ 1 ]
+
+📦 Query result: {
+
+  rowCount: 5,
+
+  sampleRows: [
+
+    {
+
+      id: 5,
+
+      groupId: 1,
+
+      plannedDate: 2025-07-17T00:00:00.000Z,
+
+      supplierName: 'Zamibo',
+
+      groupName: 'Frouard'
+
+    },
+
+    {
+
+      id: 4,
+
+      groupId: 1,
+
+      plannedDate: 2025-07-17T00:00:00.000Z,
+
+      supplierName: 'BI2L',
+
+      groupName: 'Frouard'
+
+    }
+
+  ]
+
+}
+
+📦 Orders returned: 5 items
+
+1:21:45 PM [express] GET /api/tasks 304 in 305ms
+
+1:21:45 PM [express] GET /api/groups 304 in 216ms
+
+1:21:45 PM [express] GET /api/customer-orders 304 in 319ms
+
+1:21:45 PM [express] GET /api/orders 304 in 324ms
+
+🚚 Deliveries returned: 0 items
+
+1:21:45 PM [express] GET /api/deliveries 304 in 331ms
+
+📊 Query results: {
+
+  ordersCount: '5',
+
+  deliveriesCount: '0',
+
+  orderStats: { pending_count: '5', total_palettes: '0', total_packages: '0' },
+
+  deliveryStats: { total_palettes: '0', total_packages: '0' }
+
+}
+
+📊 Final stats: {
+
+  ordersCount: 5,
+
+  deliveriesCount: 0,
+
+  pendingOrdersCount: 5,
+
+  averageDeliveryTime: 0,
+
+  totalPalettes: 0,
+
+  totalPackages: 0
+
+}
+
+1:21:45 PM [express] GET /api/stats/monthly 304 in 359ms
+
+
+      
+      
+    
