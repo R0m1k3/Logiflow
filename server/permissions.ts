@@ -24,6 +24,12 @@ export async function hasPermission(userId: string, permissionName: string): Pro
       return true;
     }
 
+    // Directeur always has all permissions (temporary fix for production issue)
+    if (user.role === 'directeur') {
+      console.log(`✅ User ${userId} is directeur - permission granted (temporary fix)`);
+      return true;
+    }
+
     // Get user's role permissions
     const userRoles = await storage.getUserRoles(userId);
     console.log(`📋 User ${userId} roles:`, userRoles.map(ur => ur.role.name));
