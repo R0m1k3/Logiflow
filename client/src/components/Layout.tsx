@@ -55,7 +55,7 @@ export default function Layout({ children }: LayoutProps) {
           {/* Header with store selector for admin */}
           <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
-              <h1 className="text-lg font-medium text-gray-800">LogiFlow</h1>
+              {/* Titre supprimé - déjà présent dans la sidebar */}
             </div>
 
             {/* Store selector for admin - moved to top right */}
