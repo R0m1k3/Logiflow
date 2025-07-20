@@ -14,7 +14,6 @@ import { Check, X } from "lucide-react";
 
 const validateDeliverySchema = z.object({
   blNumber: z.string().min(1, "Le numéro de BL est obligatoire"),
-  blAmount: z.string().optional(),
 });
 
 type ValidateDeliveryForm = z.infer<typeof validateDeliverySchema>;
@@ -39,19 +38,14 @@ export default function ValidateDeliveryModal({
     resolver: zodResolver(validateDeliverySchema),
     defaultValues: {
       blNumber: "",
-      blAmount: "",
     },
   });
 
   const validateDeliveryMutation = useMutation({
     mutationFn: async (data: ValidateDeliveryForm) => {
-      const payload: any = {
+      const payload = {
         blNumber: data.blNumber,
       };
-      
-      if (data.blAmount && data.blAmount.trim() !== '') {
-        payload.blAmount = parseFloat(data.blAmount);
-      }
       
       await apiRequest(`/api/deliveries/${delivery.id}/validate`, "POST", payload);
     },
@@ -146,25 +140,7 @@ export default function ValidateDeliveryModal({
               )}
             />
 
-            {/* Montant BL */}
-            <FormField
-              control={form.control}
-              name="blAmount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Montant BL (€) - Optionnel</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number"
-                      step="0.01"
-                      placeholder="Ex: 1200.00 (à remplir plus tard si nécessaire)"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             {/* Actions */}
             <div className="flex justify-end space-x-3 pt-4">
