@@ -428,17 +428,14 @@ export default function DlcPage() {
               Gestion des dates limites de consommation
             </p>
           </div>
-        </div>
-      </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau produit DLC
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-2xl">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau produit DLC
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? "Modifier le produit DLC" : "Nouveau produit DLC"}
@@ -569,8 +566,10 @@ export default function DlcPage() {
                 </div>
             </form>
           </Form>
-        </DialogContent>
-      </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
       {/* Filters */}
       <Card>
