@@ -184,14 +184,18 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Tableau de Bord</h2>
-          <p className="text-gray-600 mt-1">Vue d'ensemble des performances et statistiques</p>
-        </div>
-      </div>
+    <div className="p-6 space-y-6">
+      <Card className="-m-6 mb-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-white">
+            <BarChart3 className="h-8 w-8" />
+            Tableau de Bord
+          </CardTitle>
+          <CardDescription className="text-blue-100">
+            Vue d'ensemble des performances et statistiques
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
       {/* Alerts */}
       <div className="space-y-3">
