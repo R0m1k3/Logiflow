@@ -112,12 +112,20 @@ export default function AuthPage() {
       
       if (refreshedUserData && refreshedUserData.id) {
         console.log('🔄 User data confirmed, forcing redirect...');
-        setLocation("/");
+        if (currentEnvironment === 'production') {
+          window.location.href = '/dashboard';
+        } else {
+          setLocation("/");
+        }
       } else {
         setTimeout(() => {
           forceAuthRefresh().then((retryUserData) => {
             if (retryUserData && retryUserData.id) {
-              setLocation("/");
+              if (currentEnvironment === 'production') {
+                window.location.href = '/dashboard';
+              } else {
+                setLocation("/");
+              }
             }
           });
         }, 500);
@@ -150,10 +158,15 @@ export default function AuthPage() {
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
       console.log('🔄 User authenticated, redirecting to dashboard...', { user: user.username, authenticated: isAuthenticated });
-      // Force immediate redirect to home page
-      setLocation("/");
+      // Force reload on production to ensure proper routing
+      if (currentEnvironment === 'production') {
+        console.log('🔄 Production mode - forcing page reload for proper routing');
+        window.location.href = '/dashboard';
+      } else {
+        setLocation("/");
+      }
     }
-  }, [isLoading, isAuthenticated, user, setLocation]);
+  }, [isLoading, isAuthenticated, user, setLocation, currentEnvironment]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
