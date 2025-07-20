@@ -470,12 +470,15 @@ The application uses a sophisticated dual authentication approach:
 - **TECHNOLOGIES LISTÉES** - Stack frontend (React, Vite, Shadcn/ui, TanStack Query) et backend (Express, PostgreSQL, Drizzle)
 - **MÉTRIQUES PERFORMANCE** - Documentation des optimisations et choix d'architecture
 
-### July 20, 2025 - CORRECTION CRITIQUE: Permissions Employé pour Accès Dashboard
-- **PROBLÈME 404 EMPLOYÉ RÉSOLU** - Utilisateur ff292 (employé) obtenait erreur 404 en mode développement après connexion
-- **PERMISSIONS TABLEAU DE BORD AJOUTÉES** - Ajout de 3 permissions manquantes au rôle employee : dashboard_read, statistics_read, reports_generate
-- **ACCÈS DASHBOARD FONCTIONNEL** - Employés peuvent maintenant accéder au tableau de bord sans erreur de routage
-- **DIAGNOSTIC PERMISSIONS COMPLET** - Vérification et correction des permissions manquantes dans base de données production
-- **LOGIN EMPLOYEE OPÉRATIONNEL** - Connexion ff292/ff292 redirige maintenant correctement vers Dashboard
+### July 20, 2025 - CORRECTION CRITIQUE: Filtrage Publicités et Permissions Employé
+- **FILTRAGE PUBLICITÉS CORRIGÉ** - Employés voient maintenant uniquement les publicités où leurs magasins participent
+- **STORAGE PRODUCTION HARMONISÉ** - Méthode getPublicities() utilise maintenant JOIN avec publicity_participations pour filtrage correct
+- **STORAGE DÉVELOPPEMENT ALIGNÉ** - Même logique de filtrage par groupIds implémentée en mode développement
+- **PERMISSIONS FOURNISSEURS AJOUTÉES** - Permission suppliers_read ajoutée au rôle employee pour résoudre erreurs 403
+- **ACCÈS DASHBOARD FONCTIONNEL** - Ajout de 3 permissions manquantes au rôle employee : dashboard_read, statistics_read, reports_generate
+- **ERREURS CONSOLE RÉSOLUES** - Page commandes clients fonctionne maintenant sans erreurs 403 pour les employés
+- **LOGIN EMPLOYEE OPÉRATIONNEL** - Connexion ff292/ff292 redirige correctement vers Dashboard avec toutes permissions
+- **CALENDRIER FILTRÉ** - Employé Frouard ne voit plus les publicités exclusives à Houdemont
 
 ### July 20, 2025 - FONCTIONNALITÉ CALENDRIER PUBLICITÉS: Affichage Intelligent avec Points Colorés Magasins
 - **AFFICHAGE PUBLICITÉS CALENDRIER INTÉGRÉ** - Numéros de publicité affichés en haut à droite de chaque jour du calendrier
