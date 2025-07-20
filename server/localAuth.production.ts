@@ -185,33 +185,7 @@ export function setupLocalAuth(app: Express) {
     }
   });
 
-  // Get current user's permissions
-  app.get('/api/user/permissions', async (req: any, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Not authenticated' });
-    }
-    
-    try {
-      const user = req.user;
-      console.log('🔍 PRODUCTION - Fetching permissions for user:', user.id);
-      
-      // Si c'est un admin, il a toutes les permissions
-      if (user.role === 'admin') {
-        const allPermissions = await storage.getPermissions();
-        console.log('🔧 PRODUCTION Admin user - returning all permissions:', allPermissions.length);
-        return res.json(allPermissions);
-      }
-
-      // Pour les autres rôles, récupérer les permissions via le rôle
-      const permissions = await storage.getUserEffectivePermissions(user.id);
-      console.log('📝 PRODUCTION User permissions found:', permissions.length);
-      
-      res.json(permissions || []);
-    } catch (error) {
-      console.error("PRODUCTION Error fetching user permissions:", error);
-      res.status(500).json({ message: "Failed to fetch user permissions" });
-    }
-  });
+  // Route removed - handled in routes.production.ts to avoid conflict
 
   app.post('/api/logout', (req: any, res) => {
     req.logout((err: any) => {
