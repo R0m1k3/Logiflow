@@ -53,19 +53,27 @@ export async function hasPermission(userId: string, permissionName: string): Pro
 export function requirePermission(permissionName: string) {
   return async (req: any, res: any, next: any) => {
     try {
+      console.log(`🔍 PERMISSION CHECK: ${permissionName} - Incoming request`);
+      console.log(`🔍 PERMISSION CHECK: req.user exists:`, !!req.user);
+      console.log(`🔍 PERMISSION CHECK: req.user.claims:`, req.user?.claims);
+      console.log(`🔍 PERMISSION CHECK: req.user.id:`, req.user?.id);
+      
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       if (!userId) {
+        console.log(`❌ PERMISSION CHECK: No userId found - returning 401`);
         return res.status(401).json({ message: "User not authenticated" });
       }
 
+      console.log(`🔍 PERMISSION CHECK: Checking permission "${permissionName}" for user ${userId}`);
       const allowed = await hasPermission(userId, permissionName);
       
       if (!allowed) {
-        console.log(`🚫 Permission denied: ${permissionName} for user ${userId}`);
+        console.log(`🚫 PERMISSION DENIED: ${permissionName} for user ${userId}`);
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
+      console.log(`✅ PERMISSION GRANTED: ${permissionName} for user ${userId}`);
       next();
     } catch (error) {
       console.error(`❌ Permission middleware error for ${permissionName}:`, error);
