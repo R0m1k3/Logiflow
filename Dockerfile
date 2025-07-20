@@ -37,16 +37,12 @@ RUN echo "=== BUILD VERIFICATION ===" && \
     echo "index.html exists:" && \
     ls -la dist/public/index.html
 
-# Build backend avec tous les modules externes
-RUN npx esbuild server/index.ts \
+# Build backend avec tous les modules externes - utiliser index.production.ts
+RUN npx esbuild server/index.production.ts \
     --platform=node \
     --bundle \
     --format=esm \
     --outfile=dist/index.js \
-    --external:vite \
-    --external:@vitejs/* \
-    --external:@replit/* \
-    --external:tsx \
     --external:openid-client \
     --external:@neondatabase/serverless \
     --external:ws \

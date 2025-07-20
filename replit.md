@@ -123,6 +123,22 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 20, 2025 - RÉSOLUTION COMPLÈTE: Erreurs Docker Production et Configuration Vite
+- **DIAGNOSTIC COMPLET ERREURS DOCKER** - Identifié que `/app/dist/index.js` tentait d'importer Vite en production
+- **DOCKERFILE CORRIGÉ** - Entrée point changée de `server/index.ts` vers `server/index.production.ts` pour éviter dépendances Vite
+- **DÉTECTION ENVIRONNEMENT AMÉLIORÉE** - Logique robuste de détection Docker vs Replit vs Production
+- **ROUTING INTELLIGENT DOCKER** - Délégation automatique vers `index.production.ts` en environnement Docker
+- **FALLBACK COMPLET VITE** - Gestion d'erreur complète pour imports Vite défaillants
+- **BUILD PRODUCTION OPTIMISÉ** - Build frontend et backend séparés avec exclusions Vite appropriées
+- **DÉVELOPPEMENT STABLE** - Application fonctionne parfaitement en mode développement Replit
+- **PRÊT DÉPLOIEMENT DOCKER** - Configuration Docker-compose et Dockerfile prêts pour production
+
+### July 20, 2025 - CORRECTIONS CRITIQUES: Imports Vite et Gestion Production
+- **PROBLÈME RÉSOLU** - Erreur `log is not defined` corrigée en déplaçant middleware après import
+- **IMPORTS DYNAMIQUES SÉCURISÉS** - Chemins d'import `.js` vers `.ts` corrigés
+- **GESTION ERREURS VITE** - Try/catch autour imports Vite avec fallback production
+- **ENVIRONNEMENT FORCÉ REPLIT** - Détection automatique Replit pour éviter conflits Vite
+
 ### July 17, 2025 - DLC Production Inconsistencies Resolved & Schema Harmonization Complete
 - **MODULE DLC INTÉGRÉ TABLEAU DE BORD** - Carte "Statut DLC" remplace "Statut des Commandes" avec données temps réel
 - **ALERTES DLC AJOUTÉES** - Notifications automatiques pour produits expirant sous 15 jours et expirés

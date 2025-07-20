@@ -5,19 +5,33 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// Force development mode on Replit to avoid Vite import issues
-const isReplit = process.cwd().includes('/home/runner/workspace') || process.cwd().includes('/app');
-const forceDevMode = isReplit && !process.env.FORCE_PRODUCTION;
+// Enhanced environment detection
+const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
+const isReplit = process.cwd().includes('/home/runner/workspace');
+const isProduction = process.env.NODE_ENV === 'production' || isDocker;
 
-if (forceDevMode) {
-  console.log('🔧 Forcing development mode on Replit environment');
+console.log('🔍 Environment Analysis:', {
+  cwd: process.cwd(),
+  isDocker,
+  isReplit,
+  isProduction,
+  nodeEnv: process.env.NODE_ENV,
+  dockerEnv: process.env.DOCKER_ENV
+});
+
+if (isDocker) {
+  console.log('🐳 Detected Docker production environment - switching to production mode');
+  process.env.NODE_ENV = 'production';
+  process.env.STORAGE_MODE = 'production';
+} else if (isReplit) {
+  console.log('🔧 Detected Replit development environment');
   process.env.NODE_ENV = 'development';
   process.env.STORAGE_MODE = 'production'; // Keep production storage but dev Vite
-} else if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production') {
+} else if (isProduction) {
+  console.log('🏭 Production mode detected');
   process.env.STORAGE_MODE = 'production';
-  console.log('🐳 Running in Docker production mode');
 } else {
-  console.log('🔧 Running in development mode');
+  console.log('🔧 Development mode');
 }
 
 console.log('🔍 DIAGNOSTIC - Final STORAGE_MODE:', process.env.STORAGE_MODE);
@@ -49,6 +63,18 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 (async () => {
   // Conditional imports based on environment
   let setupVite: any, serveStatic: any, log: any;
+
+  // For Docker environments, route to production index.ts if available
+  if (isDocker) {
+    console.log('🐳 Docker environment detected - delegating to production entry point');
+    try {
+      const productionModule = await import("./index.production.ts");
+      console.log('✅ Successfully loaded production module, stopping execution here');
+      return; // Exit early since production module will handle everything
+    } catch (error) {
+      console.warn('⚠️  Production module not available, continuing with current process:', error.message);
+    }
+  }
 
   if (process.env.NODE_ENV === "production" || process.env.DOCKER_ENV === "production") {
     const viteProduction = await import("./vite.production.ts");
