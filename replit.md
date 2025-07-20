@@ -123,6 +123,14 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 20, 2025 - CORRECTION CRITIQUE PRODUCTION: Imports Pool/Storage et Interface Directeur 
+- **IMPORTS CASSÉS CORRIGÉS** - Erreurs `pool is not defined` et `storage is not defined` résolues en ajoutant imports manquants dans routes.production.ts
+- **INTERFACE DIRECTEUR AMÉLIORÉE** - Sélecteur de magasin étendu aux directeurs pour permettre filtrage par magasin identique aux admins
+- **DASHBOARD DIRECTEUR FONCTIONNEL** - Toutes les requêtes Dashboard.tsx modifiées pour supporter rôle directeur avec filtrage magasin
+- **API PERMISSIONS OPÉRATIONNELLES** - Routes `/api/roles/1/permissions` et `/api/user/permissions` fonctionnent maintenant correctement
+- **TESTS VALIDATION RÉUSSIS** - Directeur peut accéder à ses données (1 commande, 3 livraisons, 11 tâches) avec permissions appropriées (45 permissions)
+- **PROBLÈME RÉSOLU DÉFINITIVEMENT** - Application redémarre sans erreur, APIs répondent correctement, interface utilisateur cohérente
+
 ### July 20, 2025 - RÉSOLUTION COMPLÈTE: Erreurs Docker Production et Configuration Vite
 - **DIAGNOSTIC COMPLET ERREURS DOCKER** - Identifié que `/app/dist/index.js` tentait d'importer Vite en production
 - **DOCKERFILE CORRIGÉ** - Entrée point changée de `server/index.ts` vers `server/index.production.ts` pour éviter dépendances Vite

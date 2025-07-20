@@ -58,8 +58,8 @@ export default function Layout({ children }: LayoutProps) {
               {/* Titre supprimé - déjà présent dans la sidebar */}
             </div>
 
-            {/* Store selector for admin - moved to top right */}
-            {user?.role === 'admin' && stores.length > 0 && (
+            {/* Store selector for admin and directeur - moved to top right */}
+            {(user?.role === 'admin' || user?.role === 'directeur') && stores.length > 0 && (
               <div className="flex items-center gap-2">
                 <Store className="h-4 w-4 text-gray-500" />
                 <Select

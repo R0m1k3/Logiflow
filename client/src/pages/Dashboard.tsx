@@ -21,7 +21,7 @@ export default function Dashboard() {
         month: (currentDate.getMonth() + 1).toString(),
       });
       
-      if (selectedStoreId && user?.role === 'admin') {
+      if (selectedStoreId && (user?.role === 'admin' || user?.role === 'directeur')) {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -38,9 +38,9 @@ export default function Dashboard() {
   });
 
   // Construire les URLs pour récupérer toutes les données (pas de filtrage par date)
-  const ordersUrl = `/api/orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
-  const deliveriesUrl = `/api/deliveries${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
-  const customerOrdersUrl = `/api/customer-orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const ordersUrl = `/api/orders${selectedStoreId && (user?.role === 'admin' || user?.role === 'directeur') ? `?storeId=${selectedStoreId}` : ''}`;
+  const deliveriesUrl = `/api/deliveries${selectedStoreId && (user?.role === 'admin' || user?.role === 'directeur') ? `?storeId=${selectedStoreId}` : ''}`;
+  const customerOrdersUrl = `/api/customer-orders${selectedStoreId && (user?.role === 'admin' || user?.role === 'directeur') ? `?storeId=${selectedStoreId}` : ''}`;
 
   // Utiliser les mêmes clés de cache que les autres pages pour assurer la cohérence
   const { data: allOrders = [] } = useQuery({
@@ -93,7 +93,7 @@ export default function Dashboard() {
     queryKey: ["/api/dlc-products/stats", selectedStoreId],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (selectedStoreId && user?.role === 'admin') params.append("storeId", selectedStoreId.toString());
+      if (selectedStoreId && (user?.role === 'admin' || user?.role === 'directeur')) params.append("storeId", selectedStoreId.toString());
       return fetch(`/api/dlc-products/stats?${params.toString()}`, {
         credentials: 'include'
       }).then(res => res.json());
@@ -105,7 +105,7 @@ export default function Dashboard() {
     queryKey: ["/api/tasks", selectedStoreId],
     queryFn: () => {
       const params = new URLSearchParams();
-      if (selectedStoreId && user?.role === 'admin') params.append("storeId", selectedStoreId.toString());
+      if (selectedStoreId && (user?.role === 'admin' || user?.role === 'directeur')) params.append("storeId", selectedStoreId.toString());
       return fetch(`/api/tasks?${params.toString()}`, {
         credentials: 'include'
       }).then(res => res.json());
