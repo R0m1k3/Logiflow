@@ -5,16 +5,21 @@ import { useQuery } from "@tanstack/react-query";
 // En production utilise fetch direct, en développement utilise React Query
 export function useAuthUnified() {
   // Détection d'environnement plus robuste
-  const isDevelopment = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || 
-     window.location.hostname.includes('replit.dev')) &&
-     import.meta.env.DEV === true;
+  const isDevelopment = false; // FORCE PRODUCTION MODE FOR TESTING
+    // typeof window !== 'undefined' && 
+    // (window.location.hostname === 'localhost' || 
+    //  window.location.hostname.includes('replit.dev')) &&
+    //  import.meta.env.DEV === true;
 
   // Debug logging pour comprendre l'environnement
-  console.log('🔍 Auth Environment Debug:', {
+  console.log('🔍 Auth Environment Debug (FORCED PRODUCTION):', {
     hostname: typeof window !== 'undefined' ? window.location.hostname : 'N/A',
     isDev: import.meta.env.DEV,
-    environment: isDevelopment ? 'development' : 'production'
+    environment: isDevelopment ? 'development' : 'production',
+    originalDetection: typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || 
+       window.location.hostname.includes('replit.dev')) &&
+       import.meta.env.DEV === true
   });
 
   // État pour la version production (fetch direct)
