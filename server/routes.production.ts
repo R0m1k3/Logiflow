@@ -1,8 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage.production";
-
-// Global pool declaration for production routes
+import { storage, pool } from "./storage.production";
 
 import { setupLocalAuth, requireAuth } from "./localAuth.production";
 
