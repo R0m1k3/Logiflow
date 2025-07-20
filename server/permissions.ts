@@ -10,45 +10,55 @@ const storage = isProduction ? prodStorage : devStorage;
  */
 export async function hasPermission(userId: string, permissionName: string): Promise<boolean> {
   try {
-    console.log(`🔍 Checking permission "${permissionName}" for user ${userId}`);
+    console.log(`🔍 [PERMISSION CHECK] Checking "${permissionName}" for user ${userId}`);
+    console.log(`🔍 [PERMISSION CHECK] Storage mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
     
     const user = await storage.getUser(userId);
     if (!user) {
-      console.log(`❌ User ${userId} not found`);
+      console.log(`❌ [PERMISSION CHECK] User ${userId} not found`);
       return false;
     }
 
+    console.log(`🔍 [PERMISSION CHECK] User found: ${user.username} with role: ${user.role}`);
+
     // Admin always has all permissions
     if (user.role === 'admin') {
-      console.log(`✅ User ${userId} is admin - permission granted`);
-      return true;
-    }
-
-    // Directeur always has all permissions (temporary fix for production issue)
-    if (user.role === 'directeur') {
-      console.log(`✅ User ${userId} is directeur - permission granted (temporary fix)`);
+      console.log(`✅ [PERMISSION CHECK] User ${userId} is admin - permission granted`);
       return true;
     }
 
     // Get user's role permissions
+    console.log(`🔍 [PERMISSION CHECK] Getting user roles for ${userId}...`);
     const userRoles = await storage.getUserRoles(userId);
-    console.log(`📋 User ${userId} roles:`, userRoles.map(ur => ur.role.name));
+    console.log(`📋 [PERMISSION CHECK] User ${userId} has ${userRoles.length} roles:`, userRoles.map(ur => `${ur.role.name} (ID: ${ur.role.id})`));
+    
+    if (userRoles.length === 0) {
+      console.log(`❌ [PERMISSION CHECK] No roles found for user ${userId}`);
+      return false;
+    }
     
     for (const userRole of userRoles) {
+      console.log(`🔐 [PERMISSION CHECK] Checking permissions for role: ${userRole.role.name} (ID: ${userRole.role.id})`);
       const rolePermissions = await storage.getRolePermissions(userRole.role.id);
-      console.log(`🔐 Role ${userRole.role.name} permissions:`, rolePermissions.map(rp => rp.permission.name));
+      console.log(`🔐 [PERMISSION CHECK] Role ${userRole.role.name} has ${rolePermissions.length} permissions`);
+      
+      // Log some sample permissions for debugging
+      const samplePermissions = rolePermissions.slice(0, 3).map(rp => rp.permission.name);
+      console.log(`🔍 [PERMISSION CHECK] Sample permissions: ${samplePermissions.join(', ')}`);
       
       const hasPermission = rolePermissions.some(rp => rp.permission.name === permissionName);
       if (hasPermission) {
-        console.log(`✅ Permission "${permissionName}" found for user ${userId} via role ${userRole.role.name}`);
+        console.log(`✅ [PERMISSION CHECK] Permission "${permissionName}" FOUND for user ${userId} via role ${userRole.role.name}`);
         return true;
+      } else {
+        console.log(`❌ [PERMISSION CHECK] Permission "${permissionName}" NOT found in role ${userRole.role.name}`);
       }
     }
     
-    console.log(`❌ Permission "${permissionName}" NOT found for user ${userId}`);
+    console.log(`❌ [PERMISSION CHECK] Permission "${permissionName}" NOT found for user ${userId} in any role`);
     return false;
   } catch (error) {
-    console.error(`❌ Error checking permission "${permissionName}" for user ${userId}:`, error);
+    console.error(`❌ [PERMISSION CHECK] Error checking permission "${permissionName}" for user ${userId}:`, error);
     return false;
   }
 }
