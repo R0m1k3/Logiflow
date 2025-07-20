@@ -673,12 +673,23 @@ export default function CustomerOrders() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Commandes Client</h1>
-        <Button onClick={() => setShowCreateModal(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle Commande
-        </Button>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
+              <Package className="w-6 h-6 mr-3 text-blue-600" />
+              Commandes Client
+            </h2>
+            <p className="text-gray-600 mt-1">
+              Gestion des commandes clients et étiquettes
+            </p>
+          </div>
+          <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvelle Commande
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}

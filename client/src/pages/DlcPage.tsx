@@ -416,26 +416,36 @@ export default function DlcPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Gestion DLC</h1>
-          <p className="text-muted-foreground">Gestion des dates limites de consommation</p>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
+              <Clock className="w-6 h-6 mr-3 text-orange-600" />
+              Gestion DLC
+            </h2>
+            <p className="text-gray-600 mt-1">
+              Gestion des dates limites de consommation
+            </p>
+          </div>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau produit DLC
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingProduct ? "Modifier le produit DLC" : "Nouveau produit DLC"}
-              </DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white shadow-md">
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau produit DLC
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? "Modifier le produit DLC" : "Nouveau produit DLC"}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -557,11 +567,10 @@ export default function DlcPage() {
                     {editingProduct ? "Mettre à jour" : "Créer"}
                   </Button>
                 </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       {/* Filters */}
       <Card>

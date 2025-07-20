@@ -249,13 +249,19 @@ export default function Publicities() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Publicités</h1>
-          <p className="text-gray-600">Gestion des campagnes publicitaires</p>
-        </div>
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
+              <Calendar className="w-6 h-6 mr-3 text-green-600" />
+              Publicités
+            </h2>
+            <p className="text-gray-600 mt-1">
+              Gestion des campagnes publicitaires
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           {/* View Mode Toggle */}
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <Button 
@@ -327,11 +333,12 @@ export default function Publicities() {
           )}
 
           {canModify && (
-            <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Button onClick={() => setIsCreateModalOpen(true)} className="bg-green-600 hover:bg-green-700 text-white shadow-md">
               <Plus className="mr-2 h-4 w-4" />
               Nouvelle publicité
             </Button>
           )}
+          </div>
         </div>
       </div>
 
