@@ -31,6 +31,7 @@ import {
   insertTaskSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { requirePermission } from "./permissions";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker
@@ -181,13 +182,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Suppliers routes
-  app.get('/api/suppliers', isAuthenticated, async (req: any, res) => {
+  app.get('/api/suppliers', isAuthenticated, requirePermission('suppliers_read'), async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
-
       // Check if DLC filter is requested
       const dlcOnly = req.query.dlc === 'true';
       const suppliers = await storage.getSuppliers(dlcOnly);
@@ -198,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/suppliers', isAuthenticated, async (req: any, res) => {
+  app.post('/api/suppliers', isAuthenticated, requirePermission('suppliers_create'), async (req: any, res) => {
     try {
       // Debug logging pour la création de fournisseur
       console.log('📨 POST /api/suppliers - Headers:', {
@@ -232,13 +228,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('✅ User found:', { username: user.username, role: user.role });
       
-      // Vérifier les permissions
-      if (user.role !== 'admin' && user.role !== 'manager') {
-        console.error('❌ Insufficient permissions:', { userRole: user.role, required: ['admin', 'manager'] });
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
-      
-      console.log('✅ User has permission to create supplier');
+      // Permission check handled by middleware
+      console.log('✅ User has permission to create supplier (verified by middleware)');
       
       // Valider les données
       console.log('🔍 Validating supplier data with schema...');
@@ -272,12 +263,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/suppliers/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_update'), async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
 
       const id = parseInt(req.params.id);
       const data = insertSupplierSchema.partial().parse(req.body);
@@ -289,12 +276,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/suppliers/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_delete'), async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
 
       const id = parseInt(req.params.id);
       await storage.deleteSupplier(id);

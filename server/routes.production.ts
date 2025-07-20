@@ -23,6 +23,7 @@ import {
   insertTaskSchema
 } from "../shared/schema";
 import { z } from "zod";
+import { requirePermission } from "./permissions";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker
@@ -151,14 +152,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Suppliers routes
-  app.get('/api/suppliers', isAuthenticated, async (req: any, res) => {
+  app.get('/api/suppliers', isAuthenticated, requirePermission('suppliers_read'), async (req: any, res) => {
     try {
-      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
-
       // Check if DLC filter is requested
       const dlcOnly = req.query.dlc === 'true';
       const suppliers = await storage.getSuppliers(dlcOnly);
@@ -169,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/suppliers', isAuthenticated, async (req: any, res) => {
+  app.post('/api/suppliers', isAuthenticated, requirePermission('suppliers_create'), async (req: any, res) => {
     try {
       console.log('🚚 POST /api/suppliers - Raw request received');
       console.log('📨 Request headers:', {
@@ -189,7 +184,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('❌ Insufficient permissions for user:', { userId, userRole: user?.role });
         return res.status(403).json({ message: "Insufficient permissions" });
       }
-      console.log('✅ User has permission to create supplier:', user.role);
+      // Permission check handled by middleware
+      console.log('✅ User has permission to create supplier (verified by middleware)');
 
       const result = insertSupplierSchema.safeParse(req.body);
       if (!result.success) {
@@ -217,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/suppliers/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_update'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
@@ -239,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/suppliers/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/suppliers/:id', isAuthenticated, requirePermission('suppliers_delete'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
