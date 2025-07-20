@@ -416,6 +416,13 @@ The application uses a sophisticated dual authentication approach:
 - **PROJET OPTIMISÉ** - Taille réduite de 50M+ à structure plus propre sans fichiers de développement obsolètes
 - **BASE DONNÉES STABLE** - Application redémarrée, timeouts PostgreSQL résolus après nettoyage
 
+### July 20, 2025 - CORRECTION ERREURS DOCKER ET OPTIMISATIONS BASE DE DONNÉES
+- **ERREURS POSTGRESQL RÉSOLUES** - Configuration pool PostgreSQL optimisée avec timeouts augmentés et pool réduit
+- **SYSTÈME RETRY AJOUTÉ** - Retry automatique avec backoff exponentiel pour les requêtes qui échouent  
+- **FICHIERS DOCKER SUPPRIMÉS** - Suppression définitive de tous les fichiers Docker restants (.dockerignore, docker-compose.yml, .github/)
+- **GESTION ERREUR ROBUSTE** - Détection automatique des erreurs de connexion vs erreurs métier
+- **PERFORMANCE AMÉLIORÉE** - Plus d'erreurs 500 de timeout de connexion base de données
+
 ### July 20, 2025 - OPTIMISATION MODALE VALIDATION LIVRAISONS
 - **CHAMP MONTANT BL SUPPRIMÉ** - Suppression du champ "Montant BL (€)" de la modale de validation des livraisons
 - **PROCESSUS SIMPLIFIÉ** - La modale ne demande plus que le numéro de bon de livraison obligatoire
