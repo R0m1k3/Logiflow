@@ -1621,10 +1621,27 @@ export class DatabaseStorage implements IStorage {
 
   // User-Role association operations
   async getUserRoles(userId: string): Promise<UserRole[]> {
-    return await db
-      .select()
+    const result = await db
+      .select({
+        userId: userRoles.userId,
+        roleId: userRoles.roleId,
+        assignedBy: userRoles.assignedBy,
+        assignedAt: userRoles.assignedAt,
+        role: {
+          id: roles.id,
+          name: roles.name,
+          displayName: roles.displayName,
+          description: roles.description,
+          color: roles.color,
+          isSystem: roles.isSystem,
+          isActive: roles.isActive
+        }
+      })
       .from(userRoles)
+      .leftJoin(roles, eq(userRoles.roleId, roles.id))
       .where(eq(userRoles.userId, userId));
+    
+    return result;
   }
 
   async setUserRoles(userId: string, roleIds: number[], assignedBy: string): Promise<void> {

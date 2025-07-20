@@ -1987,6 +1987,54 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getUserRoles(userId: string): Promise<any[]> {
+    try {
+      console.log(`🔍 PRODUCTION getUserRoles called for user: ${userId}`);
+      
+      const result = await pool.query(`
+        SELECT 
+          ur.user_id,
+          ur.role_id,
+          ur.assigned_by,
+          ur.assigned_at,
+          r.id as role_id_rel,
+          r.name as role_name,
+          r.display_name as role_display_name,
+          r.description as role_description,
+          r.color as role_color,
+          r.is_system as role_is_system,
+          r.is_active as role_is_active
+        FROM user_roles ur
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE ur.user_id = $1
+      `, [userId]);
+      
+      console.log(`📋 PRODUCTION getUserRoles found ${result.rows.length} roles for user ${userId}`);
+      
+      const userRoles = result.rows.map(row => ({
+        userId: row.user_id,
+        roleId: row.role_id,
+        assignedBy: row.assigned_by,
+        assignedAt: row.assigned_at,
+        role: {
+          id: row.role_id_rel,
+          name: row.role_name,
+          displayName: row.role_display_name,
+          description: row.role_description,
+          color: row.role_color,
+          isSystem: row.role_is_system,
+          isActive: row.role_is_active
+        }
+      }));
+      
+      console.log(`✅ PRODUCTION getUserRoles returning:`, userRoles.map(ur => ({ roleId: ur.roleId, roleName: ur.role.name })));
+      return userRoles;
+    } catch (error) {
+      console.error(`❌ PRODUCTION Error in getUserRoles for user ${userId}:`, error);
+      return [];
+    }
+  }
+
   async setUserRoles(userId: string, roleIds: number[], assignedBy: string): Promise<void> {
     try {
       console.log(`🔧 setUserRoles called:`, { userId, roleIds, assignedBy });
