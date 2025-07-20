@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,7 @@ export default function UsersPage() {
     lastName: "",
     email: "",
     password: "",
-    role: "employee" as const,
+    role: "employee",
   });
   
   // Form states for creating user
@@ -60,7 +60,7 @@ export default function UsersPage() {
     lastName: "",
     username: "",
     password: "",
-    role: "employee" as const,
+    role: "employee",
   });
 
   const USE_LOCAL_AUTH = import.meta.env.VITE_USE_LOCAL_AUTH === 'true' || import.meta.env.MODE === 'development';
@@ -68,39 +68,27 @@ export default function UsersPage() {
   const { data: users = [], isLoading: usersLoading } = useQuery<UserWithGroups[]>({
     queryKey: ['/api/users'],
     enabled: user?.role === 'admin',
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: false,
   });
 
   const { data: groups = [] } = useQuery<Group[]>({
     queryKey: ['/api/groups'],
     enabled: user?.role === 'admin',
+    staleTime: 60000, // Cache for 1 minute
+    refetchOnWindowFocus: false,
   });
 
   const { data: roles = [] } = useQuery({
     queryKey: ['/api/roles'],
     enabled: user?.role === 'admin',
+    staleTime: 60000, // Cache for 1 minute  
+    refetchOnWindowFocus: false,
   });
 
-  // Protection React Error #310 - Vérification Array pour users et groups
-  console.log('👥 Users page data:', { 
-    usersLoading, 
-    usersCount: Array.isArray(users) ? users.length : 'NOT_ARRAY',
-    groupsCount: Array.isArray(groups) ? groups.length : 'NOT_ARRAY',
-    usersType: typeof users,
-    groupsType: typeof groups 
-  });
-  
-  // 🔍 Debug des couleurs de rôles
-  if (Array.isArray(users) && users.length > 0) {
-    console.log('🎨 Users roles colors debug:', users.map(u => ({
-      username: u.username,
-      oldRole: u.role,
-      userRoles: u.userRoles?.map(ur => ({
-        roleId: ur.roleId,
-        roleName: ur.role?.name,
-        roleColor: ur.role?.color
-      })) || 'NO_USER_ROLES',
-      roles: u.roles?.map(r => ({ name: r.name, color: r.color })) || 'NO_ROLES'
-    })));
+  // Debug logging only when needed
+  if (process.env.NODE_ENV === 'development' && usersLoading) {
+    console.log('👥 Loading users data...');
   }
   
   // Protection: s'assurer que users, groups et roles sont des arrays
@@ -369,27 +357,23 @@ export default function UsersPage() {
     },
   });
 
-  const filteredUsers = Array.isArray(users) ? users.filter(u => {
-    const matchesSearch = u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         u.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         u.email?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Optimize re-renders by memoizing filtered users
+  const filteredUsers = useMemo(() => {
+    if (!Array.isArray(safeUsers)) return [];
     
-    const matchesRole = roleFilter === "all" || u.role === roleFilter;
-    
-    return matchesSearch && matchesRole;
-  }) : [];
-
-  // Debug: Log user data to understand structure
-  if (Array.isArray(users) && users.length > 0) {
-    console.log('🧪 Debug Users Data:', users.map(u => ({
-      id: u.id,
-      username: u.username,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      name: u.name
-    })));
-  }
+    return safeUsers.filter((u) => {
+      const matchesSearch = !searchTerm ||
+                           u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           u.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           u.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesRole = roleFilter === "all" || u.role === roleFilter;
+      
+      return matchesSearch && matchesRole;
+    });
+  }, [safeUsers, searchTerm, roleFilter]);
 
   const getRoleIcon = (role: string) => {
     const { iconClass } = getRoleTailwindClasses(role);
@@ -484,7 +468,7 @@ export default function UsersPage() {
       lastName: lastName,
       email: userData.email || "",
       password: "",
-      role: userData.role as "admin" | "manager" | "employee",
+      role: userData.role,
     });
     setShowEditModal(true);
   };
@@ -1176,7 +1160,7 @@ export default function UsersPage() {
                 <Label htmlFor="role">Rôle</Label>
                 <Select 
                   value={newUser.role} 
-                  onValueChange={(value: "admin" | "manager" | "employee") => 
+                  onValueChange={(value) => 
                     setNewUser({...newUser, role: value})
                   }
                 >
@@ -1184,9 +1168,17 @@ export default function UsersPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="employee">Employé</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Administrateur</SelectItem>
+                    {safeRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>
+                        <div className="flex items-center">
+                          <div 
+                            className="w-2 h-2 rounded-full mr-2"
+                            style={{ backgroundColor: role.color }}
+                          />
+                          {role.displayName || role.name}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
