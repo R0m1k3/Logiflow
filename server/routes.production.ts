@@ -1226,6 +1226,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour récupérer les permissions d'un utilisateur - CRITIQUE POUR SIDEBAR DYNAMIQUE
+  app.get('/api/user/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log('🔍 PRODUCTION - Fetching permissions for user:', req.user.claims ? req.user.claims.sub : req.user.id);
+      
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const permissions = await storage.getPermissions(userId);
+      
+      console.log('📝 PRODUCTION User permissions found:', permissions.length);
+      res.json(permissions);
+    } catch (error) {
+      console.error('PRODUCTION Error fetching user permissions:', error);
+      res.status(500).json({ message: 'Failed to fetch user permissions' });
+    }
+  });
+
   // 🚨 ENDPOINT TEMPORAIRE DE DIAGNOSTIC PRODUCTION PERMISSIONS TÂCHES
   app.get('/api/debug/task-permissions', isAuthenticated, async (req: any, res) => {
     try {
