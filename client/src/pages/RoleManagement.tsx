@@ -588,6 +588,18 @@ export default function RoleManagement() {
                                 const hasPermission = rolePermissions?.some(
                                   rp => rp.permissionId === permission.id
                                 );
+                                
+                                // 🔍 DEBUG CRITIQUE COCHES PRODUCTION
+                                if (permission.category === 'administration' || permission.category === 'gestion_taches') {
+                                  console.log(`🔍 CHECKBOX ${permission.name}:`, {
+                                    permissionId: permission.id,
+                                    hasPermission,
+                                    rolePermissionsCount: rolePermissions?.length || 0,
+                                    rolePermissionsStructure: rolePermissions?.[0] ? Object.keys(rolePermissions[0]) : 'no data',
+                                    matchingRolePermission: rolePermissions?.find(rp => rp.permissionId === permission.id),
+                                    firstRolePermissionSample: rolePermissions?.[0]
+                                  });
+                                }
                                 return (
                                   <div key={permission.id} className="flex items-center space-x-2 bg-gray-50 p-1 rounded">
                                     <Checkbox
