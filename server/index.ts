@@ -35,12 +35,12 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
   let setupVite: any, serveStatic: any, log: any;
 
   if (process.env.NODE_ENV === "production" || process.env.DOCKER_ENV === "production") {
-    const viteProduction = await import("./vite.production.js");
+    const viteProduction = await import("./vite.production.ts");
     setupVite = viteProduction.setupVite;
     serveStatic = viteProduction.serveStatic;
     log = viteProduction.log;
   } else {
-    const viteDev = await import("./vite.js");
+    const viteDev = await import("./vite.ts");
     setupVite = viteDev.setupVite;
     serveStatic = viteDev.serveStatic;
     log = viteDev.log;
