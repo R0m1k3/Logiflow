@@ -193,7 +193,7 @@ L'application est conçue pour évoluer facilement :
 
 ## 📝 Licence
 
-Application propriétaire développée pour La Foir'Fouille.
+Application propriétaire développée pour Frodis.
 
 ---
 
