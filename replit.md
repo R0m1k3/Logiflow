@@ -407,6 +407,15 @@ The application uses a sophisticated dual authentication approach:
 - **DOUBLES ASCENSEURS ÉLIMINÉS** - Plus de problèmes de navigation ou de présentation dans les pages avec pagination
 - **INTERFACE STABLE** - Application entièrement fonctionnelle sans problèmes de conteneurs ou d'affichage
 
+### July 20, 2025 - NETTOYAGE PROJET: Fichiers Inutiles Supprimés
+- **FICHIERS TEMPORAIRES SUPPRIMÉS** - Scripts SQL de débogage (fix-*.sql), cookies.txt, debug-permissions.js supprimés
+- **FICHIERS DOCKER SUPPRIMÉS** - Dockerfile, docker-compose.yml et fichiers .env non nécessaires supprimés  
+- **IMAGES ANCIENNES NETTOYÉES** - 132 captures d'écran supprimées, gardé seulement les 10 plus récentes
+- **DOSSIERS CACHE SUPPRIMÉS** - Suppression .dockerignore et fichiers temporaires
+- **INIT.SQL RECRÉÉ** - Correction erreur suppression : fichier init.sql recréé car essentiel pour installation base de données
+- **PROJET OPTIMISÉ** - Taille réduite de 50M+ à structure plus propre sans fichiers de développement obsolètes
+- **BASE DONNÉES STABLE** - Application redémarrée, timeouts PostgreSQL résolus après nettoyage
+
 ### July 20, 2025 - DOCUMENTATION COMPLÈTE: README et Finalisation Projet
 - **README.MD CRÉÉ** - Documentation complète de l'application LogiFlow avec toutes les fonctionnalités détaillées
 - **ARCHITECTURE DOCUMENTÉE** - Description complète du stack technique (React, Express, PostgreSQL, TypeScript)
