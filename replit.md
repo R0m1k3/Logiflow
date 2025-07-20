@@ -125,8 +125,8 @@ The application uses a sophisticated dual authentication approach:
 
 ### July 20, 2025 - CORRECTION CRITIQUE PRODUCTION: Imports Pool/Storage et Interface Directeur 
 - **IMPORTS CASSÉS CORRIGÉS** - Erreurs `pool is not defined` et `storage is not defined` résolues en ajoutant imports manquants dans routes.production.ts
-- **INTERFACE DIRECTEUR AMÉLIORÉE** - Sélecteur de magasin étendu aux directeurs pour permettre filtrage par magasin identique aux admins
-- **DASHBOARD DIRECTEUR FONCTIONNEL** - Toutes les requêtes Dashboard.tsx modifiées pour supporter rôle directeur avec filtrage magasin
+- **INTERFACE DIRECTEUR CORRIGÉE** - Suppression du sélecteur de magasin pour directeurs selon préférences utilisateur, seuls les admins ont accès au sélecteur
+- **DASHBOARD DIRECTEUR FONCTIONNEL** - Directeurs voient données filtrées par leurs magasins assignés automatiquement sans interface de sélection
 - **API PERMISSIONS OPÉRATIONNELLES** - Routes `/api/roles/1/permissions` et `/api/user/permissions` fonctionnent maintenant correctement
 - **TESTS VALIDATION RÉUSSIS** - Directeur peut accéder à ses données (1 commande, 3 livraisons, 11 tâches) avec permissions appropriées (45 permissions)
 - **PROBLÈME RÉSOLU DÉFINITIVEMENT** - Application redémarre sans erreur, APIs répondent correctement, interface utilisateur cohérente
