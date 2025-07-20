@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { useStore } from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare } from "lucide-react";
@@ -185,17 +185,20 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <Card className="-m-6 mb-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <BarChart3 className="h-8 w-8" />
-            Tableau de Bord
-          </CardTitle>
-          <CardDescription className="text-blue-100">
-            Vue d'ensemble des performances et statistiques
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
+              <BarChart3 className="w-6 h-6 mr-3 text-blue-600" />
+              Tableau de Bord
+            </h2>
+            <p className="text-gray-600 mt-1">
+              Vue d'ensemble des performances et statistiques
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Alerts */}
       <div className="space-y-3">
