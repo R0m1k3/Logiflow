@@ -1,0 +1,204 @@
+ active: 0,
+
+  expiringSoon: 0,
+
+  expired: 0,
+
+  valide: 0,
+
+  en_cours: 0,
+
+  total: 0,
+
+  totalQuantity: 0
+
+}
+
+DLC Stats returned: {
+
+  active: 0,
+
+  expiringSoon: 0,
+
+  expired: 0,
+
+  valide: 0,
+
+  en_cours: 0,
+
+  total: 0,
+
+  totalQuantity: 0
+
+}
+
+4:36:49 PM [express] GET /api/stats/monthly 304 in 49ms
+
+👤 PRODUCTION - User found: directeur role: directeur
+
+4:36:49 PM [express] GET /api/dlc-products/stats 304 in 40ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/deliveries',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753029394963',
+
+  username: 'directeur',
+
+  sessionId: '0hlDWWUJdJ_5b27Qfuku7Mu3wAH8Ag_n',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/publicities?year=2025',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753029394963',
+
+  username: 'directeur',
+
+  sessionId: '0hlDWWUJdJ_5b27Qfuku7Mu3wAH8Ag_n',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🎯 getPublicities debug: {
+
+  year: 2025,
+
+  groupIds: undefined,
+
+  publicityCount: 1,
+
+  query: 'SELECT * FROM publicities WHERE year = ? ORDER BY start_date DESC'
+
+}
+
+🎯 getPublicities result: 1 publicités pour année 2025
+
+4:36:49 PM [express] GET /api/tasks 304 in 51ms
+
+4:36:49 PM [express] GET /api/publicities 304 in 18ms
+
+🚚 Deliveries API called with: {
+
+  startDate: undefined,
+
+  endDate: undefined,
+
+  storeId: undefined,
+
+  withBL: undefined,
+
+  userRole: 'directeur'
+
+}
+
+🚚 Non-admin filtering deliveries with groupIds: [ 1 ]
+
+🚚 Fetching all deliveries with groupIds: [ 1 ]
+
+📝 PRODUCTION - User permissions found: 0
+
+4:36:49 PM [express] GET /api/user/permissions 200 in 37ms
+
+🚚 Deliveries returned: 0 items
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/customer-orders',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753029394963',
+
+  username: 'directeur',
+
+  sessionId: '0hlDWWUJdJ_5b27Qfuku7Mu3wAH8Ag_n',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+4:36:49 PM [express] GET /api/deliveries 304 in 82ms
+
+4:36:49 PM [express] GET /api/user 304 in 54ms
+
+Customer orders - User assigned stores: { groupIds: [ 1 ] }
+
+Customer orders returned from storage: 0 items
+
+4:36:49 PM [express] GET /api/customer-orders 304 in 91ms
+
+4:36:49 PM [express] GET /api/user 304 in 2ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/groups',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753029394963',
+
+  username: 'directeur',
+
+  sessionId: '0hlDWWUJdJ_5b27Qfuku7Mu3wAH8Ag_n',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+4:36:49 PM [express] GET /api/groups 200 in 7ms
+
+
+      
+      
+    
