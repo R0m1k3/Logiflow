@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pagination, usePagination } from "@/components/ui/pagination";
-import { Plus, Edit, Trash2, Phone, PhoneCall, Printer, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Phone, PhoneCall, Printer, Eye, Package } from "lucide-react";
 import JsBarcode from 'jsbarcode';
 import { safeFormat, safeDate } from "@/lib/dateUtils";
 import { format } from "date-fns";
