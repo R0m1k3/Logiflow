@@ -603,12 +603,16 @@ export default function UsersPage() {
       return;
     }
 
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${userToDelete.firstName} ${userToDelete.lastName} ? Cette action est irréversible.`)) {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${userToDelete.username || userToDelete.firstName + ' ' + userToDelete.lastName} ? Cette action est irréversible.`)) {
       deleteUserMutation.mutate(userToDelete.id);
     }
   };
 
   const getInitials = (firstName?: string, lastName?: string, username?: string) => {
+    // Priorité au username pour éviter initiales incorrectes
+    if (username && username.trim().length >= 2) {
+      return username.substring(0, 2).toUpperCase();
+    }
     if (firstName && lastName) {
       return `${firstName[0]}${lastName[0]}`.toUpperCase();
     }
@@ -751,6 +755,10 @@ export default function UsersPage() {
                             <div>
                               <div className="text-sm font-medium text-gray-900 flex items-center">
 {(() => {
+                                  // Priorité : username pour éviter "Employee Frouard" 
+                                  if (userData.username && userData.username.trim()) {
+                                    return userData.username;
+                                  }
                                   if (userData.firstName && userData.lastName) {
                                     return `${userData.firstName} ${userData.lastName}`;
                                   }
@@ -928,7 +936,7 @@ export default function UsersPage() {
                 Modifier l'utilisateur
               </DialogTitle>
               <p id="edit-user-modal-description" className="text-sm text-gray-600 mt-1">
-                Modifier les informations de l'utilisateur {selectedUser.name || selectedUser.firstName + ' ' + selectedUser.lastName}
+                Modifier les informations de l'utilisateur {selectedUser.username || selectedUser.name || selectedUser.firstName + ' ' + selectedUser.lastName}
               </p>
             </DialogHeader>
             
@@ -1035,7 +1043,7 @@ export default function UsersPage() {
           <DialogContent className="sm:max-w-lg" aria-describedby="group-modal-description">
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold">
-                Gérer les Magasins/Groupes - {selectedUser.name || `${selectedUser.firstName} ${selectedUser.lastName}`}
+                Gérer les Magasins/Groupes - {selectedUser.username || selectedUser.name || `${selectedUser.firstName} ${selectedUser.lastName}`}
               </DialogTitle>
               <p id="group-modal-description" className="text-sm text-gray-600 mt-1">
                 Assigner ou retirer cet utilisateur des magasins/groupes
