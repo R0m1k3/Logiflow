@@ -1232,26 +1232,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 PRODUCTION - Fetching permissions for user:', req.user.claims ? req.user.claims.sub : req.user.id);
       
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      const user = await storage.getUser(userId);
       
-      if (!user) {
+      // Utiliser directement des requêtes SQL comme dans le reste du code production
+      const { pool } = require('./initDatabase.production');
+      
+      // Récupérer l'utilisateur
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0) {
         console.log('❌ PRODUCTION - User not found:', userId);
         return res.status(404).json({ message: 'User not found' });
       }
       
+      const user = userResult.rows[0];
       console.log('👤 PRODUCTION - User found:', user.username, 'role:', user.role);
       
       // Pour l'admin, retourner toutes les permissions
       if (user.role === 'admin') {
-        const allPermissions = await storage.getPermissions();
-        console.log('🔧 PRODUCTION - Admin user, returning all permissions:', allPermissions.length);
-        return res.json(allPermissions);
+        const allPermissionsResult = await pool.query(`
+          SELECT id, name, display_name as "displayName", description, category, action, resource, is_system as "isSystem", created_at as "createdAt"
+          FROM permissions 
+          ORDER BY category, name
+        `);
+        console.log('🔧 PRODUCTION - Admin user, returning all permissions:', allPermissionsResult.rows.length);
+        return res.json(allPermissionsResult.rows);
       }
       
-      // Pour les autres rôles, récupérer leurs permissions spécifiques
-      const userPermissions = await storage.getPermissions(userId);
-      console.log('📝 PRODUCTION - User permissions found:', userPermissions.length);
-      res.json(userPermissions);
+      // Pour les autres rôles, récupérer leurs permissions spécifiques via les rôles
+      const userPermissionsResult = await pool.query(`
+        SELECT DISTINCT p.id, p.name, p.display_name as "displayName", p.description, p.category, p.action, p.resource, p.is_system as "isSystem", p.created_at as "createdAt"
+        FROM permissions p
+        INNER JOIN role_permissions rp ON p.id = rp.permission_id
+        INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+        WHERE ur.user_id = $1
+        ORDER BY p.category, p.name
+      `, [userId]);
+      
+      console.log('📝 PRODUCTION - User permissions found:', userPermissionsResult.rows.length);
+      res.json(userPermissionsResult.rows);
     } catch (error) {
       console.error('PRODUCTION Error fetching user permissions:', error);
       res.status(500).json({ message: 'Failed to fetch user permissions' });
