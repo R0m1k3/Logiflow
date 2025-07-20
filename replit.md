@@ -470,6 +470,13 @@ The application uses a sophisticated dual authentication approach:
 - **TECHNOLOGIES LISTÉES** - Stack frontend (React, Vite, Shadcn/ui, TanStack Query) et backend (Express, PostgreSQL, Drizzle)
 - **MÉTRIQUES PERFORMANCE** - Documentation des optimisations et choix d'architecture
 
+### July 20, 2025 - CORRECTION CRITIQUE: Permissions Employé pour Accès Dashboard
+- **PROBLÈME 404 EMPLOYÉ RÉSOLU** - Utilisateur ff292 (employé) obtenait erreur 404 en mode développement après connexion
+- **PERMISSIONS TABLEAU DE BORD AJOUTÉES** - Ajout de 3 permissions manquantes au rôle employee : dashboard_read, statistics_read, reports_generate
+- **ACCÈS DASHBOARD FONCTIONNEL** - Employés peuvent maintenant accéder au tableau de bord sans erreur de routage
+- **DIAGNOSTIC PERMISSIONS COMPLET** - Vérification et correction des permissions manquantes dans base de données production
+- **LOGIN EMPLOYEE OPÉRATIONNEL** - Connexion ff292/ff292 redirige maintenant correctement vers Dashboard
+
 ### July 20, 2025 - FONCTIONNALITÉ CALENDRIER PUBLICITÉS: Affichage Intelligent avec Points Colorés Magasins
 - **AFFICHAGE PUBLICITÉS CALENDRIER INTÉGRÉ** - Numéros de publicité affichés en haut à droite de chaque jour du calendrier
 - **POINTS COLORÉS MAGASINS PARTICIPANTS** - Admins voient des points colorés indiquant les magasins participant à chaque publicité (Frouard=bleu, Houdemont=gris)
