@@ -239,17 +239,25 @@ export default function DlcPage() {
   };
 
   const getStatusBadge = (status: string, dlcDate: string | null) => {
-    const today = new Date();
+    // PRIORITÉ AU STATUT DE LA BASE DE DONNÉES
+    // Respecter d'abord le statut en base, puis calculer si nécessaire
+    
     if (!dlcDate) return <Badge variant="outline">Non défini</Badge>;
+    
+    // 1. Vérifier d'abord le statut explicite de la base de données
+    if (status === "valides") {
+      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Validé</Badge>;
+    }
+    
+    // 2. Pour les autres statuts, calculer en fonction de la date
+    const today = new Date();
     const expiry = new Date(dlcDate);
     const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     if (status === "expires" || daysUntilExpiry < 0) {
       return <Badge variant="destructive">Expiré</Badge>;
-    } else if (status === "expires_soon" || daysUntilExpiry <= 15) { // 15 jours au lieu de 3
+    } else if (status === "expires_soon" || daysUntilExpiry <= 15) {
       return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Expire bientôt</Badge>;
-    } else if (status === "valide") {
-      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Validé</Badge>;
     } else {
       return <Badge variant="default" className="bg-green-100 text-green-800">Actif</Badge>;
     }
