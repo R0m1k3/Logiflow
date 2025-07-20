@@ -1313,8 +1313,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🚨 ENDPOINT TEMPORAIRE POUR APPLIQUER LES CORRECTIONS SQL
   app.post('/api/debug/fix-translations', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
+      const { pool } = require('./initDatabase.production');
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      // Vérifier directement en base de données
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
         return res.status(403).json({ message: "Seul l'admin peut appliquer les corrections" });
       }
 
@@ -1385,13 +1389,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/permissions', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
+      const { pool } = require('./initDatabase.production');
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      // Vérifier directement en base de données
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
-      const permission = await storage.createPermission(req.body);
-      res.status(201).json(permission);
+      // Créer la permission directement en base
+      const result = await pool.query(`
+        INSERT INTO permissions (name, display_name, description, category, action, resource, is_system)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `, [req.body.name, req.body.displayName, req.body.description, req.body.category, req.body.action, req.body.resource, req.body.isSystem || false]);
+      
+      res.status(201).json(result.rows[0]);
     } catch (error) {
       console.error("Error creating permission:", error);
       res.status(500).json({ message: "Failed to create permission" });
@@ -1400,14 +1414,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/permissions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
+      const { pool } = require('./initDatabase.production');
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
       const id = parseInt(req.params.id);
-      const permission = await storage.updatePermission(id, req.body);
-      res.json(permission);
+      const result = await pool.query(`
+        UPDATE permissions 
+        SET display_name = $2, description = $3, category = $4, action = $5, resource = $6
+        WHERE id = $1 
+        RETURNING *
+      `, [id, req.body.displayName, req.body.description, req.body.category, req.body.action, req.body.resource]);
+      
+      res.json(result.rows[0]);
     } catch (error) {
       console.error("Error updating permission:", error);
       res.status(500).json({ message: "Failed to update permission" });
@@ -1416,13 +1439,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/permissions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
+      const { pool } = require('./initDatabase.production');
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
       const id = parseInt(req.params.id);
-      await storage.deletePermission(id);
+      await pool.query('DELETE FROM permissions WHERE id = $1', [id]);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting permission:", error);
@@ -1432,13 +1458,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/roles/:id/permissions', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
+      const { pool } = require('./initDatabase.production');
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
       const roleId = parseInt(req.params.id);
-      const rolePermissions = await storage.getRolePermissions(roleId);
+      const result = await pool.query(`
+        SELECT rp.*, p.id, p.name, p.display_name as "displayName", p.description, p.category, p.action, p.resource
+        FROM role_permissions rp
+        JOIN permissions p ON rp.permission_id = p.id
+        WHERE rp.role_id = $1
+      `, [roleId]);
+      
+      const rolePermissions = result.rows.map(row => ({
+        roleId: row.role_id,
+        permissionId: row.permission_id,
+        permission: {
+          id: row.id,
+          name: row.name,
+          displayName: row.displayName,
+          description: row.description,
+          category: row.category,
+          action: row.action,
+          resource: row.resource
+        }
+      }));
       
       // 🎯 DEBUG CRITIQUE PRODUCTION: Vérifier pourquoi les permissions tâches ne s'affichent pas
       console.log('🔍 ROLE PERMISSIONS DEBUG for role ID:', roleId);
