@@ -190,7 +190,7 @@ export default function Orders() {
       case 'planned':
         return <Badge className="bg-blue-100 text-blue-800">Planifié</Badge>;
       case 'delivered':
-        return <Badge className="bg-green-100 text-green-800">Livré</Badge>;
+        return <Badge className="bg-green-100 text-green-800 opacity-80">✓ Livré</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -333,7 +333,14 @@ export default function Orders() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50">
+                      <tr 
+                        key={order.id} 
+                        className={`hover:bg-gray-50 ${
+                          order.status === 'delivered' 
+                            ? 'opacity-60 bg-gray-50' 
+                            : ''
+                        }`}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <Building className="w-5 h-5 text-gray-400 mr-2" />

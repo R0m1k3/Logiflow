@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalendarGrid from "@/components/CalendarGrid";
 import QuickCreateMenu from "@/components/modals/QuickCreateMenu";
@@ -145,13 +145,16 @@ export default function Calendar() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200 p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Calendrier des Commandes & Livraisons
-            </h2>
-            <p className="text-gray-600">
-              {format(currentDate, 'MMMM yyyy', { locale: fr })}
-            </p>
+          <div className="flex items-center">
+            <CalendarIcon className="w-8 h-8 text-primary mr-3" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Calendrier des Commandes & Livraisons
+              </h2>
+              <p className="text-gray-600">
+                {format(currentDate, 'MMMM yyyy', { locale: fr })}
+              </p>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             {/* Legend */}

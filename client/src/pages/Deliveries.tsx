@@ -113,17 +113,23 @@ export default function Deliveries() {
         title: "Succès",
         description: "Livraison validée avec succès",
       });
-      // Invalider tous les caches liés aux livraisons
+      // Invalider TOUS les caches liés aux livraisons, commandes et stats
       queryClient.invalidateQueries({ queryKey: ['/api/deliveries'] });
       queryClient.invalidateQueries({ queryKey: [deliveriesUrl] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats/monthly'] });
       // Invalider tous les caches BL/Rapprochement
       queryClient.invalidateQueries({ 
         predicate: (query) => 
           query.queryKey[0] === '/api/deliveries/bl' || 
-          query.queryKey[0] === '/api/deliveries'
+          query.queryKey[0] === '/api/deliveries' ||
+          query.queryKey[0] === '/api/orders'
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/stats/monthly'] });
+      // Force refetch des données pour toutes les pages
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/orders'] });
+        queryClient.refetchQueries({ queryKey: ['/api/deliveries'] });
+      }, 100);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
