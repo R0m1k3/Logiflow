@@ -43,21 +43,9 @@ RUN npx esbuild server/index.production.ts \
     --bundle \
     --format=esm \
     --outfile=dist/index.js \
-    --external:openid-client \
-    --external:@neondatabase/serverless \
-    --external:ws \
-    --external:drizzle-orm \
-    --external:pg \
-    --external:express \
-    --external:connect-pg-simple \
-    --external:passport \
-    --external:passport-local \
-    --external:express-session \
-    --external:zod \
-    --external:express-rate-limit \
-    --external:memoizee \
-    --external:nanoid \
-    --external:date-fns
+    --packages=external \
+    --keep-names \
+    --sourcemap
 
 # Production stage
 FROM node:20-alpine AS production

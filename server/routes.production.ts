@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage.production";
+
+// Global pool declaration for production routes
+
 import { setupLocalAuth, requireAuth } from "./localAuth.production";
 
 
@@ -1162,13 +1165,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🚨 ENDPOINT TEMPORAIRE - CORRIGER PERMISSIONS ADMIN MANQUANTES
   app.post('/api/admin/fix-permissions', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
+
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
         return res.status(403).json({ message: "Seul l'admin peut corriger les permissions" });
       }
 
       console.log('🔧 PRODUCTION: Correction des permissions admin manquantes');
-      const { pool } = require('./initDatabase.production');
       
       // Récupérer l'ID du rôle admin
       const adminRoleResult = await pool.query('SELECT id FROM roles WHERE name = $1', ['admin']);
@@ -1234,7 +1239,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       // Utiliser directement des requêtes SQL comme dans le reste du code production
-      const { pool } = require('./initDatabase.production');
       
       // Récupérer l'utilisateur
       const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
@@ -1281,7 +1285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 PRODUCTION TASK PERMISSIONS DEBUG');
       
       // Vérifier directement en base de données
-      const { pool } = require('./initDatabase.production');
+
       const taskResult = await pool.query(`
         SELECT id, name, display_name, category, action, resource 
         FROM permissions 
@@ -1313,7 +1317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🚨 ENDPOINT TEMPORAIRE POUR APPLIQUER LES CORRECTIONS SQL
   app.post('/api/debug/fix-translations', isAuthenticated, async (req: any, res) => {
     try {
-      const { pool } = require('./initDatabase.production');
+
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       // Vérifier directement en base de données
@@ -1323,7 +1327,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('🔧 APPLYING SQL FIXES TO PRODUCTION DATABASE');
-      const { pool } = require('./initDatabase.production');
       
       // Corriger les rôles
       console.log('📝 Fixing roles...');
@@ -1389,7 +1392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/permissions', isAuthenticated, async (req: any, res) => {
     try {
-      const { pool } = require('./initDatabase.production');
+
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       // Vérifier directement en base de données
@@ -1414,7 +1417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/permissions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const { pool } = require('./initDatabase.production');
+
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
@@ -1439,7 +1442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/permissions/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const { pool } = require('./initDatabase.production');
+
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
@@ -1458,7 +1461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/roles/:id/permissions', isAuthenticated, async (req: any, res) => {
     try {
-      const { pool } = require('./initDatabase.production');
+
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);

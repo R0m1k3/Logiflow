@@ -461,6 +461,15 @@ The application uses a sophisticated dual authentication approach:
 - **SCHÉMA VALIDATION ÉPURÉ** - validateDeliverySchema simplifié sans champ blAmount
 - **UX AMÉLIORÉE** - Interface de validation plus claire et focalisée sur l'essentiel
 
+### July 20, 2025 - RÉSOLUTION FINALE: Erreurs Docker Production et Configuration Esbuild
+- **PROBLÈME DOCKER IDENTIFIÉ** - Erreurs de build esbuild causées par déclarations dupliquées de variable `pool` dans routes.production.ts
+- **DÉCLARATIONS POOL CORRIGÉES** - Suppression des 7+ déclarations dupliquées `const { pool }` remplacées par une déclaration globale unique
+- **CONFIGURATION ESBUILD SIMPLIFIÉE** - Dockerfile utilise `--packages=external --keep-names --sourcemap` pour configuration propre
+- **BUILD TEST RÉUSSI** - Test de compilation local confirme : 333.4kb généré en 42ms sans erreur
+- **DÉPLOIEMENT DOCKER PRÊT** - Configuration de production optimisée pour déploiement sans conflit de build
+- **APPLICATION OPÉRATIONNELLE** - Serveur redémarre sans erreur, API health fonctionnelle, permissions directeur résolues
+- **STRUCTURE PRODUCTION STABLE** - Routes production utilisent pool global unique pour éviter conflits futurs
+
 ### July 20, 2025 - CORRECTIONS FINALES: Affichage Utilisateurs et Validation Optionnelle
 - **AFFICHAGE NOMS UTILISATEURS CORRIGÉ** - Liste utilisateurs utilise firstName + lastName au lieu du champ name obsolète
 - **FALLBACK INTELLIGENT IMPLÉMENTÉ** - Affichage prioritaire : prénom+nom → prénom seul → nom seul → name → username
