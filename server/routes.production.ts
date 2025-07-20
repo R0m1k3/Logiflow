@@ -1232,10 +1232,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 PRODUCTION - Fetching permissions for user:', req.user.claims ? req.user.claims.sub : req.user.id);
       
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      const permissions = await storage.getPermissions(userId);
+      const user = await storage.getUser(userId);
       
-      console.log('📝 PRODUCTION User permissions found:', permissions.length);
-      res.json(permissions);
+      if (!user) {
+        console.log('❌ PRODUCTION - User not found:', userId);
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      console.log('👤 PRODUCTION - User found:', user.username, 'role:', user.role);
+      
+      // Pour l'admin, retourner toutes les permissions
+      if (user.role === 'admin') {
+        const allPermissions = await storage.getPermissions();
+        console.log('🔧 PRODUCTION - Admin user, returning all permissions:', allPermissions.length);
+        return res.json(allPermissions);
+      }
+      
+      // Pour les autres rôles, récupérer leurs permissions spécifiques
+      const userPermissions = await storage.getPermissions(userId);
+      console.log('📝 PRODUCTION - User permissions found:', userPermissions.length);
+      res.json(userPermissions);
     } catch (error) {
       console.error('PRODUCTION Error fetching user permissions:', error);
       res.status(500).json({ message: 'Failed to fetch user permissions' });

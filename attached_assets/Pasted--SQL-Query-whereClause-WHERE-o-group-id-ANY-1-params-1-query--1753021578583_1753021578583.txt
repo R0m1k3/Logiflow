@@ -1,0 +1,196 @@
+📦 SQL Query: {
+
+  whereClause: ' WHERE o.group_id = ANY($1)',
+
+  params: [ [ 1 ] ],
+
+  query: 'SELECT o.* FROM orders o  WHERE o.group_id = ANY($1) ORDER BY o.created_at DESC'
+
+}
+
+📦 Query result: {
+
+  rowCount: 5,
+
+  sampleRows: [
+
+    {
+
+      id: 5,
+
+      groupId: 1,
+
+      plannedDate: 2025-07-17T00:00:00.000Z,
+
+      supplierName: 'Zamibo',
+
+      groupName: 'Frouard'
+
+    },
+
+    {
+
+      id: 4,
+
+      groupId: 1,
+
+      plannedDate: 2025-07-17T00:00:00.000Z,
+
+      supplierName: 'BI2L',
+
+      groupName: 'Frouard'
+
+    }
+
+  ]
+
+}
+
+📦 Orders returned: 5 items
+
+📊 Query results: {
+
+  ordersCount: '5',
+
+  deliveriesCount: '0',
+
+  orderStats: { pending_count: '5', total_palettes: '0', total_packages: '0' },
+
+  deliveryStats: { total_palettes: '0', total_packages: '0' }
+
+}
+
+🚚 Deliveries API called with: {
+
+  startDate: undefined,
+
+  endDate: undefined,
+
+  storeId: undefined,
+
+  withBL: undefined,
+
+  userRole: 'directeur'
+
+}
+
+🚚 Non-admin filtering deliveries with groupIds: [ 1 ]
+
+🚚 Fetching all deliveries with groupIds: [ 1 ]
+
+2:25:59 PM [express] GET /api/orders 304 in 219ms
+
+📊 Final stats: {
+
+  ordersCount: 5,
+
+  deliveriesCount: 0,
+
+  pendingOrdersCount: 5,
+
+  averageDeliveryTime: 0,
+
+  totalPalettes: 0,
+
+  totalPackages: 0
+
+}
+
+2:25:59 PM [express] GET /api/groups 304 in 119ms
+
+2:25:59 PM [express] GET /api/stats/monthly 304 in 227ms
+
+Customer orders returned from storage: 0 items
+
+2:25:59 PM [express] GET /api/customer-orders 304 in 226ms
+
+2:25:59 PM [express] GET /api/tasks 304 in 218ms
+
+🚚 Deliveries returned: 0 items
+
+2:25:59 PM [express] GET /api/deliveries 304 in 234ms
+
+🔍 PRODUCTION - Fetching permissions for user: _1753012525653
+
+PRODUCTION Error fetching user permissions: ReferenceError: storage is not defined
+
+    at file:///app/dist/index.js:4920:28
+
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+
+    at /app/node_modules/express/lib/router/index.js:284:15
+
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:346:12)
+
+    at next (/app/node_modules/express/lib/router/index.js:280:10)
+
+    at strategy.pass (/app/node_modules/passport/lib/middleware/authenticate.js:355:9)
+
+    at /app/node_modules/passport/lib/strategies/session.js:120:12
+
+2:26:00 PM [express] GET /api/user/permissions 500 in 14ms
+
+🔍 PRODUCTION - Fetching permissions for user: _1753012525653
+
+PRODUCTION Error fetching user permissions: ReferenceError: storage is not defined
+
+    at file:///app/dist/index.js:4920:28
+
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+
+    at /app/node_modules/express/lib/router/index.js:284:15
+
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:346:12)
+
+    at next (/app/node_modules/express/lib/router/index.js:280:10)
+
+    at strategy.pass (/app/node_modules/passport/lib/middleware/authenticate.js:355:9)
+
+    at /app/node_modules/passport/lib/strategies/session.js:120:12
+
+2:26:02 PM [express] GET /api/user/permissions 500 in 10ms
+
+🔍 PRODUCTION - Fetching permissions for user: _1753012525653
+
+PRODUCTION Error fetching user permissions: ReferenceError: storage is not defined
+
+    at file:///app/dist/index.js:4920:28
+
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+
+    at /app/node_modules/express/lib/router/index.js:284:15
+
+    at Function.process_params (/app/node_modules/express/lib/router/index.js:346:12)
+
+    at next (/app/node_modules/express/lib/router/index.js:280:10)
+
+    at strategy.pass (/app/node_modules/passport/lib/middleware/authenticate.js:355:9)
+
+    at /app/node_modules/passport/lib/strategies/session.js:120:12
+
+2:26:06 PM [express] GET /api/user/permissions 500 in 5ms
+
+2:26:10 PM [express] HEAD /api/health 200 in 1ms
+
+
+      
+      
+    
