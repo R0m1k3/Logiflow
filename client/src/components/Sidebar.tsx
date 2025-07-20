@@ -164,14 +164,16 @@ export default function Sidebar() {
   const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery({
     queryKey: ['/api/user/permissions'],
     queryFn: async () => {
-      console.log('🔍 Fetching user permissions for user:', user?.username, user?.role);
+      console.log('🔍 QUERY ENABLED - Fetching user permissions for user:', user?.username, user?.role);
+      console.log('🔍 QUERY CONDITIONS - user exists:', !!user, 'isLoading:', isLoading, 'enabled condition:', !!user && !isLoading);
       const response = await fetch('/api/user/permissions', { 
         credentials: 'include',
         cache: 'no-cache' 
       });
+      console.log('🔍 API RESPONSE STATUS:', response.status, response.statusText);
       if (!response.ok) {
         console.error('❌ Failed to fetch user permissions:', response.status, response.statusText);
-        return [];
+        throw new Error(`API returned ${response.status}: ${response.statusText}`);
       }
       const permissions = await response.json();
       console.log('✅ User permissions loaded:', permissions.length, 'for role:', user?.role);
@@ -193,6 +195,7 @@ export default function Sidebar() {
   console.log('🔍 SIDEBAR DIAGNOSTIC - permissionsLoading:', permissionsLoading);
   console.log('🔍 SIDEBAR DIAGNOSTIC - permissionsError:', permissionsError);
   console.log('🔍 SIDEBAR DIAGNOSTIC - Environment:', window.location.hostname);
+  console.log('🔍 SIDEBAR DIAGNOSTIC - Query enabled condition:', !!user && !isLoading);
   console.log('🔍 SIDEBAR DIAGNOSTIC - First 3 permissions:', userPermissions?.slice(0, 3));
 
   // Fonction pour vérifier les permissions dynamiquement
