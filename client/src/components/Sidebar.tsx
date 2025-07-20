@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useAuthSimple } from "@/hooks/useAuthSimple";
+import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const { user, isLoading, error } = useAuthSimple();
+  const { user, isLoading, error } = useAuthUnified();
   const [location] = useLocation();
 
   // Les logs de debug seront ajoutés après la définition de userPermissions
