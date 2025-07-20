@@ -164,42 +164,55 @@ export default function Sidebar() {
   ];
 
   // Récupérer les permissions de l'utilisateur dynamiquement
-  const { data: userPermissions = [] } = useQuery({
+  const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery({
     queryKey: ['/api/user/permissions'],
     queryFn: async () => {
       const response = await fetch('/api/user/permissions', { credentials: 'include' });
-      if (!response.ok) return [];
-      return response.json();
+      if (!response.ok) {
+        console.error('Failed to fetch user permissions:', response.status);
+        return [];
+      }
+      const permissions = await response.json();
+      console.log('User permissions loaded:', permissions.length);
+      return permissions;
     },
-    enabled: !!user,
+    enabled: !!user && !isLoading,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    retry: 3,
   });
 
   // Fonction pour vérifier les permissions dynamiquement
   const hasPermission = (requiredPermission: string) => {
+    // Si les permissions sont en cours de chargement, ne pas afficher les menus
+    if (permissionsLoading || !user) return false;
+    
     // Admin a toujours accès
-    if (user?.role === 'admin') return true;
+    if (user.role === 'admin') return true;
+    
+    // Si pas de permissions chargées pour un non-admin, ne pas afficher
+    if (!userPermissions || userPermissions.length === 0) return false;
     
     // Vérifier si l'utilisateur a la permission spécifique
     const hasSpecificPermission = userPermissions.some((perm: any) => 
       perm.name === requiredPermission || perm.permission?.name === requiredPermission
     );
     
-    if (import.meta.env.MODE === 'development') {
-      console.log('Dynamic permission check:', { 
-        requiredPermission, 
-        userRole: user?.role, 
-        hasSpecificPermission,
-        userPermissions: userPermissions.length 
-      });
-    }
+    console.log('Permission check:', { 
+      requiredPermission, 
+      userRole: user?.role, 
+      hasSpecificPermission,
+      totalPermissions: userPermissions.length,
+      permissionsLoading
+    });
     
     return hasSpecificPermission;
   };
 
 
 
-  // Si l'utilisateur n'est pas encore chargé, afficher un état de chargement
-  if (isLoading) {
+  // Si l'utilisateur ou les permissions se chargent, afficher un état de chargement
+  if (isLoading || permissionsLoading) {
     return (
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
         <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-white">
@@ -209,7 +222,12 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-sm text-gray-600">
+              {isLoading ? 'Connexion...' : 'Chargement permissions...'}
+            </p>
+          </div>
         </div>
       </aside>
     );
