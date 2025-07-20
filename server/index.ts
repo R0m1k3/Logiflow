@@ -1,11 +1,27 @@
 // Environment setup for production deployment
 // Auto-detect environment based on Docker/container deployment
-if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production') {
+console.log('🔍 DIAGNOSTIC - NODE_ENV:', process.env.NODE_ENV);
+console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
+console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
+console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
+
+// Force development mode on Replit to avoid Vite import issues
+const isReplit = process.cwd().includes('/home/runner/workspace') || process.cwd().includes('/app');
+const forceDevMode = isReplit && !process.env.FORCE_PRODUCTION;
+
+if (forceDevMode) {
+  console.log('🔧 Forcing development mode on Replit environment');
+  process.env.NODE_ENV = 'development';
+  process.env.STORAGE_MODE = 'production'; // Keep production storage but dev Vite
+} else if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production') {
   process.env.STORAGE_MODE = 'production';
   console.log('🐳 Running in Docker production mode');
 } else {
   console.log('🔧 Running in development mode');
 }
+
+console.log('🔍 DIAGNOSTIC - Final STORAGE_MODE:', process.env.STORAGE_MODE);
+console.log('🔍 DIAGNOSTIC - Using storage:', process.env.STORAGE_MODE === 'production' ? 'PRODUCTION' : 'DEVELOPMENT');
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
@@ -40,10 +56,19 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     serveStatic = viteProduction.serveStatic;
     log = viteProduction.log;
   } else {
-    const viteDev = await import("./vite.ts");
-    setupVite = viteDev.setupVite;
-    serveStatic = viteDev.serveStatic;
-    log = viteDev.log;
+    try {
+      const viteDev = await import("./vite.ts");
+      setupVite = viteDev.setupVite;
+      serveStatic = viteDev.serveStatic;
+      log = viteDev.log;
+    } catch (error) {
+      console.error("❌ Failed to import vite.ts, falling back to production mode:", error.message);
+      // Fallback to production vite if development vite fails
+      const viteProduction = await import("./vite.production.ts");
+      setupVite = viteProduction.setupVite;
+      serveStatic = viteProduction.serveStatic;
+      log = viteProduction.log;
+    }
   }
 
   // Logging optimisé (sans détails de réponse sensibles)
