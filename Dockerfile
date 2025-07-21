@@ -74,9 +74,11 @@ USER nextjs
 # Expose port
 EXPOSE 3000
 
-# Install wget for health check
+# Install wget for health check AND PostgreSQL client tools for backups
 USER root
-RUN apk add --no-cache wget
+RUN apk add --no-cache wget postgresql-client
+# Create backup directory with proper permissions
+RUN mkdir -p /tmp/logiflow-backups && chmod 777 /tmp/logiflow-backups
 USER nextjs
 
 # Health check

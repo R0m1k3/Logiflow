@@ -125,23 +125,65 @@ export class BackupService {
 
       console.log(`📋 Connection details: host=${host}, port=${port}, db=${dbName}, user=${username}`);
 
-      // Commande pg_dump simplifiée pour éviter les erreurs de shell
-      const dumpCommand = `pg_dump "${dbUrl}" --verbose --clean --if-exists --create --format=plain --file="${filepath}"`;
-
       console.log(`🗃️ Running pg_dump for backup: ${backupId}`);
-      console.log(`🔧 Command: pg_dump [URL] --verbose --clean --if-exists --create --format=plain --file="${filepath}"`);
       
-      // Vérifier si pg_dump existe
+      // Vérifier si pg_dump existe et essayer différents chemins
+      let pgDumpPath = 'pg_dump';
       try {
         const whichResult = await execAsync('which pg_dump');
-        console.log('✅ pg_dump found at:', whichResult.stdout.trim());
+        pgDumpPath = whichResult.stdout.trim();
+        console.log('✅ pg_dump found at:', pgDumpPath);
       } catch (error) {
-        console.error('❌ pg_dump not found:', error);
-        throw new Error('pg_dump not available - PostgreSQL client tools required');
+        console.log('⚠️ pg_dump not found in PATH, trying common locations...');
+        const commonPaths = [
+          '/usr/bin/pg_dump',
+          '/usr/local/bin/pg_dump',
+          '/nix/store/07s64wxjzk6z1glwxvl3yq81vdn42k40-postgresql-15.7/bin/pg_dump'
+        ];
+        
+        let found = false;
+        for (const path of commonPaths) {
+          try {
+            try {
+              await execAsync(`test -x ${path}`);
+              pgDumpPath = path;
+              found = true;
+              console.log('✅ pg_dump found at:', pgDumpPath);
+              break;
+            } catch (e) {
+              // Si le chemin exact échoue, essayer de le trouver dynamiquement
+              if (path.includes('nix/store')) {
+                try {
+                  const findResult = await execAsync('find /nix/store -name pg_dump -executable 2>/dev/null | head -1');
+                  if (findResult.stdout.trim()) {
+                    pgDumpPath = findResult.stdout.trim();
+                    found = true;
+                    console.log('✅ pg_dump found dynamically at:', pgDumpPath);
+                    break;
+                  }
+                } catch (findError) {
+                  continue;
+                }
+              }
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+        
+        if (!found) {
+          console.error('❌ pg_dump not found in any common location');
+          throw new Error('pg_dump not available - PostgreSQL client tools required. Please install postgresql package.');
+        }
       }
       
+      // Commande pg_dump avec le chemin complet
+      const dumpCommand = `"${pgDumpPath}" "${dbUrl}" --verbose --clean --if-exists --create --format=plain --file="${filepath}"`;
+
+      console.log(`🔧 Final command: ${pgDumpPath} [URL] --verbose --clean --if-exists --create --format=plain --file="${filepath}"`);
+      
       console.log('🚀 Executing pg_dump...');
-      const result = await execAsync(dumpCommand);
+      const result = await execAsync(dumpCommand, { timeout: 300000 }); // 5 minutes timeout
       console.log('✅ pg_dump completed successfully');
       
       if (result.stderr && result.stderr.includes('ERROR')) {
