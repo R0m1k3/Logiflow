@@ -277,6 +277,189 @@ async function createTablesIfNotExist() {
     );
   `;
 
+  const createUserRolesTable = `
+    CREATE TABLE IF NOT EXISTS user_roles (
+      user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
+      role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+      assigned_by VARCHAR(255) REFERENCES users(id),
+      assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (user_id, role_id)
+    );
+  `;
+
+  const createDatabaseBackupsTable = `
+    CREATE TABLE IF NOT EXISTS database_backups (
+      id VARCHAR(255) PRIMARY KEY,
+      filename VARCHAR(255) NOT NULL,
+      description TEXT,
+      size BIGINT DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      created_by VARCHAR(255) NOT NULL REFERENCES users(id),
+      tables_count INTEGER DEFAULT 0,
+      status VARCHAR(50) DEFAULT 'creating',
+      backup_type VARCHAR(10) DEFAULT 'manual'
+    );
+  `;
+
+  const createCalendarEventsTable = `
+    CREATE TABLE IF NOT EXISTS calendar_events (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      start_date TIMESTAMP NOT NULL,
+      end_date TIMESTAMP NOT NULL,
+      event_type VARCHAR(50) DEFAULT 'custom',
+      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+      created_by VARCHAR(255) REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createClientOrdersTable = `
+    CREATE TABLE IF NOT EXISTS client_orders (
+      id SERIAL PRIMARY KEY,
+      order_number VARCHAR(255) UNIQUE NOT NULL,
+      client_name VARCHAR(255) NOT NULL,
+      client_contact VARCHAR(255),
+      product_description TEXT NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1,
+      unit_price DECIMAL(10,2),
+      total_amount DECIMAL(10,2),
+      status VARCHAR(50) DEFAULT 'pending',
+      delivery_date DATE,
+      notes TEXT,
+      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+      created_by VARCHAR(255) REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createCommandsTable = `
+    CREATE TABLE IF NOT EXISTS commands (
+      id SERIAL PRIMARY KEY,
+      command_number VARCHAR(255) UNIQUE NOT NULL,
+      supplier_id INTEGER REFERENCES suppliers(id) ON DELETE CASCADE,
+      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+      command_date DATE NOT NULL,
+      expected_delivery_date DATE,
+      status VARCHAR(50) DEFAULT 'pending',
+      total_amount DECIMAL(10,2),
+      notes TEXT,
+      created_by VARCHAR(255) REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createCommandItemsTable = `
+    CREATE TABLE IF NOT EXISTS command_items (
+      id SERIAL PRIMARY KEY,
+      command_id INTEGER REFERENCES commands(id) ON DELETE CASCADE,
+      product_name VARCHAR(255) NOT NULL,
+      product_reference VARCHAR(255),
+      quantity INTEGER NOT NULL,
+      unit_price DECIMAL(10,2),
+      total_price DECIMAL(10,2),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createCustomersTable = `
+    CREATE TABLE IF NOT EXISTS customers (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      contact_person VARCHAR(255),
+      phone VARCHAR(255),
+      email VARCHAR(255),
+      address TEXT,
+      city VARCHAR(255),
+      postal_code VARCHAR(20),
+      notes TEXT,
+      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+      created_by VARCHAR(255) REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createDeliveryItemsTable = `
+    CREATE TABLE IF NOT EXISTS delivery_items (
+      id SERIAL PRIMARY KEY,
+      delivery_id INTEGER REFERENCES deliveries(id) ON DELETE CASCADE,
+      product_name VARCHAR(255) NOT NULL,
+      product_reference VARCHAR(255),
+      quantity INTEGER NOT NULL,
+      unit VARCHAR(50),
+      notes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createInvoicesTable = `
+    CREATE TABLE IF NOT EXISTS invoices (
+      id SERIAL PRIMARY KEY,
+      invoice_number VARCHAR(255) UNIQUE NOT NULL,
+      supplier_id INTEGER REFERENCES suppliers(id) ON DELETE CASCADE,
+      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+      invoice_date DATE NOT NULL,
+      due_date DATE,
+      amount DECIMAL(10,2) NOT NULL,
+      status VARCHAR(50) DEFAULT 'pending',
+      payment_date DATE,
+      notes TEXT,
+      created_by VARCHAR(255) REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createSavTicketsTable = `
+    CREATE TABLE IF NOT EXISTS sav_tickets (
+      id SERIAL PRIMARY KEY,
+      ticket_number VARCHAR(255) UNIQUE NOT NULL,
+      customer_name VARCHAR(255) NOT NULL,
+      customer_contact VARCHAR(255),
+      product_reference VARCHAR(255),
+      issue_description TEXT NOT NULL,
+      status VARCHAR(50) DEFAULT 'open',
+      priority VARCHAR(50) DEFAULT 'medium',
+      resolution TEXT,
+      resolved_by VARCHAR(255) REFERENCES users(id),
+      resolved_at TIMESTAMP,
+      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+      created_by VARCHAR(255) REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createSessionsTable = `
+    CREATE TABLE IF NOT EXISTS sessions (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
+      session_token VARCHAR(255) UNIQUE NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createStoresTable = `
+    CREATE TABLE IF NOT EXISTS stores (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      address TEXT,
+      city VARCHAR(255),
+      postal_code VARCHAR(20),
+      phone VARCHAR(255),
+      manager_id VARCHAR(255) REFERENCES users(id),
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
   const tables = [
     createUsersTable,
     createGroupsTable,
@@ -293,7 +476,19 @@ async function createTablesIfNotExist() {
     createNocodbConfigTable,
     createCustomerOrdersTable,
     createDlcProductsTable,
-    createTasksTable
+    createTasksTable,
+    createUserRolesTable,
+    createDatabaseBackupsTable,
+    createCalendarEventsTable,
+    createClientOrdersTable,
+    createCommandsTable,
+    createCommandItemsTable,
+    createCustomersTable,
+    createDeliveryItemsTable,
+    createInvoicesTable,
+    createSavTicketsTable,
+    createSessionsTable,
+    createStoresTable
   ];
 
   for (const table of tables) {
