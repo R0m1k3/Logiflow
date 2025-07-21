@@ -135,10 +135,12 @@ export class BackupService {
         console.log('✅ pg_dump found at:', pgDumpPath);
       } catch (error) {
         console.log('⚠️ pg_dump not found in PATH, trying common locations...');
+        // Utiliser directement PostgreSQL 16 trouvé
         const commonPaths = [
+          '/nix/store/yz718sizpgsnq2y8gfv8bba8l8r4494l-postgresql-16.3/bin/pg_dump',
+          '/nix/store/r8ivqqhsp8v042nhw5sap9kz2g6ar4v1-postgresql-16.9/bin/pg_dump',
           '/usr/bin/pg_dump',
-          '/usr/local/bin/pg_dump',
-          '/nix/store/07s64wxjzk6z1glwxvl3yq81vdn42k40-postgresql-15.7/bin/pg_dump'
+          '/usr/local/bin/pg_dump'
         ];
         
         let found = false;
@@ -367,6 +369,50 @@ export class BackupService {
       }
       return false;
     }
+  }
+
+  // Méthode pour obtenir un backup spécifique
+  async getBackup(backupId: string): Promise<BackupRecord | null> {
+    try {
+      const result = await this.pool.query(`
+        SELECT * FROM database_backups WHERE id = $1
+      `, [backupId]);
+
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+      console.error('Error getting backup:', error);
+      return null;
+    }
+  }
+
+  // Méthode pour obtenir le chemin du fichier de sauvegarde
+  async getBackupFilePath(backupId: string): Promise<string | null> {
+    try {
+      const result = await this.pool.query(`
+        SELECT filename, status FROM database_backups 
+        WHERE id = $1 AND status = 'completed'
+      `, [backupId]);
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      const filepath = path.join(this.backupDir, result.rows[0].filename);
+      
+      if (!fs.existsSync(filepath)) {
+        return null;
+      }
+
+      return filepath;
+    } catch (error) {
+      console.error('Error getting backup file path:', error);
+      return null;
+    }
+  }
+
+  // Méthode pour restaurer depuis un fichier uploadé
+  async restoreFromFile(filePath: string): Promise<boolean> {
+    return this.restoreFromUpload(filePath);
   }
 
   private async cleanOldBackups() {

@@ -2801,6 +2801,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Télécharger une sauvegarde
+  app.get('/api/database/backup/:id/download', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent télécharger les sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+      }
+
+      const backupId = req.params.id;
+      const backup = await backupService.getBackup(backupId);
+      
+      if (!backup) {
+        return res.status(404).json({ message: "Sauvegarde non trouvée" });
+      }
+
+      const filePath = await backupService.getBackupFilePath(backupId);
+      if (!filePath) {
+        return res.status(404).json({ message: "Fichier de sauvegarde non trouvé" });
+      }
+
+      res.download(filePath, backup.filename);
+    } catch (error) {
+      console.error("DEV Error downloading backup:", error);
+      res.status(500).json({ message: "Erreur lors du téléchargement" });
+    }
+  });
+
   // Restaurer une sauvegarde
   app.post('/api/database/backup/:id/restore', requireAuth, async (req: any, res) => {
     try {
@@ -2824,6 +2855,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("DEV Error restoring backup:", error);
       res.status(500).json({ message: "Erreur lors de la restauration" });
+    }
+  });
+
+  // Upload et restauration d'un fichier
+  app.post('/api/database/restore/upload', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent restaurer depuis un fichier" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+      }
+
+      // Configuration multer pour l'upload de fichiers
+      const multer = require('multer');
+      const path = require('path');
+      
+      const upload = multer({
+        dest: path.join(process.cwd(), 'uploads'),
+        limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max
+        fileFilter: (req: any, file: any, cb: any) => {
+          if (file.mimetype === 'application/sql' || 
+              file.originalname.endsWith('.sql') || 
+              file.originalname.endsWith('.gz')) {
+            cb(null, true);
+          } else {
+            cb(new Error('Seuls les fichiers .sql et .gz sont acceptés'));
+          }
+        }
+      }).single('backup');
+
+      upload(req, res, async (err: any) => {
+        if (err) {
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({ message: "Aucun fichier uploadé" });
+        }
+
+        try {
+          const success = await backupService.restoreFromFile(req.file.path);
+          
+          // Supprimer le fichier temporaire
+          require('fs').unlinkSync(req.file.path);
+          
+          if (!success) {
+            return res.status(500).json({ message: "Échec de la restauration depuis le fichier" });
+          }
+
+          res.json({ message: "Base de données restaurée depuis le fichier uploadé avec succès" });
+        } catch (uploadError) {
+          console.error("DEV Error restoring from upload:", uploadError);
+          res.status(500).json({ message: "Erreur lors de la restauration depuis le fichier" });
+        }
+      });
+    } catch (error) {
+      console.error("DEV Error in upload restore:", error);
+      res.status(500).json({ message: "Erreur lors de l'upload" });
     }
   });
 
