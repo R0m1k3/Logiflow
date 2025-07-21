@@ -1850,8 +1850,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "La description est obligatoire" });
       }
 
-      console.log('🚀 Creating backup with description:', description, 'for user:', user.username || user.id);
-      const backupId = await backupService.createBackup(user.username || user.id, description, 'manual');
+      console.log('🚀 Creating backup with description:', description, 'for user ID:', user.id);
+      const backupId = await backupService.createBackup(user.id, description, 'manual');
       console.log('✅ Backup created successfully with ID:', backupId);
       res.json({ id: backupId, message: "Sauvegarde lancée avec succès" });
     } catch (error) {
