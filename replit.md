@@ -123,6 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 21, 2025 - NETTOYAGE BASE DE DONNÉES: Rôle Directeur Complètement Supprimé
+
+- **PROBLÈME IDENTIFIÉ** - Anciennes sauvegardes contenaient encore le rôle directeur (ID 4) supprimé précédemment
+- **VÉRIFICATION BASE ACTUELLE** - Confirmé que la base de données actuelle ne contient plus le rôle directeur
+- **RÔLES ACTUELS** - Seuls 3 rôles restent : admin (ID 1), manager (ID 2), employee (ID 3)
+- **UTILISATEUR MIGRÉ** - Utilisateur "directeur" correctement migré vers rôle admin
+- **SCRIPT DE MIGRATION CRÉÉ** - migration-remove-directeur-role-production.sql pour nettoyer d'autres bases si nécessaire
+- **NOUVELLE SAUVEGARDE NÉCESSAIRE** - Prochaine sauvegarde sera propre sans rôle directeur
+
 ### July 21, 2025 - INTERFACE OPTIMISÉE: Suppression Bouton Corriger Admin
 
 - **BOUTON CORRIGER ADMIN SUPPRIMÉ** - Suppression complète du bouton "🔧 Corriger Admin" de la page Gestion des Rôles
