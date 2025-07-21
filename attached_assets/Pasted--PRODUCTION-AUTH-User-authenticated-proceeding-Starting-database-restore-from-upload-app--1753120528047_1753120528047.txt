@@ -1,0 +1,112 @@
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔄 Starting database restore from upload: /app/uploads/37ca071c5ed886fe0bbf38878835aa20
+
+🔧 Filtering out SET parameter: SET statement_timeout = 0;...
+
+🔧 Filtering out SET parameter: SET lock_timeout = 0;...
+
+🔧 Filtering out SET parameter: SET idle_in_transaction_session_timeout = 0;...
+
+🔧 Filtering out SET parameter: SET transaction_timeout = 0;...
+
+🔧 Filtering out database command: DROP DATABASE IF EXISTS logiflow_db;...
+
+🔧 Filtering out database command: CREATE DATABASE logiflow_db WITH TEMPLATE = templa...
+
+🔧 Filtering out database command: \connect logiflow_db...
+
+🔧 Filtering out SET parameter: SET statement_timeout = 0;...
+
+🔧 Filtering out SET parameter: SET lock_timeout = 0;...
+
+🔧 Filtering out SET parameter: SET idle_in_transaction_session_timeout = 0;...
+
+🔧 Filtering out SET parameter: SET transaction_timeout = 0;...
+
+🔧 SQL file filtered, removed 11 problematic lines (1718 lines remaining)
+
+Error restoring from upload: Error: Command failed: PGPASSWORD="LogiFlow2025!" psql -h postgres -p 5432 -U logiflow_admin -d logiflow_db -v ON_ERROR_STOP=1 < "/app/uploads/37ca071c5ed886fe0bbf38878835aa20.filtered"
+
+ERROR:  relation "customer_orders" already exists
+
+    at genericNodeError (node:internal/errors:984:15)
+
+    at wrappedFn (node:internal/errors:538:14)
+
+    at ChildProcess.exithandler (node:child_process:422:12)
+
+    at ChildProcess.emit (node:events:524:28)
+
+    at maybeClose (node:internal/child_process:1104:16)
+
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+
+  code: 3,
+
+  killed: false,
+
+  signal: null,
+
+  cmd: 'PGPASSWORD="LogiFlow2025!" psql -h postgres -p 5432 -U logiflow_admin -d logiflow_db -v ON_ERROR_STOP=1 < "/app/uploads/37ca071c5ed886fe0bbf38878835aa20.filtered"',
+
+  stdout: 'SET\n' +
+
+    'SET\n' +
+
+    ' set_config \n' +
+
+    '------------\n' +
+
+    ' \n' +
+
+    '(1 row)\n' +
+
+    '\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'ALTER DATABASE\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    ' set_config \n' +
+
+    '------------\n' +
+
+    ' \n' +
+
+    '(1 row)\n' +
+
+    '\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'SET\n' +
+
+    'SET\n',
+
+  stderr: 'ERROR:  relation "customer_orders" already exists\n'
+
+}
+
+5:55:14 PM [express] POST /api/database/restore/upload 500 in 98ms
+
+
+      
+      
+    

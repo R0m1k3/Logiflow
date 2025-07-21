@@ -337,8 +337,27 @@ export class BackupService {
       // Lire le fichier et filtrer les lignes problématiques
       const sqlContent = fs.readFileSync(uploadPath, 'utf8');
       
-      // Filtrer les paramètres de configuration problématiques
-      const filteredLines = sqlContent.split('\n').filter(line => {
+      // Filtrer et modifier les lignes problématiques
+      const filteredLines = sqlContent.split('\n').map(line => {
+        const trimmedLine = line.trim();
+        const lowerLine = trimmedLine.toLowerCase();
+        
+        // Remplacer CREATE TABLE par CREATE TABLE IF NOT EXISTS
+        if (lowerLine.startsWith('create table ')) {
+          const modifiedLine = line.replace(/CREATE TABLE /gi, 'CREATE TABLE IF NOT EXISTS ');
+          console.log(`🔧 Modified CREATE TABLE to IF NOT EXISTS: ${trimmedLine.substring(0, 50)}...`);
+          return modifiedLine;
+        }
+        
+        // Remplacer CREATE SEQUENCE par CREATE SEQUENCE IF NOT EXISTS
+        if (lowerLine.startsWith('create sequence ')) {
+          const modifiedLine = line.replace(/CREATE SEQUENCE /gi, 'CREATE SEQUENCE IF NOT EXISTS ');
+          console.log(`🔧 Modified CREATE SEQUENCE to IF NOT EXISTS: ${trimmedLine.substring(0, 50)}...`);
+          return modifiedLine;
+        }
+        
+        return line;
+      }).filter(line => {
         const trimmedLine = line.trim();
         const lowerLine = trimmedLine.toLowerCase();
         
@@ -382,8 +401,8 @@ export class BackupService {
 
       console.log(`🔧 SQL file filtered, removed ${sqlContent.split('\n').length - filteredLines.length} problematic lines (${filteredLines.length} lines remaining)`);
 
-      // Commande de restauration avec le fichier filtré
-      const restoreCommand = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${username} -d ${dbName} -v ON_ERROR_STOP=1 < "${filteredPath}"`;
+      // Commande de restauration avec le fichier filtré (sans ON_ERROR_STOP pour ignorer les conflits)
+      const restoreCommand = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${username} -d ${dbName} < "${filteredPath}"`;
 
       await execAsync(restoreCommand);
 
