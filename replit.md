@@ -123,6 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 21, 2025 - SYSTÈME SAUVEGARDE BASE DE DONNÉES: Fonctionnalité Production Complète
+- **SERVICE SAUVEGARDE PRODUCTION CRÉÉ** - BackupService utilisant pg_dump/psql pour sauvegardes complètes PostgreSQL
+- **CORRECTION PERMISSIONS PRODUCTION** - Utilisation /tmp/logiflow-backups au lieu de /app/backups pour éviter erreurs EACCES
+- **INTERFACE ADMINISTRATION INTÉGRÉE** - Page DatabaseBackup accessible via menu Administration > Sauvegarde BDD
+- **GESTION ROBUSTE ERREURS** - Fallback /tmp/logiflow-backups-fallback si répertoire principal échoue
+- **ROUTES API COMPLÈTES** - GET /api/database/backups, POST /api/database/backup, téléchargement, restauration, suppression
+- **SCHÉMA DATABASE AJOUTÉ** - Table database_backups avec tracking complet (statut, taille, description, utilisateur)
+- **SÉCURITÉ ADMIN UNIQUEMENT** - Toutes les fonctions de sauvegarde restreintes aux administrateurs
+- **UPLOAD ET RESTAURATION** - Support upload fichiers .sql/.gz avec validation et restauration automatique
+- **NETTOYAGE AUTOMATIQUE** - Maximum 10 sauvegardes conservées, suppression automatique des plus anciennes
+- **TYPES TYPESCRIPT COMPLETS** - DatabaseBackup et DatabaseBackupInsert ajoutés au schéma partagé
+
 ### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
 - **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions
 - **MIGRATION UTILISATEURS RÉALISÉE** - Anciens utilisateurs directeur migrés vers rôle admin automatiquement

@@ -1766,12 +1766,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ===== DATABASE BACKUP ROUTES =====
   
-  // Initialiser le service de sauvegarde
-  const BackupService = require('./backupService.production').BackupService;
-  const backupService = new BackupService(pool);
-  
-  // Initialiser la table des sauvegardes au démarrage
-  backupService.initBackupTable().catch(console.error);
+  // Initialiser le service de sauvegarde avec gestion d'erreur
+  let backupService = null;
+  try {
+    const BackupService = require('./backupService.production').BackupService;
+    backupService = new BackupService(pool);
+    
+    // Initialiser la table des sauvegardes au démarrage
+    await backupService.initBackupTable();
+    console.log('✅ Backup service initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize backup service:', error);
+    // Le service de sauvegarde ne sera pas disponible
+  }
 
   // Récupérer la liste des sauvegardes
   app.get('/api/database/backups', isAuthenticated, async (req: any, res) => {
@@ -1779,6 +1786,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Seuls les administrateurs peuvent gérer les sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
       }
 
       const backups = await backupService.getBackups();
@@ -1795,6 +1806,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Seuls les administrateurs peuvent créer des sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
       }
 
       const { description } = req.body;
@@ -1816,6 +1831,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Seuls les administrateurs peuvent télécharger les sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
       }
 
       const backupId = req.params.id;
@@ -1846,6 +1865,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Seuls les administrateurs peuvent restaurer les sauvegardes" });
       }
 
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+      }
+
       const backupId = req.params.id;
       const success = await backupService.restoreBackup(backupId);
       
@@ -1866,6 +1889,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Seuls les administrateurs peuvent supprimer les sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
       }
 
       const backupId = req.params.id;
@@ -1918,6 +1945,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         try {
+          if (!backupService) {
+            return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+          }
+
           const success = await backupService.restoreFromUpload(req.file.path);
           
           if (!success) {

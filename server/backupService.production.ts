@@ -23,13 +23,32 @@ export class BackupService {
 
   constructor(pool: Pool) {
     this.pool = pool;
-    this.backupDir = path.join(process.cwd(), 'backups');
+    // Utiliser /tmp pour les sauvegardes en production (accessible en écriture)
+    this.backupDir = process.env.NODE_ENV === 'production' ? '/tmp/logiflow-backups' : path.join(process.cwd(), 'backups');
     this.ensureBackupDirectory();
   }
 
   private ensureBackupDirectory() {
-    if (!fs.existsSync(this.backupDir)) {
-      fs.mkdirSync(this.backupDir, { recursive: true });
+    try {
+      if (!fs.existsSync(this.backupDir)) {
+        fs.mkdirSync(this.backupDir, { recursive: true });
+        console.log(`✅ Backup directory created: ${this.backupDir}`);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to create backup directory: ${this.backupDir}`, error);
+      // Fallback vers /tmp si le répertoire principal échoue
+      if (this.backupDir !== '/tmp/logiflow-backups-fallback') {
+        this.backupDir = '/tmp/logiflow-backups-fallback';
+        try {
+          if (!fs.existsSync(this.backupDir)) {
+            fs.mkdirSync(this.backupDir, { recursive: true });
+            console.log(`✅ Fallback backup directory created: ${this.backupDir}`);
+          }
+        } catch (fallbackError) {
+          console.error('❌ Failed to create fallback backup directory:', fallbackError);
+          throw new Error('Cannot create backup directory. Check filesystem permissions.');
+        }
+      }
     }
   }
 
