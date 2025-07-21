@@ -1,0 +1,200 @@
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/groups',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753100468215',
+
+  username: 'Directeur',
+
+  sessionId: 'fcyKLGPv6sjPFQbg2ttUh0xhRilaSzjy',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+Customer orders - User assigned stores: { groupIds: [] }
+
+🎯 getPublicities debug: {
+
+  year: 2025,
+
+  groupIds: undefined,
+
+  publicityCount: 0,
+
+  query: 'SELECT * FROM publicities WHERE year = ? ORDER BY start_date DESC'
+
+}
+
+🎯 getPublicities result: 0 publicités pour année 2025
+
+Customer orders returned from storage: 0 items
+
+12:21:27 PM [express] GET /api/publicities 304 in 23ms
+
+🚚 Deliveries returned: 0 items
+
+12:21:27 PM [express] GET /api/customer-orders 304 in 109ms
+
+12:21:27 PM [express] GET /api/deliveries 304 in 112ms
+
+📊 Query results: {
+
+  ordersCount: '0',
+
+  deliveriesCount: '0',
+
+  orderStats: { pending_count: '0', total_palettes: '0', total_packages: '0' },
+
+  deliveryStats: { total_palettes: '0', total_packages: '0' }
+
+}
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/dlc-products/stats?',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753100468215',
+
+  username: 'Directeur',
+
+  sessionId: 'fcyKLGPv6sjPFQbg2ttUh0xhRilaSzjy',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+📊 Final stats: {
+
+  ordersCount: 0,
+
+  deliveriesCount: 0,
+
+  pendingOrdersCount: 0,
+
+  averageDeliveryTime: 0,
+
+  totalPalettes: 0,
+
+  totalPackages: 0
+
+}
+
+12:21:27 PM [express] GET /api/stats/monthly 304 in 135ms
+
+DLC Stats API called with: {
+
+  userId: '_1753100468215',
+
+  userRole: 'directeur',
+
+  groupIds: [],
+
+  storeId: undefined
+
+}
+
+📊 DLC Stats - groupIds: []
+
+📊 DLC Stats query: 
+
+        SELECT 
+
+          status,
+
+          dlc_date,
+
+          expiry_date,
+
+          COUNT(*) as count,
+
+          SUM(quantity) as total_quantity,
+
+          CASE 
+
+            WHEN COALESCE(dlc_date, expiry_date) < CURRENT_DATE THEN 'expired'
+
+            WHEN COALESCE(dlc_date, expiry_date) <= CURRENT_DATE + INTERVAL '15 days' THEN 'expiring_soon'
+
+            ELSE 'active'
+
+          END as calculated_status
+
+        FROM dlc_products
+
+       GROUP BY status, dlc_date, expiry_date, calculated_status
+
+📊 DLC Stats params: []
+
+📊 DLC Stats raw result: []
+
+📊 DLC Stats final: {
+
+  active: 0,
+
+  expiringSoon: 0,
+
+  expired: 0,
+
+  valide: 0,
+
+  en_cours: 0,
+
+  total: 0,
+
+  totalQuantity: 0
+
+}
+
+DLC Stats returned: {
+
+  active: 0,
+
+  expiringSoon: 0,
+
+  expired: 0,
+
+  valide: 0,
+
+  en_cours: 0,
+
+  total: 0,
+
+  totalQuantity: 0
+
+}
+
+12:21:27 PM [express] GET /api/dlc-products/stats 304 in 139ms
+
+12:21:27 PM [express] GET /api/groups 304 in 53ms
+
+12:21:48 PM [express] HEAD /api/health 200 in 1ms
+
+12:22:18 PM [express] HEAD /api/health 200 in 1ms
+
+12:22:48 PM [express] HEAD /api/health 200 in 1ms
+

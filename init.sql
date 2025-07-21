@@ -70,8 +70,17 @@ CREATE TABLE role_permissions (
     PRIMARY KEY (role_id, permission_id)
 );
 
--- Create user_roles junction table
+-- Create user_roles junction table (CORRECTED STRUCTURE)
 CREATE TABLE user_roles (
+    user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    assigned_by VARCHAR(255),
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- Create user_groups junction table (for store assignments)
+CREATE TABLE user_groups (
     user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
     group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
     assigned_by VARCHAR(255),
