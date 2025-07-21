@@ -136,6 +136,8 @@ The application uses a sophisticated dual authentication approach:
 - **NETTOYAGE AUTOMATIQUE** - Maximum 10 sauvegardes conservées, suppression automatique des plus anciennes
 - **TYPES TYPESCRIPT COMPLETS** - DatabaseBackup et DatabaseBackupInsert ajoutés au schéma partagé
 - **SAUVEGARDE COMPLÈTE TESTÉE** - Sauvegarde 82KB avec 28 tables créée et téléchargée avec succès (backup_1753114284096_hnc3kkj2y)
+- **GESTION ERREURS JSON CORRIGÉE** - Correction gestion réponses HTTP 204 (No Content) pour éviter erreurs de parsing JSON dans l'interface
+- **ROUTAGE FIXÉ** - Correction RouterProduction.tsx pour redirection correcte vers page de connexion
 
 ### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
 - **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions

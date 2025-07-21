@@ -5,7 +5,7 @@
 -- Dumped from database version 16.9
 -- Dumped by pg_dump version 16.3
 
--- Started on 2025-07-21 16:11:24 UTC
+-- Started on 2025-07-21 16:14:49 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1401,10 +1401,7 @@ COPY public.customers (id, first_name, last_name, email, phone, address, store_i
 --
 
 COPY public.database_backups (id, filename, description, size, created_at, created_by, tables_count, status) FROM stdin;
-backup_1753112310948_npxv2prfg	backup_1753112310948_npxv2prfg.sql	tst	0	2025-07-21 15:38:30.958068	admin	0	failed
-backup_1753114230668_zamn81mz3	backup_1753114230668_zamn81mz3.sql	Test fonctionnel téléchargement	0	2025-07-21 16:10:30.679928	admin	0	failed
-backup_1753114261596_0r8038go7	backup_1753114261596_0r8038go7.sql	Test avec PostgreSQL 16.3	0	2025-07-21 16:11:01.606736	admin	0	failed
-backup_1753114284096_hnc3kkj2y	backup_1753114284096_hnc3kkj2y.sql	Test final avec répertoire créé	0	2025-07-21 16:11:24.107106	admin	0	creating
+backup_1753114489722_kksamjbiw	backup_1753114489722_kksamjbiw.sql	Test final système complet	0	2025-07-21 16:14:49.732401	admin	0	creating
 \.
 
 
@@ -1758,10 +1755,11 @@ qNVPnJK4qf6TstLrb4M2_QkEVwJJ5Ds_	{"cookie":{"originalMaxAge":86400000,"expires":
 LMpukTV-U3Pro7Ypa0vSKoOw-w5eYZTK	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T13:52:37.325Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 15:47:01
 rvDZV_jlEj_vmNTsF3-ijKg4MXDGkJmm	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:21:10.911Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:21:14
 IcPTH3HJJigx50husDndewH93TJItM3N	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:31:49.546Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:31:51
-5AAjNqk_bk4pUqGV_89wBT0Eh1umaB1i	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:10:23.592Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:11:25
 cnrsW5Gh8Er73HnEdFMzzOfPuny8t_qf	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:13:44.012Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:14:18
 m5LspxbruWlXhr_FvVS4x3kij1JVA2yK	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:32:17.417Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:32:19
 3fl4bV6PVYUwWL1L7_SxzIym30bBt3e8	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:15:15.478Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:15:18
+K0p9ZRf2phBo-VTfJnQlVNYxl1hctemE	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:12:41.769Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:14:43
+5AAjNqk_bk4pUqGV_89wBT0Eh1umaB1i	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:10:23.592Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:14:50
 y2787Su4YF4UMEpQcICz_rWSS6i9WHzh	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:55:04.777Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-22 06:34:42
 77-quEj4EjMnKv7HpbP5NRoU7CJo58re	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:48:01.628Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:48:02
 87klsFoiche-m5bT9J-69whKDXUs79rM	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:48:18.732Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:48:20
@@ -1857,11 +1855,11 @@ _1753102038583	1	role_migration	2025-07-21 13:18:41.543897
 --
 
 COPY public.users (id, username, email, name, first_name, last_name, profile_image_url, password, role, password_changed, created_at, updated_at) FROM stdin;
-_1753001006996	ff292	ff292@logiflow.com	ff292	Employee	Frouard	\N	ff292	employee	t	2025-07-20 08:43:27.733	2025-07-20 08:56:54.66
-1	admin	admin@logiflow.com	Admin System	Michael	SCHAL	\N	0d4995395ca9c99cf7d689c615b68a266c8600fdc35540b499ec1f57cbe6cffff27448d13c4a7c87edb3e3c54e402695373758eb413d3e992e050abd28901ac5.3e629b859ccbc7013aef506b733dd575	admin	f	2025-07-19 18:54:37.64216	2025-07-21 16:11:06.058
 test_manager	manager_test	manager@logiflow.com	Manager Test	Manager	Test	\N	26e499453d0a570033917b4f172d292c3e0f69132e9c3861d4a61e24d09368bb4b8520b9333dd7f62d8f6d775e5d543111d629b0fcaa1b712df413752a5ed0fb.535952a042562679421200f1e665f47a	manager	t	2025-07-20 11:37:19.374446	2025-07-20 11:37:19.374446
 _1753102038583	directeur	directeur@logiflow.com	Test Directeur	Test	Directeur	\N	169913cc700a6062a0a33a6f2d0b5553313a5115d875c9003ff4849331a102c08052ac76f194d48ee643d2ee9177cb9d5fb74f461776da5207ab7f8411029652.8f029c10c34b0f08cd598015e331b3ce	admin	t	2025-07-20 11:58:58.314155	2025-07-20 12:24:09.953
 101	test_user	test@logiflow.com	Test User	Test	User	\N	589bf3c4899405171f173a345c9d6b16:8119cf13a75a41985e1832bd48a543c65ec7142e5f13cb0cf86c9b96b9e5d42d	test_role	f	2025-07-20 12:00:34.590954	2025-07-20 12:00:34.590954
+_1753001006996	ff292	ff292@logiflow.com	ff292	Employee	Frouard	\N	ff292	employee	t	2025-07-20 08:43:27.733	2025-07-20 08:56:54.66
+1	admin	admin@logiflow.com	Admin System	Michael	SCHAL	\N	c4030f8496d03850b285d138bca69c45abc80cac0c8880d3ea9bb681bc7f0dcf9b0fc1fcdd6d597ff570f3036319b4b290a31106985f404b26c426d94dac376f.c9c7b3fe913f2c44081db4c45db2b8b8	admin	f	2025-07-19 18:54:37.64216	2025-07-21 16:13:29.322
 \.
 
 
@@ -2418,7 +2416,7 @@ CREATE UNIQUE INDEX users_email_unique ON public.users USING btree (email) WHERE
 
 
 --
--- TOC entry 3489 (class 2606 OID 843777)
+-- TOC entry 3489 (class 2606 OID 843791)
 -- Name: tasks tasks_completed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
 --
 
@@ -2469,7 +2467,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON SEQU
 ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON TABLES TO neon_superuser WITH GRANT OPTION;
 
 
--- Completed on 2025-07-21 16:11:27 UTC
+-- Completed on 2025-07-21 16:14:52 UTC
 
 --
 -- PostgreSQL database dump complete

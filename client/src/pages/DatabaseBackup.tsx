@@ -125,11 +125,26 @@ export default function DatabaseBackup() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erreur lors de la suppression');
+        const errorText = await response.text();
+        let errorMessage = 'Erreur lors de la suppression';
+        try {
+          const error = JSON.parse(errorText);
+          errorMessage = error.message || errorMessage;
+        } catch {
+          // Si ce n'est pas du JSON, utiliser le texte brut
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
-      return response.json();
+      // Vérifier s'il y a un contenu à parser
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      }
+      
+      // Pour les 204 No Content, retourner un objet vide
+      return {};
     },
     onSuccess: () => {
       toast({
