@@ -216,13 +216,20 @@ export default function UsersPage() {
       return response;
     },
     onSuccess: async () => {
-      // Invalidation complète du cache pour rafraîchir la liste
+      // Invalidation complète du cache et refetch immédiat
       await queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       await queryClient.invalidateQueries({ queryKey: ['/api/roles'] });
       await queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
-      // Force un refetch immédiat
-      refetchUsers();
+      
+      // Force un refetch immédiat pour s'assurer que la liste se met à jour
+      await refetchUsers();
+      
       console.log('✅ User created successfully - cache invalidated and refetched');
+      
+      toast({
+        title: "Succès",
+        description: "Utilisateur créé avec succès",
+      });
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -411,8 +418,7 @@ export default function UsersPage() {
   };
 
   const handleCreateUser = () => {
-    // Force refetch des utilisateurs pour s'assurer d'avoir les données les plus récentes
-    refetchUsers();
+    // Ouvrir directement la modal sans refetch pour éviter de vider la liste
     setShowCreateModal(true);
     setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
     setUserGroups([]);
@@ -449,15 +455,6 @@ export default function UsersPage() {
           )
         );
       }
-      
-      toast({
-        title: "Succès",
-        description: `Utilisateur créé et assigné à ${userGroups.length} magasin(s)`,
-      });
-      
-      // Force un nouveau fetch immédiat des utilisateurs
-      await queryClient.invalidateQueries({ queryKey: ['/api/users'] });
-      await refetchUsers();
       
       setShowCreateModal(false);
       setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
