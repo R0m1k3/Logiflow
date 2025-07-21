@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage, pool } from "./storage.production";
 import * as path from "path";
 import { setupLocalAuth, requireAuth } from "./localAuth.production";
+import multer from "multer";
 
 
 // Alias pour compatibilité
@@ -1939,8 +1940,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Configuration multer pour l'upload de fichiers
-      const multer = require('multer');
-      
       const upload = multer({
         dest: path.join(process.cwd(), 'uploads'),
         limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max

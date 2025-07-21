@@ -144,6 +144,7 @@ The application uses a sophisticated dual authentication approach:
 - **DOCKER-COMPOSE2 CRÉÉ** - Configuration Docker avec réseau bridge local normalisé (subnet 172.20.0.0/16)
 - **CONFIGURATION POSTGRESQL CORRIGÉE** - Health checks optimisés et suppression commandes ALTER SYSTEM problématiques
 - **CONFLITS PORTS RÉSOLUS** - Application sur port 3001, PostgreSQL sur port 5435, réseau bridge simple
+- **ERREUR PRODUCTION MULTER RÉSOLUE** - Correction import dynamique require('multer') vers import ES module
 
 ### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
 - **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions
