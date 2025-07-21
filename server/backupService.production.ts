@@ -125,6 +125,17 @@ export class BackupService {
       const dumpCommand = `PGPASSWORD="${password}" pg_dump -h ${host} -p ${port} -U ${username} -d ${dbName} --verbose --clean --if-exists --create --format=plain > "${filepath}"`;
 
       console.log(`🗃️ Running pg_dump for backup: ${backupId}`);
+      console.log(`🔧 Command: ${dumpCommand}`);
+      
+      // Vérifier si pg_dump existe
+      try {
+        const whichResult = await execAsync('which pg_dump');
+        console.log('✅ pg_dump found at:', whichResult.stdout.trim());
+      } catch (error) {
+        console.error('❌ pg_dump not found:', error);
+        throw new Error('pg_dump not available - PostgreSQL client tools required');
+      }
+      
       await execAsync(dumpCommand);
 
       // Vérifier que le fichier existe et calculer sa taille

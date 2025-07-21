@@ -1767,18 +1767,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== DATABASE BACKUP ROUTES =====
   
   // Initialiser le service de sauvegarde avec gestion d'erreur
-  let backupService = null;
-  try {
-    const BackupService = require('./backupService.production').BackupService;
-    backupService = new BackupService(pool);
-    
-    // Initialiser la table des sauvegardes au démarrage
-    await backupService.initBackupTable();
-    console.log('✅ Backup service initialized successfully');
-  } catch (error) {
-    console.error('❌ Failed to initialize backup service:', error);
-    // Le service de sauvegarde ne sera pas disponible
-  }
+  let backupService: any = null;
+  
+  const initializeBackupService = async () => {
+    try {
+      const BackupService = require('./backupService.production').BackupService;
+      backupService = new BackupService(pool);
+      
+      // Initialiser la table des sauvegardes au démarrage
+      await backupService.initBackupTable();
+      console.log('✅ Backup service initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to initialize backup service:', error);
+      backupService = null;
+      return false;
+    }
+  };
+  
+  // Initialiser immédiatement mais de manière asynchrone
+  initializeBackupService();
 
   // Récupérer la liste des sauvegardes
   app.get('/api/database/backups', isAuthenticated, async (req: any, res) => {
@@ -1789,7 +1797,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!backupService) {
-        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+        // Essayer de réinitialiser le service
+        const initialized = await initializeBackupService();
+        if (!initialized) {
+          return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+        }
       }
 
       const backups = await backupService.getBackups();
@@ -1809,7 +1821,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!backupService) {
-        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+        // Essayer de réinitialiser le service
+        const initialized = await initializeBackupService();
+        if (!initialized) {
+          return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+        }
       }
 
       const { description } = req.body;
