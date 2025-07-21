@@ -123,14 +123,14 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### July 20, 2025 - RÉSOLUTION FINALE PRODUCTION: Sidebar et Permissions Directeur Entièrement Fonctionnelles
-- **SIDEBAR PRODUCTION CORRIGÉE** - Remplacé `useAuthSimple` par `useAuthUnified` dans Sidebar.tsx pour compatibilité production
-- **REDIRECTION AUTHENTIFICATION RÉPARÉE** - Ajouté `window.location.href` pour mode production dans AuthPage.tsx au lieu de `setLocation`
-- **ROUTAGE PRODUCTION OPTIMISÉ** - Ajouté route par défaut "/" vers Dashboard dans RouterProduction.tsx
-- **PERMISSIONS DIRECTEUR RÉSOLUES** - Corrigé assignation user_roles et requête SQL des permissions utilisateur (45 permissions)
-- **AUTHENTIFICATION PRODUCTION STABLE** - Détection environnement restaurée, logs confirmant 45 permissions au lieu de 0
-- **INTERFACE DIRECTEUR COMPLÈTE** - Sidebar entièrement fonctionnelle avec tous menus, dashboard opérationnel, données filtrées par magasins
-- **PROBLÈME RÉSOLU DÉFINITIVEMENT** - Directeur peut se connecter, accéder à toutes ses fonctionnalités sans erreur 404/500, navigation fluide
+### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
+- **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions
+- **MIGRATION UTILISATEURS RÉALISÉE** - Anciens utilisateurs directeur migrés vers rôle admin automatiquement
+- **STRUCTURE SIMPLIFIÉE** - Système maintenant avec 3 rôles uniquement : admin (54 permissions), manager (36 permissions), employee (28 permissions)
+- **INIT.SQL NETTOYÉ** - Suppression création automatique rôle directeur pour futures installations
+- **SCRIPT MIGRATION PRODUCTION CRÉÉ** - migration-remove-directeur-role.sql pour application en production réelle
+- **BASE DONNÉES PROPRE** - Plus aucune référence au rôle directeur dans tables roles, role_permissions, user_roles
+- **ROOT CAUSE RÉSOLU** - Problème initial de structure user_roles (group_id vs role_id) complètement corrigé
 
 ### July 20, 2025 - RÉSOLUTION COMPLÈTE: Erreurs Docker Production et Configuration Vite
 - **DIAGNOSTIC COMPLET ERREURS DOCKER** - Identifié que `/app/dist/index.js` tentait d'importer Vite en production
