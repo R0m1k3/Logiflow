@@ -139,6 +139,11 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
       // CRITICAL FIX: Auto-fix employee permissions on every startup
       const { ensureEmployeePermissions } = await import('./initDatabase.production');
       await ensureEmployeePermissions();
+      
+      // Initialize backup scheduler for automatic daily backups
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      scheduler.startDailyBackup();
     } catch (error) {
       console.error("Failed to initialize production database:", error);
       // Continue startup even if production initialization fails

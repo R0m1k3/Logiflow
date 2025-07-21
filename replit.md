@@ -123,6 +123,19 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 21, 2025 - SYSTÈME SAUVEGARDE AUTOMATIQUE QUOTIDIENNE: Planification Production à Minuit
+
+- **SCHEDULER SERVICE CRÉÉ** - SchedulerService utilisant node-cron pour sauvegardes automatiques quotidiennes à minuit (Europe/Paris)
+- **INITIALISATION AUTOMATIQUE** - Scheduler démarré automatiquement au lancement de l'application en mode production
+- **ROUTES API COMPLÈTES** - GET /api/scheduler/status, POST /api/scheduler/start/stop, POST /api/scheduler/backup-now
+- **INTERFACE ADMINISTRATION** - Composant SchedulerCard intégré dans page DatabaseBackup avec contrôles temps réel
+- **GESTION STATUT TEMPS RÉEL** - Affichage statut Actif/Inactif avec prochaine exécution et rafraîchissement automatique
+- **BOUTONS CONTRÔLE** - Activer/Désactiver scheduler + "Sauvegarder maintenant" pour tests immédiats
+- **SAUVEGARDE INTELLIGENTE** - Système garde 30 sauvegardes automatiques vs 10 manuelles, nettoyage automatique
+- **LOGS PRODUCTION** - "⏰ [SCHEDULER] Sauvegarde automatique quotidienne programmée à minuit (Europe/Paris)"
+- **SÉCURITÉ ADMIN** - Toutes les fonctions scheduler restreintes aux administrateurs uniquement
+- **DESCRIPTION AUTOMATIQUE** - Sauvegardes automatiques avec description "Sauvegarde automatique quotidienne - [date]"
+
 ### July 21, 2025 - SYSTÈME SAUVEGARDE BASE DE DONNÉES: Fonctionnalité Production Complète et Opérationnelle
 - **SERVICE SAUVEGARDE PRODUCTION CRÉÉ** - BackupService utilisant pg_dump/psql pour sauvegardes complètes PostgreSQL
 - **POSTGRESQL 16.3 CONFIGURÉ** - Migration vers PostgreSQL 16.3 pour compatibilité parfaite avec serveur Neon 16.9

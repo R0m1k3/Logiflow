@@ -1769,6 +1769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialiser le service de sauvegarde avec gestion d'erreur
   let backupService: any = null;
+  let schedulerService: any = null;
   
   const initializeBackupService = async () => {
     try {
@@ -1786,9 +1787,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return false;
     }
   };
+
+  const initializeSchedulerService = async () => {
+    try {
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      schedulerService = SchedulerService.getInstance();
+      console.log('✅ Scheduler service initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to initialize scheduler service:', error);
+      schedulerService = null;
+      return false;
+    }
+  };
   
   // Initialiser immédiatement mais de manière asynchrone
   initializeBackupService();
+  initializeSchedulerService();
 
   // Récupérer la liste des sauvegardes
   app.get('/api/database/backups', isAuthenticated, async (req: any, res) => {
@@ -1983,6 +1998,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in upload restore:", error);
       res.status(500).json({ message: "Erreur lors de la restauration" });
+    }
+  });
+
+  // ===== SCHEDULER ROUTES =====
+  
+  // Statut de la sauvegarde automatique
+  app.get('/api/scheduler/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent voir le statut du scheduler" });
+      }
+
+      if (!schedulerService) {
+        return res.status(503).json({ message: "Service de planification non disponible" });
+      }
+
+      const status = schedulerService.getDailyBackupStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting scheduler status:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération du statut" });
+    }
+  });
+
+  // Démarrer la sauvegarde automatique
+  app.post('/api/scheduler/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent gérer le scheduler" });
+      }
+
+      if (!schedulerService) {
+        return res.status(503).json({ message: "Service de planification non disponible" });
+      }
+
+      schedulerService.startDailyBackup();
+      res.json({ message: "Sauvegarde automatique quotidienne activée" });
+    } catch (error) {
+      console.error("Error starting scheduler:", error);
+      res.status(500).json({ message: "Erreur lors du démarrage du scheduler" });
+    }
+  });
+
+  // Arrêter la sauvegarde automatique
+  app.post('/api/scheduler/stop', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent gérer le scheduler" });
+      }
+
+      if (!schedulerService) {
+        return res.status(503).json({ message: "Service de planification non disponible" });
+      }
+
+      schedulerService.stopDailyBackup();
+      res.json({ message: "Sauvegarde automatique quotidienne désactivée" });
+    } catch (error) {
+      console.error("Error stopping scheduler:", error);
+      res.status(500).json({ message: "Erreur lors de l'arrêt du scheduler" });
+    }
+  });
+
+  // Déclencher une sauvegarde manuelle
+  app.post('/api/scheduler/backup-now', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent déclencher une sauvegarde" });
+      }
+
+      if (!schedulerService) {
+        return res.status(503).json({ message: "Service de planification non disponible" });
+      }
+
+      const backupId = await schedulerService.triggerManualBackup();
+      res.json({ 
+        message: "Sauvegarde manuelle créée avec succès",
+        backupId: backupId
+      });
+    } catch (error) {
+      console.error("Error triggering manual backup:", error);
+      res.status(500).json({ message: "Erreur lors de la sauvegarde manuelle" });
     }
   });
 

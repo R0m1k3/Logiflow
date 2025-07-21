@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Download, Upload, Database, Trash2, Calendar, FileText, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Download, Upload, Database, Trash2, Calendar, FileText, AlertTriangle, CheckCircle, Timer, RefreshCw, Square, Play } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,121 @@ interface DatabaseBackup {
   created_by: string;
   tables_count: number;
   status: 'creating' | 'completed' | 'failed';
+}
+
+// Composant pour gérer la sauvegarde automatique
+function SchedulerCard() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Récupérer le statut du scheduler
+  const { data: schedulerStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['/api/scheduler/status'],
+    queryFn: () => apiRequest('/api/scheduler/status'),
+    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes
+  });
+
+  // Mutation pour démarrer/arrêter le scheduler
+  const toggleSchedulerMutation = useMutation({
+    mutationFn: (action: 'start' | 'stop') => 
+      apiRequest(`/api/scheduler/${action}`, { method: 'POST' }),
+    onSuccess: (data, action) => {
+      toast({
+        title: "Succès",
+        description: action === 'start' ? 
+          "Sauvegarde automatique activée" : 
+          "Sauvegarde automatique désactivée",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduler/status'] });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier la sauvegarde automatique",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation pour déclencher une sauvegarde immédiate
+  const manualBackupMutation = useMutation({
+    mutationFn: () => apiRequest('/api/scheduler/backup-now', { method: 'POST' }),
+    onSuccess: (data) => {
+      toast({
+        title: "Sauvegarde créée",
+        description: `Sauvegarde manuelle créée avec succès: ${data.backupId}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/database/backups'] });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la sauvegarde manuelle",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Timer className="h-5 w-5" />
+          Sauvegarde automatique
+        </CardTitle>
+        <CardDescription>
+          Configuration de la sauvegarde automatique quotidienne à minuit
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge variant={schedulerStatus?.active ? "default" : "secondary"}>
+                {schedulerStatus?.active ? "Actif" : "Inactif"}
+              </Badge>
+              {statusLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
+            </div>
+            {schedulerStatus?.nextRun && (
+              <p className="text-sm text-muted-foreground">
+                Prochaine sauvegarde : {schedulerStatus.nextRun}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => manualBackupMutation.mutate()}
+              disabled={manualBackupMutation.isPending}
+            >
+              {manualBackupMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Database className="h-4 w-4" />
+              )}
+              Sauvegarder maintenant
+            </Button>
+            <Button
+              variant={schedulerStatus?.active ? "destructive" : "default"}
+              size="sm"
+              onClick={() => toggleSchedulerMutation.mutate(schedulerStatus?.active ? 'stop' : 'start')}
+              disabled={toggleSchedulerMutation.isPending}
+            >
+              {toggleSchedulerMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : schedulerStatus?.active ? (
+                <Square className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+              {schedulerStatus?.active ? "Désactiver" : "Activer"}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function DatabaseBackup() {
