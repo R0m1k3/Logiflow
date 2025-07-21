@@ -141,6 +141,7 @@ The application uses a sophisticated dual authentication approach:
 - **ERREUR PRODUCTION REQUIRE PATH RÉSOLUE** - Correction imports dynamiques require('path') causant erreurs en production
 - **DÉTECTION ENVIRONNEMENT AMÉLIORÉE** - Backup service utilise STORAGE_MODE et DATABASE_URL pour déterminer répertoire correct
 - **TÉLÉCHARGEMENT PRODUCTION FONCTIONNEL** - Sauvegarde 83KB téléchargée avec succès en mode production
+- **DOCKER-COMPOSE2 CRÉÉ** - Configuration Docker avec réseau bridge local normalisé (subnet 172.20.0.0/16)
 
 ### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
 - **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions
