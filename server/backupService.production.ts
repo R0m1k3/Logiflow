@@ -127,14 +127,15 @@ export class BackupService {
 
       console.log(`🗃️ Running pg_dump for backup: ${backupId}`);
       
-      // Vérifier si pg_dump existe et essayer différents chemins
-      let pgDumpPath = 'pg_dump';
+      // Forcer l'utilisation de PostgreSQL 16.3 pour compatibilité avec Neon 16.9
+      let pgDumpPath = '/nix/store/yz718sizpgsnq2y8gfv8bba8l8r4494l-postgresql-16.3/bin/pg_dump';
+      console.log('🎯 Using PostgreSQL 16.3 for Neon compatibility');
+      
       try {
-        const whichResult = await execAsync('which pg_dump');
-        pgDumpPath = whichResult.stdout.trim();
-        console.log('✅ pg_dump found at:', pgDumpPath);
+        await execAsync(`test -x ${pgDumpPath}`);
+        console.log('✅ pg_dump 16.3 found at:', pgDumpPath);
       } catch (error) {
-        console.log('⚠️ pg_dump not found in PATH, trying common locations...');
+        console.log('⚠️ PostgreSQL 16.3 not found, trying to find any version 16...');
         // Utiliser directement PostgreSQL 16 trouvé
         const commonPaths = [
           '/nix/store/yz718sizpgsnq2y8gfv8bba8l8r4494l-postgresql-16.3/bin/pg_dump',
@@ -243,27 +244,7 @@ export class BackupService {
   }
 
   async getBackupFile(backupId: string): Promise<string | null> {
-    try {
-      const result = await this.pool.query(`
-        SELECT filename, status FROM database_backups 
-        WHERE id = $1 AND status = 'completed'
-      `, [backupId]);
-
-      if (result.rows.length === 0) {
-        return null;
-      }
-
-      const filepath = path.join(this.backupDir, result.rows[0].filename);
-      
-      if (!fs.existsSync(filepath)) {
-        return null;
-      }
-
-      return filepath;
-    } catch (error) {
-      console.error('Error getting backup file:', error);
-      return null;
-    }
+    return this.getBackupFilePath(backupId);
   }
 
   async deleteBackup(backupId: string): Promise<boolean> {
@@ -415,10 +396,7 @@ export class BackupService {
     return this.restoreFromUpload(filePath);
   }
 
-  // Méthode pour obtenir le fichier de sauvegarde (utilisée par la route de téléchargement)
-  async getBackupFile(backupId: string): Promise<string | null> {
-    return this.getBackupFilePath(backupId);
-  }
+
 
   private async cleanOldBackups() {
     try {

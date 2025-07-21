@@ -55,8 +55,7 @@ function RouterProduction() {
     return (
       <Switch>
         <Route path="/auth" component={AuthPage} />
-        <Route path="/" component={AuthPage} />
-        <Route component={NotFound} />
+        <Route component={AuthPage} />
       </Switch>
     );
   }
