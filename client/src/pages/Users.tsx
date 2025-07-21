@@ -145,7 +145,7 @@ export default function UsersPage() {
       const response = await apiRequest(`/api/users/${data.id}`, "PUT", cleanedUpdates);
       return response;
     },
-    onSuccess: (updatedUser) => {
+    onSuccess: async (updatedUser) => {
       toast({
         title: "Succès",
         description: "Utilisateur mis à jour avec succès",
@@ -166,7 +166,10 @@ export default function UsersPage() {
         setSelectedUser(prev => prev ? {...prev, ...updatedUser} : null);
       }
       
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      // Force immediate cache invalidation and refetch
+      await queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      await refetchUsers();
+      console.log('✅ Cache invalidated and users refetched after update');
       
       // Delay modal close to show the updated data
       setTimeout(() => {
