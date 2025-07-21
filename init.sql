@@ -229,8 +229,7 @@ INSERT INTO groups (name, color) VALUES
 INSERT INTO roles (name, display_name, color) VALUES
 ('admin', 'Administrateur', '#F44336'),
 ('manager', 'Manager', '#FF9800'),
-('employee', 'Employé', '#4CAF50'),
-('directeur', 'Directeur', '#9C27B0');
+('employee', 'Employé', '#4CAF50');
 
 -- Insert permissions with French display names
 INSERT INTO permissions (code, display_name, category) VALUES
@@ -349,9 +348,7 @@ WHERE r.name = 'employee' AND p.code IN (
     'tasks_read', 'tasks_create', 'tasks_update'
 );
 
--- Directeur gets all permissions (same as admin)
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r CROSS JOIN permissions p WHERE r.name = 'directeur';
+-- Note: Le rôle directeur a été supprimé - utiliser admin ou manager selon les besoins
 
 -- Insert test suppliers
 INSERT INTO suppliers (name, contact, phone, has_dlc) VALUES
