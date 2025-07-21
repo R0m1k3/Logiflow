@@ -369,6 +369,7 @@ export class DatabaseStorage implements IStorage {
           // Marquer le mot de passe comme changé
           fields.push(`password_changed = $${paramIndex}`);
           values.push(true);
+          paramIndex++;
         } else {
           const dbKey = key === 'firstName' ? 'first_name' : 
                        key === 'lastName' ? 'last_name' : 
@@ -376,8 +377,8 @@ export class DatabaseStorage implements IStorage {
                        key === 'passwordChanged' ? 'password_changed' : key;
           fields.push(`${dbKey} = $${paramIndex}`);
           values.push(value);
+          paramIndex++;
         }
-        paramIndex++;
       }
     }
 
