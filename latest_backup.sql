@@ -5,7 +5,7 @@
 -- Dumped from database version 16.9
 -- Dumped by pg_dump version 16.3
 
--- Started on 2025-07-21 16:11:24 UTC
+-- Started on 2025-07-21 16:18:51 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1401,10 +1401,8 @@ COPY public.customers (id, first_name, last_name, email, phone, address, store_i
 --
 
 COPY public.database_backups (id, filename, description, size, created_at, created_by, tables_count, status) FROM stdin;
-backup_1753112310948_npxv2prfg	backup_1753112310948_npxv2prfg.sql	tst	0	2025-07-21 15:38:30.958068	admin	0	failed
-backup_1753114230668_zamn81mz3	backup_1753114230668_zamn81mz3.sql	Test fonctionnel téléchargement	0	2025-07-21 16:10:30.679928	admin	0	failed
-backup_1753114261596_0r8038go7	backup_1753114261596_0r8038go7.sql	Test avec PostgreSQL 16.3	0	2025-07-21 16:11:01.606736	admin	0	failed
-backup_1753114284096_hnc3kkj2y	backup_1753114284096_hnc3kkj2y.sql	Test final avec répertoire créé	0	2025-07-21 16:11:24.107106	admin	0	creating
+backup_1753114666396_5bkylrjms	backup_1753114666396_5bkylrjms.sql	Test sauvegarde en production	0	2025-07-21 16:17:46.406606	admin	0	creating
+backup_1753114731087_37sqhixni	backup_1753114731087_37sqhixni.sql	Test après correction répertoire	0	2025-07-21 16:18:51.096477	admin	0	creating
 \.
 
 
@@ -1754,11 +1752,13 @@ COPY public.sav_tickets (id, ticket_number, customer_id, store_id, user_id, assi
 --
 
 COPY public.session (sid, sess, expire) FROM stdin;
+5AAjNqk_bk4pUqGV_89wBT0Eh1umaB1i	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:10:23.592Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:15:01
 qNVPnJK4qf6TstLrb4M2_QkEVwJJ5Ds_	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:20:22.015Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:20:23
 LMpukTV-U3Pro7Ypa0vSKoOw-w5eYZTK	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T13:52:37.325Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 15:47:01
 rvDZV_jlEj_vmNTsF3-ijKg4MXDGkJmm	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:21:10.911Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:21:14
 IcPTH3HJJigx50husDndewH93TJItM3N	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:31:49.546Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:31:51
-5AAjNqk_bk4pUqGV_89wBT0Eh1umaB1i	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:10:23.592Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:11:25
+K0p9ZRf2phBo-VTfJnQlVNYxl1hctemE	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:12:41.769Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:18:01
+r5QhTdpSLcJjE5dK2wpPJ1V9wVNQ0XVJ	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-22T16:17:45.322Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"1"}}	2025-07-22 16:18:52
 cnrsW5Gh8Er73HnEdFMzzOfPuny8t_qf	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:13:44.012Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:14:18
 m5LspxbruWlXhr_FvVS4x3kij1JVA2yK	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:32:17.417Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:32:19
 3fl4bV6PVYUwWL1L7_SxzIym30bBt3e8	{"cookie":{"originalMaxAge":86400000,"expires":"2025-07-21T15:15:15.478Z","secure":false,"httpOnly":true,"path":"/"},"passport":{"user":"100"}}	2025-07-21 15:15:18
@@ -1857,11 +1857,11 @@ _1753102038583	1	role_migration	2025-07-21 13:18:41.543897
 --
 
 COPY public.users (id, username, email, name, first_name, last_name, profile_image_url, password, role, password_changed, created_at, updated_at) FROM stdin;
-_1753001006996	ff292	ff292@logiflow.com	ff292	Employee	Frouard	\N	ff292	employee	t	2025-07-20 08:43:27.733	2025-07-20 08:56:54.66
-1	admin	admin@logiflow.com	Admin System	Michael	SCHAL	\N	0d4995395ca9c99cf7d689c615b68a266c8600fdc35540b499ec1f57cbe6cffff27448d13c4a7c87edb3e3c54e402695373758eb413d3e992e050abd28901ac5.3e629b859ccbc7013aef506b733dd575	admin	f	2025-07-19 18:54:37.64216	2025-07-21 16:11:06.058
 test_manager	manager_test	manager@logiflow.com	Manager Test	Manager	Test	\N	26e499453d0a570033917b4f172d292c3e0f69132e9c3861d4a61e24d09368bb4b8520b9333dd7f62d8f6d775e5d543111d629b0fcaa1b712df413752a5ed0fb.535952a042562679421200f1e665f47a	manager	t	2025-07-20 11:37:19.374446	2025-07-20 11:37:19.374446
 _1753102038583	directeur	directeur@logiflow.com	Test Directeur	Test	Directeur	\N	169913cc700a6062a0a33a6f2d0b5553313a5115d875c9003ff4849331a102c08052ac76f194d48ee643d2ee9177cb9d5fb74f461776da5207ab7f8411029652.8f029c10c34b0f08cd598015e331b3ce	admin	t	2025-07-20 11:58:58.314155	2025-07-20 12:24:09.953
 101	test_user	test@logiflow.com	Test User	Test	User	\N	589bf3c4899405171f173a345c9d6b16:8119cf13a75a41985e1832bd48a543c65ec7142e5f13cb0cf86c9b96b9e5d42d	test_role	f	2025-07-20 12:00:34.590954	2025-07-20 12:00:34.590954
+_1753001006996	ff292	ff292@logiflow.com	ff292	Employee	Frouard	\N	ff292	employee	t	2025-07-20 08:43:27.733	2025-07-20 08:56:54.66
+1	admin	admin@logiflow.com	Admin System	Michael	SCHAL	\N	ac6289eada17390df56028f5032e201dbb7bca36c48054e84870ca9fe966437baae2db9e26cd04f5c01ebf488f6bf37b7fc6442d77daec56d1ffd1f4ea329d43.dea71bff01edb7757ea726ee2a97a8f4	admin	f	2025-07-19 18:54:37.64216	2025-07-21 16:17:53.279
 \.
 
 
@@ -2418,7 +2418,7 @@ CREATE UNIQUE INDEX users_email_unique ON public.users USING btree (email) WHERE
 
 
 --
--- TOC entry 3489 (class 2606 OID 843777)
+-- TOC entry 3489 (class 2606 OID 851969)
 -- Name: tasks tasks_completed_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
 --
 
@@ -2469,7 +2469,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON SEQU
 ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON TABLES TO neon_superuser WITH GRANT OPTION;
 
 
--- Completed on 2025-07-21 16:11:27 UTC
+-- Completed on 2025-07-21 16:18:54 UTC
 
 --
 -- PostgreSQL database dump complete

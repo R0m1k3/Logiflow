@@ -23,8 +23,12 @@ export class BackupService {
 
   constructor(pool: Pool) {
     this.pool = pool;
-    // Utiliser /tmp pour les sauvegardes en production (accessible en écriture)
-    this.backupDir = process.env.NODE_ENV === 'production' ? '/tmp/logiflow-backups' : path.join(process.cwd(), 'backups');
+    // Détecter si on utilise le stockage production pour déterminer le répertoire
+    const isUsingProductionStorage = process.env.STORAGE_MODE === 'production' || 
+                                    process.env.DATABASE_URL?.includes('postgresql');
+    
+    this.backupDir = isUsingProductionStorage ? '/tmp/logiflow-backups' : path.join(process.cwd(), 'backups');
+    console.log(`🔧 Backup service using directory: ${this.backupDir} (production storage: ${isUsingProductionStorage})`);
     this.ensureBackupDirectory();
   }
 
