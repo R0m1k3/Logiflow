@@ -184,18 +184,26 @@ export class BackupService {
         }
       }
       
-      // Commande pg_dump avec le chemin complet
-      const dumpCommand = `"${pgDumpPath}" "${dbUrl}" --verbose --clean --if-exists --create --format=plain --file="${filepath}"`;
+      // Commande pg_dump avec options pour structure ET données
+      const dumpCommand = `"${pgDumpPath}" "${dbUrl}" --verbose --clean --if-exists --create --format=plain --inserts --column-inserts --no-owner --no-privileges --file="${filepath}"`;
 
-      console.log(`🔧 Final command: ${pgDumpPath} [URL] --verbose --clean --if-exists --create --format=plain --file="${filepath}"`);
+      console.log(`🔧 Final command: ${pgDumpPath} [URL] --verbose --clean --if-exists --create --format=plain --inserts --column-inserts --no-owner --no-privileges --file="${filepath}"`);
       
       console.log('🚀 Executing pg_dump...');
       const result = await execAsync(dumpCommand, { timeout: 300000 }); // 5 minutes timeout
       console.log('✅ pg_dump completed successfully');
       
-      if (result.stderr && result.stderr.includes('ERROR')) {
-        console.error('⚠️ pg_dump stderr:', result.stderr);
+      // Afficher le stderr pour diagnostic même sans erreur
+      if (result.stderr) {
+        console.log('🔍 pg_dump stderr output:', result.stderr);
       }
+      
+      // Vérifier le contenu du fichier de sauvegarde
+      const fileContent = fs.readFileSync(filepath, 'utf8');
+      const tableMatches = fileContent.match(/CREATE TABLE/g);
+      const insertMatches = fileContent.match(/INSERT INTO/g);
+      const copyMatches = fileContent.match(/COPY.*FROM stdin;/g);
+      console.log(`🔍 Backup analysis: ${tableMatches?.length || 0} CREATE TABLE, ${insertMatches?.length || 0} INSERT INTO, ${copyMatches?.length || 0} COPY commands`);
 
       // Vérifier que le fichier existe et calculer sa taille
       const stats = fs.statSync(filepath);
