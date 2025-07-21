@@ -340,6 +340,15 @@ export class BackupService {
       // Filtrer les paramètres de configuration problématiques
       const filteredLines = sqlContent.split('\n').filter(line => {
         const trimmedLine = line.trim();
+        const lowerLine = trimmedLine.toLowerCase();
+        
+        // Exclure les commandes de base de données (DROP/CREATE DATABASE)
+        if (lowerLine.startsWith('drop database') || 
+            lowerLine.startsWith('create database') ||
+            lowerLine.includes('\\connect')) {
+          console.log(`🔧 Filtering out database command: ${trimmedLine.substring(0, 50)}...`);
+          return false;
+        }
         
         // Exclure les paramètres de configuration spécifiques à certaines versions PostgreSQL
         const problematicParams = [
@@ -355,9 +364,13 @@ export class BackupService {
         
         // Vérifier si la ligne commence par SET et contient un paramètre problématique
         if (trimmedLine.startsWith('SET ')) {
-          return !problematicParams.some(param => 
-            trimmedLine.toLowerCase().includes(param.toLowerCase())
+          const shouldFilter = problematicParams.some(param => 
+            lowerLine.includes(param.toLowerCase())
           );
+          if (shouldFilter) {
+            console.log(`🔧 Filtering out SET parameter: ${trimmedLine.substring(0, 50)}...`);
+            return false;
+          }
         }
         
         return true; // Garder toutes les autres lignes
@@ -367,7 +380,7 @@ export class BackupService {
       const filteredPath = uploadPath + '.filtered';
       fs.writeFileSync(filteredPath, filteredLines.join('\n'));
 
-      console.log(`🔧 SQL file filtered, removed problematic configuration parameters`);
+      console.log(`🔧 SQL file filtered, removed ${sqlContent.split('\n').length - filteredLines.length} problematic lines (${filteredLines.length} lines remaining)`);
 
       // Commande de restauration avec le fichier filtré
       const restoreCommand = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${username} -d ${dbName} -v ON_ERROR_STOP=1 < "${filteredPath}"`;
