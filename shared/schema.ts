@@ -61,7 +61,8 @@ export const groups = pgTable("groups", {
 export const userGroups = pgTable("user_groups", {
   userId: varchar("user_id").notNull(),
   groupId: integer("group_id").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  assignedBy: varchar("assigned_by"),
+  assignedAt: timestamp("assigned_at").defaultNow(),
 });
 
 // Suppliers

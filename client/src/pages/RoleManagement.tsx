@@ -145,11 +145,13 @@ export default function RoleManagement() {
     retry: false
   });
 
-  // Force refresh permissions on mount
+  // Force refresh permissions and roles on mount
   useEffect(() => {
     queryClient.removeQueries({ queryKey: ['/api/permissions'] });
+    queryClient.removeQueries({ queryKey: ['/api/roles'] });
     refetchPermissions();
-  }, [refetchPermissions, queryClient]);
+    refetchRoles();
+  }, [refetchPermissions, refetchRoles, queryClient]);
 
   // Force refresh permissions function
   const forceRefreshPermissions = () => {
