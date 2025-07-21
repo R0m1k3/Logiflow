@@ -1,5 +1,6 @@
 import * as cron from 'node-cron';
 import { BackupService } from './backupService.production.js';
+import { Pool } from '@neondatabase/serverless';
 
 export class SchedulerService {
   private static instance: SchedulerService;
@@ -7,7 +8,9 @@ export class SchedulerService {
   private dailyBackupTask: cron.ScheduledTask | null = null;
 
   private constructor() {
-    this.backupService = new BackupService();
+    // Initialiser le pool pour le BackupService
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    this.backupService = new BackupService(pool);
   }
 
   public static getInstance(): SchedulerService {
@@ -34,7 +37,7 @@ export class SchedulerService {
         console.log('🌙 [SCHEDULER] Démarrage de la sauvegarde automatique quotidienne...');
         
         const backupId = await this.backupService.createBackup(
-          'system', // créé par le système
+          '1', // créé par l'admin (ID 1)
           `Sauvegarde automatique quotidienne - ${new Date().toLocaleDateString('fr-FR')}`,
           'auto' // Type de sauvegarde automatique
         );

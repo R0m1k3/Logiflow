@@ -217,7 +217,7 @@ export class BackupService {
       
       // Analyser quelles tables sont présentes dans la sauvegarde
       const createTableRegex = /CREATE TABLE (\w+\.)?(\w+)/g;
-      const foundTables = [];
+      const foundTables: string[] = [];
       let match;
       while ((match = createTableRegex.exec(fileContent)) !== null) {
         foundTables.push(match[2]); // match[2] contient le nom de la table

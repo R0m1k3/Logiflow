@@ -2762,7 +2762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { description } = req.body;
-      const backupId = await backupService.createBackup(description, user.username);
+      const backupId = await backupService.createBackup(user.id, description);
       
       res.json({ 
         success: true, 
