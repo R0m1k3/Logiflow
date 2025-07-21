@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage, pool } from "./storage.production";
-
+import * as path from "path";
 import { setupLocalAuth, requireAuth } from "./localAuth.production";
 
 
@@ -1866,7 +1866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Définir les headers pour le téléchargement
-      const filename = require('path').basename(filepath);
+      const filename = path.basename(filepath);
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Type', 'application/sql');
       
@@ -1940,7 +1940,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Configuration multer pour l'upload de fichiers
       const multer = require('multer');
-      const path = require('path');
       
       const upload = multer({
         dest: path.join(process.cwd(), 'uploads'),

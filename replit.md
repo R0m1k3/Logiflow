@@ -138,6 +138,9 @@ The application uses a sophisticated dual authentication approach:
 - **SAUVEGARDE COMPLÈTE TESTÉE** - Sauvegarde 82KB avec 28 tables créée et téléchargée avec succès (backup_1753114284096_hnc3kkj2y)
 - **GESTION ERREURS JSON CORRIGÉE** - Correction gestion réponses HTTP 204 (No Content) pour éviter erreurs de parsing JSON dans l'interface
 - **ROUTAGE FIXÉ** - Correction RouterProduction.tsx pour redirection correcte vers page de connexion
+- **ERREUR PRODUCTION REQUIRE PATH RÉSOLUE** - Correction imports dynamiques require('path') causant erreurs en production
+- **DÉTECTION ENVIRONNEMENT AMÉLIORÉE** - Backup service utilise STORAGE_MODE et DATABASE_URL pour déterminer répertoire correct
+- **TÉLÉCHARGEMENT PRODUCTION FONCTIONNEL** - Sauvegarde 83KB téléchargée avec succès en mode production
 
 ### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
 - **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions
