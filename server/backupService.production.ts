@@ -215,22 +215,39 @@ export class BackupService {
       const insertMatches = fileContent.match(/INSERT INTO/g);
       const copyMatches = fileContent.match(/COPY.*FROM stdin;/g);
       
-      // Vérifier spécifiquement les tables importantes
-      const deliveriesInserts = fileContent.match(/INSERT INTO.*deliveries/g);
-      const usersInserts = fileContent.match(/INSERT INTO.*users/g);
-      const groupsInserts = fileContent.match(/INSERT INTO.*groups/g);
-      const ordersInserts = fileContent.match(/INSERT INTO.*orders/g);
-      const invoicesInserts = fileContent.match(/INSERT INTO.*invoices/g);
+      // Analyser quelles tables sont présentes dans la sauvegarde
+      const createTableRegex = /CREATE TABLE (\w+\.)?(\w+)/g;
+      const foundTables = [];
+      let match;
+      while ((match = createTableRegex.exec(fileContent)) !== null) {
+        foundTables.push(match[2]); // match[2] contient le nom de la table
+      }
       
-      console.log(`🔍 Backup analysis: ${tableMatches?.length || 0} CREATE TABLE, ${insertMatches?.length || 0} INSERT INTO, ${copyMatches?.length || 0} COPY commands`);
-      console.log(`🔍 Key tables: deliveries(${deliveriesInserts?.length || 0}), users(${usersInserts?.length || 0}), groups(${groupsInserts?.length || 0}), orders(${ordersInserts?.length || 0}), invoices(${invoicesInserts?.length || 0})`);
+      console.log(`🔍 DIAGNOSTIC BACKUP - Tables présentes dans la sauvegarde:`, foundTables.sort());
+      console.log(`🔍 DIAGNOSTIC BACKUP - Total CREATE TABLE: ${tableMatches?.length || 0}`);
+      console.log(`🔍 DIAGNOSTIC BACKUP - Total INSERT INTO: ${insertMatches?.length || 0}`);
+      console.log(`🔍 DIAGNOSTIC BACKUP - Total COPY: ${copyMatches?.length || 0}`);
+      
+      // Comparer avec les tables de la base de données
+      const actualTablesResult = await this.pool.query(`
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+        ORDER BY table_name
+      `);
+      const actualTables = actualTablesResult.rows.map(row => row.table_name);
+      
+      console.log(`🔍 DIAGNOSTIC BASE - Tables dans la base de données:`, actualTables);
+      console.log(`🔍 DIAGNOSTIC DIFF - Tables manquantes dans la sauvegarde:`, 
+        actualTables.filter(t => !foundTables.includes(t)));
+      console.log(`🔍 DIAGNOSTIC DIFF - Tables supplémentaires dans la sauvegarde:`, 
+        foundTables.filter(t => !actualTables.includes(t)));
 
       // Vérifier que le fichier existe et calculer sa taille
       const stats = fs.statSync(filepath);
       const fileSize = stats.size;
 
-      // Compter le nombre de tables dans la sauvegarde
-      const tablesCount = await this.countTablesInDatabase();
+      // Compter le nombre de tables dans la sauvegarde (fichier réel)
+      const tablesCount = foundTables.length;
 
       // Mettre à jour l'enregistrement
       await this.pool.query(`
@@ -239,7 +256,7 @@ export class BackupService {
         WHERE id = $3
       `, [fileSize, tablesCount, backupId]);
 
-      console.log(`✅ Backup completed successfully: ${backupId} (${fileSize} bytes, ${tablesCount} tables)`);
+      console.log(`✅ Backup completed successfully: ${backupId} (${fileSize} bytes, ${tablesCount} tables - CORRECTED FROM FILE ANALYSIS)`);
 
       // Nettoyer les ancienne sauvegardes (garder seulement 10)
       await this.cleanOldBackups();
