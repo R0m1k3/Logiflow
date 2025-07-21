@@ -334,23 +334,65 @@ export class BackupService {
       const username = url.username;
       const password = url.password;
 
-      // Commande de restauration
-      const restoreCommand = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${username} -d ${dbName} -v ON_ERROR_STOP=1 < "${uploadPath}"`;
+      // Lire le fichier et filtrer les lignes problématiques
+      const sqlContent = fs.readFileSync(uploadPath, 'utf8');
+      
+      // Filtrer les paramètres de configuration problématiques
+      const filteredLines = sqlContent.split('\n').filter(line => {
+        const trimmedLine = line.trim();
+        
+        // Exclure les paramètres de configuration spécifiques à certaines versions PostgreSQL
+        const problematicParams = [
+          'transaction_timeout',
+          'idle_in_transaction_session_timeout',
+          'lock_timeout',
+          'statement_timeout',
+          'log_statement_stats',
+          'log_parser_stats',
+          'log_planner_stats',
+          'log_executor_stats'
+        ];
+        
+        // Vérifier si la ligne commence par SET et contient un paramètre problématique
+        if (trimmedLine.startsWith('SET ')) {
+          return !problematicParams.some(param => 
+            trimmedLine.toLowerCase().includes(param.toLowerCase())
+          );
+        }
+        
+        return true; // Garder toutes les autres lignes
+      });
+
+      // Créer un fichier temporaire filtré
+      const filteredPath = uploadPath + '.filtered';
+      fs.writeFileSync(filteredPath, filteredLines.join('\n'));
+
+      console.log(`🔧 SQL file filtered, removed problematic configuration parameters`);
+
+      // Commande de restauration avec le fichier filtré
+      const restoreCommand = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${username} -d ${dbName} -v ON_ERROR_STOP=1 < "${filteredPath}"`;
 
       await execAsync(restoreCommand);
 
-      // Supprimer le fichier temporaire
+      // Supprimer les fichiers temporaires
       if (fs.existsSync(uploadPath)) {
         fs.unlinkSync(uploadPath);
+      }
+      if (fs.existsSync(filteredPath)) {
+        fs.unlinkSync(filteredPath);
       }
 
       console.log(`✅ Database restored successfully from upload`);
       return true;
     } catch (error) {
       console.error('Error restoring from upload:', error);
-      // Supprimer le fichier temporaire même en cas d'erreur
+      // Supprimer les fichiers temporaires même en cas d'erreur
       if (fs.existsSync(uploadPath)) {
         fs.unlinkSync(uploadPath);
+      }
+      const filteredPath = uploadPath + '.filtered';
+      if (fs.existsSync(filteredPath)) {
+        fs.unlinkSync(filteredPath);
       }
       return false;
     }
