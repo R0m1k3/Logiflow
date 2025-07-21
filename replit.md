@@ -123,6 +123,14 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 21, 2025 - CORRECTION BUG AFFICHAGE UTILISATEURS: Cache et Invalidation Corrigés
+
+- **PROBLÈME IDENTIFIÉ** - Lors de la création d'un utilisateur, la modal s'ouvrait mais les utilisateurs disparaissaient de la liste, nécessitant un rechargement de page
+- **CAUSE ROOT** - Mutation createUserMutation manquait l'invalidation du cache dans onSuccess
+- **CORRECTIONS APPLIQUÉES** - Ajout invalidation complète du cache + refetch forcé après création utilisateur
+- **AMÉLIORATION UX** - Refetch automatique à l'ouverture de la modal de création pour garantir données à jour
+- **RÉSULTAT** - Création d'utilisateurs maintenant fluide sans rechargement de page nécessaire
+
 ### July 21, 2025 - NETTOYAGE BASE DE DONNÉES: Rôle Directeur Complètement Supprimé
 
 - **PROBLÈME IDENTIFIÉ** - Anciennes sauvegardes contenaient encore le rôle directeur (ID 4) supprimé précédemment

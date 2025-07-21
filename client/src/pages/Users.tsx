@@ -65,7 +65,7 @@ export default function UsersPage() {
 
   const USE_LOCAL_AUTH = import.meta.env.VITE_USE_LOCAL_AUTH === 'true' || import.meta.env.MODE === 'development';
 
-  const { data: users = [], isLoading: usersLoading } = useQuery<UserWithGroups[]>({
+  const { data: users = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery<UserWithGroups[]>({
     queryKey: ['/api/users'],
     enabled: user?.role === 'admin',
     staleTime: 30000, // Cache for 30 seconds
@@ -211,6 +211,15 @@ export default function UsersPage() {
       
       const response = await apiRequest("/api/users", "POST", payload);
       return response;
+    },
+    onSuccess: async () => {
+      // Invalidation complète du cache pour rafraîchir la liste
+      await queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/roles'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+      // Force un refetch immédiat
+      refetchUsers();
+      console.log('✅ User created successfully - cache invalidated and refetched');
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -399,6 +408,8 @@ export default function UsersPage() {
   };
 
   const handleCreateUser = () => {
+    // Force refetch des utilisateurs pour s'assurer d'avoir les données les plus récentes
+    refetchUsers();
     setShowCreateModal(true);
     setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
     setUserGroups([]);
@@ -441,10 +452,13 @@ export default function UsersPage() {
         description: `Utilisateur créé et assigné à ${userGroups.length} magasin(s)`,
       });
       
+      // Force un nouveau fetch immédiat des utilisateurs
+      await queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      await refetchUsers();
+      
       setShowCreateModal(false);
-      setNewUser({ email: "", firstName: "", lastName: "", password: "", role: "employee" });
+      setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
       setUserGroups([]);
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
     } catch (error) {
       // Error handling is already done in the mutations
     }
