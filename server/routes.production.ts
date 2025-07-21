@@ -1771,7 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   const initializeBackupService = async () => {
     try {
-      const BackupService = require('./backupService.production').BackupService;
+      const { BackupService } = await import('./backupService.production.js');
       backupService = new BackupService(pool);
       
       // Initialiser la table des sauvegardes au démarrage
@@ -1780,6 +1780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return true;
     } catch (error) {
       console.error('❌ Failed to initialize backup service:', error);
+      console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
       backupService = null;
       return false;
     }

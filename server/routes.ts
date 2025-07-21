@@ -2702,6 +2702,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== DATABASE BACKUP ROUTES =====
+  
+  // Initialiser le service de sauvegarde
+  let backupService: any = null;
+  
+  const initializeBackupService = async () => {
+    try {
+      const { BackupService } = await import('./backupService.production.js');
+      const { pool } = await import('./db.production.js');
+      backupService = new BackupService(pool);
+      
+      await backupService.initBackupTable();
+      console.log('✅ DEV: Backup service initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ DEV: Failed to initialize backup service:', error);
+      backupService = null;
+      return false;
+    }
+  };
+  
+  // Initialiser le service au démarrage
+  initializeBackupService();
+
+  // Récupérer la liste des sauvegardes
+  app.get('/api/database/backups', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent gérer les sauvegardes" });
+      }
+
+      if (!backupService) {
+        const initialized = await initializeBackupService();
+        if (!initialized) {
+          return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+        }
+      }
+
+      const backups = await backupService.getBackups();
+      res.json(backups);
+    } catch (error) {
+      console.error("DEV Error fetching backups:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération des sauvegardes" });
+    }
+  });
+
+  // Créer une nouvelle sauvegarde
+  app.post('/api/database/backup', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent créer des sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+      }
+
+      const { description } = req.body;
+      const backupId = await backupService.createBackup(description, user.username);
+      
+      res.json({ 
+        success: true, 
+        backupId,
+        message: "Sauvegarde créée avec succès" 
+      });
+    } catch (error) {
+      console.error("DEV Error creating backup:", error);
+      res.status(500).json({ message: "Erreur lors de la création de la sauvegarde" });
+    }
+  });
+
+  // Supprimer une sauvegarde
+  app.delete('/api/database/backup/:id', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent supprimer les sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+      }
+
+      const backupId = req.params.id;
+      const success = await backupService.deleteBackup(backupId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Sauvegarde non trouvée" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("DEV Error deleting backup:", error);
+      res.status(500).json({ message: "Erreur lors de la suppression" });
+    }
+  });
+
+  // Restaurer une sauvegarde
+  app.post('/api/database/backup/:id/restore', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent restaurer les sauvegardes" });
+      }
+
+      if (!backupService) {
+        return res.status(503).json({ message: "Service de sauvegarde non disponible" });
+      }
+
+      const backupId = req.params.id;
+      const success = await backupService.restoreBackup(backupId);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Échec de la restauration" });
+      }
+
+      res.json({ message: "Base de données restaurée avec succès" });
+    } catch (error) {
+      console.error("DEV Error restoring backup:", error);
+      res.status(500).json({ message: "Erreur lors de la restauration" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
