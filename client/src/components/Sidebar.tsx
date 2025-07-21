@@ -25,7 +25,7 @@ export default function Sidebar() {
   const { user, isLoading, error } = useAuthUnified();
   const [location] = useLocation();
 
-  // Les logs de debug seront ajoutés après la définition de userPermissions
+  // PRODUCTION DEBUG: Diagnostic sera après définition userPermissions
 
   const handleLogout = async () => {
     try {
@@ -187,16 +187,18 @@ export default function Sidebar() {
     refetchInterval: false
   });
 
-  // Debug logging pour production - après définition userPermissions
-  console.log('🔍 SIDEBAR DIAGNOSTIC - User:', user?.username, user?.role);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - isLoading:', isLoading);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - error:', error);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - userPermissions length:', userPermissions?.length);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - permissionsLoading:', permissionsLoading);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - permissionsError:', permissionsError);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - Environment:', window.location.hostname);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - Query enabled condition:', !!user && !isLoading);
-  console.log('🔍 SIDEBAR DIAGNOSTIC - First 3 permissions:', userPermissions?.slice(0, 3));
+  // PRODUCTION DEBUG: Diagnostic complet sidebar
+  console.log('🔍 PRODUCTION SIDEBAR DIAGNOSTIC:', {
+    user: user ? { id: user.id, username: user.username, role: user.role } : null,
+    isLoading,
+    error: error?.message || null,
+    queryEnabled: !!user && !isLoading,
+    userPermissions: userPermissions ? userPermissions.length : 'null',
+    permissionsLoading,
+    permissionsError: permissionsError?.message || null,
+    environment: typeof window !== 'undefined' ? window.location.hostname : 'N/A',
+    firstPermissions: userPermissions?.slice(0, 3)?.map((p: any) => p.name) || []
+  });
 
   // Fonction pour vérifier les permissions dynamiquement
   const hasPermission = (requiredPermission: string) => {
