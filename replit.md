@@ -123,6 +123,21 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 21, 2025 - INTERFACE OPTIMISÉE: Suppression Bouton Corriger Admin
+
+- **BOUTON CORRIGER ADMIN SUPPRIMÉ** - Suppression complète du bouton "🔧 Corriger Admin" de la page Gestion des Rôles
+- **CODE NETTOYÉ** - Suppression de la mutation `fixAdminPermissionsMutation` et de sa fonction associée
+- **INTERFACE ÉPURÉE** - Page des rôles maintenant plus propre avec seulement le bouton "🔄 Actualiser"
+- **UX AMÉLIORÉE** - Suppression d'une fonctionnalité technique qui n'était plus nécessaire en interface utilisateur
+
+### July 21, 2025 - SYSTÈME SAUVEGARDE DATABASE: Correction Tables Manquantes
+
+- **PROBLÈME IDENTIFIÉ ET RÉSOLU** - Base de données Neon ne contenait que 18 tables au lieu des 28 attendues
+- **SCRIPT INITIALISATION ENRICHI** - Ajout de 12 tables manquantes au script `initDatabase.production.ts`
+- **TABLES AJOUTÉES** - calendar_events, client_orders, commands, command_items, customers, delivery_items, invoices, sav_tickets, sessions, stores, user_roles, database_backups
+- **COMPTAGE CORRIGÉ** - Système de sauvegarde affiche maintenant le bon nombre de tables (28+)
+- **APPLICATION REDÉMARRÉE** - Base de données reconstruite avec schéma complet pour sauvegardes correctes
+
 ### July 21, 2025 - SYSTÈME SAUVEGARDE AUTOMATIQUE QUOTIDIENNE: Planification Production à Minuit
 
 - **SCHEDULER SERVICE CRÉÉ** - SchedulerService utilisant node-cron pour sauvegardes automatiques quotidiennes à minuit (Europe/Paris)

@@ -322,32 +322,7 @@ export default function RoleManagement() {
     },
   });
 
-  // Fix admin permissions mutation
-  const fixAdminPermissionsMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest('/api/admin/fix-permissions', 'POST');
-    },
-    onSuccess: (data) => {
-      // Rafraîchir toutes les données
-      queryClient.invalidateQueries({ queryKey: ['/api/roles'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
-      if (selectedRole) {
-        queryClient.invalidateQueries({ queryKey: [`/api/roles/${selectedRole.id}/permissions`] });
-      }
-      
-      toast({ 
-        title: "Permissions administrateur corrigées", 
-        description: `${data.added} permissions ajoutées. Total: ${data.after}/${data.total}` 
-      });
-    },
-    onError: (error) => {
-      toast({ 
-        title: "Erreur lors de la correction", 
-        description: error.message, 
-        variant: "destructive" 
-      });
-    },
-  });
+
 
 
 
@@ -466,28 +441,17 @@ export default function RoleManagement() {
                     <CardTitle>Liste des Rôles</CardTitle>
                     <CardDescription>Sélectionnez un rôle pour voir ses permissions</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fixAdminPermissionsMutation.mutate()}
-                      disabled={fixAdminPermissionsMutation.isPending}
-                      className="text-xs"
-                    >
-                      {fixAdminPermissionsMutation.isPending ? 'Correction...' : '🔧 Corriger Admin'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        console.log("🔄 Manual refetch triggered");
-                        queryClient.invalidateQueries({ queryKey: ['/api/roles'] });
-                        refetchRoles();
-                      }}
-                    >
-                      🔄 Actualiser
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      console.log("🔄 Manual refetch triggered");
+                      queryClient.invalidateQueries({ queryKey: ['/api/roles'] });
+                      refetchRoles();
+                    }}
+                  >
+                    🔄 Actualiser
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
