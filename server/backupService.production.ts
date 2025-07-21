@@ -415,6 +415,11 @@ export class BackupService {
     return this.restoreFromUpload(filePath);
   }
 
+  // Méthode pour obtenir le fichier de sauvegarde (utilisée par la route de téléchargement)
+  async getBackupFile(backupId: string): Promise<string | null> {
+    return this.getBackupFilePath(backupId);
+  }
+
   private async cleanOldBackups() {
     try {
       // Récupérer toutes les sauvegardes triées par date
