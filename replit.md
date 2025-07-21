@@ -146,7 +146,7 @@ The application uses a sophisticated dual authentication approach:
 - **CONFLITS PORTS RÉSOLUS** - Application sur port 3001, PostgreSQL sur port 5435, réseau bridge simple
 - **ERREUR PRODUCTION MULTER RÉSOLUE** - Correction import dynamique require('multer') vers import ES module
 - **RESTAURATION SQL PRODUCTION CORRIGÉE** - Filtrage paramètres incompatibles, modification CREATE TABLE vers IF NOT EXISTS, suppression ON_ERROR_STOP
-- **SAUVEGARDE COMPLÈTE CORRIGÉE** - Options pg_dump corrigées (--inserts --column-inserts) pour sauvegarder structure ET données de toutes les tables
+- **SAUVEGARDE COMPLÈTE CORRIGÉE** - Options pg_dump corrigées (--inserts --column-inserts) pour sauvegarder structure ET données, analyse détaillée des tables importantes
 
 ### July 21, 2025 - SUPPRESSION COMPLÈTE RÔLE DIRECTEUR: Simplification Système de Rôles
 - **RÔLE DIRECTEUR SUPPRIMÉ DÉFINITIVEMENT** - Suppression complète du rôle directeur (ID 4) avec ses 45 permissions

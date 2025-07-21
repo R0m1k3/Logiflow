@@ -1,0 +1,197 @@
+pg_dump: creating TABLE "public.user_groups"
+
+pg_dump: creating TABLE "public.user_roles"
+
+pg_dump: creating TABLE "public.users"
+
+pg_dump: creating DEFAULT "public.customer_orders id"
+
+pg_dump: creating DEFAULT "public.deliveries id"
+
+pg_dump: creating DEFAULT "public.dlc_products id"
+
+pg_dump: creating DEFAULT "public.groups id"
+
+pg_dump: creating DEFAULT "public.nocodb_config id"
+
+pg_dump: creating DEFAULT "public.orders id"
+
+pg_dump: creating DEFAULT "public.permissions id"
+
+pg_dump: creating DEFAULT "public.publicities id"
+
+pg_dump: creating DEFAULT "public.roles id"
+
+pg_dump: creating DEFAULT "public.suppliers id"
+
+pg_dump: creating DEFAULT "public.tasks id"
+
+pg_dump: processing data for table "public.customer_orders"
+
+pg_dump: processing data for table "public.database_backups"
+
+pg_dump: processing data for table "public.deliveries"
+
+pg_dump: processing data for table "public.dlc_products"
+
+pg_dump: processing data for table "public.groups"
+
+pg_dump: processing data for table "public.nocodb_config"
+
+pg_dump: processing data for table "public.orders"
+
+pg_dump: processing data for table "public.permissions"
+
+pg_dump: processing data for table "public.publicities"
+
+pg_dump: processing data for table "public.publicity_participations"
+
+pg_dump: processing data for table "public.role_permissions"
+
+pg_dump: processing data for table "public.roles"
+
+pg_dump: processing data for table "public.session"
+
+pg_dump: processing data for table "public.suppliers"
+
+pg_dump: processing data for table "public.tasks"
+
+pg_dump: processing data for table "public.user_groups"
+
+pg_dump: processing data for table "public.user_roles"
+
+pg_dump: processing data for table "public.users"
+
+pg_dump: executing SEQUENCE SET customer_orders_id_seq
+
+pg_dump: executing SEQUENCE SET deliveries_id_seq
+
+pg_dump: executing SEQUENCE SET dlc_products_id_seq
+
+pg_dump: executing SEQUENCE SET groups_id_seq
+
+pg_dump: executing SEQUENCE SET nocodb_config_id_seq
+
+pg_dump: executing SEQUENCE SET orders_id_seq
+
+pg_dump: executing SEQUENCE SET permissions_id_seq
+
+pg_dump: executing SEQUENCE SET publicities_id_seq
+
+pg_dump: executing SEQUENCE SET roles_id_seq
+
+pg_dump: executing SEQUENCE SET suppliers_id_seq
+
+pg_dump: executing SEQUENCE SET tasks_id_seq
+
+pg_dump: creating CONSTRAINT "public.customer_orders customer_orders_pkey"
+
+pg_dump: creating CONSTRAINT "public.database_backups database_backups_pkey"
+
+pg_dump: creating CONSTRAINT "public.deliveries deliveries_pkey"
+
+pg_dump: creating CONSTRAINT "public.dlc_products dlc_products_pkey"
+
+pg_dump: creating CONSTRAINT "public.groups groups_pkey"
+
+pg_dump: creating CONSTRAINT "public.nocodb_config nocodb_config_pkey"
+
+pg_dump: creating CONSTRAINT "public.orders orders_pkey"
+
+pg_dump: creating CONSTRAINT "public.permissions permissions_name_key"
+
+pg_dump: creating CONSTRAINT "public.permissions permissions_pkey"
+
+pg_dump: creating CONSTRAINT "public.publicities publicities_pkey"
+
+pg_dump: creating CONSTRAINT "public.publicity_participations publicity_participations_pkey"
+
+pg_dump: creating CONSTRAINT "public.role_permissions role_permissions_pkey"
+
+pg_dump: creating CONSTRAINT "public.roles roles_name_key"
+
+pg_dump: creating CONSTRAINT "public.roles roles_pkey"
+
+pg_dump: creating CONSTRAINT "public.session session_pkey"
+
+pg_dump: creating CONSTRAINT "public.suppliers suppliers_pkey"
+
+pg_dump: creating CONSTRAINT "public.tasks tasks_pkey"
+
+pg_dump: creating CONSTRAINT "public.user_groups user_groups_pkey"
+
+pg_dump: creating CONSTRAINT "public.user_roles user_roles_pkey"
+
+pg_dump: creating CONSTRAINT "public.users users_email_key"
+
+pg_dump: creating CONSTRAINT "public.users users_pkey"
+
+pg_dump: creating CONSTRAINT "public.users users_username_key"
+
+pg_dump: creating INDEX "public.idx_user_roles_assigned_by"
+
+pg_dump: creating INDEX "public.idx_user_roles_role_id"
+
+pg_dump: creating INDEX "public.idx_user_roles_user_id"
+
+pg_dump: creating FK CONSTRAINT "public.customer_orders customer_orders_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.customer_orders customer_orders_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.customer_orders customer_orders_supplier_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.deliveries deliveries_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.deliveries deliveries_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.deliveries deliveries_order_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.deliveries deliveries_supplier_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.dlc_products dlc_products_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.dlc_products dlc_products_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.dlc_products dlc_products_supplier_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.dlc_products dlc_products_validated_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.nocodb_config nocodb_config_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.orders orders_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.orders orders_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.orders orders_supplier_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.publicities publicities_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.publicity_participations publicity_participations_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.publicity_participations publicity_participations_publicity_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.role_permissions role_permissions_permission_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.role_permissions role_permissions_role_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.tasks tasks_completed_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.tasks tasks_created_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.tasks tasks_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.user_groups user_groups_group_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.user_groups user_groups_user_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.user_roles user_roles_assigned_by_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.user_roles user_roles_role_id_fkey"
+
+pg_dump: creating FK CONSTRAINT "public.user_roles user_roles_user_id_fkey"
+
+🔍 Backup analysis: 18 CREATE TABLE, 185 INSERT INTO, 0 COPY commands
+
+✅ Backup completed successfully: backup_1753121253611_x2e9lbdaf (72796 bytes, 18 tables)
+
+6:07:43 PM [express] HEAD /api/health 200 in 1ms

@@ -203,7 +203,16 @@ export class BackupService {
       const tableMatches = fileContent.match(/CREATE TABLE/g);
       const insertMatches = fileContent.match(/INSERT INTO/g);
       const copyMatches = fileContent.match(/COPY.*FROM stdin;/g);
+      
+      // Vérifier spécifiquement les tables importantes
+      const deliveriesInserts = fileContent.match(/INSERT INTO.*deliveries/g);
+      const usersInserts = fileContent.match(/INSERT INTO.*users/g);
+      const groupsInserts = fileContent.match(/INSERT INTO.*groups/g);
+      const ordersInserts = fileContent.match(/INSERT INTO.*orders/g);
+      const invoicesInserts = fileContent.match(/INSERT INTO.*invoices/g);
+      
       console.log(`🔍 Backup analysis: ${tableMatches?.length || 0} CREATE TABLE, ${insertMatches?.length || 0} INSERT INTO, ${copyMatches?.length || 0} COPY commands`);
+      console.log(`🔍 Key tables: deliveries(${deliveriesInserts?.length || 0}), users(${usersInserts?.length || 0}), groups(${groupsInserts?.length || 0}), orders(${ordersInserts?.length || 0}), invoices(${invoicesInserts?.length || 0})`);
 
       // Vérifier que le fichier existe et calculer sa taille
       const stats = fs.statSync(filepath);
