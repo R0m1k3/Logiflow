@@ -821,7 +821,7 @@ async function initRolesAndPermissionsProduction() {
       { name: 'admin', displayName: 'Administrateur', description: 'Accès complet à toutes les fonctionnalités', color: '#dc2626' },
       { name: 'manager', displayName: 'Manager', description: 'Gestion des commandes, livraisons et fournisseurs', color: '#2563eb' },
       { name: 'employee', displayName: 'Employé', description: 'Accès en lecture aux données et publicités', color: '#16a34a' },
-      { name: 'directeur', displayName: 'Directeur', description: 'Supervision générale et gestion stratégique', color: '#7c3aed' }
+      // Rôle directeur supprimé - système simplifié à 3 rôles
     ];
 
     const createdRoles = {};
@@ -956,17 +956,7 @@ async function initRolesAndPermissionsProduction() {
         'calendar_read', 'dlc_read', 'dlc_create', 'dlc_update',
         'tasks_read', 'tasks_create', 'tasks_update'
       ],
-      'directeur': [
-        'dashboard_read', 'groups_read', 'groups_create', 'groups_update', 'suppliers_read', 
-        'suppliers_create', 'suppliers_update', 'orders_read', 'orders_create', 'orders_update',
-        'deliveries_read', 'deliveries_create', 'deliveries_update', 'publicities_read', 
-        'publicities_create', 'publicities_update', 'publicities_participate', 
-        'customer_orders_read', 'customer_orders_create', 'customer_orders_update', 
-        'customer_orders_print', 'users_read', 'users_create', 'users_update', 'roles_read',
-        'bl_reconciliation_read', 'bl_reconciliation_update', 'calendar_read', 'calendar_update',
-        'dlc_read', 'dlc_create', 'dlc_update', 'dlc_delete', 'dlc_validate', 'dlc_print', 'dlc_stats',
-        'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_assign'
-      ]
+      // Rôle directeur supprimé - utiliser admin ou manager selon les besoins
     };
 
     for (const [roleName, permissionNames] of Object.entries(rolePermissions)) {
