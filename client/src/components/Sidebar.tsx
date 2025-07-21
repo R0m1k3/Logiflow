@@ -153,6 +153,12 @@ export default function Sidebar() {
       permission: "roles_read" 
     },
     { 
+      path: "/database-backup", 
+      label: "Sauvegarde BDD", 
+      icon: Database, 
+      permission: "system_admin" 
+    },
+    { 
       path: "/nocodb-config", 
       label: "Configuration NocoDB", 
       icon: Database, 

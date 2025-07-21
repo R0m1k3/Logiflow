@@ -271,6 +271,18 @@ export const tasks = pgTable("tasks", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Database backups table
+export const databaseBackups = pgTable("database_backups", {
+  id: varchar("id").primaryKey().notNull(),
+  filename: varchar("filename").notNull(),
+  description: text("description"),
+  size: integer("size").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: varchar("created_by").notNull(),
+  tablesCount: integer("tables_count").default(0),
+  status: varchar("status").default("creating"), // 'creating', 'completed', 'failed'
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userGroups: many(userGroups),
@@ -282,6 +294,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdDlcProducts: many(dlcProducts),
   createdTasks: many(tasks),
   assignedTasks: many(tasks),
+  createdBackups: many(databaseBackups),
 }));
 
 export const groupsRelations = relations(groups, ({ one, many }) => ({
@@ -553,6 +566,12 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   dueDate: z.coerce.date().optional().nullable(), // Convertit automatiquement les chaînes en Date
 });
 
+export const insertDatabaseBackupSchema = createInsertSchema(databaseBackups).omit({
+  createdAt: true,
+  size: true,
+  tablesCount: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -574,6 +593,9 @@ export type InsertUserGroup = z.infer<typeof insertUserGroupSchema>;
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
+
+export type DatabaseBackup = typeof databaseBackups.$inferSelect;
+export type DatabaseBackupInsert = z.infer<typeof insertDatabaseBackupSchema>;
 
 // Extended types with relations
 export type OrderWithRelations = Order & {

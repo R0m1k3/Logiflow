@@ -1764,6 +1764,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== DATABASE BACKUP ROUTES =====
+  
+  // Initialiser le service de sauvegarde
+  const BackupService = require('./backupService.production').BackupService;
+  const backupService = new BackupService(pool);
+  
+  // Initialiser la table des sauvegardes au démarrage
+  backupService.initBackupTable().catch(console.error);
+
+  // Récupérer la liste des sauvegardes
+  app.get('/api/database/backups', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent gérer les sauvegardes" });
+      }
+
+      const backups = await backupService.getBackups();
+      res.json(backups);
+    } catch (error) {
+      console.error("Error fetching backups:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération des sauvegardes" });
+    }
+  });
+
+  // Créer une nouvelle sauvegarde
+  app.post('/api/database/backup', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent créer des sauvegardes" });
+      }
+
+      const { description } = req.body;
+      if (!description || description.trim() === '') {
+        return res.status(400).json({ message: "La description est obligatoire" });
+      }
+
+      const backupId = await backupService.createBackup(description, user.username || user.id);
+      res.json({ id: backupId, message: "Sauvegarde lancée avec succès" });
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      res.status(500).json({ message: "Erreur lors de la création de la sauvegarde" });
+    }
+  });
+
+  // Télécharger une sauvegarde
+  app.get('/api/database/backup/:id/download', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent télécharger les sauvegardes" });
+      }
+
+      const backupId = req.params.id;
+      const filepath = await backupService.getBackupFile(backupId);
+      
+      if (!filepath) {
+        return res.status(404).json({ message: "Sauvegarde non trouvée" });
+      }
+
+      // Définir les headers pour le téléchargement
+      const filename = require('path').basename(filepath);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', 'application/sql');
+      
+      // Envoyer le fichier
+      res.sendFile(filepath);
+    } catch (error) {
+      console.error("Error downloading backup:", error);
+      res.status(500).json({ message: "Erreur lors du téléchargement de la sauvegarde" });
+    }
+  });
+
+  // Restaurer une sauvegarde
+  app.post('/api/database/backup/:id/restore', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent restaurer les sauvegardes" });
+      }
+
+      const backupId = req.params.id;
+      const success = await backupService.restoreBackup(backupId);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Échec de la restauration" });
+      }
+
+      res.json({ message: "Base de données restaurée avec succès" });
+    } catch (error) {
+      console.error("Error restoring backup:", error);
+      res.status(500).json({ message: "Erreur lors de la restauration" });
+    }
+  });
+
+  // Supprimer une sauvegarde
+  app.delete('/api/database/backup/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent supprimer les sauvegardes" });
+      }
+
+      const backupId = req.params.id;
+      const success = await backupService.deleteBackup(backupId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Sauvegarde non trouvée" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting backup:", error);
+      res.status(500).json({ message: "Erreur lors de la suppression" });
+    }
+  });
+
+  // Upload et restauration d'un fichier
+  app.post('/api/database/restore/upload', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent restaurer depuis un fichier" });
+      }
+
+      // Configuration multer pour l'upload de fichiers
+      const multer = require('multer');
+      const path = require('path');
+      
+      const upload = multer({
+        dest: path.join(process.cwd(), 'uploads'),
+        limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max
+        fileFilter: (req, file, cb) => {
+          if (file.mimetype === 'application/sql' || 
+              file.originalname.endsWith('.sql') || 
+              file.originalname.endsWith('.gz')) {
+            cb(null, true);
+          } else {
+            cb(new Error('Seuls les fichiers .sql et .gz sont acceptés'));
+          }
+        }
+      }).single('backup');
+
+      upload(req, res, async (err) => {
+        if (err) {
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({ message: "Aucun fichier uploadé" });
+        }
+
+        try {
+          const success = await backupService.restoreFromUpload(req.file.path);
+          
+          if (!success) {
+            return res.status(500).json({ message: "Échec de la restauration depuis le fichier" });
+          }
+
+          res.json({ message: "Base de données restaurée avec succès depuis le fichier" });
+        } catch (uploadError) {
+          console.error("Error restoring from upload:", uploadError);
+          res.status(500).json({ message: "Erreur lors de la restauration depuis le fichier" });
+        }
+      });
+    } catch (error) {
+      console.error("Error in upload restore:", error);
+      res.status(500).json({ message: "Erreur lors de la restauration" });
+    }
+  });
+
   // ===== DLC PRODUCTS ROUTES =====
 
   // DLC Products routes
