@@ -106,12 +106,14 @@ export class BackupService {
   private async performBackup(backupId: string, filepath: string, description: string, createdBy: string) {
     try {
       console.log(`🔄 Starting backup creation: ${backupId}`);
+      console.log(`🔧 Backup filepath: ${filepath}`);
 
       // Construire la commande pg_dump
       const dbUrl = process.env.DATABASE_URL;
       if (!dbUrl) {
         throw new Error('DATABASE_URL not found');
       }
+      console.log(`🔗 Database URL available: ${dbUrl.substring(0, 20)}...`);
 
       // Extraire les informations de connexion de l'URL
       const url = new URL(dbUrl);
@@ -121,11 +123,13 @@ export class BackupService {
       const username = url.username;
       const password = url.password;
 
-      // Commande pg_dump complète
-      const dumpCommand = `PGPASSWORD="${password}" pg_dump -h ${host} -p ${port} -U ${username} -d ${dbName} --verbose --clean --if-exists --create --format=plain > "${filepath}"`;
+      console.log(`📋 Connection details: host=${host}, port=${port}, db=${dbName}, user=${username}`);
+
+      // Commande pg_dump simplifiée pour éviter les erreurs de shell
+      const dumpCommand = `pg_dump "${dbUrl}" --verbose --clean --if-exists --create --format=plain --file="${filepath}"`;
 
       console.log(`🗃️ Running pg_dump for backup: ${backupId}`);
-      console.log(`🔧 Command: ${dumpCommand}`);
+      console.log(`🔧 Command: pg_dump [URL] --verbose --clean --if-exists --create --format=plain --file="${filepath}"`);
       
       // Vérifier si pg_dump existe
       try {
@@ -136,7 +140,13 @@ export class BackupService {
         throw new Error('pg_dump not available - PostgreSQL client tools required');
       }
       
-      await execAsync(dumpCommand);
+      console.log('🚀 Executing pg_dump...');
+      const result = await execAsync(dumpCommand);
+      console.log('✅ pg_dump completed successfully');
+      
+      if (result.stderr && result.stderr.includes('ERROR')) {
+        console.error('⚠️ pg_dump stderr:', result.stderr);
+      }
 
       // Vérifier que le fichier existe et calculer sa taille
       const stats = fs.statSync(filepath);

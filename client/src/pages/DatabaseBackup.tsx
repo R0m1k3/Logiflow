@@ -41,7 +41,7 @@ export default function DatabaseBackup() {
   const queryClient = useQueryClient();
 
   // Récupérer la liste des sauvegardes
-  const { data: backups = [], isLoading, error } = useQuery({
+  const { data: backups = [], isLoading, error } = useQuery<DatabaseBackup[]>({
     queryKey: ['/api/database/backups'],
     refetchInterval: 30000, // Actualiser toutes les 30 secondes
   });
@@ -49,10 +49,21 @@ export default function DatabaseBackup() {
   // Créer une sauvegarde
   const createBackupMutation = useMutation({
     mutationFn: async (description: string) => {
-      return apiRequest('/api/database/backup', {
+      const response = await fetch('/api/database/backup', {
         method: 'POST',
-        body: { description },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description }),
+        credentials: 'include',
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erreur lors de la création de la sauvegarde');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -108,9 +119,17 @@ export default function DatabaseBackup() {
   // Supprimer une sauvegarde
   const deleteBackupMutation = useMutation({
     mutationFn: async (backupId: string) => {
-      return apiRequest(`/api/database/backup/${backupId}`, {
+      const response = await fetch(`/api/database/backup/${backupId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erreur lors de la suppression');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -131,9 +150,17 @@ export default function DatabaseBackup() {
   // Restaurer une sauvegarde
   const restoreBackupMutation = useMutation({
     mutationFn: async (backupId: string) => {
-      return apiRequest(`/api/database/backup/${backupId}/restore`, {
+      const response = await fetch(`/api/database/backup/${backupId}/restore`, {
         method: 'POST',
+        credentials: 'include',
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erreur lors de la restauration');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       toast({
