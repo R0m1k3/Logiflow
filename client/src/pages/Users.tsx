@@ -467,13 +467,22 @@ export default function UsersPage() {
   const handleEditUser = (userData: UserWithGroups) => {
     console.log('📝 Opening edit modal for user data:', userData);
     
-    // Utiliser directement les champs firstName et lastName s'ils existent, sinon essayer de diviser le champ name
-    let firstName = userData.firstName || '';
-    let lastName = userData.lastName || '';
+    // Utiliser directement les champs firstName et lastName s'ils existent ET ne sont pas null/undefined
+    let firstName = userData.firstName && userData.firstName.trim() ? userData.firstName : '';
+    let lastName = userData.lastName && userData.lastName.trim() ? userData.lastName : '';
     
     // Si pas de firstName/lastName mais qu'il y a un champ name, le diviser
-    if (!firstName && !lastName && userData.name) {
-      const [firstPart = '', ...lastNameParts] = userData.name.split(' ');
+    if (!firstName && !lastName && userData.name && userData.name.trim()) {
+      console.log('📝 Using fallback: splitting name field:', userData.name);
+      const [firstPart = '', ...lastNameParts] = userData.name.trim().split(' ');
+      firstName = firstPart;
+      lastName = lastNameParts.join(' ');
+    }
+    
+    // Si toujours pas de données, essayer d'extraire depuis username si c'est un nom complet
+    if (!firstName && !lastName && userData.username && userData.username.includes(' ')) {
+      console.log('📝 Using fallback: splitting username field:', userData.username);
+      const [firstPart = '', ...lastNameParts] = userData.username.trim().split(' ');
       firstName = firstPart;
       lastName = lastNameParts.join(' ');
     }
@@ -484,7 +493,18 @@ export default function UsersPage() {
       lastName
     };
     
-    console.log('📝 Setting edit form with:', { firstName, lastName, username: userData.username, email: userData.email });
+    console.log('📝 Setting edit form with:', { 
+      firstName, 
+      lastName, 
+      username: userData.username, 
+      email: userData.email,
+      originalData: { 
+        dbFirstName: userData.firstName, 
+        dbLastName: userData.lastName, 
+        dbName: userData.name 
+      }
+    });
+    
     setSelectedUser(userWithNames);
     setEditForm({
       username: userData.username || "",
