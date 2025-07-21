@@ -478,15 +478,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/deliveries/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const result = insertDeliverySchema.partial().safeParse(req.body);
+      
+      // 🔧 CORRECTION CRITIQUE: Nettoyer les champs numériques vides avant validation
+      const cleanedData = { ...req.body };
+      
+      // Convertir les chaînes vides en null pour les champs numériques
+      if (cleanedData.blAmount === "" || cleanedData.blAmount === undefined) {
+        delete cleanedData.blAmount;
+      }
+      if (cleanedData.invoiceAmount === "" || cleanedData.invoiceAmount === undefined) {
+        delete cleanedData.invoiceAmount;
+      }
+      if (cleanedData.quantity === "" || cleanedData.quantity === undefined) {
+        delete cleanedData.quantity;
+      }
+      if (cleanedData.orderId === "" || cleanedData.orderId === "none") {
+        cleanedData.orderId = null;
+      }
+      if (cleanedData.supplierId === "" || cleanedData.supplierId === undefined) {
+        delete cleanedData.supplierId;
+      }
+      if (cleanedData.groupId === "" || cleanedData.groupId === undefined) {
+        delete cleanedData.groupId;
+      }
+      
+      console.log('🔍 PUT /api/deliveries/:id - Original data:', req.body);
+      console.log('🔍 PUT /api/deliveries/:id - Cleaned data:', cleanedData);
+      
+      const result = insertDeliverySchema.partial().safeParse(cleanedData);
       if (!result.success) {
+        console.error('❌ Validation errors:', result.error.errors);
         return res.status(400).json({ message: "Invalid input", errors: result.error.errors });
       }
 
       const delivery = await storage.updateDelivery(id, result.data);
+      console.log('✅ Delivery updated successfully:', { id, fieldsUpdated: Object.keys(result.data) });
       res.json(delivery);
     } catch (error) {
-      console.error("Error updating delivery:", error);
+      console.error("❌ Error updating delivery:", error);
+      
+      // Gestion d'erreur spécifique pour les erreurs numériques
+      if (error.message && error.message.includes('invalid input syntax for type numeric')) {
+        return res.status(400).json({ 
+          message: "Erreur de format numérique. Vérifiez que tous les champs numériques contiennent des valeurs valides." 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to update delivery" });
     }
   });

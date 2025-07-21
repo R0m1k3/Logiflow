@@ -1074,6 +1074,15 @@ export class DatabaseStorage implements IStorage {
     // Construire dynamiquement la requête pour éviter les erreurs de colonnes manquantes
     for (const [key, value] of Object.entries(delivery)) {
       if (value !== undefined) {
+        // 🔧 CORRECTION CRITIQUE: Nettoyer les valeurs numériques vides avant insertion
+        let cleanValue = value;
+        
+        // Gérer les champs numériques qui peuvent être des chaînes vides
+        if ((key === 'blAmount' || key === 'invoiceAmount' || key === 'quantity') && 
+            (value === "" || value === null)) {
+          continue; // Skip ce champ s'il est vide
+        }
+        
         const dbKey = key === 'orderId' ? 'order_id' :
                      key === 'supplierId' ? 'supplier_id' :
                      key === 'groupId' ? 'group_id' :
@@ -1087,7 +1096,7 @@ export class DatabaseStorage implements IStorage {
                      key === 'createdBy' ? 'created_by' : key;
         
         fields.push(`${dbKey} = $${paramIndex}`);
-        values.push(value);
+        values.push(cleanValue);
         paramIndex++;
       }
     }
