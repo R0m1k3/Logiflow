@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: logiflow-app
+    container_name: logiflow-app-v2
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -16,7 +16,7 @@ services:
       DOCKER_ENV: production
       USE_LOCAL_AUTH: "true"
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - logiflow_network
     depends_on:
@@ -32,7 +32,7 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    container_name: logiflow-postgres
+    container_name: logiflow-postgres-v2
     restart: unless-stopped
     environment:
       POSTGRES_DB: logiflow_db
@@ -40,7 +40,7 @@ services:
       POSTGRES_PASSWORD: LogiFlow2025!
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
-      - "5434:5432"
+      - "5435:5432"
     networks:
       - logiflow_network
     volumes:
@@ -61,7 +61,3 @@ volumes:
 networks:
   logiflow_network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-          gateway: 172.20.0.1
