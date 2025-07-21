@@ -468,9 +468,18 @@ export default function UsersPage() {
   };
 
   const handleEditUser = (userData: UserWithGroups) => {
-    // Convert the single 'name' field to firstName/lastName
-    const [firstName = '', ...lastNameParts] = (userData.name || '').split(' ');
-    const lastName = lastNameParts.join(' ');
+    console.log('📝 Opening edit modal for user data:', userData);
+    
+    // Utiliser directement les champs firstName et lastName s'ils existent, sinon essayer de diviser le champ name
+    let firstName = userData.firstName || '';
+    let lastName = userData.lastName || '';
+    
+    // Si pas de firstName/lastName mais qu'il y a un champ name, le diviser
+    if (!firstName && !lastName && userData.name) {
+      const [firstPart = '', ...lastNameParts] = userData.name.split(' ');
+      firstName = firstPart;
+      lastName = lastNameParts.join(' ');
+    }
     
     const userWithNames = {
       ...userData,
@@ -478,6 +487,7 @@ export default function UsersPage() {
       lastName
     };
     
+    console.log('📝 Setting edit form with:', { firstName, lastName, username: userData.username, email: userData.email });
     setSelectedUser(userWithNames);
     setEditForm({
       username: userData.username || "",
