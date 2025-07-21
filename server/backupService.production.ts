@@ -66,17 +66,28 @@ export class BackupService {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         created_by VARCHAR(255) NOT NULL,
         tables_count INTEGER DEFAULT 0,
-        status VARCHAR(50) DEFAULT 'creating'
+        status VARCHAR(50) DEFAULT 'creating',
+        backup_type VARCHAR(10) DEFAULT 'manual'
       )
     `);
+    
+    // Ajouter la colonne backup_type si elle n'existe pas (migration)
+    try {
+      await this.pool.query(`
+        ALTER TABLE database_backups 
+        ADD COLUMN IF NOT EXISTS backup_type VARCHAR(10) DEFAULT 'manual'
+      `);
+    } catch (error) {
+      // La colonne existe déjà
+    }
   }
 
   async getBackups(): Promise<BackupRecord[]> {
     try {
       const result = await this.pool.query(`
-        SELECT * FROM database_backups 
+        SELECT *, backup_type FROM database_backups 
         ORDER BY created_at DESC 
-        LIMIT 10
+        LIMIT 20
       `);
       return result.rows;
     } catch (error) {
@@ -85,17 +96,17 @@ export class BackupService {
     }
   }
 
-  async createBackup(description: string, createdBy: string): Promise<string> {
+  async createBackup(createdBy: string, description: string, type: 'manual' | 'auto' = 'manual'): Promise<string> {
     const backupId = `backup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const filename = `${backupId}.sql`;
     const filepath = path.join(this.backupDir, filename);
 
     try {
-      // Créer l'enregistrement de sauvegarde
+      // Créer l'enregistrement de sauvegarde avec type
       await this.pool.query(`
-        INSERT INTO database_backups (id, filename, description, created_by, status)
-        VALUES ($1, $2, $3, $4, 'creating')
-      `, [backupId, filename, description, createdBy]);
+        INSERT INTO database_backups (id, filename, description, created_by, status, backup_type)
+        VALUES ($1, $2, $3, $4, 'creating', $5)
+      `, [backupId, filename, description, createdBy, type]);
 
       // Lancer la sauvegarde en arrière-plan
       this.performBackup(backupId, filepath, description, createdBy);
@@ -491,7 +502,36 @@ export class BackupService {
     return this.restoreFromUpload(filePath);
   }
 
+  async cleanupOldBackups(keepCount: number = 10, type?: 'manual' | 'auto'): Promise<void> {
+    try {
+      let query = `
+        SELECT id, filename FROM database_backups 
+      `;
+      let params: any[] = [];
+      
+      if (type) {
+        query += ` WHERE backup_type = $1`;
+        params.push(type);
+      }
+      
+      query += ` ORDER BY created_at DESC`;
+      
+      const result = await this.pool.query(query, params);
 
+      // Garder seulement les N plus récentes
+      const toDelete = result.rows.slice(keepCount);
+
+      for (const backup of toDelete) {
+        await this.deleteBackup(backup.id);
+      }
+
+      if (toDelete.length > 0) {
+        console.log(`🧹 Cleaned up ${toDelete.length} old ${type || 'all'} backups (kept ${keepCount})`);
+      }
+    } catch (error) {
+      console.error('Error cleaning old backups:', error);
+    }
+  }
 
   private async cleanOldBackups() {
     try {

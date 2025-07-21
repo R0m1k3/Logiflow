@@ -35,14 +35,15 @@ export class SchedulerService {
         
         const backupId = await this.backupService.createBackup(
           'system', // créé par le système
-          `Sauvegarde automatique quotidienne - ${new Date().toLocaleDateString('fr-FR')}`
+          `Sauvegarde automatique quotidienne - ${new Date().toLocaleDateString('fr-FR')}`,
+          'auto' // Type de sauvegarde automatique
         );
         
         console.log(`✅ [SCHEDULER] Sauvegarde automatique créée avec succès: ${backupId}`);
         
-        // Nettoyer les anciennes sauvegardes (garder les 30 dernières)
-        // await this.backupService.cleanupOldBackups(30);
-        console.log('🧹 [SCHEDULER] Nettoyage des anciennes sauvegardes terminé');
+        // Nettoyer les anciennes sauvegardes automatiques (garder les 10 dernières)
+        await this.backupService.cleanupOldBackups(10, 'auto');
+        console.log('🧹 [SCHEDULER] Nettoyage des anciennes sauvegardes automatiques terminé');
         
       } catch (error) {
         console.error('❌ [SCHEDULER] Erreur lors de la sauvegarde automatique:', error);
@@ -94,7 +95,8 @@ export class SchedulerService {
     console.log('🔧 [SCHEDULER] Déclenchement manuel de sauvegarde...');
     const backupId = await this.backupService.createBackup(
       'system',
-      `Sauvegarde manuelle déclenchée - ${new Date().toLocaleString('fr-FR')}`
+      `Sauvegarde manuelle déclenchée - ${new Date().toLocaleString('fr-FR')}`,
+      'manual'
     );
     console.log(`✅ [SCHEDULER] Sauvegarde manuelle créée: ${backupId}`);
     return backupId;
