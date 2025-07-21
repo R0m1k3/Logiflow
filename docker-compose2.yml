@@ -22,6 +22,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
@@ -37,6 +38,7 @@ services:
       POSTGRES_DB: logiflow_db
       POSTGRES_USER: logiflow_admin
       POSTGRES_PASSWORD: LogiFlow2025!
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
       - "5434:5432"
     networks:
@@ -47,9 +49,10 @@ services:
       - ./migration-production.sql:/docker-entrypoint-initdb.d/02-migration.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U logiflow_admin -d logiflow_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
 
 volumes:
   postgres_data:

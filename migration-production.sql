@@ -9,12 +9,8 @@ GRANT ALL PRIVILEGES ON DATABASE logiflow_db TO logiflow_admin;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO logiflow_admin;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO logiflow_admin;
 
--- Ensure connection limits are appropriate
-ALTER SYSTEM SET max_connections = 100;
-ALTER SYSTEM SET shared_buffers = '128MB';
-
--- Refresh configuration
-SELECT pg_reload_conf();
+-- Note: ALTER SYSTEM commands removed for Docker compatibility
+-- Connection limits will be handled by PostgreSQL defaults
 
 -- Log successful migration
 DO $$
