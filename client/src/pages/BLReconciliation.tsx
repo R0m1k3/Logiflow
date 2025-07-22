@@ -43,8 +43,10 @@ export default function BLReconciliation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Redirection pour les employés
-  if (user?.role === 'employee') {
+  // 🔧 FIX ADMIN - Admin doit avoir accès au rapprochement
+  const isAdmin = user && (user as any).role === 'admin';
+  // Redirection pour les employés (mais pas pour admin)
+  if (user?.role === 'employee' && !isAdmin) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">

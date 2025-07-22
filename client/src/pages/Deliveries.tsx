@@ -40,8 +40,9 @@ export default function Deliveries() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Vérifier la permission de lecture
-  if (!hasPermission('deliveries_read')) {
+  // 🔧 FIX ADMIN - Pour admin, toujours autoriser accès aux livraisons
+  const isAdmin = user && (user as any).role === 'admin';
+  if (!isAdmin && !hasPermission('deliveries_read')) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">

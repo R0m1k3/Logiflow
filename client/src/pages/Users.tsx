@@ -698,8 +698,10 @@ export default function UsersPage() {
     return "U";
   };
 
-  const canManage = user?.role === 'admin';
-
+  // 🔧 FIX ADMIN - Toujours autoriser pour admin (contourner problème hasPermission)
+  const isAdmin = user && (user as any).role === 'admin';
+  const canManage = isAdmin; // Forcer true pour admin
+  
   if (!canManage) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center">

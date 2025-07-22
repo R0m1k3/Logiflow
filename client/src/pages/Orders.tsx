@@ -38,8 +38,9 @@ export default function Orders() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Vérifier la permission de lecture
-  if (!hasPermission('orders_read')) {
+  // 🔧 FIX ADMIN - Pour admin, toujours autoriser accès aux commandes
+  const isAdmin = user && (user as any).role === 'admin';
+  if (!isAdmin && !hasPermission('orders_read')) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
