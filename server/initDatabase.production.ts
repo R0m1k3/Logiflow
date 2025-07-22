@@ -1066,7 +1066,7 @@ async function assignFixedRolePermissions() {
     `);
     console.log('✅ Admin: 54 permissions assignées');
     
-    // Assigner 50 permissions au rôle manager (tout sauf administration)
+    // Assigner 50 permissions au rôle manager (tout sauf administration, avec validation livraisons)
     await pool.query(`
       INSERT INTO role_permissions (role_id, permission_id)
       SELECT 2, p.id 
@@ -1074,7 +1074,7 @@ async function assignFixedRolePermissions() {
       WHERE p.category NOT IN ('administration') 
         AND p.name NOT IN ('reconciliation_view')
     `);
-    console.log('✅ Manager: permissions assignées (tout sauf administration)');
+    console.log('✅ Manager: permissions assignées (tout sauf administration, avec validation livraisons)');
     
     // Assigner 15 permissions au rôle employee (accès de base)
     await pool.query(`

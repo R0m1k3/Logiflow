@@ -468,9 +468,9 @@ export default function UsersPage() {
       case 'directeur':
         return <Shield className={`w-4 h-4 ${iconClass}`} />;
       case 'employee':
-        return <User className={`w-4 h-4 ${iconClass}`} />;
+        return <UserIconMain className={`w-4 h-4 ${iconClass}`} />;
       default:
-        return <User className={`w-4 h-4 ${iconClass}`} />;
+        return <UserIconMain className={`w-4 h-4 ${iconClass}`} />;
     }
   };
 
