@@ -825,7 +825,7 @@ export default function CustomerOrders() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        {(canShowButtons(order.status) || user?.role === 'admin' || user?.role === 'directeur') && (
+                        {canShowButtons(order.status) && (
                           <>
                             <Button
                               variant="outline"
