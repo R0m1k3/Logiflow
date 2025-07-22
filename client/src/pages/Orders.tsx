@@ -69,7 +69,7 @@ export default function Orders() {
   const [orderToDelete, setOrderToDelete] = useState<OrderWithRelations | null>(null);
 
   // Construire l'URL pour l'historique complet sans filtrage par date
-  const ordersUrl = `/api/orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const ordersUrl = `/api/orders${selectedStoreId && user && user.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
   
   const { data: ordersData = [], isLoading } = useQuery<OrderWithRelations[]>({
     queryKey: [ordersUrl, selectedStoreId],
@@ -199,7 +199,7 @@ export default function Orders() {
   };
 
   const handleViewOrder = (order: OrderWithRelations) => {
-    setSelectedOrder({ ...order, type: 'order' });
+    setSelectedOrder(order);
     setShowDetailModal(true);
   };
 
@@ -224,6 +224,15 @@ export default function Orders() {
   const canCreate = hasPermission('orders_create');
   const canEdit = hasPermission('orders_update');
   const canDelete = hasPermission('orders_delete');
+
+  // 🔧 DEBUG - Vérifier les permissions de création
+  console.log('📦 Orders permissions check:', {
+    canCreate,
+    canEdit,
+    canDelete,
+    userRole: user?.role,
+    hasOrdersCreate: hasPermission('orders_create')
+  });
 
   return (
     <div className="p-6 space-y-6">
@@ -287,7 +296,7 @@ export default function Orders() {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
-        ) : (console.log('📦 Filtered orders length:', filteredOrders.length) || filteredOrders.length === 0) ? (
+        ) : filteredOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
             <Package className="w-16 h-16 mb-4 text-gray-300" />
             <h3 className="text-lg font-medium mb-2">Aucune commande trouvée</h3>

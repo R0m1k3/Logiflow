@@ -71,7 +71,7 @@ export default function Deliveries() {
   const [deliveryToDelete, setDeliveryToDelete] = useState<DeliveryWithRelations | null>(null);
 
   // Construire l'URL pour l'historique complet sans filtrage par date
-  const deliveriesUrl = `/api/deliveries${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const deliveriesUrl = `/api/deliveries${selectedStoreId && user && user.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
   
   const { data: deliveriesData = [], isLoading } = useQuery<DeliveryWithRelations[]>({
     queryKey: ['/api/deliveries', selectedStoreId, user?.role],
@@ -227,7 +227,7 @@ export default function Deliveries() {
   };
 
   const handleViewDelivery = (delivery: DeliveryWithRelations) => {
-    setSelectedDelivery({ ...delivery, type: 'delivery' });
+    setSelectedDelivery(delivery);
     setShowDetailModal(true);
   };
 
@@ -259,6 +259,16 @@ export default function Deliveries() {
   const canEdit = hasPermission('deliveries_update');
   const canDelete = hasPermission('deliveries_delete');
   const canValidate = hasPermission('deliveries_validate');
+
+  // 🔧 DEBUG - Vérifier les permissions de création
+  console.log('🚚 Deliveries permissions check:', {
+    canCreate,
+    canEdit,
+    canDelete,
+    canValidate,
+    userRole: user?.role,
+    hasDeliveriesCreate: hasPermission('deliveries_create')
+  });
 
   return (
     <div className="p-6 space-y-6">
