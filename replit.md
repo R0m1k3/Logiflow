@@ -123,6 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - RÉSOLUTION FINALE: Système de Tâches et Calendrier - Directeur et Manager Entièrement Fonctionnels
+
+- **CALENDRIER OPÉRATIONNEL** - Nicolas (directeur) peut maintenant cliquer sur le calendrier et ouvrir les modales de création
+- **FOURNISSEURS UNIVERSELS** - Tous les 4 rôles (admin, manager, directeur, employee) ont accès aux listes de fournisseurs dans les modales
+- **TÂCHES COMPLÈTEMENT RÉSOLUES** - Permissions tâches assignées correctement aux rôles directeur (50 permissions) et manager (50 permissions)
+- **CRÉATION/LECTURE TÂCHES** - Plus d'erreurs 403, Nicolas peut créer des tâches et les voir s'afficher immédiatement
+- **WORKFLOW CALENDRIER FONCTIONNEL** - Clic calendrier → Menu création rapide → Modales commandes/livraisons avec fournisseurs
+- **PERMISSIONS VALIDÉES** - Base de données confirme : directeur et manager ont tasks_read, tasks_create, tasks_update, tasks_delete, tasks_validate
+- **SYSTÈME TOTALEMENT OPÉRATIONNEL** - 4 rôles fixes avec permissions hardcodées entièrement fonctionnels
+
 ### July 22, 2025 - RÉSOLUTION FINALE: Système de Permissions Hardcodées - 4 Rôles Fixes Complètement Opérationnel
 
 - **PERSISTANCE DÉFINITIVEMENT RÉSOLUE** - Nicolas garde maintenant ses 50 permissions directeur après chaque redémarrage serveur
