@@ -449,13 +449,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check if user has deliveries_validate permission
-      const userPermissions = await storage.getUserPermissions(user.id);
-      const hasValidatePermission = userPermissions.some(p => p.name === 'deliveries_validate');
-      
-      if (!hasValidatePermission) {
-        console.log('❌ User lacks deliveries_validate permission:', { userId, userRole: user.role });
-        return res.status(403).json({ message: "Insufficient permissions" });
+      // 🔧 FIX ADMIN - Bypass permission check for admin
+      const isAdmin = user.role === 'admin';
+      if (!isAdmin) {
+        // Check if user has deliveries_validate permission
+        const userPermissions = await storage.getUserPermissions(user.id);
+        const hasValidatePermission = userPermissions.some(p => p.name === 'deliveries_validate');
+        
+        if (!hasValidatePermission) {
+          console.log('❌ User lacks deliveries_validate permission:', { userId, userRole: user.role });
+          return res.status(403).json({ message: "Insufficient permissions" });
+        }
       }
 
       const id = parseInt(req.params.id);
