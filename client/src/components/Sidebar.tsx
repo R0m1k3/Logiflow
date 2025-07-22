@@ -208,11 +208,17 @@ export default function Sidebar() {
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
-            // 🔧 FIX TOUS RÔLES - Pour tous les rôles, bypass hasPermission() défaillant
+            // 🔧 FIX TOUS RÔLES - Employé exclu de calendrier, commandes, livraisons, rapprochement
             const isAdmin = user && (user as any).role === 'admin';
             const isManager = user && (user as any).role === 'manager';
             const isEmployee = user && (user as any).role === 'employee';
             const isDirecteur = user && (user as any).role === 'directeur';
+            
+            // Spécifications: Employé ne voit pas calendrier, commandes, livraisons, rapprochement
+            if (isEmployee && (item.path === '/calendar' || item.path === '/orders' || item.path === '/deliveries' || item.path === '/reconciliation')) {
+              return null;
+            }
+            
             const shouldShow = isAdmin || isManager || isEmployee || isDirecteur || hasPermission(item.permission);
             
             if (!shouldShow) return null;
