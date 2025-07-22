@@ -26,8 +26,8 @@ export default function QuickCreateMenu({
   const isEmployee = user && (user as any).role === 'employee';
   const isDirecteur = user && (user as any).role === 'directeur';
   
-  // Spécifications: Manager ne peut PAS créer de commandes, mais peut créer des livraisons
-  const ordersAllowed = isAdmin || isDirecteur || hasPermission('orders_create');
+  // Spécifications MISES À JOUR: Manager PEUT créer des commandes ET des livraisons
+  const ordersAllowed = isAdmin || isDirecteur || isManager || hasPermission('orders_create');
   const deliveriesAllowed = isAdmin || isManager || isDirecteur || hasPermission('deliveries_create');
 
 

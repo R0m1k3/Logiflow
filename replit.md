@@ -123,14 +123,22 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - SPÉCIFICATIONS FINALES MANAGER: Création Commandes et Validation Livraisons Autorisées
+
+- **PERMISSIONS MANAGER ÉTENDUES** - Manager peut maintenant créer des commandes ET valider des livraisons selon nouvelles spécifications
+- **QUICKCREATEMENU CORRIGÉ** - Menu création rapide affiche maintenant "Nouvelle Commande" ET "Nouvelle Livraison" pour le manager
+- **ORDERS.TSX MIS À JOUR** - Manager peut créer, modifier des commandes (sauf suppression réservée Admin/Directeur)
+- **DELIVERIES.TSX CONFIRMÉ** - Manager peut créer, modifier et valider des livraisons (permissions déjà correctes)
+- **SPÉCIFICATIONS MANAGER COMPLÈTES** - Accès total sauf : Rapprochement et sections Gestion/Administration
+
 ### July 22, 2025 - RESTRICTION MENUS EMPLOYÉ: Calendrier, Commandes, Livraisons et Rapprochement Cachés
 
 - **SIDEBAR EMPLOYÉ RESTREINTE** - Employé ne voit plus les menus Calendrier, Commandes, Livraisons et Rapprochement selon nouvelles spécifications
 - **SIDEBAR MANAGER RESTREINTE** - Manager ne voit plus le menu Rapprochement (Admin/Directeur uniquement)
 - **ACCÈS EMPLOYÉ LIMITÉ À** - Tableau de bord, Publicités, Commandes Client, Gestion DLC, Tâches uniquement
-- **ACCÈS MANAGER LIMITÉ** - Tous les menus sauf Rapprochement et sections Gestion/Administration
+- **ACCÈS MANAGER ÉTENDU** - Tous les menus avec création/validation sauf Rapprochement et sections Gestion/Administration
 - **LOGIQUE FILTRAGE APPLIQUÉE** - Vérification spécifique rôles employé et manager pour masquer les menus interdits
-- **SPÉCIFICATIONS MISES À JOUR** - Interfaces employé et manager simplifiées avec accès restreints selon rôles
+- **SPÉCIFICATIONS MISES À JOUR** - Interfaces employé et manager optimisées selon besoins opérationnels
 
 ### July 22, 2025 - RÉSOLUTION FINALE COMPLÈTE: Admin Sidebar Production - Bug Permissions Entièrement Résolu
 

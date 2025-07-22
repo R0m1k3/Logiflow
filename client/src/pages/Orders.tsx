@@ -229,9 +229,9 @@ export default function Orders() {
   };
 
   // Permissions selon spécifications (utilise les variables déclarées en haut)
-  // Spécifications: Manager ne peut PAS créer de commandes, Employé peut seulement lire
-  const canCreate = isAdmin || isDirecteur || hasPermission('orders_create');
-  const canEdit = isAdmin || isDirecteur || hasPermission('orders_update');
+  // Spécifications MISES À JOUR: Manager PEUT créer des commandes, Employé peut seulement lire
+  const canCreate = isAdmin || isDirecteur || isManager || hasPermission('orders_create');
+  const canEdit = isAdmin || isDirecteur || isManager || hasPermission('orders_update');
   const canDelete = isAdmin || isDirecteur || hasPermission('orders_delete');
 
   // 🔧 DEBUG - Vérifier les permissions de création
