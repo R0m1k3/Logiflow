@@ -33,15 +33,17 @@ export function usePermissions() {
         // DLC (création/modification/validation)
         'dlc_read', 'dlc_create', 'dlc_update', 'dlc_validate', 'dlc_print', 'dlc_stats',
         // Tâches (lecture/validation)
-        'tasks_read', 'tasks_validate'
+        'tasks_read', 'tasks_validate',
+        // Fournisseurs (lecture uniquement pour formulaires - PAS DE MENU GESTION)
+        'suppliers_read'
       ],
       'manager': [
         // Tableau de bord
         'dashboard_read', 'statistics_read', 'reports_generate',
         // Calendrier
         'calendar_read',
-        // Commandes (tout sauf création)
-        'orders_read', 'orders_update', 'orders_delete',
+        // Commandes (complet)
+        'orders_read', 'orders_create', 'orders_update', 'orders_delete',
         // Livraisons (complet)
         'deliveries_read', 'deliveries_create', 'deliveries_update', 'deliveries_delete', 'deliveries_validate',
         // Publicités (lecture seulement - pas d'édition)
@@ -51,8 +53,10 @@ export function usePermissions() {
         // DLC (complet)
         'dlc_read', 'dlc_create', 'dlc_update', 'dlc_delete', 'dlc_validate', 'dlc_print', 'dlc_stats',
         // Tâches (complet)
-        'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_validate'
-        // PAS D'ACCÈS aux fournisseurs, magasins (gestion) ni aux utilisateurs (administration)
+        'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_validate',
+        // Fournisseurs (lecture uniquement pour formulaires - PAS DE MENU GESTION)
+        'suppliers_read'
+        // PAS D'ACCÈS aux menus gestion (fournisseurs, magasins) ni administration (utilisateurs)
       ],
       'directeur': [
         // Tableau de bord
@@ -72,8 +76,10 @@ export function usePermissions() {
         // Tâches (complet)
         'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_validate',
         // Rapprochement (lecture/modification)
-        'reconciliation_read', 'reconciliation_update'
-        // PAS D'ACCÈS aux fournisseurs, magasins (gestion) ni aux utilisateurs (administration)
+        'reconciliation_read', 'reconciliation_update',
+        // Fournisseurs (lecture uniquement pour formulaires - PAS DE MENU GESTION)
+        'suppliers_read'
+        // PAS D'ACCÈS aux menus gestion (fournisseurs, magasins) ni administration (utilisateurs)
       ]
     };
     

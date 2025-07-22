@@ -10,7 +10,15 @@ import type { PublicityWithRelations } from "@shared/schema";
 
 export default function Dashboard() {
   const { user } = useAuthUnified();
-  const { selectedStoreId } = useStore();
+  
+  // Utilisation conditionnelle de useStore pour éviter l'erreur
+  let selectedStoreId: number | null = null;
+  try {
+    const storeContext = useStore();
+    selectedStoreId = storeContext.selectedStoreId;
+  } catch (error) {
+    console.warn('Store context not available, using default store filtering');
+  }
 
   const { data: stats } = useQuery({
     queryKey: ['/api/stats/monthly', selectedStoreId],
@@ -21,7 +29,7 @@ export default function Dashboard() {
         month: (currentDate.getMonth() + 1).toString(),
       });
       
-      if (selectedStoreId && user?.role === 'admin') {
+      if (selectedStoreId && (user as any)?.role === 'admin') {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -38,9 +46,9 @@ export default function Dashboard() {
   });
 
   // Construire les URLs pour récupérer toutes les données (pas de filtrage par date)
-  const ordersUrl = `/api/orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
-  const deliveriesUrl = `/api/deliveries${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
-  const customerOrdersUrl = `/api/customer-orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const ordersUrl = `/api/orders${selectedStoreId && (user as any)?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const deliveriesUrl = `/api/deliveries${selectedStoreId && (user as any)?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const customerOrdersUrl = `/api/customer-orders${selectedStoreId && (user as any)?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
 
   // Utiliser les mêmes clés de cache que les autres pages pour assurer la cohérence
   const { data: allOrders = [] } = useQuery({

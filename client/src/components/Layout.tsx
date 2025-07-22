@@ -59,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             {/* Store selector for admin only - moved to top right */}
-            {user?.role === 'admin' && stores.length > 0 && (
+            {(user as any)?.role === 'admin' && stores.length > 0 && (
               <div className="flex items-center gap-2">
                 <Store className="h-4 w-4 text-gray-500" />
                 <Select

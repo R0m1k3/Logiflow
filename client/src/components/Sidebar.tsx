@@ -302,30 +302,31 @@ export default function Sidebar() {
         <div className="flex items-center space-x-3 mb-3">
           <div className="h-8 w-8 bg-gray-100 flex items-center justify-center rounded-full">
             <span className="text-xs font-medium text-gray-700">
-              {getInitials(user?.firstName, user?.lastName, user?.username)}
+              {getInitials((user as any)?.firstName, (user as any)?.lastName, (user as any)?.username)}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">
               {(() => {
-                if (user?.firstName && user?.lastName) {
-                  return `${user.firstName} ${user.lastName}`;
+                const u = user as any;
+                if (u?.firstName && u?.lastName) {
+                  return `${u.firstName} ${u.lastName}`;
                 }
-                if (user?.firstName && user.firstName.trim()) {
-                  return user.firstName;
+                if (u?.firstName && u.firstName.trim()) {
+                  return u.firstName;
                 }
-                if (user?.lastName && user.lastName.trim()) {
-                  return user.lastName;
+                if (u?.lastName && u.lastName.trim()) {
+                  return u.lastName;
                 }
-                return user?.username || 'Utilisateur';
+                return u?.username || 'Utilisateur';
               })()}
             </p>
             <p className="text-xs text-gray-500 truncate">
-              {user?.role === 'admin' ? 'Administrateur' :
-               user?.role === 'employee' ? 'Employé' :
-               user?.role === 'manager' ? 'Manager' :
-               user?.role === 'directeur' ? 'Directeur' :
-               user?.role}
+              {(user as any)?.role === 'admin' ? 'Administrateur' :
+               (user as any)?.role === 'employee' ? 'Employé' :
+               (user as any)?.role === 'manager' ? 'Manager' :
+               (user as any)?.role === 'directeur' ? 'Directeur' :
+               (user as any)?.role}
             </p>
           </div>
         </div>
