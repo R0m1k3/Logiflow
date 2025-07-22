@@ -68,12 +68,34 @@ export default function UsersPage() {
   // Force update of form fields when modal opens and selectedUser changes
   useEffect(() => {
     if (showEditModal && selectedUser) {
-      console.log('📝 useEffect triggered - updating form fields with selectedUser:', selectedUser);
+      console.log('📝 useEffect triggered - selectedUser data:', {
+        username: selectedUser.username,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName, 
+        name: selectedUser.name,
+        email: selectedUser.email,
+        role: selectedUser.role
+      });
+      
+      // Use the same logic as handleEditUser to extract firstName/lastName
+      let firstName = selectedUser.firstName && selectedUser.firstName.trim() ? selectedUser.firstName : '';
+      let lastName = selectedUser.lastName && selectedUser.lastName.trim() ? selectedUser.lastName : '';
+      
+      // Si pas de firstName/lastName mais qu'il y a un champ name, le diviser
+      if (!firstName && !lastName && selectedUser.name && selectedUser.name.trim()) {
+        console.log('📝 useEffect using fallback: splitting name field:', selectedUser.name);
+        const [firstPart = '', ...lastNameParts] = selectedUser.name.trim().split(' ');
+        firstName = firstPart;
+        lastName = lastNameParts.join(' ');
+      }
+      
+      console.log('📝 useEffect final values:', { firstName, lastName });
+      
       setEditForm(prev => ({
         ...prev,
         username: selectedUser.username || "",
-        firstName: selectedUser.firstName || "",
-        lastName: selectedUser.lastName || "",
+        firstName: firstName,
+        lastName: lastName,
         email: selectedUser.email || "",
         role: selectedUser.role || "employee",
       }));
