@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +64,21 @@ export default function UsersPage() {
   });
 
   const USE_LOCAL_AUTH = import.meta.env.VITE_USE_LOCAL_AUTH === 'true' || import.meta.env.MODE === 'development';
+
+  // Force update of form fields when modal opens and selectedUser changes
+  useEffect(() => {
+    if (showEditModal && selectedUser) {
+      console.log('📝 useEffect triggered - updating form fields with selectedUser:', selectedUser);
+      setEditForm(prev => ({
+        ...prev,
+        username: selectedUser.username || "",
+        firstName: selectedUser.firstName || "",
+        lastName: selectedUser.lastName || "",
+        email: selectedUser.email || "",
+        role: selectedUser.role || "employee",
+      }));
+    }
+  }, [showEditModal, selectedUser]);
 
   const { data: users = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery<UserWithGroups[]>({
     queryKey: ['/api/users'],
@@ -518,12 +533,7 @@ export default function UsersPage() {
     
     console.log('📝 About to set editForm state:', newEditForm);
     setEditForm(newEditForm);
-    
-    // Force a small delay to ensure state is updated before opening modal
-    setTimeout(() => {
-      console.log('📝 EditForm state after setTimeout:', editForm);
-      setShowEditModal(true);
-    }, 100);
+    setShowEditModal(true);
   };
 
   const handleGroupManager = (userData: UserWithGroups) => {
