@@ -999,55 +999,154 @@ async function createDefaultAdmin() {
   }
 }
 
-async function cleanupOldRoles() {
+async function ensureFixedRoles() {
   try {
-    console.log('🧹 Nettoyage des anciens rôles système pour simplification...');
+    console.log('🔒 Vérification du système de rôles fixes...');
     
-    // Supprimer SEULEMENT les anciens rôles système, PAS les rôles personnalisés créés par l'utilisateur
-    const systemRolesToDelete = ['employee', 'manager', 'directeur'];
-    const oldRoles = await pool.query(`
-      SELECT id, name FROM roles 
-      WHERE name = ANY($1) AND is_system = true
-    `, [systemRolesToDelete]);
+    // Les 4 rôles fixes qui DOIVENT exister
+    const fixedRoles = [
+      { id: 1, name: 'admin', display_name: 'Administrateur', description: 'Accès complet à toutes les fonctionnalités', color: '#fca5a5' },
+      { id: 2, name: 'manager', display_name: 'Manager', description: 'Accès étendu sauf administration', color: '#93c5fd' },
+      { id: 3, name: 'employee', display_name: 'Employé', description: 'Accès limité aux opérations de base', color: '#86efac' },
+      { id: 4, name: 'directeur', display_name: 'Directeur', description: 'Accès direction sans administration', color: '#c4b5fd' }
+    ];
     
-    if (oldRoles.rows.length > 0) {
-      console.log(`🗑️ Suppression de ${oldRoles.rows.length} anciens rôles système:`, oldRoles.rows.map(r => r.name));
-      
-      const roleIds = oldRoles.rows.map(r => r.id);
-      
-      // Migrer les utilisateurs de ces anciens rôles système vers admin
+    // Vérifier et créer les rôles manquants
+    for (const role of fixedRoles) {
+      const exists = await pool.query('SELECT id FROM roles WHERE id = $1', [role.id]);
+      if (exists.rows.length === 0) {
+        await pool.query(`
+          INSERT INTO roles (id, name, display_name, description, color, is_system, is_active, created_at)
+          VALUES ($1, $2, $3, $4, $5, true, true, NOW())
+        `, [role.id, role.name, role.display_name, role.description, role.color]);
+        console.log(`✅ Rôle fixe créé: ${role.display_name}`);
+      } else {
+        console.log(`✅ Rôle fixe existe: ${role.display_name}`);
+      }
+    }
+    
+    // Supprimer uniquement les rôles NON-FIXES qui sont système (cleanup des anciens)
+    await pool.query(`
+      DELETE FROM role_permissions WHERE role_id NOT IN (1, 2, 3, 4) AND role_id IN (
+        SELECT id FROM roles WHERE is_system = true
+      )
+    `);
+    
+    await pool.query(`
+      DELETE FROM user_roles WHERE role_id NOT IN (1, 2, 3, 4) AND role_id IN (
+        SELECT id FROM roles WHERE is_system = true
+      )
+    `);
+    
+    await pool.query(`
+      DELETE FROM roles WHERE id NOT IN (1, 2, 3, 4) AND is_system = true
+    `);
+    
+    console.log('✅ Nettoyage des anciens rôles système terminé - rôles fixes préservés');
+    
+    // Assigner les permissions aux rôles fixes
+    await assignFixedRolePermissions();
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la vérification des rôles fixes:', error);
+  }
+}
+
+async function assignFixedRolePermissions() {
+  try {
+    console.log('🔑 Assignment des permissions aux rôles fixes...');
+    
+    // Supprimer toutes les permissions actuelles des 4 rôles fixes pour les réassigner proprement
+    await pool.query('DELETE FROM role_permissions WHERE role_id IN (1, 2, 3, 4)');
+    
+    // Assigner TOUTES les permissions (54) au rôle admin
+    await pool.query(`
+      INSERT INTO role_permissions (role_id, permission_id)
+      SELECT 1, id FROM permissions
+    `);
+    console.log('✅ Admin: 54 permissions assignées');
+    
+    // Assigner 50 permissions au rôle manager (tout sauf administration)
+    await pool.query(`
+      INSERT INTO role_permissions (role_id, permission_id)
+      SELECT 2, p.id 
+      FROM permissions p 
+      WHERE p.category NOT IN ('administration') 
+        AND p.name NOT IN ('reconciliation_view')
+    `);
+    console.log('✅ Manager: permissions assignées (tout sauf administration)');
+    
+    // Assigner 15 permissions au rôle employee (accès de base)
+    await pool.query(`
+      INSERT INTO role_permissions (role_id, permission_id)
+      SELECT 3, p.id
+      FROM permissions p 
+      WHERE p.name IN (
+        'calendar_read', 'orders_read', 'deliveries_read', 'publicities_read',
+        'customer_orders_create', 'customer_orders_read', 'customer_orders_update',
+        'dlc_products_create', 'dlc_products_read', 'dlc_products_update', 'dlc_products_validate',
+        'tasks_read', 'tasks_validate', 'dashboard_read', 'statistics_read', 'reports_generate',
+        'suppliers_read', 'groups_read', 'users_read'
+      )
+    `);
+    console.log('✅ Employee: 15 permissions de base assignées');
+    
+    // Assigner 50 permissions au rôle directeur (tout sauf administration)
+    await pool.query(`
+      INSERT INTO role_permissions (role_id, permission_id)
+      SELECT 4, p.id
+      FROM permissions p 
+      WHERE p.category NOT IN ('administration')
+    `);
+    console.log('✅ Directeur: permissions assignées (tout sauf administration)');
+    
+    // Assigner les utilisateurs existants aux rôles fixes
+    await assignUsersToFixedRoles();
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'assignment des permissions:', error);
+  }
+}
+
+async function assignUsersToFixedRoles() {
+  try {
+    console.log('👥 Assignment des utilisateurs aux rôles fixes...');
+    
+    // Supprimer toutes les assignations actuelles
+    await pool.query('DELETE FROM user_roles');
+    
+    // Assigner admin_local au rôle administrateur (ID 1)
+    const adminExists = await pool.query('SELECT id FROM users WHERE id = $1', ['admin_local']);
+    if (adminExists.rows.length > 0) {
       await pool.query(`
-        UPDATE users SET role = 'admin' 
-        WHERE role = ANY($1)
-      `, [systemRolesToDelete]);
-      console.log('✅ Utilisateurs des anciens rôles système migrés vers admin');
-      
-      // Supprimer les permissions des anciens rôles système
+        INSERT INTO user_roles (user_id, role_id, assigned_by, assigned_at)
+        VALUES ('admin_local', 1, 'system', NOW())
+      `);
+      console.log('✅ admin_local assigné au rôle Administrateur');
+    }
+    
+    // Assigner Nicolas au rôle directeur (ID 4)
+    const nicolasExists = await pool.query('SELECT id FROM users WHERE id = $1', ['nicolasvoignier_1753176398084']);
+    if (nicolasExists.rows.length > 0) {
       await pool.query(`
-        DELETE FROM role_permissions 
-        WHERE role_id = ANY($1)
-      `, [roleIds]);
-      console.log('✅ Permissions des anciens rôles système supprimées');
-      
-      // Supprimer les assignations des anciens rôles système  
+        INSERT INTO user_roles (user_id, role_id, assigned_by, assigned_at)
+        VALUES ('nicolasvoignier_1753176398084', 4, 'system', NOW())
+      `);
+      console.log('✅ Nicolas assigné au rôle Directeur');
+    }
+    
+    // Assigner ff292 au rôle employee s'il existe
+    const ff292Exists = await pool.query('SELECT id FROM users WHERE username = $1', ['ff292']);
+    if (ff292Exists.rows.length > 0) {
       await pool.query(`
-        DELETE FROM user_roles 
-        WHERE role_id = ANY($1)
-      `, [roleIds]);
-      console.log('✅ Assignations des anciens rôles système supprimées');
-      
-      // Supprimer les anciens rôles système
-      await pool.query(`
-        DELETE FROM roles 
-        WHERE id = ANY($1)
-      `, [roleIds]);
-      console.log('✅ Anciens rôles système supprimés - rôles personnalisés préservés');
-    } else {
-      console.log('✅ Aucun ancien rôle système à nettoyer');
+        INSERT INTO user_roles (user_id, role_id, assigned_by, assigned_at)
+        VALUES ($1, 3, 'system', NOW())
+      `, [ff292Exists.rows[0].id]);
+      console.log('✅ ff292 assigné au rôle Employé');
     }
     
   } catch (error) {
-    console.error('❌ Erreur lors du nettoyage des rôles:', error);
+    console.error('❌ Erreur lors de l\'assignment des utilisateurs:', error);
   }
 }
 
@@ -1055,8 +1154,8 @@ async function initRolesAndPermissionsProduction() {
   try {
     console.log('🎭 Initializing roles and permissions for production...');
     
-    // NETTOYAGE AUTOMATIQUE : Supprimer les anciens rôles pour simplification
-    await cleanupOldRoles();
+    // SYSTÈME DE RÔLES FIXES : Garantir les 4 rôles hardcodés
+    await ensureFixedRoles();
     
     // Check if roles already exist (avoid re-creating)
     const existingRoles = await pool.query('SELECT COUNT(*) as count FROM roles');
