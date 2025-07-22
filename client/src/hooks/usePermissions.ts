@@ -10,7 +10,7 @@ export function usePermissions() {
     queryKey: ['/api/user/permissions'],
     enabled: !!user,
     staleTime: 0, // 🔧 DEBUG - Désactiver le cache pour forcer requête fraîche
-    cacheTime: 0, // 🔧 DEBUG - Pas de cache en mémoire
+    gcTime: 0, // 🔧 DEBUG - Pas de cache en mémoire (TanStack Query v5)
     retry: false,
     refetchOnWindowFocus: false
   });
