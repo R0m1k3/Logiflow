@@ -215,12 +215,12 @@ export default function Sidebar() {
             const isDirecteur = user && (user as any).role === 'directeur';
             
             // Spécifications: Employé ne voit pas calendrier, commandes, livraisons, rapprochement
-            if (isEmployee && (item.path === '/calendar' || item.path === '/orders' || item.path === '/deliveries' || item.path === '/reconciliation')) {
+            if (isEmployee && (item.path === '/calendar' || item.path === '/orders' || item.path === '/deliveries' || item.path === '/bl-reconciliation')) {
               return null;
             }
             
-            // Spécifications: Manager ne voit pas rapprochement
-            if (isManager && item.path === '/reconciliation') {
+            // Spécifications: Manager ne voit pas rapprochement (Admin/Directeur uniquement)
+            if (isManager && item.path === '/bl-reconciliation') {
               return null;
             }
             

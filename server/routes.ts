@@ -1661,7 +1661,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Customer order not found" });
       }
 
-      if (user.role !== 'admin') {
+      // Admin, Manager et Directeur peuvent modifier les commandes client selon spécifications
+      if (!['admin', 'manager', 'directeur'].includes(user.role)) {
         const userGroupIds = user.userGroups.map(ug => ug.groupId);
         if (!userGroupIds.includes(existingOrder.groupId)) {
           return res.status(403).json({ message: "Access denied" });

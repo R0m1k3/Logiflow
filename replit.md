@@ -154,6 +154,20 @@ The application uses a sophisticated dual authentication approach:
 - **VALIDATION DLC DIRECTEUR CORRIGÉE** - Routes POST/PUT /api/dlc-products/:id/validate autorisent maintenant Directeur
 - **SUPPRESSION COMMANDES CLIENT CORRIGÉE** - Route DELETE /api/customer-orders/:id autorise maintenant Directeur
 - **SPÉCIFICATIONS DIRECTEUR COMPLÈTES** - Validation DLC et suppression commandes client opérationnelles pour Directeur
+- **MENU RAPPROCHEMENT MASQUÉ** - Employé ET Manager ne voient plus le menu rapprochement (Admin/Directeur uniquement)
+- **ERREUR 502 BOUTON CONTACT CORRIGÉE** - Route PUT /api/customer-orders/:id autorise maintenant Manager pour notification client
+
+### July 22, 2025 - SPÉCIFICATIONS FINALES MANAGER: Création Commandes et Validation Livraisons Autorisées
+
+- **PERMISSIONS MANAGER ÉTENDUES** - Manager peut maintenant créer des commandes ET valider des livraisons selon nouvelles spécifications
+- **QUICKCREATEMENU CORRIGÉ** - Menu création rapide affiche maintenant "Nouvelle Commande" ET "Nouvelle Livraison" pour le manager
+- **ORDERS.TSX MIS À JOUR** - Manager peut créer, modifier des commandes (sauf suppression réservée Admin/Directeur)
+- **DELIVERIES.TSX CONFIRMÉ** - Manager peut créer, modifier et valider des livraisons (permissions déjà correctes)
+- **ROUTE VALIDATION LIVRAISONS CORRIGÉE** - API /api/deliveries/:id/validate permet maintenant Manager ET Directeur de valider
+- **ERREUR LSP DELIVERIES.TXS CORRIGÉE** - Correction erreur compilation "expression of type void cannot be tested for truthiness"
+- **VALIDATION DLC DIRECTEUR CORRIGÉE** - Routes POST/PUT /api/dlc-products/:id/validate autorisent maintenant Directeur
+- **SUPPRESSION COMMANDES CLIENT CORRIGÉE** - Route DELETE /api/customer-orders/:id autorise maintenant Directeur
+- **SPÉCIFICATIONS DIRECTEUR COMPLÈTES** - Validation DLC et suppression commandes client opérationnelles pour Directeur
 
 ### July 22, 2025 - RESTRICTION MENUS EMPLOYÉ: Calendrier, Commandes, Livraisons et Rapprochement Cachés
 
