@@ -208,9 +208,10 @@ export default function Sidebar() {
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
-            // 🔧 FIX ADMIN - Pour admin, toujours afficher tous les menus principaux
+            // 🔧 FIX ADMIN & MANAGER - Pour admin et manager, toujours afficher tous les menus principaux
             const isAdmin = user && (user as any).role === 'admin';
-            const shouldShow = isAdmin || hasPermission(item.permission);
+            const isManager = user && (user as any).role === 'manager';
+            const shouldShow = isAdmin || isManager || hasPermission(item.permission);
             
             if (!shouldShow) return null;
             
@@ -234,11 +235,11 @@ export default function Sidebar() {
           })}
         </div>
 
-        {/* Management Section */}
+        {/* Management Section - ADMIN UNIQUEMENT */}
         {(function() {
           const isAdmin = user && (user as any).role === 'admin';
-          const hasManagementItems = isAdmin || managementItems.some(item => hasPermission(item.permission));
-          return hasManagementItems;
+          // ⚠️ SPÉCIFICATION: Seul admin a accès aux sections Gestion et Administration
+          return isAdmin;
         })() && (
           <>
             <div className="mt-6 mb-2">
@@ -248,9 +249,9 @@ export default function Sidebar() {
             </div>
             <div className="space-y-1">
               {managementItems.map((item) => {
-                // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus gestion
+                // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus gestion (déjà filtré par section)
                 const isAdmin = user && (user as any).role === 'admin';
-                const shouldShow = isAdmin || hasPermission(item.permission);
+                const shouldShow = isAdmin; // Toujours true car section déjà filtrée admin uniquement
                 
                 if (!shouldShow) return null;
                 
@@ -277,11 +278,11 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* Administration Section */}
+      {/* Administration Section - ADMIN UNIQUEMENT */}
       {(function() {
         const isAdmin = user && (user as any).role === 'admin';
-        const hasAdminItems = isAdmin || adminItems.some(item => hasPermission(item.permission));
-        return hasAdminItems;
+        // ⚠️ SPÉCIFICATION: Seul admin a accès aux sections Gestion et Administration
+        return isAdmin;
       })() && (
         <div className="border-t border-gray-200 py-4 px-3">
           <div className="mb-2">
@@ -291,9 +292,9 @@ export default function Sidebar() {
           </div>
           <div className="space-y-1">
             {adminItems.map((item) => {
-              // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus administration
+              // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus administration (déjà filtré par section)
               const isAdmin = user && (user as any).role === 'admin';
-              const shouldShow = isAdmin || hasPermission(item.permission);
+              const shouldShow = isAdmin; // Toujours true car section déjà filtrée admin uniquement
               
               if (!shouldShow) return null;
               
