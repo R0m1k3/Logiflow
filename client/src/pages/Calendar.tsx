@@ -9,6 +9,7 @@ import CreateOrderModal from "@/components/modals/CreateOrderModal";
 import CreateDeliveryModal from "@/components/modals/CreateDeliveryModal";
 import StatsPanel from "@/components/StatsPanel";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useStore } from "@/components/Layout";
 import { hasPermission, canCreateOrders, canCreateDeliveries } from "@/lib/permissions";
 import { apiRequest } from "@/lib/queryClient";

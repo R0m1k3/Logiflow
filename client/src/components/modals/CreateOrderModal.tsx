@@ -37,9 +37,21 @@ export default function CreateOrderModal({
     notes: "",
   });
 
-  const { data: suppliers = [] } = useQuery<Supplier[]>({
+  const { data: suppliers = [], isLoading: loadingSuppliers } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
-    enabled: user?.role === 'admin' || user?.role === 'manager',
+    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur',
+    queryFn: async () => {
+      console.log('📦 Fetching suppliers for order modal... Role:', user?.role);
+      const response = await fetch('/api/suppliers', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch suppliers: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('📦 Suppliers received:', data.length, data);
+      return data;
+    }
   });
 
   const { data: groupsData = [] } = useQuery<Group[]>({
