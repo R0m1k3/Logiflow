@@ -2766,26 +2766,23 @@ export class DatabaseStorage implements IStorage {
       
       const result = await pool.query(`
         INSERT INTO dlc_products (
-          name, product_name, product_code, gencode, dlc_date, expiry_date, 
+          product_name, gencode, expiry_date, 
           quantity, status, group_id, supplier_id, 
           created_by, created_at, updated_at, date_type, unit, 
           location, alert_threshold, notes
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), $12, $13, $14, $15, $16)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(), $9, $10, $11, $12, $13)
         RETURNING *
       `, [
-        finalProductName,                                // name
         finalProductName,                                // product_name
-        finalProductCode,                                // product_code
         finalProductCode,                                // gencode
-        finalExpiryDate,                                 // dlc_date
         finalExpiryDate,                                 // expiry_date
         dlcProductData.quantity || 1,                    // quantity
-        dlcProductData.status || 'en_attente',           // status
+        dlcProductData.status || 'en_cours',             // status (corrigé de en_attente vers en_cours)
         dlcProductData.groupId,                          // group_id
         dlcProductData.supplierId,                       // supplier_id
         dlcProductData.createdBy,                        // created_by
-        dlcProductData.dateType || 'DLC',                // date_type
+        dlcProductData.dateType || 'dlc',                // date_type (corrigé de DLC vers dlc)
         dlcProductData.unit || 'unité',                  // unit
         dlcProductData.location || 'Magasin',            // location
         dlcProductData.alertThreshold || 15,             // alert_threshold
@@ -2797,9 +2794,9 @@ export class DatabaseStorage implements IStorage {
 
       return {
         id: row.id,
-        name: row.name || row.product_name,
-        productCode: row.product_code || row.gencode,
-        dlcDate: this.formatDate(row.dlc_date || row.expiry_date),
+        name: row.product_name,
+        productCode: row.gencode,
+        dlcDate: this.formatDate(row.expiry_date),
         quantity: row.quantity,
         status: row.status,
         groupId: row.group_id,

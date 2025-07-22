@@ -1309,12 +1309,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDlcProduct(dlcProductData: InsertDlcProductFrontend): Promise<DlcProductFrontend> {
-    // Convert dlcDate to expiryDate for Drizzle schema compatibility
-    const { dlcDate, ...restData } = dlcProductData as any;
+    // Convert dlcDate to expiryDate and productName field mapping for Drizzle schema compatibility
+    const { dlcDate, productName, ...restData } = dlcProductData as any;
+    const finalProductName = productName || restData.name || 'Produit DLC';
+    
     const [dlcProduct] = await db
       .insert(dlcProducts)
       .values({
         ...restData,
+        name: finalProductName, // Fill the required 'name' column
+        productName: finalProductName, // Also set productName for consistency
         expiryDate: dlcDate,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -1324,6 +1328,7 @@ export class DatabaseStorage implements IStorage {
     // Return with dlcDate field for frontend compatibility
     return {
       ...dlcProduct,
+      name: dlcProduct.productName || dlcProduct.name, // Map back to frontend expected field name
       dlcDate: dlcProduct.expiryDate,
     } as any;
   }

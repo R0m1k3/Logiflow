@@ -551,10 +551,13 @@ export const insertDlcProductSchema = createInsertSchema(dlcProducts).omit({
   updatedAt: true,
 });
 
-// Frontend-compatible schema with dlcDate instead of expiryDate
+// Frontend-compatible schema with dlcDate instead of expiryDate and productName field
 export const insertDlcProductFrontendSchema = insertDlcProductSchema
   .omit({ expiryDate: true })
-  .extend({ dlcDate: z.coerce.date() });
+  .extend({ 
+    dlcDate: z.coerce.date(),
+    productName: z.string().optional() // Support both productName and name fields
+  });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
