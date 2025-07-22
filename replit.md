@@ -142,7 +142,7 @@ The application uses a sophisticated dual authentication approach:
 - **CALENDRIER CLICK CORRIGÉ** - Fix critique Calendar.tsx : admin peut maintenant cliquer sur dates calendrier
 - **TOUTES INTERACTIONS ADMIN RÉSOLUES** - Application de logique bypass sur : sidebar, pages, modales, calendrier
 - **VALIDATION LIVRAISONS CORRIGÉE** - Route validation `/api/deliveries/:id/validate` corrigée avec bypass admin
-- **SIDEBAR MANAGER CORRIGÉE** - Bypass ajouté pour rôle manager dans affichage menus principaux
+- **SIDEBAR TOUS RÔLES CORRIGÉE** - Bypass ajouté pour tous les rôles (admin, manager, employee, directeur) dans affichage menus principaux
 - **SECTIONS ADMIN UNIQUEMENT** - Gestion et Administration limitées strictement à l'admin selon spécifications
 - **APPLICATION PRODUCTION READY** - Système de permissions admin/manager complètement opérationnel avec interactions fonctionnelles
 

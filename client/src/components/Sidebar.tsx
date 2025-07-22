@@ -208,10 +208,12 @@ export default function Sidebar() {
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
-            // 🔧 FIX ADMIN & MANAGER - Pour admin et manager, toujours afficher tous les menus principaux
+            // 🔧 FIX TOUS RÔLES - Pour tous les rôles, bypass hasPermission() défaillant
             const isAdmin = user && (user as any).role === 'admin';
             const isManager = user && (user as any).role === 'manager';
-            const shouldShow = isAdmin || isManager || hasPermission(item.permission);
+            const isEmployee = user && (user as any).role === 'employee';
+            const isDirecteur = user && (user as any).role === 'directeur';
+            const shouldShow = isAdmin || isManager || isEmployee || isDirecteur || hasPermission(item.permission);
             
             if (!shouldShow) return null;
             
