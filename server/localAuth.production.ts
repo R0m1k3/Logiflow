@@ -175,8 +175,9 @@ export function setupLocalAuth(app: Express) {
     try {
       const userId = req.user.id;
       
-      // Import storage from the production routes
-      const { storage } = await import('./routes.production.js');
+      // Import storage production directly
+      const { DatabaseStorage } = await import('./storage.production.js');
+      const storage = new DatabaseStorage();
       const userWithGroups = await storage.getUserWithGroups(userId);
       
       if (!userWithGroups) {
