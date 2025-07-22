@@ -531,7 +531,14 @@ export default function UsersPage() {
   };
 
   const handleEditUser = (userData: UserWithGroups) => {
-    console.log('📝 Opening edit modal for user data:', userData);
+    console.log('🔥 PRODUCTION DEBUG - FULL userdata:', JSON.stringify(userData, null, 2));
+    console.log('🔥 PRODUCTION DEBUG - userdata keys:', Object.keys(userData));
+    console.log('🔥 PRODUCTION DEBUG - individual fields:');
+    console.log('  firstName:', `"${userData.firstName}"`, 'type:', typeof userData.firstName);
+    console.log('  lastName:', `"${userData.lastName}"`, 'type:', typeof userData.lastName);
+    console.log('  name:', `"${userData.name}"`, 'type:', typeof userData.name);
+    console.log('  username:', `"${userData.username}"`, 'type:', typeof userData.username);
+    console.log('  email:', `"${userData.email}"`, 'type:', typeof userData.email);
     
     // Utiliser directement les champs firstName et lastName s'ils existent ET ne sont pas null/undefined
     let firstName = userData.firstName && userData.firstName.trim() ? userData.firstName : '';
@@ -539,7 +546,7 @@ export default function UsersPage() {
     
     // Si pas de firstName/lastName mais qu'il y a un champ name, le diviser
     if (!firstName && !lastName && userData.name && userData.name.trim()) {
-      console.log('📝 Using fallback: splitting name field:', userData.name);
+      console.log('🔥 PRODUCTION DEBUG - Using fallback: splitting name field:', userData.name);
       const [firstPart = '', ...lastNameParts] = userData.name.trim().split(' ');
       firstName = firstPart;
       lastName = lastNameParts.join(' ');
@@ -547,11 +554,13 @@ export default function UsersPage() {
     
     // Si toujours pas de données, essayer d'extraire depuis username si c'est un nom complet
     if (!firstName && !lastName && userData.username && userData.username.includes(' ')) {
-      console.log('📝 Using fallback: splitting username field:', userData.username);
+      console.log('🔥 PRODUCTION DEBUG - Using fallback: splitting username field:', userData.username);
       const [firstPart = '', ...lastNameParts] = userData.username.trim().split(' ');
       firstName = firstPart;
       lastName = lastNameParts.join(' ');
     }
+    
+    console.log('🔥 PRODUCTION DEBUG - computed values:', { firstName, lastName });
     
     const userWithNames = {
       ...userData,
