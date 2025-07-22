@@ -7,11 +7,10 @@ export function usePermissions() {
 
   // Récupérer les permissions utilisateur depuis l'API - NOUVEAU SYSTÈME
   const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError, refetch } = useQuery({
-    queryKey: ['/api/user/permissions'],
+    queryKey: ['/api/user/permissions', user?.id || user?.username],
     enabled: !!user,
-    staleTime: 0, // 🔧 DEBUG - Désactiver le cache pour forcer requête fraîche
-    gcTime: 0, // 🔧 DEBUG - Pas de cache en mémoire (TanStack Query v5)
-    retry: false,
+    staleTime: 5 * 60 * 1000, // Cache 5 minutes
+    retry: 1,
     refetchOnWindowFocus: false
   });
 
@@ -23,12 +22,20 @@ export function usePermissions() {
     }
   }, [user, permissionsLoading, userPermissions, refetch]);
 
-  // 🔧 FIX PERMISSIONS - Extraire les noms des permissions
+  // 🔧 FIX PERMISSIONS - Extraire les noms des permissions (PRODUCTION FORMAT)
   const permissionNames = React.useMemo(() => {
     if (!Array.isArray(userPermissions)) return [];
-    return userPermissions.map(p => 
-      typeof p === 'string' ? p : p.name
-    ).filter(Boolean);
+    
+    // Format production : objets avec propriété 'name'
+    // Format développement : chaînes de caractères
+    const names = userPermissions.map(p => {
+      if (typeof p === 'string') return p;
+      if (typeof p === 'object' && p?.name) return p.name;
+      return null;
+    }).filter(Boolean);
+    
+    console.log('🔧 PRODUCTION - Permission names extracted:', names.slice(0, 10));
+    return names;
   }, [userPermissions]);
 
   // 🔧 DEBUG - Logs pour vérifier le bon fonctionnement

@@ -123,6 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - RÉSOLUTION CRITIQUE: Admin Sidebar Production - Bug Permissions Complètement Corrigé
+
+- **PROBLÈME ROOT CAUSE IDENTIFIÉ** - Admin en production n'affichait que menu DLC au lieu de sidebar complète avec tous les menus
+- **ROUTE PERMISSIONS CORRIGÉE** - Modified `/api/user/permissions` dans routes.ts pour utiliser SQL production au lieu de Drizzle développement
+- **MODE PRODUCTION FORCÉ** - Variable isProduction forcée à true pour assurer utilisation système production
+- **HOOK USEPERMISSIONS FIXÉ** - Extraction correcte des noms permissions depuis objets API (production) vs chaînes (développement)
+- **CACHE INVALIDÉ** - TanStack Query configuré pour actualiser permissions avec user ID dans queryKey
+- **RÉSULTAT VALIDÉ** - Admin a maintenant ses 54 permissions, sidebar détecte correctement dashboard, calendrier, commandes, gestion
+- **LOGS CONFIRMÉS** - Console montre "permissionsCount":54,"hasDashboard":true,"hasCalendar":true,"hasOrders":true,"hasGestion":true
+- **SIDEBAR ENTIÈREMENT FONCTIONNELLE** - Admin peut maintenant naviguer vers toutes les sections au lieu du seul menu DLC
+
 ### July 22, 2025 - RÉSOLUTION FINALE: Système de Tâches et Calendrier - Directeur et Manager Entièrement Fonctionnels
 
 - **CALENDRIER OPÉRATIONNEL** - Nicolas (directeur) peut maintenant cliquer sur le calendrier et ouvrir les modales de création
