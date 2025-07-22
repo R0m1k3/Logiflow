@@ -554,10 +554,10 @@ export const insertDlcProductSchema = createInsertSchema(dlcProducts).omit({
 
 // Frontend-compatible schema with dlcDate instead of expiryDate and productName field
 export const insertDlcProductFrontendSchema = insertDlcProductSchema
-  .omit({ expiryDate: true })
+  .omit({ expiryDate: true, name: true }) // Remove name from validation since frontend uses productName
   .extend({ 
     dlcDate: z.coerce.date(),
-    productName: z.string().optional() // Support both productName and name fields
+    productName: z.string().min(1, "Le nom du produit est obligatoire") // Frontend field
   });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
