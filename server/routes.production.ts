@@ -159,8 +159,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dlcOnly = req.query.dlc === 'true';
       console.log('🏪 Suppliers API called:', { dlcOnly, query: req.query });
       
+      // TOUS les fournisseurs sont disponibles pour TOUS les magasins
+      // Pas de filtrage par magasin pour les fournisseurs
       const suppliers = await storage.getSuppliers(dlcOnly);
-      console.log('🏪 Suppliers returned:', { 
+      console.log('🏪 Suppliers returned (all suppliers for all stores):', { 
         count: suppliers.length, 
         dlcOnly,
         suppliers: suppliers.map(s => ({ id: s.id, name: s.name, hasDlc: s.hasDlc })) 

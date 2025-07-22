@@ -19,6 +19,7 @@ import type { PublicityWithRelations } from "@shared/schema";
 export default function Calendar() {
   const { user } = useAuthUnified();
   const { selectedStoreId } = useStore();
+  const { hasPermission } = usePermissions();
   const queryClient = useQueryClient();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 6, 1)); // July 2025
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -148,6 +149,15 @@ export default function Calendar() {
   };
 
   const handleDateClick = (date: Date) => {
+    console.log('📅 Date clicked:', format(date, 'yyyy-MM-dd'));
+    
+    // Vérifier que l'utilisateur a les permissions pour créer
+    if (!hasPermission('calendar_read')) {
+      console.log('❌ No calendar permission');
+      return;
+    }
+    
+    console.log('✅ Opening quick create menu');
     setSelectedDate(date);
     setShowQuickCreate(true);
   };
@@ -235,7 +245,7 @@ export default function Calendar() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          {(canCreateOrders(user?.role, user?.permissions) || canCreateDeliveries(user?.role, user?.permissions)) && (
+          {(hasPermission('orders_create') || hasPermission('deliveries_create')) && (
             <Button
               onClick={() => setShowQuickCreate(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white"
