@@ -21,9 +21,20 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const { user, isLoading, error } = useAuthUnified();
-  const { hasPermission } = usePermissions();
+  const { user, isLoading: userLoading, error } = useAuthUnified();
+  const { hasPermission, isLoading: permissionsLoading, userPermissions } = usePermissions();
   const [location] = useLocation();
+
+  const isLoading = userLoading || permissionsLoading;
+  
+  // 🔧 DEBUG - Logs simplifiés pour sidebar
+  console.log('🔧 Sidebar Result:', { 
+    isLoading,
+    hasUser: !!user, 
+    permissionsCount: Array.isArray(userPermissions) ? userPermissions.length : 'not-array',
+    hasDashboard: hasPermission('dashboard_read'),
+    hasCalendar: hasPermission('calendar_read')
+  });
 
   const handleLogout = async () => {
     try {

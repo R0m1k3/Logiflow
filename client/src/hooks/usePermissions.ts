@@ -5,11 +5,24 @@ export function usePermissions() {
   const { user, isLoading: userLoading } = useAuthUnified();
 
   // Récupérer les permissions utilisateur depuis l'API - NOUVEAU SYSTÈME
-  const { data: userPermissions = [], isLoading: permissionsLoading } = useQuery({
+  const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery({
     queryKey: ['/api/user/permissions'],
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-    retry: false
+    staleTime: 0, // 🔧 DEBUG - Désactiver le cache pour forcer requête fraîche
+    cacheTime: 0, // 🔧 DEBUG - Pas de cache en mémoire
+    retry: false,
+    refetchOnWindowFocus: false
+  });
+
+  // 🔧 DEBUG - Logs pour diagnostiquer le problème de données
+  console.log('🔧 usePermissions Debug:', {
+    hasUser: !!user,
+    permissionsLoading,
+    permissionsError: permissionsError?.message,
+    userPermissionsType: typeof userPermissions,
+    userPermissionsIsArray: Array.isArray(userPermissions),
+    userPermissionsLength: Array.isArray(userPermissions) ? userPermissions.length : 'not-array',
+    firstFewPermissions: Array.isArray(userPermissions) ? userPermissions.slice(0, 3) : userPermissions
   });
 
   // Fonction pour vérifier une permission basée sur les vrais rôles de la base

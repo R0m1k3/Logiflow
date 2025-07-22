@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('👤 User roles:', userWithRoles.userRoles?.length || 0);
 
-      // Récupérer toutes les permissions pour cet utilisateur
+      // Récupérer toutes les permissions pour cet utilisateur - CORRECTION: retourner noms seulement
       const permissions: string[] = [];
       
       if (userWithRoles.userRoles && userWithRoles.userRoles.length > 0) {
@@ -70,13 +70,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const rolePermissions = await storage.getRolePermissions(userRole.roleId);
           for (const rp of rolePermissions) {
             if (rp.permission && !permissions.includes(rp.permission.name)) {
-              permissions.push(rp.permission.name);
+              permissions.push(rp.permission.name); // 🔧 Retourner seulement le nom, pas l'objet complet
             }
           }
         }
       }
 
       console.log('📝 User permissions found:', permissions.length);
+      console.log('🔍 Sample permissions:', permissions.slice(0, 5));
       res.json(permissions);
     } catch (error) {
       console.error("Error fetching user permissions:", error);
