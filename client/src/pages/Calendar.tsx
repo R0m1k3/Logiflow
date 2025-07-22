@@ -11,7 +11,7 @@ import StatsPanel from "@/components/StatsPanel";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useStore } from "@/components/Layout";
-import { hasPermission, canCreateOrders, canCreateDeliveries } from "@/lib/permissions";
+
 import { apiRequest } from "@/lib/queryClient";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";

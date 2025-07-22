@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Package, Truck } from "lucide-react";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { canCreateOrders, canCreateDeliveries } from "@/lib/permissions";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface QuickCreateMenuProps {
   isOpen: boolean;
@@ -18,13 +18,21 @@ export default function QuickCreateMenu({
   onCreateDelivery,
 }: QuickCreateMenuProps) {
   const { user } = useAuthUnified();
+  const { hasPermission } = usePermissions();
   
   // Vérifier les permissions de création
-  const ordersAllowed = canCreateOrders(user?.role, user?.permissions);
-  const deliveriesAllowed = canCreateDeliveries(user?.role, user?.permissions);
+  const ordersAllowed = hasPermission('orders_create');
+  const deliveriesAllowed = hasPermission('deliveries_create');
+
+  console.log('🎯 QuickCreateMenu permissions:', {
+    ordersAllowed,
+    deliveriesAllowed,
+    userRole: user?.role
+  });
 
   // Si aucune permission de création, ne pas afficher le modal
   if (!ordersAllowed && !deliveriesAllowed) {
+    console.log('❌ No creation permissions, hiding modal');
     return null;
   }
 
