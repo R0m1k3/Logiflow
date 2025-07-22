@@ -151,6 +151,9 @@ export default function Calendar() {
 
   const handleDateClick = (date: Date) => {
     console.log('📅 Date clicked:', format(date, 'yyyy-MM-dd'));
+    console.log('📅 Current user:', user?.username, 'Role:', user?.role);
+    console.log('📅 Permission check result:', hasPermission('calendar_read'));
+    console.log('📅 All permissions available:', typeof hasPermission);
     
     // Vérifier que l'utilisateur a les permissions pour créer
     if (!hasPermission('calendar_read')) {
