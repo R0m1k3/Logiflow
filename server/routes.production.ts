@@ -931,6 +931,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/customer-orders/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      // Check if user has permission to delete customer orders - Admin, Manager et Directeur selon spécifications
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'manager' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Insufficient permissions to delete customer orders" });
+      }
+      
       await storage.deleteCustomerOrder(id);
       res.status(204).send();
     } catch (error) {
@@ -2369,9 +2377,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
-      // Check if user has permission to validate
+      // Check if user has permission to validate - Admin, Manager et Directeur selon spécifications
       const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
+      if (!user || (user.role !== 'admin' && user.role !== 'manager' && user.role !== 'directeur')) {
         return res.status(403).json({ message: "Insufficient permissions to validate products" });
       }
 
@@ -2390,9 +2398,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('✅ PUT Validation request:', { id, userId });
       
-      // Check if user has permission to validate
+      // Check if user has permission to validate - Admin, Manager et Directeur selon spécifications
       const user = await storage.getUser(userId);
-      if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
+      if (!user || (user.role !== 'admin' && user.role !== 'manager' && user.role !== 'directeur')) {
         return res.status(403).json({ message: "Insufficient permissions to validate products" });
       }
 
