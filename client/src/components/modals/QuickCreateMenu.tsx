@@ -20,15 +20,12 @@ export default function QuickCreateMenu({
   const { user } = useAuthUnified();
   const { hasPermission } = usePermissions();
   
-  // Vérifier les permissions de création
-  const ordersAllowed = hasPermission('orders_create');
-  const deliveriesAllowed = hasPermission('deliveries_create');
+  // 🔧 FIX ADMIN - Pour admin, toujours autoriser création commandes/livraisons
+  const isAdmin = user && (user as any).role === 'admin';
+  const ordersAllowed = isAdmin || hasPermission('orders_create');
+  const deliveriesAllowed = isAdmin || hasPermission('deliveries_create');
 
-  console.log('🎯 QuickCreateMenu permissions:', {
-    ordersAllowed,
-    deliveriesAllowed,
-    userRole: user?.role
-  });
+
 
   // Si aucune permission de création, ne pas afficher le modal
   if (!ordersAllowed && !deliveriesAllowed) {
