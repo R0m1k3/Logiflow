@@ -506,15 +506,24 @@ export default function UsersPage() {
     });
     
     setSelectedUser(userWithNames);
-    setEditForm({
+    
+    const newEditForm = {
       username: userData.username || "",
       firstName: firstName,
       lastName: lastName,
       email: userData.email || "",
       password: "",
       role: userData.role,
-    });
-    setShowEditModal(true);
+    };
+    
+    console.log('📝 About to set editForm state:', newEditForm);
+    setEditForm(newEditForm);
+    
+    // Force a small delay to ensure state is updated before opening modal
+    setTimeout(() => {
+      console.log('📝 EditForm state after setTimeout:', editForm);
+      setShowEditModal(true);
+    }, 100);
   };
 
   const handleGroupManager = (userData: UserWithGroups) => {
@@ -974,19 +983,23 @@ export default function UsersPage() {
                   <Label htmlFor="edit-firstName">Prénom</Label>
                   <Input
                     id="edit-firstName"
-                    value={editForm.firstName}
+                    value={editForm.firstName || ''}
                     onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
                     placeholder="Prénom"
+                    onFocus={() => console.log('📝 firstName field focus - current value:', editForm.firstName)}
                   />
+                  <p className="text-xs text-gray-500 mt-1">Debug: "{editForm.firstName}"</p>
                 </div>
                 <div>
                   <Label htmlFor="edit-lastName">Nom</Label>
                   <Input
                     id="edit-lastName"
-                    value={editForm.lastName}
+                    value={editForm.lastName || ''}
                     onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
                     placeholder="Nom"
+                    onFocus={() => console.log('📝 lastName field focus - current value:', editForm.lastName)}
                   />
+                  <p className="text-xs text-gray-500 mt-1">Debug: "{editForm.lastName}"</p>
                 </div>
               </div>
 
