@@ -20,6 +20,13 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function comparePasswords(password: string, hashedPassword: string): Promise<boolean> {
   try {
+    console.log('🔐 comparePasswords DEBUG:', {
+      passwordLength: password.length,
+      hashedPasswordFormat: hashedPassword.substring(0, 20) + '...',
+      hasColon: hashedPassword.includes(':'),
+      hasDot: hashedPassword.includes('.')
+    });
+    
     // Vérifier si c'est un hash de développement (format scrypt avec point)
     if (hashedPassword.includes('.')) {
       console.log('🔧 Detected development hash format - attempting migration');
@@ -30,17 +37,32 @@ export async function comparePasswords(password: string, hashedPassword: string)
     const [salt, originalHash] = hashedPassword.split(':');
     
     if (!salt || !originalHash) {
-      console.log('❌ Invalid PBKDF2 hash format');
+      console.log('❌ Invalid PBKDF2 hash format:', { salt: !!salt, originalHash: !!originalHash });
       return false;
     }
+    
+    console.log('🔐 PBKDF2 verification:', {
+      saltLength: salt.length,
+      originalHashLength: originalHash.length,
+      passwordProvided: password
+    });
     
     // Recalculer le hash avec le même salt
     const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
     
+    console.log('🔐 Hash comparison:', {
+      generatedHashLength: hash.length,
+      originalHashLength: originalHash.length,
+      hashesMatch: hash === originalHash
+    });
+    
     // Comparaison sécurisée
-    return crypto.timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(hash, 'hex'));
+    const result = crypto.timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(hash, 'hex'));
+    console.log('🔐 Final comparison result:', result);
+    
+    return result;
   } catch (error) {
-    console.error('Error comparing passwords:', error);
+    console.error('❌ Error comparing passwords:', error);
     return false;
   }
 }
