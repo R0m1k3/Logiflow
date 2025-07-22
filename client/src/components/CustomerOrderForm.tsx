@@ -33,6 +33,7 @@ const customerOrderFormSchema = insertCustomerOrderSchema.extend({
   supplierId: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseInt(val) : val),
   groupId: z.union([z.string(), z.number()]).transform(val => typeof val === 'string' ? parseInt(val) : val).optional(),
   createdBy: z.string().optional(), // Will be set automatically
+  notes: z.string().optional(), // Champ commentaire
 });
 
 type CustomerOrderFormData = z.infer<typeof customerOrderFormSchema>;
@@ -86,6 +87,7 @@ export function CustomerOrderForm({
       deposit: order?.deposit ? order.deposit.toString() : "0",
       isPromotionalPrice: order?.isPromotionalPrice || false,
       customerNotified: order?.customerNotified || false,
+      notes: order?.notes || "",
       groupId: order?.groupId || (user?.role === 'admin' && selectedStoreId ? selectedStoreId : user?.userGroups?.[0]?.groupId) || undefined, // Only auto-select for admin
     },
   });
@@ -340,6 +342,24 @@ export function CustomerOrderForm({
                       Cocher si le produit était en promotion
                     </p>
                   </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Commentaires (optionnel)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Notes additionnelles sur la commande..."
+                      rows={3}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

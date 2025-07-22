@@ -135,6 +135,14 @@ The application uses a sophisticated dual authentication approach:
 - **APPLICATION ENTIÈREMENT FONCTIONNELLE** - Directeur peut maintenant utiliser toutes ses fonctionnalités selon cahier des charges
 - **PERMISSIONS IMPRESSION ET CONTACT AJOUTÉES** - Directeur a maintenant accès aux boutons impression et validation contact (mêmes droits que Admin sur page commandes client)
 
+### July 22, 2025 - INTERFACE COMMANDES CLIENT: Suppression EAN13 Scannable et Ajout Champ Commentaire
+
+- **CODE EAN13 SCANNABLE SUPPRIMÉ** - Suppression du code-barres SVG complexe dans CustomerOrderDetails.tsx, remplacé par affichage simple du gencode
+- **CHAMP COMMENTAIRE AJOUTÉ** - Nouveau champ "Commentaires" optionnel dans formulaire création CustomerOrderForm.tsx
+- **AFFICHAGE COMMENTAIRES DÉTAILS** - Commentaires visibles uniquement dans modal informations, pas dans liste des commandes
+- **INTERFACE SIMPLIFIÉE** - Modal informations plus épuré sans code-barres complexe, focus sur informations essentielles
+- **SCHÉMA NOTES UTILISÉ** - Utilisation champ `notes` existant dans base de données pour les commentaires
+
 ### July 22, 2025 - SPÉCIFICATIONS FINALES MANAGER: Création Commandes et Validation Livraisons Autorisées
 
 - **PERMISSIONS MANAGER ÉTENDUES** - Manager peut maintenant créer des commandes ET valider des livraisons selon nouvelles spécifications

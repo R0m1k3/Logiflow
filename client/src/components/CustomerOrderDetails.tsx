@@ -118,57 +118,11 @@ export function CustomerOrderDetails({ order }: CustomerOrderDetailsProps) {
           </div>
 
           {order.gencode && (
-            <div>
-              <span className="font-medium">Code à barres:</span>
-              <div className="mt-2">
-                <div className="font-mono text-center border border-dashed p-2 bg-gray-50 rounded">
-                  <div className="text-sm text-gray-600 mb-1 text-center">
-                    Code-barres EAN13 scannable
-                  </div>
-                  <div className="border bg-white p-2 text-center">
-                    <svg width="200" height="40" viewBox="0 0 200 40" className="mx-auto">
-                      <rect width="200" height="40" fill="white"/>
-                      <g stroke="black" strokeWidth="1">
-                        <line x1="10" y1="5" x2="10" y2="35"/>
-                        <line x1="15" y1="5" x2="15" y2="35"/>
-                        <line x1="18" y1="5" x2="18" y2="35"/>
-                        <line x1="25" y1="5" x2="25" y2="35"/>
-                        <line x1="30" y1="5" x2="30" y2="35"/>
-                        <line x1="35" y1="5" x2="35" y2="35"/>
-                        <line x1="40" y1="5" x2="40" y2="35"/>
-                        <line x1="45" y1="5" x2="45" y2="35"/>
-                        <line x1="50" y1="5" x2="50" y2="35"/>
-                        <line x1="60" y1="5" x2="60" y2="35"/>
-                        <line x1="65" y1="5" x2="65" y2="35"/>
-                        <line x1="70" y1="5" x2="70" y2="35"/>
-                        <line x1="75" y1="5" x2="75" y2="35"/>
-                        <line x1="80" y1="5" x2="80" y2="35"/>
-                        <line x1="85" y1="5" x2="85" y2="35"/>
-                        <line x1="90" y1="5" x2="90" y2="35"/>
-                        <line x1="95" y1="5" x2="95" y2="35"/>
-                        <line x1="100" y1="5" x2="100" y2="35"/>
-                        <line x1="110" y1="5" x2="110" y2="35"/>
-                        <line x1="115" y1="5" x2="115" y2="35"/>
-                        <line x1="120" y1="5" x2="120" y2="35"/>
-                        <line x1="125" y1="5" x2="125" y2="35"/>
-                        <line x1="130" y1="5" x2="130" y2="35"/>
-                        <line x1="135" y1="5" x2="135" y2="35"/>
-                        <line x1="140" y1="5" x2="140" y2="35"/>
-                        <line x1="145" y1="5" x2="145" y2="35"/>
-                        <line x1="150" y1="5" x2="150" y2="35"/>
-                        <line x1="160" y1="5" x2="160" y2="35"/>
-                        <line x1="165" y1="5" x2="165" y2="35"/>
-                        <line x1="170" y1="5" x2="170" y2="35"/>
-                        <line x1="175" y1="5" x2="175" y2="35"/>
-                        <line x1="180" y1="5" x2="180" y2="35"/>
-                        <line x1="185" y1="5" x2="185" y2="35"/>
-                        <line x1="190" y1="5" x2="190" y2="35"/>
-                      </g>
-                    </svg>
-                  </div>
-                  <div className="text-xs">{order.gencode}</div>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Gencode:</span>
+              <code className="bg-gray-100 px-2 py-1 rounded text-sm">
+                {order.gencode}
+              </code>
             </div>
           )}
 
@@ -229,6 +183,14 @@ export function CustomerOrderDetails({ order }: CustomerOrderDetailsProps) {
             <span>{safeFormat(order.createdAt, 'dd/MM/yyyy à HH:mm')}</span>
           </div>
 
+          {order.notes && order.notes.trim() && (
+            <div>
+              <span className="font-medium">Commentaires:</span>
+              <div className="mt-1 p-3 bg-gray-50 rounded-lg border">
+                <p className="text-sm whitespace-pre-wrap">{order.notes}</p>
+              </div>
+            </div>
+          )}
 
         </CardContent>
       </Card>
