@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { scrypt, randomBytes, timingSafeEqual, pbkdf2Sync } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
@@ -31,7 +31,6 @@ async function comparePasswords(supplied: string, stored: string) {
   if (stored && stored.includes(':')) {
     console.log('🔧 Using production PBKDF2 format');
     try {
-      const crypto = require('crypto');
       const [salt, originalHash] = stored.split(':');
       
       if (!salt || !originalHash) {
@@ -40,10 +39,17 @@ async function comparePasswords(supplied: string, stored: string) {
       }
       
       // Recalculer le hash avec le même salt
-      const hash = crypto.pbkdf2Sync(supplied, salt, 100000, 64, 'sha512').toString('hex');
+      // Déterminer la longueur du hash attendu
+      const expectedLength = originalHash.length / 2; // Longueur en bytes (hex = 2 chars par byte)
+      const hash = pbkdf2Sync(supplied, salt, 100000, expectedLength, expectedLength === 32 ? 'sha256' : 'sha512').toString('hex');
       
-      // Comparaison sécurisée
-      const result = crypto.timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(hash, 'hex'));
+      // Comparaison sécurisée - vérifier d'abord les longueurs
+      if (originalHash.length !== hash.length) {
+        console.error('❌ Hash length mismatch:', { originalLen: originalHash.length, newLen: hash.length });
+        return false;
+      }
+      
+      const result = timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(hash, 'hex'));
       console.log('🔐 PBKDF2 password comparison result:', result);
       return result;
     } catch (error) {
