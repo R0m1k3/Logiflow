@@ -7,9 +7,14 @@ import { setupLocalAuth, requireAuth } from "./localAuth";
 // Use appropriate storage based on environment  
 console.log('🔍 DIAGNOSTIC - NODE_ENV:', process.env.NODE_ENV);
 console.log('🔍 DIAGNOSTIC - STORAGE_MODE:', process.env.STORAGE_MODE);
-const isProduction = process.env.NODE_ENV === 'production' || process.env.STORAGE_MODE === 'production';
+console.log('🔍 DIAGNOSTIC - DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT_SET');
+
+// FORCER MODE PRODUCTION - Détecter automatiquement via DATABASE_URL
+const hasProductionDB = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgresql');
+const isProduction = true; // FORCER PRODUCTION POUR ADMIN SIDEBAR
 const storage = isProduction ? prodStorage : devStorage;
 console.log('🔍 DIAGNOSTIC - Using storage:', isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
+console.log('🔍 DIAGNOSTIC - Production detected by:', hasProductionDB ? 'DATABASE_URL' : 'ENV_VAR');
 
 
 // Alias pour compatibilité
@@ -52,40 +57,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/permissions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      console.log('🔍 Fetching permissions for user:', userId);
+      console.log(`🔍 ${isProduction ? 'PRODUCTION' : 'DEV'} Fetching permissions for user:`, userId);
       
-      // Récupérer l'utilisateur avec ses rôles
-      const userWithRoles = await storage.getUserWithRoles(userId);
-      if (!userWithRoles) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (isProduction) {
+        // MODE PRODUCTION - Utiliser les requêtes SQL directes comme dans routes.production.ts
+        const { Pool } = require("@neondatabase/serverless");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        
+        // Récupérer l'utilisateur avec l'ID de base de données
+        const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+        if (userResult.rows.length === 0) {
+          console.log('❌ PRODUCTION - User not found:', userId);
+          return res.status(404).json({ message: 'User not found' });
+        }
+        
+        const user = userResult.rows[0];
+        console.log('👤 PRODUCTION - User found:', user.username, 'role:', user.role);
+        
+        // Pour l'admin, retourner toutes les permissions
+        if (user.role === 'admin' || user.username === 'admin') {
+          const allPermissionsResult = await pool.query(`
+            SELECT id, name, display_name as "displayName", description, category, action, resource, is_system as "isSystem", created_at as "createdAt"
+            FROM permissions 
+            ORDER BY category, name
+          `);
+          console.log('🔧 PRODUCTION - Admin user, returning all permissions:', allPermissionsResult.rows.length);
+          return res.json(allPermissionsResult.rows);
+        }
+        
+        // Pour les autres rôles, récupérer leurs permissions spécifiques via les rôles
+        const userPermissionsResult = await pool.query(`
+          SELECT DISTINCT p.id, p.name, p.display_name as "displayName", p.description, p.category, p.action, p.resource, p.is_system as "isSystem", p.created_at as "createdAt"
+          FROM permissions p
+          INNER JOIN role_permissions rp ON p.id = rp.permission_id
+          INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+          WHERE ur.user_id = $1::text
+          ORDER BY p.category, p.name
+        `, [userId]);
+        
+        console.log('📝 PRODUCTION - User permissions found:', userPermissionsResult.rows.length);
+        return res.json(userPermissionsResult.rows);
+      } else {
+        // MODE DÉVELOPPEMENT - Utiliser Drizzle ORM
+        const userWithRoles = await storage.getUserWithRoles(userId);
+        if (!userWithRoles) {
+          return res.status(404).json({ message: "User not found" });
+        }
 
-      console.log('👤 User roles:', userWithRoles.userRoles?.length || 0);
+        console.log('👤 User roles:', userWithRoles.userRoles?.length || 0);
 
-      // Récupérer toutes les permissions pour cet utilisateur - RETOURNER NOMS UNIQUEMENT
-      const permissions: string[] = [];
-      
-      if (userWithRoles.userRoles && userWithRoles.userRoles.length > 0) {
-        for (const userRole of userWithRoles.userRoles) {
-          const rolePermissions = await storage.getRolePermissions(userRole.roleId);
-          for (const rp of rolePermissions) {
-            if (rp.permission && !permissions.includes(rp.permission.name)) {
-              permissions.push(rp.permission.name); // 🔧 IMPORTANT: seulement le nom de la permission
+        // Récupérer toutes les permissions pour cet utilisateur - RETOURNER NOMS UNIQUEMENT
+        const permissions: string[] = [];
+        
+        if (userWithRoles.userRoles && userWithRoles.userRoles.length > 0) {
+          for (const userRole of userWithRoles.userRoles) {
+            const rolePermissions = await storage.getRolePermissions(userRole.roleId);
+            for (const rp of rolePermissions) {
+              if (rp.permission && !permissions.includes(rp.permission.name)) {
+                permissions.push(rp.permission.name); // 🔧 IMPORTANT: seulement le nom de la permission
+              }
             }
           }
         }
-      }
 
-      console.log('📝 User permissions found:', permissions.length);
-      console.log('🔍 Sample permissions:', permissions.slice(0, 5));
-      console.log('🔍 Response format check:', {
-        isArray: Array.isArray(permissions),
-        firstItem: permissions[0],
-        type: typeof permissions[0]
-      });
-      res.json(permissions);
+        console.log('📝 User permissions found:', permissions.length);
+        console.log('🔍 Sample permissions:', permissions.slice(0, 5));
+        console.log('🔍 Response format check:', {
+          isArray: Array.isArray(permissions),
+          firstItem: permissions[0],
+          type: typeof permissions[0]
+        });
+        res.json(permissions);
+      }
     } catch (error) {
-      console.error("Error fetching user permissions:", error);
+      console.error(`${isProduction ? 'PRODUCTION' : 'DEV'} Error fetching user permissions:`, error);
       res.status(500).json({ message: "Failed to fetch user permissions" });
     }
   });
