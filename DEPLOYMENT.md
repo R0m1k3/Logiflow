@@ -27,6 +27,18 @@ docker network create nginx_default
 docker-compose up -d
 ```
 
+## Résolution des Erreurs Communes
+
+### Erreur "port is already allocated"
+Si vous obtenez une erreur de port déjà alloué, le PostgreSQL local utilise déjà le port 5432.
+Le docker-compose.yml utilise maintenant le port 5434 pour éviter les conflits.
+
+### Erreur réseau "nginx_default"
+Créez le réseau avant le déploiement :
+```bash
+docker network create nginx_default
+```
+
 ## Configuration Production
 L'application est déjà configurée pour la production avec :
 - ✅ 4 rôles fixes (Admin, Manager, Employé, Directeur)  
@@ -34,6 +46,7 @@ L'application est déjà configurée pour la production avec :
 - ✅ Authentification locale sécurisée
 - ✅ Système de permissions complet
 - ✅ Sauvegarde automatique quotidienne
+- ✅ Ports configurés sans conflit (app:3000, db:5434)
 
 ## Variables d'Environnement
 Les variables sont déjà configurées dans les fichiers docker-compose.
