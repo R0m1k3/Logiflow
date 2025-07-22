@@ -1340,17 +1340,23 @@ async function ensureEmployeePermissions() {
     console.log('🔧 CRITICAL FIX: Ensuring employee user ff292...');
     
     try {
+      // Générer un mot de passe haché pour ff292
+      const crypto = require('crypto');
+      const password = 'ff292';
+      const salt = crypto.randomBytes(32);
+      const hashedPassword = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512');
+      const fullHashedPassword = salt.toString('hex') + ':' + hashedPassword.toString('hex');
+      
       const employeeUser = await pool.query(`
         INSERT INTO users (id, username, email, password, first_name, last_name, role, password_changed, created_at, updated_at)
-        VALUES ('ff292_employee', 'ff292', 'ff292@logiflow.com', 'ff292', 'Employee', 'Frouard', 'employee', false, NOW(), NOW())
+        VALUES ('ff292_employee', 'ff292', 'ff292@logiflow.com', $1, 'Employee', 'Frouard', 'employee', false, NOW(), NOW')
         ON CONFLICT (username) DO UPDATE SET
           email = EXCLUDED.email,
-          password = EXCLUDED.password,
           first_name = EXCLUDED.first_name,
           last_name = EXCLUDED.last_name,
           role = EXCLUDED.role
         RETURNING id
-      `);
+      `, [fullHashedPassword]);
       
       const userId = employeeUser.rows[0]?.id || 'ff292_employee';
       
