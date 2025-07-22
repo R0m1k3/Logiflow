@@ -25,28 +25,57 @@ export async function hashPassword(password: string) {
 async function comparePasswords(supplied: string, stored: string) {
   console.log('🔐 comparePasswords:', { supplied: 'HIDDEN', stored: stored?.substring(0, 20) + '...', hasFormat: stored?.includes('.') });
   
-  // Vérifier le format du mot de passe stocké
-  if (!stored || !stored.includes('.')) {
-    console.error('❌ Invalid password format:', { stored });
-    return false;
+  // 🔧 CORRECTION CRITIQUE: Support des deux formats de hash
+  
+  // Format production PBKDF2 avec deux-points
+  if (stored && stored.includes(':')) {
+    console.log('🔧 Using production PBKDF2 format');
+    try {
+      const crypto = require('crypto');
+      const [salt, originalHash] = stored.split(':');
+      
+      if (!salt || !originalHash) {
+        console.error('❌ Invalid PBKDF2 hash format');
+        return false;
+      }
+      
+      // Recalculer le hash avec le même salt
+      const hash = crypto.pbkdf2Sync(supplied, salt, 100000, 64, 'sha512').toString('hex');
+      
+      // Comparaison sécurisée
+      const result = crypto.timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(hash, 'hex'));
+      console.log('🔐 PBKDF2 password comparison result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error comparing PBKDF2 passwords:', error);
+      return false;
+    }
   }
   
-  const [hashed, salt] = stored.split(".");
-  if (!hashed || !salt) {
-    console.error('❌ Missing hash or salt:', { hasHash: !!hashed, hasSalt: !!salt });
-    return false;
+  // Format développement scrypt avec point (ancien format)
+  if (stored && stored.includes('.')) {
+    console.log('🔧 Using development scrypt format');
+    const [hashed, salt] = stored.split(".");
+    if (!hashed || !salt) {
+      console.error('❌ Missing hash or salt:', { hasHash: !!hashed, hasSalt: !!salt });
+      return false;
+    }
+    
+    try {
+      const hashedBuf = Buffer.from(hashed, "hex");
+      const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+      const result = timingSafeEqual(hashedBuf, suppliedBuf);
+      console.log('🔐 Scrypt password comparison result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error comparing scrypt passwords:', error);
+      return false;
+    }
   }
   
-  try {
-    const hashedBuf = Buffer.from(hashed, "hex");
-    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-    const result = timingSafeEqual(hashedBuf, suppliedBuf);
-    console.log('🔐 Password comparison result:', result);
-    return result;
-  } catch (error) {
-    console.error('❌ Error comparing passwords:', error);
-    return false;
-  }
+  // Format invalide
+  console.error('❌ Invalid password format - no separator found:', { stored });
+  return false;
 }
 
 async function createDefaultAdminUser() {
