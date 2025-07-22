@@ -11,7 +11,7 @@ export function usePermissions() {
     }
     
     // Admin a toujours accès
-    if (user.role === 'admin') {
+    if ((user as any).role === 'admin') {
       return true;
     }
     
@@ -56,7 +56,7 @@ export function usePermissions() {
     };
     
     // Vérifier si l'utilisateur a la permission selon son rôle
-    const userRolePermissions = rolePermissions[user.role] || [];
+    const userRolePermissions = rolePermissions[(user as any).role] || [];
     return userRolePermissions.includes(requiredPermission);
   };
 
