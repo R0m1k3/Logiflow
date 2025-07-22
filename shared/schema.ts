@@ -235,7 +235,8 @@ export const userRoles = pgTable("user_roles", {
 // DLC Products (Date Limite de Consommation)
 export const dlcProducts = pgTable("dlc_products", {
   id: serial("id").primaryKey(),
-  productName: varchar("product_name").notNull(), // Nom du produit
+  name: varchar("name").notNull(), // Nom du produit (colonne obligatoire en base)
+  productName: varchar("product_name").notNull(), // Nom du produit (nouveau format)
   gencode: varchar("gencode"), // Code-barres/gencode EAN13 (optionnel)
   supplierId: integer("supplier_id").notNull(), // ID du fournisseur
   groupId: integer("group_id").notNull(), // ID du magasin/groupe
