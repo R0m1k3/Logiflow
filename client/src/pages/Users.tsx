@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { getRoleTailwindClasses, getRoleDisplayName } from "@/lib/roleUtils";
+import { getRoleTailwindClasses, getRoleDisplayName, getRoleIcon } from "@/lib/roleUtils";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { 
   Search, 
@@ -866,49 +866,53 @@ export default function UsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            {/* 🔧 SYSTÈME DE RÔLES CORRIGÉ - Utilise les vraies couleurs de la DB */}
+                            {/* 🎨 SYSTÈME DE RÔLES AVEC ICÔNES ET COULEURS CLAIRES */}
                             {Array.isArray(userData.userRoles) && userData.userRoles.length > 0 ? (
-                              userData.userRoles.map((userRole, index) => (
-                                <div key={userRole.roleId || index} className="flex items-center mr-2">
-                                  <div 
-                                    className="w-3 h-3 rounded-full mr-2 border-2 border-white shadow-sm"
-                                    style={{ backgroundColor: userRole.role?.color || '#6b7280' }}
-                                  />
-                                  <Badge 
-                                    style={{ 
-                                      backgroundColor: userRole.role?.color || '#6b7280',
-                                      color: 'white'
-                                    }}
-                                    className="text-xs font-medium"
-                                  >
-                                    {userRole.role?.displayName || userRole.role?.name || 'Rôle inconnu'}
-                                  </Badge>
-                                </div>
-                              ))
+                              userData.userRoles.map((userRole, index) => {
+                                const RoleIcon = getRoleIcon(userRole.role?.name || 'user');
+                                const classes = getRoleTailwindClasses(userRole.role?.name || 'user');
+                                const displayName = getRoleDisplayName(userRole.role?.name || 'user');
+                                
+                                return (
+                                  <div key={userRole.roleId || index} className="flex items-center mr-2">
+                                    <div className={`flex items-center px-2 py-1 rounded-md ${classes.badgeClass}`}>
+                                      <RoleIcon className={`w-3 h-3 mr-1 ${classes.iconClass}`} />
+                                      <span className="text-xs font-medium">{displayName}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })
                             ) : Array.isArray(userData.roles) && userData.roles.length > 0 ? (
-                              userData.roles.map((role, index) => (
-                                <div key={role.id || index} className="flex items-center mr-2">
-                                  <div 
-                                    className="w-3 h-3 rounded-full mr-2 border-2 border-white shadow-sm"
-                                    style={{ backgroundColor: role.color || '#6b7280' }}
-                                  />
-                                  <Badge 
-                                    style={{ 
-                                      backgroundColor: role.color || '#6b7280',
-                                      color: 'white'
-                                    }}
-                                    className="text-xs font-medium"
-                                  >
-                                    {role.displayName || role.name}
-                                  </Badge>
-                                </div>
-                              ))
+                              userData.roles.map((role, index) => {
+                                const RoleIcon = getRoleIcon(role.name || 'user');
+                                const classes = getRoleTailwindClasses(role.name || 'user');
+                                const displayName = getRoleDisplayName(role.name || 'user');
+                                
+                                return (
+                                  <div key={role.id || index} className="flex items-center mr-2">
+                                    <div className={`flex items-center px-2 py-1 rounded-md ${classes.badgeClass}`}>
+                                      <RoleIcon className={`w-3 h-3 mr-1 ${classes.iconClass}`} />
+                                      <span className="text-xs font-medium">{displayName}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })
                             ) : (
                               // Fallback final si aucune donnée de rôle n'est disponible
-                              <div className="flex items-center">
-                                {getRoleIcon(userData.role)}
-                                <span className="ml-2">{getRoleBadge(userData.role)}</span>
-                              </div>
+                              (() => {
+                                const RoleIcon = getRoleIcon(userData.role);
+                                const classes = getRoleTailwindClasses(userData.role);
+                                const displayName = getRoleDisplayName(userData.role);
+                                
+                                return (
+                                  <div className="flex items-center">
+                                    <div className={`flex items-center px-2 py-1 rounded-md ${classes.badgeClass}`}>
+                                      <RoleIcon className={`w-3 h-3 mr-1 ${classes.iconClass}`} />
+                                      <span className="text-xs font-medium">{displayName}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })()
                             )}
                           </div>
                         </td>
@@ -948,17 +952,19 @@ export default function UsersPage() {
                                   <SelectValue placeholder="Rôle" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {safeRoles.map((role) => (
-                                    <SelectItem key={role.id} value={role.name}>
-                                      <div className="flex items-center">
-                                        <div 
-                                          className="w-2 h-2 rounded-full mr-2"
-                                          style={{ backgroundColor: role.color }}
-                                        />
-                                        {role.displayName || role.name}
-                                      </div>
-                                    </SelectItem>
-                                  ))}
+                                  {safeRoles.map((role) => {
+                                    const RoleIcon = getRoleIcon(role.name);
+                                    const classes = getRoleTailwindClasses(role.name);
+                                    
+                                    return (
+                                      <SelectItem key={role.id} value={role.name}>
+                                        <div className="flex items-center">
+                                          <RoleIcon className={`w-3 h-3 mr-2 ${classes.iconClass}`} />
+                                          {role.displayName || role.name}
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
                                 </SelectContent>
                               </Select>
                             )}
