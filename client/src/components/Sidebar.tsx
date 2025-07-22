@@ -125,13 +125,13 @@ export default function Sidebar() {
       path: "/suppliers", 
       label: "Fournisseurs", 
       icon: Building, 
-      permission: "suppliers_read" 
+      permission: "system_admin" // ADMIN UNIQUEMENT - Pas d'accès Gestion pour Directeur/Manager
     },
     { 
       path: "/groups", 
       label: "Magasins", 
       icon: Users, 
-      permission: "groups_read" 
+      permission: "system_admin" // ADMIN UNIQUEMENT - Pas d'accès Gestion pour Directeur/Manager
     },
   ];
 
@@ -140,7 +140,7 @@ export default function Sidebar() {
       path: "/users", 
       label: "Utilisateurs", 
       icon: UserCog, 
-      permission: "users_read" 
+      permission: "system_admin" // ADMIN UNIQUEMENT - Pas d'accès Administration pour Directeur/Manager
     },
     { 
       path: "/database-backup", 

@@ -48,6 +48,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // NOUVEAU SYSTÈME - Route pour récupérer les permissions de l'utilisateur connecté
+  app.get('/api/user/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      console.log('🔍 Fetching permissions for user:', userId);
+      
+      // Récupérer l'utilisateur avec ses rôles
+      const userWithRoles = await storage.getUserWithRoles(userId);
+      if (!userWithRoles) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log('👤 User roles:', userWithRoles.userRoles?.length || 0);
+
+      // Récupérer toutes les permissions pour cet utilisateur
+      const permissions: string[] = [];
+      
+      if (userWithRoles.userRoles && userWithRoles.userRoles.length > 0) {
+        for (const userRole of userWithRoles.userRoles) {
+          const rolePermissions = await storage.getRolePermissions(userRole.roleId);
+          for (const rp of rolePermissions) {
+            if (rp.permission && !permissions.includes(rp.permission.name)) {
+              permissions.push(rp.permission.name);
+            }
+          }
+        }
+      }
+
+      console.log('📝 User permissions found:', permissions.length);
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+      res.status(500).json({ message: "Failed to fetch user permissions" });
+    }
+  });
+
   // Auth routes handled by authSwitch (local or Replit)
 
   // Groups routes
