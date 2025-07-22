@@ -27,13 +27,15 @@ export default function Sidebar() {
 
   const isLoading = userLoading || permissionsLoading;
   
-  // 🔧 DEBUG - Logs simplifiés pour sidebar
-  console.log('🔧 Sidebar Result:', { 
+  // 🔧 DEBUG - Vérification sidebar pour Nicolas
+  console.log('🔧 Sidebar Nicolas:', { 
     isLoading,
-    hasUser: !!user, 
+    shouldShowSidebar: !isLoading && !!user,
     permissionsCount: Array.isArray(userPermissions) ? userPermissions.length : 'not-array',
     hasDashboard: hasPermission('dashboard_read'),
-    hasCalendar: hasPermission('calendar_read')
+    hasCalendar: hasPermission('calendar_read'),
+    hasOrders: hasPermission('orders_read'),
+    hasGestion: hasPermission('suppliers_create') // Test si peut voir gestion
   });
 
   const handleLogout = async () => {

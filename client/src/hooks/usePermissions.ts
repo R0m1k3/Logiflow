@@ -23,16 +23,22 @@ export function usePermissions() {
     }
   }, [user, permissionsLoading, userPermissions, refetch]);
 
-  // 🔧 DEBUG - Logs pour diagnostiquer le problème de données
-  console.log('🔧 usePermissions Debug:', {
-    hasUser: !!user,
-    permissionsLoading,
-    permissionsError: permissionsError?.message,
-    userPermissionsType: typeof userPermissions,
-    userPermissionsIsArray: Array.isArray(userPermissions),
-    userPermissionsLength: Array.isArray(userPermissions) ? userPermissions.length : 'not-array',
-    firstFewPermissions: Array.isArray(userPermissions) ? userPermissions.slice(0, 3) : userPermissions,
-    userPermissionsRaw: userPermissions // 🔧 Voir la vraie structure des données
+  // 🔧 FIX PERMISSIONS - Extraire les noms des permissions
+  const permissionNames = React.useMemo(() => {
+    if (!Array.isArray(userPermissions)) return [];
+    return userPermissions.map(p => 
+      typeof p === 'string' ? p : p.name
+    ).filter(Boolean);
+  }, [userPermissions]);
+
+  // 🔧 DEBUG - Logs pour vérifier le bon fonctionnement
+  console.log('🔧 usePermissions - Nicolas Directeur:', {
+    permissionsCount: permissionNames.length,
+    hasDashboard: permissionNames.includes('dashboard_read'),
+    hasCalendar: permissionNames.includes('calendar_read'),
+    hasOrders: permissionNames.includes('orders_read'),
+    hasGestion: permissionNames.includes('suppliers_create') || permissionNames.includes('groups_create'),
+    permissionNames: permissionNames.slice(0, 10) // Premiers 10 pour vérification
   });
 
   // Fonction pour vérifier une permission basée sur les vrais rôles de la base
@@ -42,8 +48,8 @@ export function usePermissions() {
       return false;
     }
 
-    // Vérifier si l'utilisateur a la permission selon les données de la base
-    return Array.isArray(userPermissions) && userPermissions.includes(requiredPermission);
+    // 🔧 CORRECTION - Vérifier dans les noms extraits
+    return permissionNames.includes(requiredPermission);
   };
 
   return {

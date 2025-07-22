@@ -123,6 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - RÉSOLUTION FINALE: Système de Permissions Hardcodées - 4 Rôles Fixes Complètement Opérationnel
+
+- **PERSISTANCE DÉFINITIVEMENT RÉSOLUE** - Nicolas garde maintenant ses 50 permissions directeur après chaque redémarrage serveur
+- **SIDEBAR DYNAMIQUE FONCTIONNELLE** - Menu de navigation s'affiche correctement basé sur permissions réelles utilisateur
+- **EXTRACTION PERMISSIONS CORRIGÉE** - usePermissions.ts extrait maintenant correctement les noms des permissions depuis objets API
+- **ASSIGNATION AUTOMATIQUE** - initDatabase.production.ts assigne automatiquement Nicolas (ID: _1753182518439) au rôle directeur
+- **API PERMISSIONS OPÉRATIONNELLE** - Route /api/user/permissions retourne 50 permissions objets complets pour directeur
+- **FONCTION hasPermission RÉPARÉE** - Vérification permissions basée sur extraction des noms depuis structure objet API
+- **SYSTÈME ENTIÈREMENT VERROUILLÉ** - Aucune interface modification rôles/permissions, 4 rôles fixes hardcodés uniquement
+
 ### July 22, 2025 - CORRECTION CRITIQUE: Système de Permissions Hardcodées - 4 Rôles Fixes Finalisés
 
 - **BUG PERMISSIONS RÉSOLU** - Directeur et Manager ne voient plus les menus "Gestion" (fournisseurs/magasins) selon spécifications
