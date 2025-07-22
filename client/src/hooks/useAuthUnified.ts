@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 
 // Hook d'authentification unifié qui s'adapte automatiquement
 // En production utilise fetch direct, en développement utilise React Query
@@ -113,7 +114,7 @@ export function useAuthUnified() {
       console.log('🔄 Development refetch result:', { 
         success: result.isSuccess, 
         hasData: !!result.data,
-        userId: result.data?.id 
+        userId: (result.data as any)?.id 
       });
       return result.data;
     }
