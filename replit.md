@@ -133,6 +133,7 @@ The application uses a sophisticated dual authentication approach:
 - **SPÉCIFICATIONS DIRECTEUR RESPECTÉES** - Tout sauf Gestion/Administration, incluant validation DLC et suppression commandes client
 - **PATTERN BYPASS APPLIQUÉ** - Même logique (isAdmin || isDirecteur || condition) utilisée uniformément
 - **APPLICATION ENTIÈREMENT FONCTIONNELLE** - Directeur peut maintenant utiliser toutes ses fonctionnalités selon cahier des charges
+- **PERMISSIONS IMPRESSION ET CONTACT AJOUTÉES** - Directeur a maintenant accès aux boutons impression et validation contact (mêmes droits que Admin sur page commandes client)
 
 ### July 22, 2025 - SPÉCIFICATIONS FINALES MANAGER: Création Commandes et Validation Livraisons Autorisées
 

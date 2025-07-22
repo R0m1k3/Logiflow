@@ -64,7 +64,7 @@ export default function CustomerOrders() {
   });
 
   // Fetch suppliers for filter
-  const { data: suppliers = [] } = useQuery({
+  const { data: suppliers = [] } = useQuery<any[]>({
     queryKey: ['/api/suppliers'],
   });
 
@@ -825,7 +825,7 @@ export default function CustomerOrders() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        {canShowButtons(order.status) && (
+                        {(canShowButtons(order.status) || user?.role === 'admin' || user?.role === 'directeur') && (
                           <>
                             <Button
                               variant="outline"
