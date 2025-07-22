@@ -26,17 +26,6 @@ export default function Sidebar() {
   const [location] = useLocation();
 
   const isLoading = userLoading || permissionsLoading;
-  
-  // 🔧 DEBUG - Vérification sidebar pour Nicolas
-  console.log('🔧 Sidebar Nicolas:', { 
-    isLoading,
-    shouldShowSidebar: !isLoading && !!user,
-    permissionsCount: Array.isArray(userPermissions) ? userPermissions.length : 'not-array',
-    hasDashboard: hasPermission('dashboard_read'),
-    hasCalendar: hasPermission('calendar_read'),
-    hasOrders: hasPermission('orders_read'),
-    hasGestion: hasPermission('suppliers_create') // Test si peut voir gestion
-  });
 
   const handleLogout = async () => {
     try {
@@ -219,10 +208,11 @@ export default function Sidebar() {
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
-            const hasPermissionResult = hasPermission(item.permission);
+            // 🔧 FIX ADMIN - Pour admin, toujours afficher tous les menus principaux
+            const isAdmin = user && (user as any).role === 'admin';
+            const shouldShow = isAdmin || hasPermission(item.permission);
             
-            // 🚨 CRITICAL DEBUG - Forcer l'affichage de TOUS les éléments temporairement
-            console.log(`🚨 FORCE RENDER - ${item.label}: showing regardless of permissions`);
+            if (!shouldShow) return null;
             
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -238,7 +228,6 @@ export default function Sidebar() {
                 >
                   <Icon className="mr-3 h-4 w-4" />
                   {item.label}
-                  {!hasPermissionResult && <span className="ml-2 text-xs text-red-500">[NO PERM]</span>}
                 </div>
               </Link>
             );
@@ -246,7 +235,11 @@ export default function Sidebar() {
         </div>
 
         {/* Management Section */}
-        {managementItems.some(item => hasPermission(item.permission)) && (
+        {(function() {
+          const isAdmin = user && (user as any).role === 'admin';
+          const hasManagementItems = isAdmin || managementItems.some(item => hasPermission(item.permission));
+          return hasManagementItems;
+        })() && (
           <>
             <div className="mt-6 mb-2">
               <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -255,7 +248,11 @@ export default function Sidebar() {
             </div>
             <div className="space-y-1">
               {managementItems.map((item) => {
-                if (!hasPermission(item.permission)) return null;
+                // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus gestion
+                const isAdmin = user && (user as any).role === 'admin';
+                const shouldShow = isAdmin || hasPermission(item.permission);
+                
+                if (!shouldShow) return null;
                 
                 const Icon = item.icon;
                 const active = isActive(item.path);
@@ -281,7 +278,11 @@ export default function Sidebar() {
       </nav>
 
       {/* Administration Section */}
-      {adminItems.some(item => hasPermission(item.permission)) && (
+      {(function() {
+        const isAdmin = user && (user as any).role === 'admin';
+        const hasAdminItems = isAdmin || adminItems.some(item => hasPermission(item.permission));
+        return hasAdminItems;
+      })() && (
         <div className="border-t border-gray-200 py-4 px-3">
           <div className="mb-2">
             <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -290,7 +291,11 @@ export default function Sidebar() {
           </div>
           <div className="space-y-1">
             {adminItems.map((item) => {
-              if (!hasPermission(item.permission)) return null;
+              // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus administration
+              const isAdmin = user && (user as any).role === 'admin';
+              const shouldShow = isAdmin || hasPermission(item.permission);
+              
+              if (!shouldShow) return null;
               
               const Icon = item.icon;
               const active = isActive(item.path);

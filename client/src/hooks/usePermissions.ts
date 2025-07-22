@@ -14,10 +14,9 @@ export function usePermissions() {
     refetchOnWindowFocus: false
   });
 
-  // 🔧 FORCE REFRESH - Forcer actualisation si aucune permission
+  // Force refresh permissions if none are detected
   React.useEffect(() => {
     if (user && !permissionsLoading && Array.isArray(userPermissions) && userPermissions.length === 0) {
-      console.log('🔧 Force refresh permissions - aucune permission détectée');
       refetch();
     }
   }, [user, permissionsLoading, userPermissions, refetch]);
@@ -34,19 +33,11 @@ export function usePermissions() {
       return null;
     }).filter(Boolean);
     
-    console.log('🔧 PRODUCTION - Permission names extracted:', names.slice(0, 10));
+
     return names;
   }, [userPermissions]);
 
-  // 🔧 DEBUG - Logs pour vérifier le bon fonctionnement
-  console.log('🔧 usePermissions - Nicolas Directeur:', {
-    permissionsCount: permissionNames.length,
-    hasDashboard: permissionNames.includes('dashboard_read'),
-    hasCalendar: permissionNames.includes('calendar_read'),
-    hasOrders: permissionNames.includes('orders_read'),
-    hasGestion: permissionNames.includes('suppliers_create') || permissionNames.includes('groups_create'),
-    permissionNames: permissionNames.slice(0, 10) // Premiers 10 pour vérification
-  });
+
 
   // Fonction pour vérifier une permission basée sur les vrais rôles de la base
   const hasPermission = (requiredPermission: string): boolean => {
