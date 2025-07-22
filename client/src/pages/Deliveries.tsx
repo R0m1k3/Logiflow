@@ -342,7 +342,7 @@ export default function Deliveries() {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary"></div>
           </div>
-        ) : (console.log('🚚 Filtered deliveries length:', filteredDeliveries.length) || filteredDeliveries.length === 0) ? (
+        ) : filteredDeliveries.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500">
             <Truck className="w-16 h-16 mb-4 text-gray-300" />
             <h3 className="text-lg font-medium mb-2">Aucune livraison trouvée</h3>

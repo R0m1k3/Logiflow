@@ -129,7 +129,9 @@ The application uses a sophisticated dual authentication approach:
 - **QUICKCREATEMENU CORRIGÉ** - Menu création rapide affiche maintenant "Nouvelle Commande" ET "Nouvelle Livraison" pour le manager
 - **ORDERS.TSX MIS À JOUR** - Manager peut créer, modifier des commandes (sauf suppression réservée Admin/Directeur)
 - **DELIVERIES.TSX CONFIRMÉ** - Manager peut créer, modifier et valider des livraisons (permissions déjà correctes)
-- **SPÉCIFICATIONS MANAGER COMPLÈTES** - Accès total sauf : Rapprochement et sections Gestion/Administration
+- **ROUTE VALIDATION LIVRAISONS CORRIGÉE** - API /api/deliveries/:id/validate permet maintenant Manager ET Directeur de valider
+- **ERREUR LSP DELIVERIES.TXS CORRIGÉE** - Correction erreur compilation "expression of type void cannot be tested for truthiness"
+- **SPÉCIFICATIONS MANAGER/DIRECTEUR COMPLÈTES** - Validation livraisons opérationnelle pour Manager et Directeur
 
 ### July 22, 2025 - RESTRICTION MENUS EMPLOYÉ: Calendrier, Commandes, Livraisons et Rapprochement Cachés
 

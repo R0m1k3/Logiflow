@@ -449,10 +449,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // 🔧 FIX ADMIN - Bypass permission check for admin
+      // 🔧 FIX VALIDATION PERMISSIONS - Bypass pour Admin, Manager et Directeur selon spécifications
       const isAdmin = user.role === 'admin';
-      if (!isAdmin) {
-        // Check if user has deliveries_validate permission
+      const isManager = user.role === 'manager';
+      const isDirecteur = user.role === 'directeur';
+      
+      if (!isAdmin && !isManager && !isDirecteur) {
+        // Check if user has deliveries_validate permission for other roles
         const userPermissions = await storage.getUserPermissions(user.id);
         const hasValidatePermission = userPermissions.some(p => p.name === 'deliveries_validate');
         
