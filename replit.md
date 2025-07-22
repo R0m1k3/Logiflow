@@ -133,9 +133,10 @@ The application uses a sophisticated dual authentication approach:
 - **UTILISATEUR TEST FF292** - Configuré avec rôle "Directeur Houdemont" (33 permissions) et assigné aux magasins
 - **PERMISSIONS GRANULAIRES** - Système flexible permettant des rôles personnalisés avec permissions précises
 
-### July 22, 2025 - SYSTÈME DE RÔLES FIXES: Implémentation Production Complète
+### July 22, 2025 - SYSTÈME DE RÔLES FIXES: Implémentation Production Complète et Permissions Manager Corrigées
 
-- **SYSTÈME RÔLES FIXES FINALISÉ** - 4 rôles hardcodés opérationnels : Admin (54 permissions), Employé (19 permissions), Manager (38 permissions), Directeur (40 permissions)
+- **SYSTÈME RÔLES FIXES FINALISÉ** - 4 rôles hardcodés opérationnels : Admin (54 permissions), Manager (48 permissions), Employé (15 permissions), Directeur (50 permissions)
+- **PERMISSIONS MANAGER CORRIGÉES** - Suppression accès rapprochement pour les managers (48 permissions au lieu de 50)
 - **HOOK PERMISSIONS OPTIMISÉ** - usePermissions() simplifié avec permissions hardcodées par rôle, plus d'API dynamique
 - **SIDEBAR ÉPURÉE FONCTIONNELLE** - Interface nettoyée sans logique complexe, utilisation directe du hook simplifié
 - **ROUTES GESTION RÔLES ÉLIMINÉES** - Suppression complète "/roles" et "/role-management" pour bloquer toute modification
