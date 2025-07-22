@@ -57,9 +57,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/permissions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      console.log(`🔍 ${isProduction ? 'PRODUCTION' : 'DEV'} Fetching permissions for user:`, userId);
+      // 🔧 PRODUCTION FIX - Forcer utilisation production pour résoudre problème sidebar admin
+      const forceProduction = true; // Toujours utiliser le mode production
+      console.log(`🔍 PRODUCTION FORCÉ - Fetching permissions for user:`, userId);
       
-      if (isProduction) {
+      // TOUJOURS utiliser le mode production maintenant
+      try {
         // MODE PRODUCTION - Utiliser les requêtes SQL directes comme dans routes.production.ts
         const { Pool } = require("@neondatabase/serverless");
         const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -97,37 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log('📝 PRODUCTION - User permissions found:', userPermissionsResult.rows.length);
         return res.json(userPermissionsResult.rows);
-      } else {
-        // MODE DÉVELOPPEMENT - Utiliser Drizzle ORM
-        const userWithRoles = await storage.getUserWithRoles(userId);
-        if (!userWithRoles) {
-          return res.status(404).json({ message: "User not found" });
-        }
-
-        console.log('👤 User roles:', userWithRoles.userRoles?.length || 0);
-
-        // Récupérer toutes les permissions pour cet utilisateur - RETOURNER NOMS UNIQUEMENT
-        const permissions: string[] = [];
-        
-        if (userWithRoles.userRoles && userWithRoles.userRoles.length > 0) {
-          for (const userRole of userWithRoles.userRoles) {
-            const rolePermissions = await storage.getRolePermissions(userRole.roleId);
-            for (const rp of rolePermissions) {
-              if (rp.permission && !permissions.includes(rp.permission.name)) {
-                permissions.push(rp.permission.name); // 🔧 IMPORTANT: seulement le nom de la permission
-              }
-            }
-          }
-        }
-
-        console.log('📝 User permissions found:', permissions.length);
-        console.log('🔍 Sample permissions:', permissions.slice(0, 5));
-        console.log('🔍 Response format check:', {
-          isArray: Array.isArray(permissions),
-          firstItem: permissions[0],
-          type: typeof permissions[0]
-        });
-        res.json(permissions);
+      } catch (productionError) {
+        console.error('❌ PRODUCTION Error in user permissions SQL:', productionError);
+        throw productionError;
       }
     } catch (error) {
       console.error(`${isProduction ? 'PRODUCTION' : 'DEV'} Error fetching user permissions:`, error);
