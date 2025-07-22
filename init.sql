@@ -48,7 +48,10 @@ CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     display_name VARCHAR(255) NOT NULL,
+    description TEXT,
     color VARCHAR(7) DEFAULT '#1976D2',
+    is_system BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -56,7 +59,7 @@ CREATE TABLE roles (
 -- Create permissions table
 CREATE TABLE permissions (
     id SERIAL PRIMARY KEY,
-    code VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL UNIQUE,
     display_name VARCHAR(255) NOT NULL,
     category VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -225,12 +228,15 @@ INSERT INTO groups (name, color) VALUES
 ('Frouard', '#1976D2'),
 ('Houdemont', '#455A64');
 
--- Insert roles (only admin and directeur)
-INSERT INTO roles (name, display_name, color) VALUES
-('admin', 'Administrateur', '#F44336');
+-- Insert 4 fixed roles with soft colors
+INSERT INTO roles (id, name, display_name, description, color, is_system, is_active) VALUES
+(1, 'admin', 'Administrateur', 'Accès complet à toutes les fonctionnalités', '#fca5a5', true, true),
+(2, 'manager', 'Manager', 'Accès étendu sauf administration', '#93c5fd', true, true),
+(3, 'employee', 'Employé', 'Accès limité aux opérations de base', '#86efac', true, true),
+(4, 'directeur', 'Directeur', 'Accès direction sans administration', '#c4b5fd', true, true);
 
 -- Insert permissions with French display names
-INSERT INTO permissions (code, display_name, category) VALUES
+INSERT INTO permissions (name, display_name, category) VALUES
 -- Dashboard permissions
 ('dashboard_view', 'Voir le tableau de bord', 'tableau_de_bord'),
 
@@ -304,15 +310,51 @@ INSERT INTO permissions (code, display_name, category) VALUES
 ('tasks_delete', 'Supprimer les tâches', 'gestion_taches'),
 ('tasks_assign', 'Assigner des tâches', 'gestion_taches'),
 
+-- Reconciliation/BL management  
+('reconciliation_read', 'Voir les rapprochements', 'rapprochement'),
+('reconciliation_update', 'Rapprocher BL/Factures', 'rapprochement'),
+
+-- Calendar management
+('calendar_read', 'Voir le calendrier', 'calendrier'),
+
+-- Statistics and reporting
+('statistics_read', 'Voir les statistiques', 'statistiques'),
+('reports_generate', 'Générer des rapports', 'statistiques'),
+
+-- Groups/stores reading (essential for filtering)
+('groups_read', 'Voir les magasins assignés', 'magasins'),
+
 -- Administration
 ('system_admin', 'Administration système', 'administration'),
 ('nocodb_config', 'Configuration NocoDB', 'administration');
 
 -- Assign permissions to roles
 
--- Admin gets all permissions
+-- Admin gets all permissions (56 total)
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r CROSS JOIN permissions p WHERE r.name = 'admin';
+SELECT 1, p.id FROM permissions p;
+
+-- Manager gets everything except administration and reconciliation (50 permissions)
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 2, p.id FROM permissions p 
+WHERE p.category NOT IN ('administration') 
+  AND p.name NOT IN ('reconciliation_read', 'reconciliation_update');
+
+-- Employee gets basic operations only (19 permissions)
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 3, p.id FROM permissions p 
+WHERE p.name IN (
+  'dashboard_view', 'calendar_read', 'orders_read', 'deliveries_read', 'publicities_read',
+  'customer_orders_create', 'customer_orders_read', 'customer_orders_update',
+  'dlc_read', 'dlc_create', 'dlc_update', 'dlc_validate',
+  'tasks_read', 'tasks_validate', 'suppliers_read', 'users_read',
+  'statistics_read', 'reports_generate', 'groups_read'
+);
+
+-- Directeur gets everything except administration (52 permissions)
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT 4, p.id FROM permissions p 
+WHERE p.category NOT IN ('administration');
 
 -- Insert test suppliers
 INSERT INTO suppliers (name, contact, phone, has_dlc) VALUES

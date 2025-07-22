@@ -137,6 +137,7 @@ The application uses a sophisticated dual authentication approach:
 
 - **SYSTÈME RÔLES FIXES FINALISÉ** - 4 rôles hardcodés opérationnels : Admin (54 permissions), Manager (48 permissions), Employé (15 permissions), Directeur (50 permissions)
 - **PERMISSIONS MANAGER CORRIGÉES** - Suppression accès rapprochement pour les managers (48 permissions au lieu de 50)
+- **INIT.SQL COMPLÈTEMENT MIS À JOUR** - Script d'initialisation contient maintenant les 4 rôles fixes avec toutes leurs permissions et couleurs douces
 - **HOOK PERMISSIONS OPTIMISÉ** - usePermissions() simplifié avec permissions hardcodées par rôle, plus d'API dynamique
 - **SIDEBAR ÉPURÉE FONCTIONNELLE** - Interface nettoyée sans logique complexe, utilisation directe du hook simplifié
 - **ROUTES GESTION RÔLES ÉLIMINÉES** - Suppression complète "/roles" et "/role-management" pour bloquer toute modification
