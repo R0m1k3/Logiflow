@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useStore } from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ type TaskWithRelations = Task & {
 
 export default function Tasks() {
   const { user } = useAuthUnified();
+  const { hasPermission } = usePermissions();
   const { selectedStoreId } = useStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -218,7 +220,9 @@ export default function Tasks() {
     }
   };
 
-  const canCreateTasks = user?.role === 'admin' || user?.role === 'manager';
+  const canCreateTasks = hasPermission('tasks_create');
+  const canEditTasks = hasPermission('tasks_update');
+  const canDeleteTasks = hasPermission('tasks_delete');
 
   if (isLoading) {
     return (
@@ -390,21 +394,25 @@ export default function Tasks() {
                                     >
                                       <CheckCircle className="w-4 h-4" />
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleEditTask(task)}
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleDeleteClick(task)}
-                                      className="text-red-600 hover:text-red-700"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    {canEditTasks && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleEditTask(task)}
+                                      >
+                                        <Edit className="w-4 h-4" />
+                                      </Button>
+                                    )}
+                                    {canDeleteTasks && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleDeleteClick(task)}
+                                        className="text-red-600 hover:text-red-700"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
                               </CardContent>
@@ -465,14 +473,16 @@ export default function Tasks() {
                                   </div>
                                   
                                   <div className="flex items-center gap-2 ml-4">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleDeleteClick(task)}
-                                      className="text-red-600 hover:text-red-700"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    {canDeleteTasks && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleDeleteClick(task)}
+                                        className="text-red-600 hover:text-red-700"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    )}
                                   </div>
                                 </div>
                               </CardContent>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, usePagination } from "@/components/ui/pagination";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useStore } from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,12 +32,13 @@ import type { OrderWithRelations } from "@shared/schema";
 
 export default function Orders() {
   const { user } = useAuthUnified();
+  const { hasPermission } = usePermissions();
   const { selectedStoreId } = useStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Redirection pour les employés
-  if (user?.role === 'employee') {
+  // Vérifier la permission de lecture
+  if (!hasPermission('orders_read')) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
@@ -47,7 +49,7 @@ export default function Orders() {
             <div className="ml-3">
               <p className="text-sm text-orange-700">
                 <strong>Accès restreint</strong><br />
-                Seuls les managers et administrateurs peuvent accéder à la page des commandes.
+                Vous n'avez pas la permission de voir les commandes.
               </p>
             </div>
           </div>
@@ -219,9 +221,9 @@ export default function Orders() {
     }
   };
 
-  const canCreate = true; // All users can create orders
-  const canEdit = user?.role === 'admin' || user?.role === 'manager';
-  const canDelete = user?.role === 'admin' || user?.role === 'manager';
+  const canCreate = hasPermission('orders_create');
+  const canEdit = hasPermission('orders_update');
+  const canDelete = hasPermission('orders_delete');
 
   return (
     <div className="p-6 space-y-6">

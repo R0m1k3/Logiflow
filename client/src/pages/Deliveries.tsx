@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, usePagination } from "@/components/ui/pagination";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useStore } from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -33,12 +34,13 @@ import type { DeliveryWithRelations } from "@shared/schema";
 
 export default function Deliveries() {
   const { user } = useAuthUnified();
+  const { hasPermission } = usePermissions();
   const { selectedStoreId } = useStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Redirection pour les employés
-  if (user?.role === 'employee') {
+  // Vérifier la permission de lecture
+  if (!hasPermission('deliveries_read')) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
@@ -49,7 +51,7 @@ export default function Deliveries() {
             <div className="ml-3">
               <p className="text-sm text-orange-700">
                 <strong>Accès restreint</strong><br />
-                Seuls les managers et administrateurs peuvent accéder à la page des livraisons.
+                Vous n'avez pas la permission de voir les livraisons.
               </p>
             </div>
           </div>
@@ -253,10 +255,10 @@ export default function Deliveries() {
     }
   };
 
-  const canCreate = true; // All users can create deliveries
-  const canEdit = user?.role === 'admin' || user?.role === 'manager';
-  const canDelete = user?.role === 'admin' || user?.role === 'manager';
-  const canValidate = user?.role === 'admin' || user?.role === 'manager';
+  const canCreate = hasPermission('deliveries_create');
+  const canEdit = hasPermission('deliveries_update');
+  const canDelete = hasPermission('deliveries_delete');
+  const canValidate = hasPermission('deliveries_validate');
 
   return (
     <div className="p-6 space-y-6">

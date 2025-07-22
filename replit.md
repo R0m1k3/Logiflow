@@ -123,6 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - SYSTÈME PERMISSIONS DYNAMIQUE: Interface Basée sur Permissions Réelles
+
+- **HOOK PERMISSIONS CRÉÉ** - usePermissions centralisé pour vérifier les permissions utilisateur dynamiquement
+- **PAGES REFACTORISÉES** - Tasks, Orders et Deliveries utilisent maintenant les permissions réelles au lieu des rôles
+- **BOUTONS CRÉATION CORRIGÉS** - Affichage des boutons basé sur orders_create, deliveries_create, tasks_create
+- **RESTRICTIONS EMPLOYÉS SUPPRIMÉES** - Plus de blocage par rôle, uniquement par permissions
+- **ACTIONS CONDITIONNELLES** - Édition et suppression vérifiées via permissions update/delete spécifiques
+- **UTILISATEUR TEST FF292** - Configuré avec rôle "Directeur Houdemont" (33 permissions) et assigné aux magasins
+- **PERMISSIONS GRANULAIRES** - Système flexible permettant des rôles personnalisés avec permissions précises
+
 ### July 22, 2025 - RÉSOLUTION FINALE: Système Rôles Personnalisés Complètement Opérationnel
 
 - **BUG CRITIQUE SIDEBAR VIDE RÉSOLU** - Problème des nouveaux rôles sans permissions complètement corrigé
