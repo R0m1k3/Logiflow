@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { useQuery } from "@tanstack/react-query";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
 import { 
   Store, 
@@ -14,7 +14,6 @@ import {
   LogOut,
   FileText,
   Megaphone,
-  Shield,
   Database,
   ShoppingCart,
   Clock,
@@ -23,13 +22,11 @@ import {
 
 export default function Sidebar() {
   const { user, isLoading, error } = useAuthUnified();
+  const { hasPermission } = usePermissions();
   const [location] = useLocation();
-
-  // PRODUCTION DEBUG: Diagnostic sera après définition userPermissions
 
   const handleLogout = async () => {
     try {
-      // Force logout via fetch to ensure session is destroyed
       await fetch('/api/logout', { 
         method: 'POST',
         credentials: 'include'
@@ -37,7 +34,6 @@ export default function Sidebar() {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Force redirect to auth page regardless of API response
       window.location.href = "/auth";
     }
   };
@@ -78,7 +74,7 @@ export default function Sidebar() {
       path: "/calendar", 
       label: "Calendrier", 
       icon: Calendar, 
-      permission: "dashboard_read" // Calendrier fait partie du dashboard
+      permission: "calendar_read"
     },
     { 
       path: "/orders", 
@@ -96,7 +92,7 @@ export default function Sidebar() {
       path: "/bl-reconciliation", 
       label: "Rapprochement", 
       icon: FileText, 
-      permission: "deliveries_read" // Rapprochement lié aux livraisons
+      permission: "reconciliation_read" 
     },
     { 
       path: "/publicities", 
@@ -147,12 +143,6 @@ export default function Sidebar() {
       permission: "users_read" 
     },
     { 
-      path: "/roles", 
-      label: "Gestion des Rôles", 
-      icon: Shield, 
-      permission: "roles_read" 
-    },
-    { 
       path: "/database-backup", 
       label: "Sauvegarde BDD", 
       icon: Database, 
@@ -166,101 +156,7 @@ export default function Sidebar() {
     },
   ];
 
-  // Récupérer les permissions de l'utilisateur dynamiquement
-  const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery({
-    queryKey: ['/api/user/permissions'],
-    queryFn: async () => {
-      console.log('🔍 QUERY ENABLED - Fetching user permissions for user:', user?.username, user?.role);
-      console.log('🔍 QUERY CONDITIONS - user exists:', !!user, 'isLoading:', isLoading, 'enabled condition:', !!user && !isLoading);
-      const response = await fetch('/api/user/permissions', { 
-        credentials: 'include',
-        cache: 'no-cache' 
-      });
-      console.log('🔍 API RESPONSE STATUS:', response.status, response.statusText);
-      if (!response.ok) {
-        console.error('❌ Failed to fetch user permissions:', response.status, response.statusText);
-        throw new Error(`API returned ${response.status}: ${response.statusText}`);
-      }
-      const permissions = await response.json();
-      console.log('✅ User permissions loaded:', permissions.length, 'for role:', user?.role);
-      console.log('📋 First 3 permissions:', permissions.slice(0, 3).map((p: any) => p.name || p.permission?.name));
-      return permissions;
-    },
-    enabled: !!user && !isLoading,
-    staleTime: 1000, // 1 second pour debug
-    refetchOnWindowFocus: false,
-    retry: 3,
-    refetchInterval: false
-  });
-
-  // PRODUCTION DEBUG: Diagnostic complet sidebar
-  console.log('🔍 PRODUCTION SIDEBAR DIAGNOSTIC:', {
-    user: user ? { id: user.id, username: user.username, role: user.role } : null,
-    isLoading,
-    error: error?.message || null,
-    queryEnabled: !!user && !isLoading,
-    userPermissions: userPermissions ? userPermissions.length : 'null',
-    permissionsLoading,
-    permissionsError: permissionsError?.message || null,
-    environment: typeof window !== 'undefined' ? window.location.hostname : 'N/A',
-    firstPermissions: userPermissions?.slice(0, 3)?.map((p: any) => p.name) || []
-  });
-
-  // Fonction pour vérifier les permissions dynamiquement
-  const hasPermission = (requiredPermission: string) => {
-    // Si l'utilisateur n'est pas chargé, ne pas afficher les menus
-    if (!user) {
-      console.log('❌ Permission check failed: no user');
-      return false;
-    }
-    
-    // Admin a toujours accès
-    if (user.role === 'admin') {
-      console.log('✅ Admin user - permission granted:', requiredPermission);
-      return true;
-    }
-    
-    // Si les permissions sont en cours de chargement, ne pas afficher les menus (sauf admin)
-    if (permissionsLoading) {
-      console.log('⏳ Permissions loading for:', user.role, requiredPermission);
-      return false;
-    }
-    
-    // Si erreur de chargement des permissions, ne pas afficher
-    if (permissionsError) {
-      console.log('❌ Permissions error:', permissionsError, 'for:', requiredPermission);
-      return false;
-    }
-    
-    // Si pas de permissions chargées pour un non-admin, ne pas afficher
-    if (!userPermissions || userPermissions.length === 0) {
-      console.log('❌ No permissions loaded for role:', user.role, 'required:', requiredPermission);
-      return false;
-    }
-    
-    // Vérifier si l'utilisateur a la permission spécifique
-    const hasSpecificPermission = userPermissions.some((perm: any) => 
-      perm.name === requiredPermission || perm.permission?.name === requiredPermission
-    );
-    
-    const result = {
-      requiredPermission, 
-      userRole: user?.role, 
-      hasSpecificPermission,
-      totalPermissions: userPermissions.length,
-      permissionsLoading,
-      permissionsError: !!permissionsError
-    };
-    
-    console.log(hasSpecificPermission ? '✅' : '❌', 'Permission check:', result);
-    
-    return hasSpecificPermission;
-  };
-
-
-
-  // Si l'utilisateur ou les permissions se chargent, afficher un état de chargement
-  if (isLoading || permissionsLoading) {
+  if (isLoading) {
     return (
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
         <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-white">
@@ -270,19 +166,15 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">
-              {isLoading ? 'Connexion...' : 'Chargement permissions...'}
-            </p>
+          <div className="text-center text-gray-500">
+            <p>Chargement...</p>
           </div>
         </div>
       </aside>
     );
   }
 
-  // Si l'utilisateur n'est pas authentifié, afficher seulement le logo
-  if (!user) {
+  if (error || !user) {
     return (
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
         <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-white">
@@ -313,11 +205,8 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
-
-          {menuItems.map((item, index) => {
-            const hasRequiredPermission = hasPermission(item.permission);
-            
-            if (!hasRequiredPermission) return null;
+          {menuItems.map((item) => {
+            if (!hasPermission(item.permission)) return null;
             
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -330,7 +219,6 @@ export default function Sidebar() {
                       ? 'bg-gray-100 text-gray-900 border-r-2 border-gray-700'
                       : 'text-gray-700'
                   }`}
-                  onClick={() => console.log(`Navigating to: ${item.path}`)}
                 >
                   <Icon className="mr-3 h-4 w-4" />
                   {item.label}
@@ -363,7 +251,6 @@ export default function Sidebar() {
                           ? 'bg-gray-100 text-gray-900 border-r-2 border-gray-700'
                           : 'text-gray-700'
                       }`}
-                      onClick={() => console.log(`Navigating to management: ${item.path}`)}
                     >
                       <Icon className="mr-3 h-4 w-4" />
                       {item.label}
@@ -399,7 +286,6 @@ export default function Sidebar() {
                         ? 'bg-gray-100 text-gray-900 border-r-2 border-gray-700'
                         : 'text-gray-700'
                     }`}
-                    onClick={() => console.log(`Navigating to admin: ${item.path}`)}
                   >
                     <Icon className="mr-3 h-4 w-4" />
                     {item.label}
@@ -435,7 +321,11 @@ export default function Sidebar() {
               })()}
             </p>
             <p className="text-xs text-gray-500 truncate">
-              {user?.email || user?.username}
+              {user?.role === 'admin' ? 'Administrateur' :
+               user?.role === 'employee' ? 'Employé' :
+               user?.role === 'manager' ? 'Manager' :
+               user?.role === 'directeur' ? 'Directeur' :
+               user?.role}
             </p>
           </div>
         </div>
