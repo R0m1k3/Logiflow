@@ -1,4 +1,4 @@
-// Utilitaire pour harmoniser les couleurs des rôles dans toute l'application
+// Utilitaire pour harmoniser les couleurs des rôles dans toute l'application  
 import { Crown, Users, User, Shield } from "lucide-react";
 
 export const ROLE_COLORS = {
