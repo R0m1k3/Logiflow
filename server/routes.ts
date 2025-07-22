@@ -781,12 +781,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check if user has deliveries_validate permission
-      const userPermissions = await storage.getUserPermissions(user.id);
-      const hasValidatePermission = userPermissions.some(p => p.name === 'deliveries_validate');
-      
-      if (!hasValidatePermission) {
-        return res.status(403).json({ message: "Insufficient permissions" });
+      // Check if user has deliveries_validate permission - Admin, Manager et Directeur selon spécifications
+      if (!['admin', 'manager', 'directeur'].includes(user.role)) {
+        return res.status(403).json({ message: "Insufficient permissions to validate deliveries" });
       }
 
       const id = parseInt(req.params.id);
@@ -1695,9 +1692,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Customer order not found" });
       }
 
-      // Only admin can delete orders
-      if (user.role !== 'admin') {
-        return res.status(403).json({ message: "Only admins can delete customer orders" });
+      // Admin, Manager et Directeur peuvent supprimer les commandes client selon spécifications
+      if (!['admin', 'manager', 'directeur'].includes(user.role)) {
+        return res.status(403).json({ message: "Insufficient permissions to delete customer orders" });
       }
 
       await storage.deleteCustomerOrder(id);
@@ -2221,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
       
-      if (!user || !['admin', 'manager'].includes(user.role)) {
+      if (!user || !['admin', 'manager', 'directeur'].includes(user.role)) {
         return res.status(403).json({ message: "Insufficient permissions to validate products" });
       }
 
