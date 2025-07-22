@@ -123,15 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### July 22, 2025 - SYSTÈME PERMISSIONS DYNAMIQUE: Interface Basée sur Permissions Réelles
+### July 22, 2025 - CORRECTION CRITIQUE: Système de Permissions Hardcodées - 4 Rôles Fixes Finalisés
 
-- **HOOK PERMISSIONS CRÉÉ** - usePermissions centralisé pour vérifier les permissions utilisateur dynamiquement
-- **PAGES REFACTORISÉES** - Tasks, Orders et Deliveries utilisent maintenant les permissions réelles au lieu des rôles
-- **BOUTONS CRÉATION CORRIGÉS** - Affichage des boutons basé sur orders_create, deliveries_create, tasks_create
-- **RESTRICTIONS EMPLOYÉS SUPPRIMÉES** - Plus de blocage par rôle, uniquement par permissions
-- **ACTIONS CONDITIONNELLES** - Édition et suppression vérifiées via permissions update/delete spécifiques
-- **UTILISATEUR TEST FF292** - Configuré avec rôle "Directeur Houdemont" (33 permissions) et assigné aux magasins
-- **PERMISSIONS GRANULAIRES** - Système flexible permettant des rôles personnalisés avec permissions précises
+- **BUG PERMISSIONS RÉSOLU** - Directeur et Manager ne voient plus les menus "Gestion" (fournisseurs/magasins) selon spécifications
+- **SYSTÈME 4 RÔLES FIXES FINALISÉ** - Permissions strictement hardcodées dans usePermissions.ts :
+  - **Admin** : Accès complet à tout (menus principaux, gestion, administration)
+  - **Employé** : Tableau de bord, calendrier, commandes/livraisons (lecture), publicités (lecture), commandes clients (création/modification), DLC (complet), tâches (lecture/validation)
+  - **Manager** : Tout sauf création commandes, rapprochement et AUCUN accès Gestion/Administration
+  - **Directeur** : Tout sauf AUCUN accès Gestion/Administration, publicités lecture uniquement
+- **MENUS GESTION RESTREINTS** - Seul Admin voit "Fournisseurs" et "Magasins" dans section Gestion
+- **MENUS ADMINISTRATION RESTREINTS** - Seul Admin voit "Utilisateurs" et "Sauvegarde BDD" dans section Administration
+- **ZERO MODIFICATION POSSIBLE** - Aucun interface de modification des rôles ou permissions accessible
+- **ARCHITECTURE SÉCURISÉE** - System entièrement hardcodé sans possibilité de contournement
 
 ### July 22, 2025 - SYSTÈME DE RÔLES FIXES: Implémentation Production Complète et Permissions Manager Corrigées
 

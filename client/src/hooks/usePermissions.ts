@@ -15,43 +15,65 @@ export function usePermissions() {
       return true;
     }
     
-    // Permissions hardcodées par rôle
+    // Permissions hardcodées par rôle - 4 RÔLES FIXES
     const rolePermissions: Record<string, string[]> = {
       'employee': [
+        // Tableau de bord
         'dashboard_read', 'statistics_read', 'reports_generate',
+        // Calendrier
         'calendar_read',
+        // Commandes (lecture seulement)
         'orders_read',
+        // Livraisons (lecture seulement)
         'deliveries_read', 
+        // Publicités (lecture seulement)
         'publicities_read',
+        // Commandes clients (création/modification)
         'customer_orders_read', 'customer_orders_create', 'customer_orders_update',
+        // DLC (création/modification/validation)
         'dlc_read', 'dlc_create', 'dlc_update', 'dlc_validate', 'dlc_print', 'dlc_stats',
-        'tasks_read', 'tasks_validate',
-        'suppliers_read'
+        // Tâches (lecture/validation)
+        'tasks_read', 'tasks_validate'
       ],
       'manager': [
+        // Tableau de bord
         'dashboard_read', 'statistics_read', 'reports_generate',
+        // Calendrier
         'calendar_read',
-        'orders_read', 'orders_create', 'orders_update', 'orders_delete',
+        // Commandes (tout sauf création)
+        'orders_read', 'orders_update', 'orders_delete',
+        // Livraisons (complet)
         'deliveries_read', 'deliveries_create', 'deliveries_update', 'deliveries_delete', 'deliveries_validate',
+        // Publicités (lecture seulement - pas d'édition)
         'publicities_read',
+        // Commandes clients (complet)
         'customer_orders_read', 'customer_orders_create', 'customer_orders_update', 'customer_orders_delete',
+        // DLC (complet)
         'dlc_read', 'dlc_create', 'dlc_update', 'dlc_delete', 'dlc_validate', 'dlc_print', 'dlc_stats',
-        'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_validate',
-        'suppliers_read', 'suppliers_create', 'suppliers_update', 'suppliers_delete',
-        'groups_read', 'groups_create', 'groups_update', 'groups_delete'
+        // Tâches (complet)
+        'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_validate'
+        // PAS D'ACCÈS aux fournisseurs, magasins (gestion) ni aux utilisateurs (administration)
       ],
       'directeur': [
+        // Tableau de bord
         'dashboard_read', 'statistics_read', 'reports_generate',
+        // Calendrier
         'calendar_read',
+        // Commandes (complet)
         'orders_read', 'orders_create', 'orders_update', 'orders_delete',
+        // Livraisons (complet)
         'deliveries_read', 'deliveries_create', 'deliveries_update', 'deliveries_delete', 'deliveries_validate',
+        // Publicités (lecture seulement - pas d'édition)
         'publicities_read',
+        // Commandes clients (complet)
         'customer_orders_read', 'customer_orders_create', 'customer_orders_update', 'customer_orders_delete',
+        // DLC (complet)
         'dlc_read', 'dlc_create', 'dlc_update', 'dlc_delete', 'dlc_validate', 'dlc_print', 'dlc_stats',
+        // Tâches (complet)
         'tasks_read', 'tasks_create', 'tasks_update', 'tasks_delete', 'tasks_validate',
-        'suppliers_read', 'suppliers_create', 'suppliers_update', 'suppliers_delete',
-        'groups_read', 'groups_create', 'groups_update', 'groups_delete',
+        // Rapprochement (lecture/modification)
         'reconciliation_read', 'reconciliation_update'
+        // PAS D'ACCÈS aux fournisseurs, magasins (gestion) ni aux utilisateurs (administration)
       ]
     };
     
