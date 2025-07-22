@@ -39,7 +39,7 @@ export default function CreateOrderModal({
 
   const { data: suppliers = [], isLoading: loadingSuppliers } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
-    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur',
+    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur' || user?.role === 'employee',
     queryFn: async () => {
       console.log('📦 Fetching suppliers for order modal... Role:', user?.role);
       const response = await fetch('/api/suppliers', {

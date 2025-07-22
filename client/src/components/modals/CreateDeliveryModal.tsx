@@ -43,7 +43,7 @@ export default function CreateDeliveryModal({
 
   const { data: suppliers = [], isLoading: loadingSuppliers } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
-    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur',
+    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur' || user?.role === 'employee',
     queryFn: async () => {
       console.log('🚚 Fetching suppliers for delivery modal... Role:', user?.role);
       const response = await fetch('/api/suppliers', {

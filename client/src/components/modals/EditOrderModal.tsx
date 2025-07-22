@@ -38,7 +38,7 @@ export default function EditOrderModal({
 
   const { data: suppliers = [] } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
-    enabled: user?.role === 'admin' || user?.role === 'manager',
+    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur' || user?.role === 'employee',
   });
 
   const { data: groups = [] } = useQuery<Group[]>({
