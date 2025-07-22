@@ -1,0 +1,204 @@
+  username: 'Nicolas',
+
+  sessionId: 'hPnH-0JOCfwzuT7VixNaiopOhA1Z0ua_',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/deliveries?startDate=2025-07-01&endDate=2025-07-31',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753182518439',
+
+  username: 'Nicolas',
+
+  sessionId: 'hPnH-0JOCfwzuT7VixNaiopOhA1Z0ua_',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/publicities?year=2025',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: '_1753182518439',
+
+  username: 'Nicolas',
+
+  sessionId: 'hPnH-0JOCfwzuT7VixNaiopOhA1Z0ua_',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🎯 getPublicities debug: {
+
+  year: 2025,
+
+  groupIds: undefined,
+
+  publicityCount: 0,
+
+  query: 'SELECT * FROM publicities WHERE year = ? ORDER BY start_date DESC'
+
+}
+
+🎯 getPublicities result: 0 publicités pour année 2025
+
+📦 Orders API called with: {
+
+  startDate: '2025-07-01',
+
+  endDate: '2025-07-31',
+
+  storeId: undefined,
+
+  storeIdType: 'undefined',
+
+  userRole: 'directeur',
+
+  fullQuery: { startDate: '2025-07-01', endDate: '2025-07-31' }
+
+}
+
+📦 Non-admin filtering with groupIds: [ 2 ]
+
+📦 Fetching orders by date range: 2025-07-01 to 2025-07-31
+
+🚚 Deliveries API called with: {
+
+  startDate: '2025-07-01',
+
+  endDate: '2025-07-31',
+
+  storeId: undefined,
+
+  withBL: undefined,
+
+  userRole: 'directeur'
+
+}
+
+🚚 Non-admin filtering deliveries with groupIds: [ 2 ]
+
+🚚 Fetching deliveries by date range: 2025-07-01 to 2025-07-31
+
+📊 Monthly stats query params: {
+
+  year: 2025,
+
+  month: 7,
+
+  startDate: '2025-07-01',
+
+  endDate: '2025-07-31',
+
+  groupIds: [ 2 ],
+
+  whereClause: ' AND group_id = ANY($3)'
+
+}
+
+📅 getOrdersByDateRange debug: {
+
+  startDate: '2025-07-01',
+
+  endDate: '2025-07-31',
+
+  groupIds: [ 2 ],
+
+  orderCount: 0
+
+}
+
+📦 Orders returned: 0 items
+
+📊 Query results: {
+
+  ordersCount: '0',
+
+  deliveriesCount: '0',
+
+  orderStats: { pending_count: '0', total_palettes: '0', total_packages: '0' },
+
+  deliveryStats: { total_palettes: '0', total_packages: '0' }
+
+}
+
+📊 Final stats: {
+
+  ordersCount: 0,
+
+  deliveriesCount: 0,
+
+  pendingOrdersCount: 0,
+
+  averageDeliveryTime: 0,
+
+  totalPalettes: 0,
+
+  totalPackages: 0
+
+}
+
+🚛 getDeliveriesByDateRange debug: {
+
+  startDate: '2025-07-01',
+
+  endDate: '2025-07-31',
+
+  groupIds: [ 2 ],
+
+  deliveryCount: 0
+
+}
+
+🚚 Deliveries returned: 0 items
+
+12:02:29 PM [express] GET /api/publicities 304 in 11ms
+
+12:02:29 PM [express] GET /api/orders 200 in 17ms
+
+12:02:29 PM [express] GET /api/stats/monthly 304 in 20ms
+
+12:02:29 PM [express] GET /api/deliveries 304 in 17ms
+
+12:02:37 PM [express] HEAD /api/health 200 in 0ms
+
+
+      
+      
+    
