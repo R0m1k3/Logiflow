@@ -871,7 +871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: z.string().optional(),
         lastName: z.string().optional(),
         password: z.string().optional(),
-        role: z.enum(['admin', 'manager', 'employee']).optional(),
+        role: z.enum(['admin', 'manager', 'employee', 'directeur']).optional(),
       });
 
       const userData = createUserSchema.parse(req.body);
@@ -923,7 +923,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Schema utilisateur SANS champs obligatoires pour résoudre le problème de production
       const updateUserSchema = z.object({
         username: z.string().optional(),
-        role: z.enum(['admin', 'manager', 'employee']).optional(),
+        role: z.enum(['admin', 'manager', 'employee', 'directeur']).optional(),
         firstName: z.string().optional(),
         lastName: z.string().optional(),
         email: z.string().email().optional(),
