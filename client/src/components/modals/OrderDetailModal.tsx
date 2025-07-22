@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -25,10 +26,12 @@ export default function OrderDetailModal({
   item,
 }: OrderDetailModalProps) {
   const { user } = useAuthUnified();
+  const { hasPermission } = usePermissions();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showValidateModal, setShowValidateModal] = useState(false);
 
   const isOrder = item?.type === 'order';
   const isDelivery = item?.type === 'delivery';
@@ -123,8 +126,6 @@ export default function OrderDetailModal({
     },
   });
 
-  const [showValidateModal, setShowValidateModal] = useState(false);
-
   const handleValidateDelivery = () => {
     setShowValidateModal(true);
   };
@@ -139,9 +140,9 @@ export default function OrderDetailModal({
     setShowEditModal(true);
   };
 
-  const canEdit = user?.role === 'admin' || user?.role === 'manager';
-  const canDelete = user?.role === 'admin' || user?.role === 'manager';
-  const canValidate = (user?.role === 'admin' || user?.role === 'manager') && 
+  const canEdit = hasPermission(isOrder ? 'orders_update' : 'deliveries_update');
+  const canDelete = hasPermission(isOrder ? 'orders_delete' : 'deliveries_delete');
+  const canValidate = hasPermission('deliveries_validate') && 
                      isDelivery && item.status !== 'delivered';
 
   const getStatusBadge = (status: string) => {
