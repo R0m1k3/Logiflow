@@ -19,7 +19,8 @@ import {
   Plus,
   Users,
   Edit,
-  Trash2
+  Trash2,
+  Shield
 } from "lucide-react";
 import type { UserWithGroups, Group } from "@shared/schema";
 
