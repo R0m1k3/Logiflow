@@ -761,7 +761,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      if (user.role !== 'admin' && user.role !== 'manager') {
+      // Check if user has deliveries_validate permission
+      const userPermissions = await storage.getUserPermissions(user.id);
+      const hasValidatePermission = userPermissions.some(p => p.name === 'deliveries_validate');
+      
+      if (!hasValidatePermission) {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
 
@@ -772,11 +776,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Delivery not found" });
       }
 
-      // Check permissions
-      if (user.role === 'manager') {
+      // Check store access for non-admin users
+      if (user.role !== 'admin') {
         const userGroupIds = user.userGroups.map(ug => ug.groupId);
         if (!userGroupIds.includes(delivery.groupId)) {
-          return res.status(403).json({ message: "Access denied" });
+          return res.status(403).json({ message: "Access denied to this store's delivery" });
         }
       }
 

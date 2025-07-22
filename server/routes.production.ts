@@ -441,10 +441,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Route spécifique AVANT la route générale pour éviter l'interception
   app.post('/api/deliveries/:id/validate', isAuthenticated, async (req: any, res) => {
     try {
+      // Get user and check permissions
+      const userId = req.user.id;
+      const user = await storage.getUserWithGroups(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has deliveries_validate permission
+      const userPermissions = await storage.getUserPermissions(user.id);
+      const hasValidatePermission = userPermissions.some(p => p.name === 'deliveries_validate');
+      
+      if (!hasValidatePermission) {
+        console.log('❌ User lacks deliveries_validate permission:', { userId, userRole: user.role });
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
+
       const id = parseInt(req.params.id);
       const { blNumber, blAmount } = req.body;
       
-      console.log('🔍 POST /api/deliveries/:id/validate - Request:', { id, blNumber, blAmount });
+      console.log('🔍 POST /api/deliveries/:id/validate - Request:', { id, blNumber, blAmount, userId, userRole: user.role });
       
       if (isNaN(id)) {
         return res.status(400).json({ message: "ID de livraison invalide" });
