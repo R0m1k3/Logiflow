@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import type { User } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +43,7 @@ import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { useStore } from "@/components/Layout";
 
 export default function CustomerOrders() {
-  const { user } = useAuthUnified();
+  const { user } = useAuthUnified() as { user: User | null };
   const { selectedStoreId } = useStore();
   const queryClient = useQueryClient();
   const [showCreateModal, setShowCreateModal] = useState(false);

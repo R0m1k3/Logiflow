@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, usePagination } from "@/components/ui/pagination";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import type { User } from "@shared/schema";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useStore } from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +22,7 @@ import {
   Edit,
   Trash2,
   Building,
-  User
+  User as UserIcon
 } from "lucide-react";
 import { safeFormat } from "@/lib/dateUtils";
 import CreateOrderModal from "@/components/modals/CreateOrderModal";
@@ -31,7 +32,7 @@ import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
 import type { OrderWithRelations } from "@shared/schema";
 
 export default function Orders() {
-  const { user } = useAuthUnified();
+  const { user } = useAuthUnified() as { user: User | null };
   const { hasPermission } = usePermissions();
   const { selectedStoreId } = useStore();
   const { toast } = useToast();

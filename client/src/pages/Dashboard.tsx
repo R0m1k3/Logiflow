@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import type { User } from "@shared/schema";
 import { useStore } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare } from "lucide-react";
+import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare } from "lucide-react";
 import { safeFormat, safeDate } from "@/lib/dateUtils";
 import type { PublicityWithRelations } from "@shared/schema";
 
 export default function Dashboard() {
-  const { user } = useAuthUnified();
+  const { user } = useAuthUnified() as { user: User | null };
   
   // Utilisation conditionnelle de useStore pour éviter l'erreur
   let selectedStoreId: number | null = null;
@@ -29,7 +30,7 @@ export default function Dashboard() {
         month: (currentDate.getMonth() + 1).toString(),
       });
       
-      if (selectedStoreId && (user as any)?.role === 'admin') {
+      if (selectedStoreId && user?.role === 'admin') {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -46,9 +47,9 @@ export default function Dashboard() {
   });
 
   // Construire les URLs pour récupérer toutes les données (pas de filtrage par date)
-  const ordersUrl = `/api/orders${selectedStoreId && (user as any)?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
-  const deliveriesUrl = `/api/deliveries${selectedStoreId && (user as any)?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
-  const customerOrdersUrl = `/api/customer-orders${selectedStoreId && (user as any)?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const ordersUrl = `/api/orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const deliveriesUrl = `/api/deliveries${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  const customerOrdersUrl = `/api/customer-orders${selectedStoreId && user?.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
 
   // Utiliser les mêmes clés de cache que les autres pages pour assurer la cohérence
   const { data: allOrders = [] } = useQuery({

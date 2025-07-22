@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import type { User } from "@shared/schema";
 import { useStore } from "@/components/Layout";
 import { apiRequest } from "@/lib/queryClient";
 import type { DlcProductWithRelations, InsertDlcProduct } from "@shared/schema";
@@ -37,7 +38,7 @@ const dlcFormSchema = z.object({
 type DlcFormData = z.infer<typeof dlcFormSchema>;
 
 export default function DlcPage() {
-  const { user, isLoading: authLoading } = useAuthUnified();
+  const { user, isLoading: authLoading } = useAuthUnified() as { user: User | null, isLoading: boolean };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { selectedStoreId } = useStore();
@@ -216,7 +217,7 @@ export default function DlcPage() {
 
   const onSubmit = (data: DlcFormData) => {
     // Calculer la date d'expiration et le seuil d'alerte (15 jours avant)
-    const expiryDate = new Date(data.dlcDate);
+    const expiryDate = data.dlcDate;
     
     // Déterminer le magasin selon le rôle
     let targetStoreId;

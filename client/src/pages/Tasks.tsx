@@ -58,7 +58,7 @@ export default function Tasks() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (selectedStoreId) {
-        params.append('storeId', selectedStoreId);
+        params.append('storeId', selectedStoreId.toString());
       }
       return fetch(`/api/tasks?${params.toString()}`, {
         credentials: 'include'
