@@ -999,9 +999,59 @@ async function createDefaultAdmin() {
   }
 }
 
+async function cleanupOldRoles() {
+  try {
+    console.log('🧹 Nettoyage des anciens rôles pour simplification...');
+    
+    // Vérifier s'il y a des rôles autres que 'admin'
+    const oldRoles = await pool.query(`
+      SELECT name FROM roles WHERE name != 'admin'
+    `);
+    
+    if (oldRoles.rows.length > 0) {
+      console.log(`🗑️ Suppression de ${oldRoles.rows.length} anciens rôles:`, oldRoles.rows.map(r => r.name));
+      
+      // Migrer tous les utilisateurs vers le rôle admin avant suppression
+      await pool.query(`
+        UPDATE users SET role = 'admin' 
+        WHERE role IN ('employee', 'manager', 'directeur')
+      `);
+      console.log('✅ Tous les utilisateurs migrés vers le rôle admin');
+      
+      // Supprimer les anciennes permissions de rôles
+      await pool.query(`
+        DELETE FROM role_permissions 
+        WHERE role_id IN (SELECT id FROM roles WHERE name != 'admin')
+      `);
+      console.log('✅ Anciennes permissions de rôles supprimées');
+      
+      // Supprimer les anciennes assignations de rôles
+      await pool.query(`
+        DELETE FROM user_roles 
+        WHERE role_id IN (SELECT id FROM roles WHERE name != 'admin')
+      `);
+      console.log('✅ Anciennes assignations de rôles supprimées');
+      
+      // Supprimer les anciens rôles
+      await pool.query(`
+        DELETE FROM roles WHERE name != 'admin'
+      `);
+      console.log('✅ Anciens rôles supprimés - système simplifié au rôle admin uniquement');
+    } else {
+      console.log('✅ Aucun ancien rôle à nettoyer');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erreur lors du nettoyage des rôles:', error);
+  }
+}
+
 async function initRolesAndPermissionsProduction() {
   try {
     console.log('🎭 Initializing roles and permissions for production...');
+    
+    // NETTOYAGE AUTOMATIQUE : Supprimer les anciens rôles pour simplification
+    await cleanupOldRoles();
     
     // Check if roles already exist (avoid re-creating)
     const existingRoles = await pool.query('SELECT COUNT(*) as count FROM roles');
