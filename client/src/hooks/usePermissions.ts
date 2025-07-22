@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthUnified } from "./useAuthUnified";
 
@@ -5,7 +6,7 @@ export function usePermissions() {
   const { user, isLoading: userLoading } = useAuthUnified();
 
   // Récupérer les permissions utilisateur depuis l'API - NOUVEAU SYSTÈME
-  const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery({
+  const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError, refetch } = useQuery({
     queryKey: ['/api/user/permissions'],
     enabled: !!user,
     staleTime: 0, // 🔧 DEBUG - Désactiver le cache pour forcer requête fraîche
@@ -13,6 +14,14 @@ export function usePermissions() {
     retry: false,
     refetchOnWindowFocus: false
   });
+
+  // 🔧 FORCE REFRESH - Forcer actualisation si aucune permission
+  React.useEffect(() => {
+    if (user && !permissionsLoading && Array.isArray(userPermissions) && userPermissions.length === 0) {
+      console.log('🔧 Force refresh permissions - aucune permission détectée');
+      refetch();
+    }
+  }, [user, permissionsLoading, userPermissions, refetch]);
 
   // 🔧 DEBUG - Logs pour diagnostiquer le problème de données
   console.log('🔧 usePermissions Debug:', {
@@ -22,7 +31,8 @@ export function usePermissions() {
     userPermissionsType: typeof userPermissions,
     userPermissionsIsArray: Array.isArray(userPermissions),
     userPermissionsLength: Array.isArray(userPermissions) ? userPermissions.length : 'not-array',
-    firstFewPermissions: Array.isArray(userPermissions) ? userPermissions.slice(0, 3) : userPermissions
+    firstFewPermissions: Array.isArray(userPermissions) ? userPermissions.slice(0, 3) : userPermissions,
+    userPermissionsRaw: userPermissions // 🔧 Voir la vraie structure des données
   });
 
   // Fonction pour vérifier une permission basée sur les vrais rôles de la base

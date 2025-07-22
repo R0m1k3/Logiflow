@@ -1125,14 +1125,16 @@ async function assignUsersToFixedRoles() {
       console.log('✅ admin_local assigné au rôle Administrateur');
     }
     
-    // Assigner Nicolas au rôle directeur (ID 4)
-    const nicolasExists = await pool.query('SELECT id FROM users WHERE id = $1', ['nicolasvoignier_1753176398084']);
+    // 🔧 PERSISTENCE FIX - Assigner Nicolas au rôle directeur (ID 4) avec bon ID
+    const nicolasExists = await pool.query('SELECT id FROM users WHERE id = $1', ['_1753182518439']);
     if (nicolasExists.rows.length > 0) {
       await pool.query(`
         INSERT INTO user_roles (user_id, role_id, assigned_by, assigned_at)
-        VALUES ('nicolasvoignier_1753176398084', 4, 'system', NOW())
+        VALUES ('_1753182518439', 4, 'system', NOW())
       `);
-      console.log('✅ Nicolas assigné au rôle Directeur');
+      console.log('✅ Nicolas assigné au rôle Directeur (ID correct)');
+    } else {
+      console.log('❌ Nicolas introuvable avec ID _1753182518439');
     }
     
     // Assigner ff292 au rôle employee s'il existe
