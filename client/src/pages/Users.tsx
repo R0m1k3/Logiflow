@@ -102,6 +102,35 @@ export default function UsersPage() {
     }
   }, [showEditModal, selectedUser]);
 
+  // Additional production fix: Force field update after render
+  useEffect(() => {
+    if (showEditModal && selectedUser && editForm.firstName === '' && editForm.lastName === '') {
+      // Delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        console.log('🔧 Production fix: Forcing field update after render');
+        // Extract data using same logic as above
+        let firstName = selectedUser.firstName && selectedUser.firstName.trim() ? selectedUser.firstName : '';
+        let lastName = selectedUser.lastName && selectedUser.lastName.trim() ? selectedUser.lastName : '';
+        
+        if (!firstName && !lastName && selectedUser.name && selectedUser.name.trim()) {
+          const [firstPart = '', ...lastNameParts] = selectedUser.name.trim().split(' ');
+          firstName = firstPart;
+          lastName = lastNameParts.join(' ');
+        }
+        
+        if (firstName || lastName) {
+          setEditForm(prev => ({
+            ...prev,
+            firstName: firstName,
+            lastName: lastName,
+          }));
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showEditModal, selectedUser, editForm.firstName, editForm.lastName]);
+
   const { data: users = [], isLoading: usersLoading, refetch: refetchUsers } = useQuery<UserWithGroups[]>({
     queryKey: ['/api/users'],
     enabled: user?.role === 'admin',
@@ -1014,6 +1043,7 @@ export default function UsersPage() {
                 <div>
                   <Label htmlFor="edit-firstName">Prénom</Label>
                   <Input
+                    key={`firstName-${selectedUser?.id}-${editForm.firstName}`}
                     id="edit-firstName"
                     value={editForm.firstName || ''}
                     onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
@@ -1025,6 +1055,7 @@ export default function UsersPage() {
                 <div>
                   <Label htmlFor="edit-lastName">Nom</Label>
                   <Input
+                    key={`lastName-${selectedUser?.id}-${editForm.lastName}`}
                     id="edit-lastName"
                     value={editForm.lastName || ''}
                     onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
