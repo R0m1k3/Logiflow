@@ -321,7 +321,8 @@ The application uses a sophisticated dual authentication approach:
 - **INTERFACE ADMINISTRATION** - Composant SchedulerCard intégré dans page DatabaseBackup avec contrôles temps réel
 - **GESTION STATUT TEMPS RÉEL** - Affichage statut Actif/Inactif avec prochaine exécution et rafraîchissement automatique
 - **BOUTONS CONTRÔLE** - Activer/Désactiver scheduler + "Sauvegarder maintenant" pour tests immédiats
-- **SAUVEGARDE INTELLIGENTE** - Système garde 30 sauvegardes automatiques vs 10 manuelles, nettoyage automatique
+- **SAUVEGARDE OPTIMISÉE** - Système garde 5 sauvegardes automatiques vs 10 manuelles, nettoyage automatique
+- **INTERFACE LISTE FONCTIONNELLE** - Page sauvegarde BDD affiche liste complète avec boutons téléchargement opérationnels
 - **LOGS PRODUCTION** - "⏰ [SCHEDULER] Sauvegarde automatique quotidienne programmée à minuit (Europe/Paris)"
 - **SÉCURITÉ ADMIN** - Toutes les fonctions scheduler restreintes aux administrateurs uniquement
 - **DESCRIPTION AUTOMATIQUE** - Sauvegardes automatiques avec description "Sauvegarde automatique quotidienne - [date]"

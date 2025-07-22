@@ -498,7 +498,7 @@ export default function DatabaseBackup() {
             Sauvegardes disponibles ({backups.length}/10)
           </CardTitle>
           <CardDescription>
-            Liste des sauvegardes créées (maximum 10, les plus anciennes sont supprimées automatiquement)
+            Liste des sauvegardes créées (maximum 5 automatiques + 10 manuelles, nettoyage automatique)
           </CardDescription>
         </CardHeader>
         <CardContent>

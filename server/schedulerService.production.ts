@@ -44,8 +44,8 @@ export class SchedulerService {
         
         console.log(`✅ [SCHEDULER] Sauvegarde automatique créée avec succès: ${backupId}`);
         
-        // Nettoyer les anciennes sauvegardes automatiques (garder les 10 dernières)
-        await this.backupService.cleanupOldBackups(10, 'auto');
+        // Nettoyer les anciennes sauvegardes automatiques (garder les 5 dernières)
+        await this.backupService.cleanupOldBackups(5, 'auto');
         console.log('🧹 [SCHEDULER] Nettoyage des anciennes sauvegardes automatiques terminé');
         
       } catch (error) {
