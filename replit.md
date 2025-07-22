@@ -123,6 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - RÉSOLUTION CRITIQUE: Bug Affichage Modal Edition Utilisateur Production Complètement Corrigé
+
+- **PROBLÈME PRODUCTION IDENTIFIÉ** - Modal d'édition utilisateur affichait "Administrateur" au lieu de "Michael" et nom vide au lieu de "SCHAL" en production uniquement
+- **DIAGNOSTIC COMPLET** - Base de données contenait bien `first_name: "Michael"` et `last_name: "SCHAL"` mais API `/api/users` en production ne retournait pas ces champs
+- **CAUSE ROOT TROUVÉE** - Fonction `getUsers()` dans storage.production.ts ne sélectionnait pas les colonnes `first_name`/`last_name` et manquait le mapping camelCase
+- **CORRECTIONS APPLIQUÉES** - 
+  - Ajout `first_name` et `last_name` dans la requête SQL
+  - Mapping camelCase ajouté : `firstName: user.first_name`, `lastName: user.last_name`
+  - Correction appliquée aussi au fallback de la fonction
+- **RÉSULTAT** - Modal d'édition affiche maintenant correctement "Michael SCHAL" en production identique au développement
+- **LOGS DEBUG SUPPRIMÉS** - Nettoyage des logs temporaires après résolution complète
+
 ### July 21, 2025 - CORRECTION BUG AFFICHAGE UTILISATEURS: Cache et Invalidation Corrigés
 
 - **PROBLÈME IDENTIFIÉ** - Lors de la création d'un utilisateur, la modal s'ouvrait mais les utilisateurs disparaissaient de la liste, nécessitant un rechargement de page
