@@ -123,6 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - FINALISATION: Architecture Rôles Simplifiée et Configuration Base de Données Complète
+
+- **SYSTÈME RÔLES SIMPLIFIÉ** - Suppression définitive des rôles "employee", "manager" et "directeur", maintien uniquement du rôle "admin"
+- **BASE DE DONNÉES NETTOYÉE** - Configuration rôles standardisée avec un seul rôle administrateur pour tous les utilisateurs
+- **INTERFACE UTILISATEUR HARMONISÉE** - Formulaire création d'utilisateurs défini par défaut sur rôle "admin"
+- **SCRIPT INIT.SQL CORRIGÉ** - Suppression des anciens rôles et permissions associés pour installations propres
+- **BUG PRODUCTION RÉSOLU DÉFINITIVEMENT** - Modal d'édition utilisateur affiche correctement firstName/lastName grâce aux corrections dans storage.production.ts
+- **ARCHITECTURE SIMPLIFIÉE** - Système maintenant avec un rôle unique "admin" possédant toutes les permissions (54 au total)
+
 ### July 22, 2025 - RÉSOLUTION CRITIQUE: Bug Affichage Modal Edition Utilisateur Production Complètement Corrigé
 
 - **PROBLÈME PRODUCTION IDENTIFIÉ** - Modal d'édition utilisateur affichait "Administrateur" au lieu de "Michael" et nom vide au lieu de "SCHAL" en production uniquement

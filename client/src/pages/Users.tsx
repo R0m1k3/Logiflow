@@ -486,7 +486,7 @@ export default function UsersPage() {
   const handleCreateUser = () => {
     // Ouvrir directement la modal sans refetch pour éviter de vider la liste
     setShowCreateModal(true);
-    setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
+    setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "admin" });
     setUserGroups([]);
   };
 
@@ -523,7 +523,7 @@ export default function UsersPage() {
       }
       
       setShowCreateModal(false);
-      setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
+      setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "admin" });
       setUserGroups([]);
     } catch (error) {
       // Error handling is already done in the mutations
@@ -1318,7 +1318,7 @@ export default function UsersPage() {
                   variant="outline" 
                   onClick={() => {
                     setShowCreateModal(false);
-                    setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "employee" });
+                    setNewUser({ email: "", firstName: "", lastName: "", username: "", password: "", role: "admin" });
                     setUserGroups([]);
                   }}
                 >

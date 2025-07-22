@@ -225,11 +225,9 @@ INSERT INTO groups (name, color) VALUES
 ('Frouard', '#1976D2'),
 ('Houdemont', '#455A64');
 
--- Insert roles
+-- Insert roles (only admin and directeur)
 INSERT INTO roles (name, display_name, color) VALUES
-('admin', 'Administrateur', '#F44336'),
-('manager', 'Manager', '#FF9800'),
-('employee', 'Employé', '#4CAF50');
+('admin', 'Administrateur', '#F44336');
 
 -- Insert permissions with French display names
 INSERT INTO permissions (code, display_name, category) VALUES
@@ -315,40 +313,6 @@ INSERT INTO permissions (code, display_name, category) VALUES
 -- Admin gets all permissions
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r CROSS JOIN permissions p WHERE r.name = 'admin';
-
--- Manager permissions
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p 
-WHERE r.name = 'manager' AND p.code IN (
-    'dashboard_view',
-    'stores_read', 'stores_create', 'stores_update',
-    'suppliers_read', 'suppliers_create', 'suppliers_update',
-    'orders_read', 'orders_create', 'orders_update', 'orders_validate',
-    'deliveries_read', 'deliveries_create', 'deliveries_update', 'deliveries_validate',
-    'publicities_read', 'publicities_create', 'publicities_update', 'publicities_participate',
-    'customer_orders_read', 'customer_orders_create', 'customer_orders_update', 'customer_orders_print',
-    'users_read', 'users_create', 'users_update', 'users_assign_roles',
-    'roles_read',
-    'dlc_read', 'dlc_create', 'dlc_update', 'dlc_validate', 'dlc_print', 'dlc_stats',
-    'tasks_read', 'tasks_create', 'tasks_update', 'tasks_assign'
-);
-
--- Employee permissions
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM roles r, permissions p 
-WHERE r.name = 'employee' AND p.code IN (
-    'dashboard_view',
-    'stores_read',
-    'suppliers_read',
-    'orders_read', 'orders_create', 'orders_update',
-    'deliveries_read', 'deliveries_create', 'deliveries_update',
-    'publicities_read', 'publicities_participate',
-    'customer_orders_read', 'customer_orders_create', 'customer_orders_update', 'customer_orders_print',
-    'dlc_read', 'dlc_create', 'dlc_update', 'dlc_print',
-    'tasks_read', 'tasks_create', 'tasks_update'
-);
-
--- Note: Le rôle directeur a été supprimé - utiliser admin ou manager selon les besoins
 
 -- Insert test suppliers
 INSERT INTO suppliers (name, contact, phone, has_dlc) VALUES
