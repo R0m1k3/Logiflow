@@ -219,7 +219,10 @@ export default function Sidebar() {
       <nav className="flex-1 py-4 px-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
-            if (!hasPermission(item.permission)) return null;
+            const hasPermissionResult = hasPermission(item.permission);
+            
+            // 🚨 CRITICAL DEBUG - Forcer l'affichage de TOUS les éléments temporairement
+            console.log(`🚨 FORCE RENDER - ${item.label}: showing regardless of permissions`);
             
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -235,6 +238,7 @@ export default function Sidebar() {
                 >
                   <Icon className="mr-3 h-4 w-4" />
                   {item.label}
+                  {!hasPermissionResult && <span className="ml-2 text-xs text-red-500">[NO PERM]</span>}
                 </div>
               </Link>
             );
