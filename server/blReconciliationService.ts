@@ -33,35 +33,54 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
     
     // 1. Récupérer toutes les livraisons validées sans référence facture
     const deliveries = await storage.getDeliveries();
-    const allUnreconciledDeliveries = deliveries.filter(delivery => 
+    const unReconciledDeliveries = deliveries.filter(delivery => 
       delivery.status === 'delivered' && 
+      delivery.blNumber && 
       !delivery.invoiceReference
     );
 
-    // Séparer les livraisons avec et sans numéro de BL
-    const deliveriesWithBL = allUnreconciledDeliveries.filter(d => d.blNumber);
-    const deliveriesWithoutBL = allUnreconciledDeliveries.filter(d => !d.blNumber);
-
-    console.log(`🔍 [BL-RECONCILIATION] ${deliveriesWithBL.length} livraisons avec N° BL à rapprocher`);
-    console.log(`🔍 [BL-RECONCILIATION] ${deliveriesWithoutBL.length} livraisons sans N° BL à rapprocher`);
+    console.log(`🔍 [BL-RECONCILIATION] ${unReconciledDeliveries.length} livraisons non rapprochées trouvées`);
     
-    if (allUnreconciledDeliveries.length === 0) {
+    if (unReconciledDeliveries.length === 0) {
       console.log("✅ [BL-RECONCILIATION] Aucune livraison à rapprocher");
       return result;
     }
 
-    // 2. Traiter d'abord les livraisons avec numéro de BL
-    for (const delivery of deliveriesWithBL) {
+    // 2. Traiter chaque livraison
+    for (const delivery of unReconciledDeliveries) {
       result.processedDeliveries++;
       
       try {
-        const invoiceData = await searchInvoiceByBLNumber(
+        // 3. Rechercher d'abord dans NocoDB par numéro de BL
+        let invoiceData = await searchInvoiceByBLNumber(
           delivery.groupId,
           delivery.blNumber!,
           delivery.supplier?.name
         );
 
+        // 4. Si pas trouvé par BL, essayer par fournisseur et montant
+        if (!invoiceData && delivery.blAmount) {
+          console.log(`🔄 [BL-RECONCILIATION] BL ${delivery.blNumber} non trouvé, recherche par fournisseur + montant...`);
+          invoiceData = await searchInvoiceBySupplierAndAmount(
+            delivery.groupId,
+            delivery.supplier?.name,
+            delivery.blAmount
+          );
+        }
+
+        // 5. Si pas trouvé par montant, essayer par fournisseur et date
+        if (!invoiceData) {
+          console.log(`🔄 [BL-RECONCILIATION] Recherche par fournisseur + date pour livraison ${delivery.id}...`);
+          const scheduledDate = delivery.scheduledDate ? new Date(delivery.scheduledDate) : undefined;
+          invoiceData = await searchInvoiceBySupplierAndDate(
+            delivery.groupId,
+            delivery.supplier?.name,
+            scheduledDate
+          );
+        }
+
         if (invoiceData) {
+          // 6. Mettre à jour la livraison avec les données de facture
           await storage.updateDelivery(delivery.id, {
             invoiceReference: invoiceData.invoiceRef,
             invoiceAmount: invoiceData.amount,
@@ -77,7 +96,7 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
             amount: invoiceData.amount
           });
 
-          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée par BL: ${delivery.blNumber} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
+          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée: BL ${delivery.blNumber} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
         } else {
           result.details.push({
             deliveryId: delivery.id,
@@ -93,56 +112,6 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
         result.details.push({
           deliveryId: delivery.id,
           blNumber: delivery.blNumber!,
-          status: 'error'
-        });
-        console.error(`💥 [BL-RECONCILIATION] ${errorMessage}`);
-      }
-    }
-
-    // 3. Traiter ensuite les livraisons sans numéro de BL par d'autres critères
-    for (const delivery of deliveriesWithoutBL) {
-      result.processedDeliveries++;
-      
-      try {
-        const invoiceData = await searchInvoiceByAlternateCriteria(
-          delivery.groupId,
-          delivery.supplier?.name,
-          delivery.blAmount,
-          delivery.scheduledDate
-        );
-
-        if (invoiceData) {
-          await storage.updateDelivery(delivery.id, {
-            invoiceReference: invoiceData.invoiceRef,
-            invoiceAmount: invoiceData.amount,
-            reconciled: true
-          });
-
-          result.reconciledDeliveries++;
-          result.details.push({
-            deliveryId: delivery.id,
-            blNumber: 'N/A',
-            status: 'reconciled',
-            invoiceRef: invoiceData.invoiceRef,
-            amount: invoiceData.amount
-          });
-
-          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée par critères alternatifs: ${delivery.supplier?.name} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
-        } else {
-          result.details.push({
-            deliveryId: delivery.id,
-            blNumber: 'N/A',
-            status: 'not_found'
-          });
-
-          console.log(`❌ [BL-RECONCILIATION] Livraison ${delivery.id}: Aucune facture trouvée pour ${delivery.supplier?.name}`);
-        }
-      } catch (error) {
-        const errorMessage = `Erreur lors du traitement de la livraison ${delivery.id}: ${error}`;
-        result.errors.push(errorMessage);
-        result.details.push({
-          deliveryId: delivery.id,
-          blNumber: 'N/A',
           status: 'error'
         });
         console.error(`💥 [BL-RECONCILIATION] ${errorMessage}`);
@@ -217,20 +186,23 @@ async function searchInvoiceByBLNumber(
     // Rechercher la ligne correspondant au numéro de BL
     const normalizedBLNumber = blNumber.trim().toLowerCase();
     
+    // Le fournisseur est OBLIGATOIRE pour la sécurité du rapprochement
+    if (!supplierName) {
+      console.log(`❌ [BL-RECONCILIATION] Fournisseur manquant pour BL ${blNumber}, rapprochement refusé`);
+      return null;
+    }
+
+    const normalizedSupplier = supplierName.trim().toLowerCase();
+
     const matchingRow = data.list?.find((row: any) => {
       const rowBLNumber = row[blColumnName]?.toString().trim().toLowerCase();
       const rowSupplier = row[supplierColumnName]?.toString().trim().toLowerCase();
       
-      // Vérifier d'abord le numéro de BL
+      // Vérifier le numéro de BL ET le fournisseur (obligatoire)
       const blMatches = rowBLNumber === normalizedBLNumber;
+      const supplierMatches = rowSupplier && rowSupplier.includes(normalizedSupplier);
       
-      // Si un fournisseur est spécifié, vérifier également la correspondance
-      if (supplierName && rowSupplier) {
-        const normalizedSupplier = supplierName.trim().toLowerCase();
-        return blMatches && rowSupplier.includes(normalizedSupplier);
-      }
-      
-      return blMatches;
+      return blMatches && supplierMatches;
     });
 
     if (matchingRow) {
@@ -249,6 +221,148 @@ async function searchInvoiceByBLNumber(
     
   } catch (error) {
     console.error(`💥 [BL-RECONCILIATION] Erreur recherche NocoDB:`, error);
+    return null;
+  }
+}
+
+// Fonction de recherche alternative par fournisseur et montant
+async function searchInvoiceBySupplierAndAmount(
+  groupId: number,
+  supplierName?: string,
+  amount?: string
+): Promise<NocoDBInvoiceData | null> {
+  if (!supplierName || !amount) {
+    return null;
+  }
+
+  try {
+    const group = await storage.getGroup(groupId);
+    if (!group || !group.nocodbConfigId || !group.nocodbTableId) {
+      return null;
+    }
+
+    const nocodbConfig = await storage.getNocodbConfig(group.nocodbConfigId);
+    if (!nocodbConfig) {
+      return null;
+    }
+
+    const amountColumnName = group.nocodbAmountColumnName || "Montant HT";
+    const supplierColumnName = group.nocodbSupplierColumnName || "Fournisseur";
+    const invoiceColumnName = group.invoiceColumnName || "Ref Facture";
+    
+    const url = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${group.nocodbTableId}`;
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "xc-token": nocodbConfig.apiToken,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    
+    const normalizedSupplier = supplierName.trim().toLowerCase();
+    const normalizedAmount = parseFloat(amount.replace(/[^\d.-]/g, ''));
+    
+    const matchingRow = data.list?.find((row: any) => {
+      const rowSupplier = row[supplierColumnName]?.toString().trim().toLowerCase();
+      const rowAmount = parseFloat(row[amountColumnName]?.toString().replace(/[^\d.-]/g, '') || '0');
+      
+      const supplierMatches = rowSupplier && rowSupplier.includes(normalizedSupplier);
+      const amountMatches = Math.abs(rowAmount - normalizedAmount) < 0.01;
+      
+      return supplierMatches && amountMatches;
+    });
+
+    if (matchingRow) {
+      const invoiceData: NocoDBInvoiceData = {
+        invoiceRef: matchingRow[invoiceColumnName]?.toString() || '',
+        amount: matchingRow[amountColumnName]?.toString() || '',
+        supplier: matchingRow[supplierColumnName]?.toString() || ''
+      };
+
+      console.log(`✅ [BL-RECONCILIATION] Trouvé par fournisseur+montant:`, invoiceData);
+      return invoiceData;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`💥 [BL-RECONCILIATION] Erreur recherche par fournisseur+montant:`, error);
+    return null;
+  }
+}
+
+// Fonction de recherche alternative par fournisseur et date (approximative)
+async function searchInvoiceBySupplierAndDate(
+  groupId: number,
+  supplierName?: string,
+  deliveryDate?: Date
+): Promise<NocoDBInvoiceData | null> {
+  if (!supplierName || !deliveryDate) {
+    return null;
+  }
+
+  try {
+    const group = await storage.getGroup(groupId);
+    if (!group || !group.nocodbConfigId || !group.nocodbTableId) {
+      return null;
+    }
+
+    const nocodbConfig = await storage.getNocodbConfig(group.nocodbConfigId);
+    if (!nocodbConfig) {
+      return null;
+    }
+
+    const supplierColumnName = group.nocodbSupplierColumnName || "Fournisseur";
+    const invoiceColumnName = group.invoiceColumnName || "Ref Facture";
+    const amountColumnName = group.nocodbAmountColumnName || "Montant HT";
+    
+    const url = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${group.nocodbTableId}`;
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "xc-token": nocodbConfig.apiToken,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    
+    const normalizedSupplier = supplierName.trim().toLowerCase();
+    
+    // Chercher par fournisseur et prendre la facture la plus récente non encore rapprochée
+    const candidateRows = data.list?.filter((row: any) => {
+      const rowSupplier = row[supplierColumnName]?.toString().trim().toLowerCase();
+      return rowSupplier && rowSupplier.includes(normalizedSupplier);
+    });
+
+    if (candidateRows && candidateRows.length > 0) {
+      // Prendre la première facture correspondante du fournisseur
+      const matchingRow = candidateRows[0];
+      
+      const invoiceData: NocoDBInvoiceData = {
+        invoiceRef: matchingRow[invoiceColumnName]?.toString() || '',
+        amount: matchingRow[amountColumnName]?.toString() || '',
+        supplier: matchingRow[supplierColumnName]?.toString() || ''
+      };
+
+      console.log(`✅ [BL-RECONCILIATION] Trouvé par fournisseur+date:`, invoiceData);
+      return invoiceData;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`💥 [BL-RECONCILIATION] Erreur recherche par fournisseur+date:`, error);
     return null;
   }
 }

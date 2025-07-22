@@ -123,20 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### July 22, 2025 - RAPPROCHEMENT AUTOMATIQUE BL: Service de Rapprochement par Numéro de BL Toutes les 20 Minutes Complètement Opérationnel
+### July 22, 2025 - RAPPROCHEMENT AUTOMATIQUE BL AMÉLIORÉ: Recherche Multi-Critères et Sécurité Renforcée
 
-- **SERVICE DE RAPPROCHEMENT BL CRÉÉ** - blReconciliationService.ts avec logique complète de rapprochement automatique par numéro de BL
-- **CHAMPS NOCODB BL AJOUTÉS** - Nouvelles colonnes nocodb_bl_column_name, nocodb_amount_column_name, nocodb_supplier_column_name configurables par groupe
-- **MIGRATION BASE DONNÉES APPLIQUÉE** - Script SQL de migration automatique pour ajouter les nouveaux champs NocoDB
-- **PROGRAMMATION AUTOMATIQUE** - Service intégré au scheduler pour s'exécuter automatiquement toutes les 20 minutes
-- **RECHERCHE INTELLIGENT** - Recherche par N° BL dans NocoDB avec correspondance fournisseur et mise à jour automatique des livraisons
-- **ROUTES API COMPLÈTES** - API /api/bl-reconciliation/* pour contrôler démarrage, arrêt, statut et déclenchement manuel
-- **INTERFACE ADMINISTRATION** - Composant BLReconciliationCard intégré à la page Sauvegarde BDD pour contrôle temps réel
-- **DÉMARRAGE AUTOMATIQUE** - Service démarre automatiquement au lancement de l'application via startAllServices()
-- **LOGS DÉTAILLÉS** - Traçabilité complète des rapprochements avec compteurs de livraisons traitées et rapprochées
-- **COMPATIBLE PRODUCTION** - Code prêt pour déploiement avec gestion erreurs robuste et configuration environnement
-- **LOGIQUE NON-DESTRUCTIVE** - Rapprochement uniquement sur livraisons validées sans référence facture existante
-- **CONFIGURATION FLEXIBLE** - Noms de colonnes NocoDB configurables par groupe pour adaptation aux besoins métier
+- **RECHERCHE INTELLIGENTE MULTI-ÉTAPES** - Logique de rapprochement en 3 étapes : BL number, fournisseur+montant, fournisseur+date
+- **SÉCURITÉ FOURNISSEUR OBLIGATOIRE** - Vérification du fournisseur rendue obligatoire pour tous les rapprochements, évite les erreurs de correspondance
+- **FONCTION RECHERCHE PAR MONTANT** - searchInvoiceBySupplierAndAmount() pour recherche précise par fournisseur et montant exact avec tolérance 0.01€
+- **FONCTION RECHERCHE PAR DATE** - searchInvoiceBySupplierAndDate() pour recherche par fournisseur et correspondance temporelle approximative
+- **RECHERCHE BL SÉCURISÉE** - searchInvoiceByBLNumber() modifiée pour rejeter tout rapprochement sans vérification fournisseur
+- **FALLBACK INTELLIGENT** - Si numéro BL non trouvé, essai automatique par autres critères pour maximiser les rapprochements
+- **LOGS DÉTAILLÉS PAR ÉTAPE** - Traçabilité complète de chaque méthode de recherche pour diagnostic et optimisation
+- **INTERFACE COCHE VERTE CONSERVÉE** - Système de vérification NocoDB existant maintenu pour validation visuelle des correspondances
+- **COMPATIBLE PRODUCTION** - Toutes les améliorations testées et prêtes pour déploiement avec gestion erreurs robuste
+- **PRÉVENTION RAPPROCHEMENTS ERRONÉS** - Architecture sécurisée empêchant les correspondances entre différents fournisseurs
 
 ### July 22, 2025 - CORRECTION COMPLÈTE DIRECTEUR: Validation DLC, Suppression Commandes Client et Modales Calendrier Opérationnelles
 
