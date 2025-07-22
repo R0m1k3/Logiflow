@@ -190,13 +190,15 @@ export class DatabaseStorage implements IStorage {
   async getUsers(): Promise<User[]> {
     // Version complète récupérant les utilisateurs avec leurs rôles ET groupes
     try {
-      // Récupérer tous les utilisateurs
+      // Récupérer tous les utilisateurs avec firstName et lastName
       const usersResult = await pool.query(`
         SELECT 
           u.id,
           u.username,
           u.email,
           u.name,
+          u.first_name,
+          u.last_name,
           u.password,
           u.role,
           u.password_changed,
@@ -228,6 +230,9 @@ export class DatabaseStorage implements IStorage {
         
         return {
           ...user,
+          // 🔧 MAPPING CRITIQUE: Convertir snake_case vers camelCase pour le frontend
+          firstName: user.first_name,
+          lastName: user.last_name,
           userRoles: rolesResult.rows.map(role => ({
             userId: user.id,
             roleId: role.id,
@@ -267,6 +272,9 @@ export class DatabaseStorage implements IStorage {
       const simpleResult = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
       return simpleResult.rows.map(row => ({
         ...row,
+        // 🔧 MAPPING CRITIQUE: Convertir snake_case vers camelCase pour le frontend (fallback)
+        firstName: row.first_name,
+        lastName: row.last_name,
         userRoles: [],
         userGroups: []
       }));
