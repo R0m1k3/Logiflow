@@ -86,7 +86,7 @@ export function CustomerOrderForm({
       deposit: order?.deposit ? order.deposit.toString() : "0",
       isPromotionalPrice: order?.isPromotionalPrice || false,
       customerNotified: order?.customerNotified || false,
-      groupId: order?.groupId || (user?.role === 'admin' && selectedStoreId ? selectedStoreId : user?.userGroups?.[0]?.groupId) || (groups.length > 0 ? groups[0].id : undefined), // Auto-select first available group
+      groupId: order?.groupId || (user?.role === 'admin' && selectedStoreId ? selectedStoreId : user?.userGroups?.[0]?.groupId) || undefined, // Only auto-select for admin
     },
   });
 
@@ -112,10 +112,6 @@ export function CustomerOrderForm({
         groupId = user.userGroups[0].groupId;
       } else if (user?.role === 'admin' && groups.length > 0) {
         groupId = groups[0].id; // Admin in "tous magasins" mode - use first group
-      } else if (groups.length > 0) {
-        // Fallback: use first available group for any user
-        groupId = groups[0].id;
-        console.log("🏪 Using fallback first group:", groups[0].id);
       }
     }
     
@@ -141,21 +137,17 @@ export function CustomerOrderForm({
     ? groups 
     : user?.userGroups?.map(ug => ug.group) || [];
 
-  // Auto-select group for users respecting admin store selection
+  // Auto-select group ONLY for admin when a store is selected
   const currentGroupId = form.getValues('groupId');
-  if (!currentGroupId && groups.length > 0) {
+  if (!currentGroupId) {
     if (user?.role === 'admin' && selectedStoreId) {
       // Admin has selected a specific store - use it
       form.setValue('groupId', selectedStoreId);
       console.log("🏪 Auto-selecting admin store:", selectedStoreId);
-    } else if (user?.userGroups?.[0]?.groupId) {
-      // User has assigned groups - use first one
-      form.setValue('groupId', user.userGroups[0].groupId);
-    } else if (groups.length > 0) {
-      // Fallback: use first available group for any user
+    } else if (user?.role === 'admin' && groups.length > 0) {
+      // Admin with no specific store selected - use first available
       form.setValue('groupId', groups[0].id);
-      console.log("🏪 Auto-selecting first available group:", groups[0].id);
-      form.setValue('groupId', groups[0].id);
+      console.log("🏪 Auto-selecting first group for admin:", groups[0].id);
     }
   }
 

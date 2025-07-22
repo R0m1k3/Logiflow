@@ -222,21 +222,24 @@ export function setupLocalAuth(app: Express) {
   app.post("/api/logout", logoutHandler);
   app.get("/api/logout", logoutHandler);
 
-  // Get current user
-  app.get("/api/user", (req, res) => {
+  // Get current user with groups
+  app.get("/api/user", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Non authentifié" });
     }
-    const user = req.user as SelectUser;
-    res.json({ 
-      id: user.id, 
-      username: user.username, 
-      email: user.email, 
-      firstName: user.firstName, 
-      lastName: user.lastName, 
-      role: user.role,
-      passwordChanged: user.passwordChanged 
-    });
+    try {
+      const user = req.user as SelectUser;
+      const userWithGroups = await storage.getUserWithGroups(user.id);
+      
+      if (!userWithGroups) {
+        return res.status(404).json({ message: "Utilisateur introuvable" });
+      }
+      
+      res.json(userWithGroups);
+    } catch (error) {
+      console.error("Error fetching user with groups:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
   });
 
   // Get current user's permissions

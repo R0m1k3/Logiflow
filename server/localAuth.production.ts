@@ -167,21 +167,26 @@ export function setupLocalAuth(app: Express) {
     }
   });
 
-  app.get('/api/user', (req: any, res) => {
-    if (req.isAuthenticated()) {
-      res.json({
-        id: req.user.id,
-        username: req.user.username,
-        email: req.user.email,
-        name: req.user.name,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        profileImageUrl: req.user.profileImageUrl,
-        role: req.user.role,
-        passwordChanged: req.user.passwordChanged
-      });
-    } else {
-      res.status(401).json({ message: 'Not authenticated' });
+  app.get('/api/user', async (req: any, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+    
+    try {
+      const userId = req.user.id;
+      
+      // Import storage from the production routes
+      const { storage } = await import('./routes.production.js');
+      const userWithGroups = await storage.getUserWithGroups(userId);
+      
+      if (!userWithGroups) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json(userWithGroups);
+    } catch (error) {
+      console.error("Error fetching user with groups:", error);
+      res.status(500).json({ message: "Server error" });
     }
   });
 
