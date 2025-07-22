@@ -1079,7 +1079,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid input", errors: result.error.errors });
       }
 
+      // Créer le rôle
       const role = await storage.createRole(result.data);
+      console.log('✅ Nouveau rôle créé:', role.name, 'ID:', role.id);
+
+      // 🔧 AMÉLIORATION: Donner automatiquement toutes les permissions aux nouveaux rôles personnalisés
+      try {
+        console.log('🔧 Attribution automatique des permissions au nouveau rôle...');
+        
+        // Récupérer toutes les permissions
+        const allPermissionsResult = await pool.query('SELECT id FROM permissions ORDER BY id');
+        const allPermissionIds = allPermissionsResult.rows.map(p => p.id);
+        
+        console.log(`📋 Attribution de ${allPermissionIds.length} permissions au rôle ${role.name}`);
+        
+        // Attribuer toutes les permissions au nouveau rôle
+        await storage.setRolePermissions(role.id, allPermissionIds);
+        
+        console.log('✅ Permissions attribuées automatiquement au nouveau rôle');
+      } catch (permError) {
+        console.error('⚠️ Erreur lors de l\'attribution des permissions:', permError);
+        // Ne pas échouer la création du rôle si l'attribution des permissions échoue
+      }
+
       res.status(201).json(role);
     } catch (error) {
       console.error("Error creating role:", error);

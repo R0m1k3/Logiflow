@@ -1001,44 +1001,49 @@ async function createDefaultAdmin() {
 
 async function cleanupOldRoles() {
   try {
-    console.log('🧹 Nettoyage des anciens rôles pour simplification...');
+    console.log('🧹 Nettoyage des anciens rôles système pour simplification...');
     
-    // Vérifier s'il y a des rôles autres que 'admin'
+    // Supprimer SEULEMENT les anciens rôles système, PAS les rôles personnalisés créés par l'utilisateur
+    const systemRolesToDelete = ['employee', 'manager', 'directeur'];
     const oldRoles = await pool.query(`
-      SELECT name FROM roles WHERE name != 'admin'
-    `);
+      SELECT id, name FROM roles 
+      WHERE name = ANY($1) AND is_system = true
+    `, [systemRolesToDelete]);
     
     if (oldRoles.rows.length > 0) {
-      console.log(`🗑️ Suppression de ${oldRoles.rows.length} anciens rôles:`, oldRoles.rows.map(r => r.name));
+      console.log(`🗑️ Suppression de ${oldRoles.rows.length} anciens rôles système:`, oldRoles.rows.map(r => r.name));
       
-      // Migrer tous les utilisateurs vers le rôle admin avant suppression
+      const roleIds = oldRoles.rows.map(r => r.id);
+      
+      // Migrer les utilisateurs de ces anciens rôles système vers admin
       await pool.query(`
         UPDATE users SET role = 'admin' 
-        WHERE role IN ('employee', 'manager', 'directeur')
-      `);
-      console.log('✅ Tous les utilisateurs migrés vers le rôle admin');
+        WHERE role = ANY($1)
+      `, [systemRolesToDelete]);
+      console.log('✅ Utilisateurs des anciens rôles système migrés vers admin');
       
-      // Supprimer les anciennes permissions de rôles
+      // Supprimer les permissions des anciens rôles système
       await pool.query(`
         DELETE FROM role_permissions 
-        WHERE role_id IN (SELECT id FROM roles WHERE name != 'admin')
-      `);
-      console.log('✅ Anciennes permissions de rôles supprimées');
+        WHERE role_id = ANY($1)
+      `, [roleIds]);
+      console.log('✅ Permissions des anciens rôles système supprimées');
       
-      // Supprimer les anciennes assignations de rôles
+      // Supprimer les assignations des anciens rôles système  
       await pool.query(`
         DELETE FROM user_roles 
-        WHERE role_id IN (SELECT id FROM roles WHERE name != 'admin')
-      `);
-      console.log('✅ Anciennes assignations de rôles supprimées');
+        WHERE role_id = ANY($1)
+      `, [roleIds]);
+      console.log('✅ Assignations des anciens rôles système supprimées');
       
-      // Supprimer les anciens rôles
+      // Supprimer les anciens rôles système
       await pool.query(`
-        DELETE FROM roles WHERE name != 'admin'
-      `);
-      console.log('✅ Anciens rôles supprimés - système simplifié au rôle admin uniquement');
+        DELETE FROM roles 
+        WHERE id = ANY($1)
+      `, [roleIds]);
+      console.log('✅ Anciens rôles système supprimés - rôles personnalisés préservés');
     } else {
-      console.log('✅ Aucun ancien rôle à nettoyer');
+      console.log('✅ Aucun ancien rôle système à nettoyer');
     }
     
   } catch (error) {

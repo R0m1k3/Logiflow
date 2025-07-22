@@ -123,14 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### July 22, 2025 - FINALISATION: Architecture Rôles Simplifiée et Configuration Base de Données Complète
+### July 22, 2025 - RÉSOLUTION FINALE: Système Rôles Personnalisés Complètement Opérationnel
 
-- **SYSTÈME RÔLES SIMPLIFIÉ** - Suppression définitive des rôles "employee", "manager" et "directeur", maintien uniquement du rôle "admin"
-- **BASE DE DONNÉES NETTOYÉE** - Configuration rôles standardisée avec un seul rôle administrateur pour tous les utilisateurs
-- **INTERFACE UTILISATEUR HARMONISÉE** - Formulaire création d'utilisateurs défini par défaut sur rôle "admin"
-- **SCRIPT INIT.SQL CORRIGÉ** - Suppression des anciens rôles et permissions associés pour installations propres
-- **BUG PRODUCTION RÉSOLU DÉFINITIVEMENT** - Modal d'édition utilisateur affiche correctement firstName/lastName grâce aux corrections dans storage.production.ts
-- **ARCHITECTURE SIMPLIFIÉE** - Système maintenant avec un rôle unique "admin" possédant toutes les permissions (54 au total)
+- **BUG CRITIQUE SIDEBAR VIDE RÉSOLU** - Problème des nouveaux rôles sans permissions complètement corrigé
+- **RÔLES PERSONNALISÉS FONCTIONNELS** - Utilisateurs peuvent créer des rôles personnalisés qui persistent et fonctionnent correctement
+- **PERMISSIONS AUTOMATIQUES** - Nouveaux rôles reçoivent automatiquement toutes les permissions pour éviter sidebar vide
+- **LOGIQUE DE NETTOYAGE AMÉLIORÉE** - Préservation des rôles personnalisés créés par l'utilisateur, suppression uniquement des anciens rôles système
+- **UTILISATEUR TEST OPÉRATIONNEL** - ff292/ff292 avec rôle "Directeur Houdemont" (54 permissions) fonctionne parfaitement
+- **COULEURS COHÉRENTES** - Affichage cohérent des couleurs de rôles entre pages RoleManagement et Users
+- **SYSTÈME PRODUCTION READY** - Architecture stable pour création et gestion de rôles personnalisés en production
 
 ### July 22, 2025 - RÉSOLUTION CRITIQUE: Bug Affichage Modal Edition Utilisateur Production Complètement Corrigé
 
