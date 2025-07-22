@@ -155,8 +155,9 @@ export default function Calendar() {
     console.log('📅 Permission check result:', hasPermission('calendar_read'));
     console.log('📅 All permissions available:', typeof hasPermission);
     
-    // Vérifier que l'utilisateur a les permissions pour créer
-    if (!hasPermission('calendar_read')) {
+    // 🔧 FIX ADMIN - Autoriser admin à cliquer sur calendrier même si hasPermission échoue
+    const isAdmin = user && (user as any).role === 'admin';
+    if (!isAdmin && !hasPermission('calendar_read')) {
       console.log('❌ No calendar permission');
       return;
     }
