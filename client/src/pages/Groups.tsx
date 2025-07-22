@@ -49,6 +49,9 @@ export default function Groups() {
     nocodbTableId: "",
     nocodbTableName: "",
     invoiceColumnName: "Ref Facture",
+    nocodbBlColumnName: "Numéro de BL",
+    nocodbAmountColumnName: "Montant HT", 
+    nocodbSupplierColumnName: "Fournisseur",
   });
 
   const { data: groups = [], isLoading } = useQuery<Group[]>({
@@ -246,6 +249,9 @@ export default function Groups() {
       nocodbTableId: "",
       nocodbTableName: "",
       invoiceColumnName: "Ref Facture",
+      nocodbBlColumnName: "Numéro de BL",
+      nocodbAmountColumnName: "Montant HT",
+      nocodbSupplierColumnName: "Fournisseur",
     });
     setShowCreateModal(true);
   };
@@ -259,6 +265,9 @@ export default function Groups() {
       nocodbTableId: group.nocodbTableId || "",
       nocodbTableName: group.nocodbTableName || "",
       invoiceColumnName: group.invoiceColumnName || "Ref Facture",
+      nocodbBlColumnName: group.nocodbBlColumnName || "Numéro de BL",
+      nocodbAmountColumnName: group.nocodbAmountColumnName || "Montant HT",
+      nocodbSupplierColumnName: group.nocodbSupplierColumnName || "Fournisseur",
     });
     setShowEditModal(true);
   };
@@ -590,6 +599,41 @@ export default function Groups() {
                       placeholder="Ref Facture"
                     />
                   </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium text-gray-800 mb-3">Configuration rapprochement par N° BL</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="nocodbBlColumnName">Nom de la colonne N° BL</Label>
+                        <Input
+                          id="nocodbBlColumnName"
+                          value={formData.nocodbBlColumnName}
+                          onChange={(e) => handleChange('nocodbBlColumnName', e.target.value)}
+                          placeholder="Numéro de BL"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="nocodbAmountColumnName">Nom de la colonne Montant HT</Label>
+                        <Input
+                          id="nocodbAmountColumnName"
+                          value={formData.nocodbAmountColumnName}
+                          onChange={(e) => handleChange('nocodbAmountColumnName', e.target.value)}
+                          placeholder="Montant HT"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="nocodbSupplierColumnName">Nom de la colonne Fournisseur</Label>
+                        <Input
+                          id="nocodbSupplierColumnName"
+                          value={formData.nocodbSupplierColumnName}
+                          onChange={(e) => handleChange('nocodbSupplierColumnName', e.target.value)}
+                          placeholder="Fournisseur"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
@@ -609,6 +653,9 @@ export default function Groups() {
                     nocodbTableId: "",
                     nocodbTableName: "",
                     invoiceColumnName: "Ref Facture",
+                    nocodbBlColumnName: "Numéro de BL",
+                    nocodbAmountColumnName: "Montant HT",
+                    nocodbSupplierColumnName: "Fournisseur",
                   });
                 }}
               >

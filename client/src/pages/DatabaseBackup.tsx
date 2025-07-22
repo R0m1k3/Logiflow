@@ -147,6 +147,127 @@ function SchedulerCard() {
   );
 }
 
+// Composant pour gérer le rapprochement automatique par N° BL
+function BLReconciliationCard() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Récupérer le statut du service de rapprochement BL
+  const { data: blStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['/api/bl-reconciliation/status'],
+    queryFn: () => apiRequest('/api/bl-reconciliation/status'),
+    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes
+  });
+
+  // Mutation pour démarrer/arrêter le service
+  const toggleBLServiceMutation = useMutation({
+    mutationFn: (action: 'start' | 'stop') => 
+      apiRequest(`/api/bl-reconciliation/${action}`, { method: 'POST' }),
+    onSuccess: (data, action) => {
+      toast({
+        title: "Succès",
+        description: action === 'start' ? 
+          "Rapprochement automatique BL activé" : 
+          "Rapprochement automatique BL désactivé",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/bl-reconciliation/status'] });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le service de rapprochement BL",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation pour déclencher un rapprochement manuel
+  const manualReconciliationMutation = useMutation({
+    mutationFn: () => apiRequest('/api/bl-reconciliation/trigger', { method: 'POST' }),
+    onSuccess: (data) => {
+      const result = data.result;
+      toast({
+        title: "Rapprochement terminé",
+        description: `${result.reconciledDeliveries} livraisons rapprochées sur ${result.processedDeliveries} traitées`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/bl-reconciliation/status'] });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de déclencher le rapprochement manuel",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          Rapprochement automatique BL
+        </CardTitle>
+        <CardDescription>
+          Rapprochement automatique des livraisons avec les factures par numéro de BL (toutes les 20 minutes)
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge variant={blStatus?.active ? "default" : "secondary"}>
+                {blStatus?.active ? "Actif" : "Inactif"}
+              </Badge>
+              {statusLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
+              {blStatus?.intervalMinutes && (
+                <Badge variant="outline">
+                  Toutes les {blStatus.intervalMinutes} min
+                </Badge>
+              )}
+            </div>
+            {blStatus?.nextRun && (
+              <p className="text-sm text-muted-foreground">
+                Prochain rapprochement : {blStatus.nextRun}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => manualReconciliationMutation.mutate()}
+              disabled={manualReconciliationMutation.isPending}
+            >
+              {manualReconciliationMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4" />
+              )}
+              Rapprocher maintenant
+            </Button>
+            <Button
+              variant={blStatus?.active ? "destructive" : "default"}
+              size="sm"
+              onClick={() => toggleBLServiceMutation.mutate(blStatus?.active ? 'stop' : 'start')}
+              disabled={toggleBLServiceMutation.isPending}
+            >
+              {toggleBLServiceMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : blStatus?.active ? (
+                <Square className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+              {blStatus?.active ? "Désactiver" : "Activer"}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DatabaseBackup() {
   const [description, setDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -489,6 +610,10 @@ export default function DatabaseBackup() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Services automatiques */}
+      <SchedulerCard />
+      <BLReconciliationCard />
 
       {/* Liste des sauvegardes */}
       <Card>

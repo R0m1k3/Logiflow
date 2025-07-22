@@ -2983,6 +2983,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== BL RECONCILIATION ROUTES =====
+  
+  // Status du service de rapprochement BL
+  app.get("/api/bl-reconciliation/status", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      const status = scheduler.getBLReconciliationStatus();
+      
+      res.json(status);
+    } catch (error) {
+      console.error("❌ Error getting BL reconciliation status:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de la récupération du statut du rapprochement BL",
+        error: error.message 
+      });
+    }
+  });
+
+  // Démarrer le service de rapprochement BL
+  app.post("/api/bl-reconciliation/start", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      scheduler.startBLReconciliation();
+      
+      res.json({ 
+        message: "Service de rapprochement BL démarré avec succès",
+        status: scheduler.getBLReconciliationStatus()
+      });
+    } catch (error) {
+      console.error("❌ Error starting BL reconciliation:", error);
+      res.status(500).json({ 
+        message: "Erreur lors du démarrage du rapprochement BL",
+        error: error.message 
+      });
+    }
+  });
+
+  // Arrêter le service de rapprochement BL
+  app.post("/api/bl-reconciliation/stop", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      scheduler.stopBLReconciliation();
+      
+      res.json({ 
+        message: "Service de rapprochement BL arrêté avec succès",
+        status: scheduler.getBLReconciliationStatus()
+      });
+    } catch (error) {
+      console.error("❌ Error stopping BL reconciliation:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de l'arrêt du rapprochement BL",
+        error: error.message 
+      });
+    }
+  });
+
+  // Déclenchement manuel d'un rapprochement BL
+  app.post("/api/bl-reconciliation/trigger", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      const result = await scheduler.triggerManualBLReconciliation();
+      
+      res.json({ 
+        message: "Rapprochement BL manuel exécuté avec succès",
+        result: result
+      });
+    } catch (error) {
+      console.error("❌ Error triggering manual BL reconciliation:", error);
+      res.status(500).json({ 
+        message: "Erreur lors du rapprochement BL manuel",
+        error: error.message 
+      });
+    }
+  });
+
+  // Status global de tous les services automatiques
+  app.get("/api/scheduler/all-status", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      const allStatus = scheduler.getAllServicesStatus();
+      
+      res.json({
+        services: allStatus,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("❌ Error getting all services status:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de la récupération du statut des services",
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -123,6 +123,21 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - RAPPROCHEMENT AUTOMATIQUE BL: Service de Rapprochement par Numéro de BL Toutes les 20 Minutes Complètement Opérationnel
+
+- **SERVICE DE RAPPROCHEMENT BL CRÉÉ** - blReconciliationService.ts avec logique complète de rapprochement automatique par numéro de BL
+- **CHAMPS NOCODB BL AJOUTÉS** - Nouvelles colonnes nocodb_bl_column_name, nocodb_amount_column_name, nocodb_supplier_column_name configurables par groupe
+- **MIGRATION BASE DONNÉES APPLIQUÉE** - Script SQL de migration automatique pour ajouter les nouveaux champs NocoDB
+- **PROGRAMMATION AUTOMATIQUE** - Service intégré au scheduler pour s'exécuter automatiquement toutes les 20 minutes
+- **RECHERCHE INTELLIGENT** - Recherche par N° BL dans NocoDB avec correspondance fournisseur et mise à jour automatique des livraisons
+- **ROUTES API COMPLÈTES** - API /api/bl-reconciliation/* pour contrôler démarrage, arrêt, statut et déclenchement manuel
+- **INTERFACE ADMINISTRATION** - Composant BLReconciliationCard intégré à la page Sauvegarde BDD pour contrôle temps réel
+- **DÉMARRAGE AUTOMATIQUE** - Service démarre automatiquement au lancement de l'application via startAllServices()
+- **LOGS DÉTAILLÉS** - Traçabilité complète des rapprochements avec compteurs de livraisons traitées et rapprochées
+- **COMPATIBLE PRODUCTION** - Code prêt pour déploiement avec gestion erreurs robuste et configuration environnement
+- **LOGIQUE NON-DESTRUCTIVE** - Rapprochement uniquement sur livraisons validées sans référence facture existante
+- **CONFIGURATION FLEXIBLE** - Noms de colonnes NocoDB configurables par groupe pour adaptation aux besoins métier
+
 ### July 22, 2025 - CORRECTION COMPLÈTE DIRECTEUR: Validation DLC, Suppression Commandes Client et Modales Calendrier Opérationnelles
 
 - **PROBLÈME SYSTÉMIQUE RÉSOLU** - hasPermission() défaillant contourné avec bypasses spécifiques pour directeur dans tous les composants critiques

@@ -140,10 +140,10 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
       const { ensureEmployeePermissions } = await import('./initDatabase.production');
       await ensureEmployeePermissions();
       
-      // Initialize backup scheduler for automatic daily backups
+      // Initialize all automatic services (backup and BL reconciliation)
       const { SchedulerService } = await import('./schedulerService.production.js');
       const scheduler = SchedulerService.getInstance();
-      scheduler.startDailyBackup();
+      scheduler.startAllServices();
     } catch (error) {
       console.error("Failed to initialize production database:", error);
       // Continue startup even if production initialization fails

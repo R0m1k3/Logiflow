@@ -1,11 +1,13 @@
 import * as cron from 'node-cron';
 import { BackupService } from './backupService.production.js';
 import { Pool } from '@neondatabase/serverless';
+import { performBLReconciliation } from './blReconciliationService.js';
 
 export class SchedulerService {
   private static instance: SchedulerService;
   private backupService: BackupService;
   private dailyBackupTask: cron.ScheduledTask | null = null;
+  private blReconciliationTask: cron.ScheduledTask | null = null;
 
   private constructor() {
     // Initialiser le pool pour le BackupService
@@ -103,5 +105,116 @@ export class SchedulerService {
     );
     console.log(`✅ [SCHEDULER] Sauvegarde manuelle créée: ${backupId}`);
     return backupId;
+  }
+
+  /**
+   * Démarre le rapprochement automatique par N° BL toutes les 20 minutes
+   */
+  public startBLReconciliation(): void {
+    // Arrêter la tâche existante si elle existe
+    if (this.blReconciliationTask) {
+      this.blReconciliationTask.stop();
+      this.blReconciliationTask.destroy();
+    }
+
+    // Programmer un rapprochement toutes les 20 minutes
+    // Format cron: */20 * * * * = toutes les 20 minutes
+    this.blReconciliationTask = cron.schedule('*/20 * * * *', async () => {
+      try {
+        console.log('⏰ [BL-RECONCILIATION] Démarrage du rapprochement automatique programmé');
+        
+        const result = await performBLReconciliation();
+        
+        if (result.reconciledDeliveries > 0) {
+          console.log(`🎉 [BL-RECONCILIATION] ${result.reconciledDeliveries} nouvelles livraisons rapprochées automatiquement`);
+        } else {
+          console.log('ℹ️ [BL-RECONCILIATION] Aucune nouvelle livraison à rapprocher');
+        }
+        
+        if (result.errors.length > 0) {
+          console.error(`⚠️ [BL-RECONCILIATION] ${result.errors.length} erreurs lors du rapprochement automatique:`, result.errors);
+        }
+      } catch (error) {
+        console.error('💥 [BL-RECONCILIATION] Erreur lors du rapprochement automatique:', error);
+      }
+    });
+
+    console.log('⏰ [BL-RECONCILIATION] Rapprochement automatique par N° BL programmé toutes les 20 minutes');
+  }
+
+  /**
+   * Arrête le rapprochement automatique
+   */
+  public stopBLReconciliation(): void {
+    if (this.blReconciliationTask) {
+      this.blReconciliationTask.stop();
+      this.blReconciliationTask.destroy();
+      this.blReconciliationTask = null;
+      console.log('⏹️ [BL-RECONCILIATION] Rapprochement automatique arrêté');
+    }
+  }
+
+  /**
+   * Vérifie le statut du rapprochement automatique
+   */
+  public getBLReconciliationStatus(): { active: boolean; nextRun?: string; intervalMinutes: number } {
+    if (!this.blReconciliationTask) {
+      return { active: false, intervalMinutes: 20 };
+    }
+
+    // Calculer la prochaine exécution (dans maximum 20 minutes)
+    const now = new Date();
+    const nextRun = new Date(now.getTime() + (20 * 60 * 1000)); // +20 minutes max
+    
+    return {
+      active: true,
+      intervalMinutes: 20,
+      nextRun: nextRun.toLocaleString('fr-FR', { 
+        timeZone: 'Europe/Paris',
+        dateStyle: 'short',
+        timeStyle: 'short'
+      })
+    };
+  }
+
+  /**
+   * Force un rapprochement immédiat (pour test)
+   */
+  public async triggerManualBLReconciliation(): Promise<any> {
+    console.log('🔧 [BL-RECONCILIATION] Déclenchement manuel du rapprochement...');
+    const result = await performBLReconciliation();
+    console.log(`✅ [BL-RECONCILIATION] Rapprochement manuel terminé: ${result.reconciledDeliveries}/${result.processedDeliveries} livraisons rapprochées`);
+    return result;
+  }
+
+  /**
+   * Démarre tous les services programmés (pour l'initialisation)
+   */
+  public startAllServices(): void {
+    this.startDailyBackup();
+    this.startBLReconciliation();
+    console.log('🚀 [SCHEDULER] Tous les services automatiques démarrés');
+  }
+
+  /**
+   * Arrête tous les services programmés
+   */
+  public stopAllServices(): void {
+    this.stopDailyBackup();
+    this.stopBLReconciliation();
+    console.log('⏹️ [SCHEDULER] Tous les services automatiques arrêtés');
+  }
+
+  /**
+   * Obtient le statut complet de tous les services
+   */
+  public getAllServicesStatus(): {
+    dailyBackup: { active: boolean; nextRun?: string };
+    blReconciliation: { active: boolean; nextRun?: string; intervalMinutes: number };
+  } {
+    return {
+      dailyBackup: this.getDailyBackupStatus(),
+      blReconciliation: this.getBLReconciliationStatus()
+    };
   }
 }
