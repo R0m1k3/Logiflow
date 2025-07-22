@@ -86,7 +86,7 @@ export function CustomerOrderForm({
       deposit: order?.deposit ? order.deposit.toString() : "0",
       isPromotionalPrice: order?.isPromotionalPrice || false,
       customerNotified: order?.customerNotified || false,
-      groupId: order?.groupId || (user?.role === 'admin' && selectedStoreId ? selectedStoreId : user?.userGroups?.[0]?.groupId) || undefined, // Respect admin store selection
+      groupId: order?.groupId || (user?.role === 'admin' && selectedStoreId ? selectedStoreId : user?.userGroups?.[0]?.groupId) || (groups.length > 0 ? groups[0].id : undefined), // Auto-select first available group
     },
   });
 
@@ -112,6 +112,10 @@ export function CustomerOrderForm({
         groupId = user.userGroups[0].groupId;
       } else if (user?.role === 'admin' && groups.length > 0) {
         groupId = groups[0].id; // Admin in "tous magasins" mode - use first group
+      } else if (groups.length > 0) {
+        // Fallback: use first available group for any user
+        groupId = groups[0].id;
+        console.log("🏪 Using fallback first group:", groups[0].id);
       }
     }
     
@@ -139,7 +143,7 @@ export function CustomerOrderForm({
 
   // Auto-select group for users respecting admin store selection
   const currentGroupId = form.getValues('groupId');
-  if (!currentGroupId) {
+  if (!currentGroupId && groups.length > 0) {
     if (user?.role === 'admin' && selectedStoreId) {
       // Admin has selected a specific store - use it
       form.setValue('groupId', selectedStoreId);
@@ -147,8 +151,10 @@ export function CustomerOrderForm({
     } else if (user?.userGroups?.[0]?.groupId) {
       // User has assigned groups - use first one
       form.setValue('groupId', user.userGroups[0].groupId);
-    } else if (user?.role === 'admin' && groups.length > 0) {
-      // Admin with no specific groups - use first available group
+    } else if (groups.length > 0) {
+      // Fallback: use first available group for any user
+      form.setValue('groupId', groups[0].id);
+      console.log("🏪 Auto-selecting first available group:", groups[0].id);
       form.setValue('groupId', groups[0].id);
     }
   }
