@@ -448,7 +448,7 @@ export default function Dashboard() {
         <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="pb-4 border-b border-gray-100">
             <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
-              <User className="h-5 w-5 mr-3 text-purple-600" />
+              <UserIcon className="h-5 w-5 mr-3 text-purple-600" />
               Commandes Clients
             </CardTitle>
           </CardHeader>
