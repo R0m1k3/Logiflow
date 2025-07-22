@@ -219,6 +219,11 @@ export default function Sidebar() {
               return null;
             }
             
+            // Spécifications: Manager ne voit pas rapprochement
+            if (isManager && item.path === '/reconciliation') {
+              return null;
+            }
+            
             const shouldShow = isAdmin || isManager || isEmployee || isDirecteur || hasPermission(item.permission);
             
             if (!shouldShow) return null;

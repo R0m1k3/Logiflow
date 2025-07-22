@@ -126,9 +126,11 @@ The application uses a sophisticated dual authentication approach:
 ### July 22, 2025 - RESTRICTION MENUS EMPLOYÉ: Calendrier, Commandes, Livraisons et Rapprochement Cachés
 
 - **SIDEBAR EMPLOYÉ RESTREINTE** - Employé ne voit plus les menus Calendrier, Commandes, Livraisons et Rapprochement selon nouvelles spécifications
+- **SIDEBAR MANAGER RESTREINTE** - Manager ne voit plus le menu Rapprochement (Admin/Directeur uniquement)
 - **ACCÈS EMPLOYÉ LIMITÉ À** - Tableau de bord, Publicités, Commandes Client, Gestion DLC, Tâches uniquement
-- **LOGIQUE FILTRAGE APPLIQUÉE** - Vérification spécifique rôle employé pour masquer les menus interdits
-- **SPÉCIFICATIONS MISES À JOUR** - Interface employé simplifiée avec accès restreint aux fonctionnalités autorisées
+- **ACCÈS MANAGER LIMITÉ** - Tous les menus sauf Rapprochement et sections Gestion/Administration
+- **LOGIQUE FILTRAGE APPLIQUÉE** - Vérification spécifique rôles employé et manager pour masquer les menus interdits
+- **SPÉCIFICATIONS MISES À JOUR** - Interfaces employé et manager simplifiées avec accès restreints selon rôles
 
 ### July 22, 2025 - RÉSOLUTION FINALE COMPLÈTE: Admin Sidebar Production - Bug Permissions Entièrement Résolu
 
