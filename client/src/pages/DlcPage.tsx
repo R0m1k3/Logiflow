@@ -48,12 +48,20 @@ export default function DlcPage() {
   const [editingProduct, setEditingProduct] = useState<DlcProductWithRelations | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
+  const [localSelectedStoreId, setLocalSelectedStoreId] = useState<number | null>(null);
 
-  // Fetch stores/groups
-  const { data: stores = [] } = useQuery({
+  // Fetch stores/groups with user filtering
+  const { data: groupsData = [] } = useQuery({
     queryKey: ["/api/groups"],
     enabled: !authLoading,
   });
+  
+  // Filtrer les groupes selon le magasin sélectionné pour les admins
+  const stores = Array.isArray(groupsData) ? (
+    user?.role === 'admin' && selectedStoreId 
+      ? groupsData.filter(g => g.id === selectedStoreId)
+      : groupsData
+  ) : [];
 
 
 
@@ -67,8 +75,32 @@ export default function DlcPage() {
   // Debug log suppliers
   console.log('🔍 DLC Page - Suppliers fetched:', { 
     count: suppliers.length, 
-    suppliers: suppliers.map(s => ({ id: s.id, name: s.name, hasDlc: s.hasDlc })) 
+    suppliers: suppliers.map((s: any) => ({ id: s.id, name: s.name, hasDlc: s.hasDlc })) 
   });
+
+  // Auto-sélection uniquement pour les admins
+  useEffect(() => {
+    if (user?.role === 'admin' && stores.length > 0 && !localSelectedStoreId) {
+      let defaultStoreId = null;
+      
+      // Pour l'admin : utiliser le magasin sélectionné dans le header, sinon le premier disponible
+      if (selectedStoreId && stores.find((g: any) => g.id === selectedStoreId)) {
+        defaultStoreId = selectedStoreId;
+      } else {
+        defaultStoreId = (stores[0] as any)?.id;
+      }
+      
+      console.log('🏪 Admin DLC store auto-selection:', { 
+        selectedStoreId, 
+        defaultStoreId, 
+        firstGroupId: (stores[0] as any)?.id
+      });
+      
+      if (defaultStoreId) {
+        setLocalSelectedStoreId(defaultStoreId);
+      }
+    }
+  }, [stores, selectedStoreId, user?.role, localSelectedStoreId]);
 
   // Fetch DLC products
   const { data: dlcProducts = [], isLoading: productsLoading } = useQuery({
@@ -184,17 +216,29 @@ export default function DlcPage() {
 
   const onSubmit = (data: DlcFormData) => {
     // Calculer la date d'expiration et le seuil d'alerte (15 jours avant)
-    const dlcDate = new Date(data.dlcDate);
+    const expiryDate = new Date(data.dlcDate);
+    
+    // Déterminer le magasin selon le rôle
+    let targetStoreId;
+    if (user?.role === 'admin') {
+      // Pour l'admin : utiliser l'auto-sélection ou le header
+      targetStoreId = localSelectedStoreId || selectedStoreId || (stores[0] as any)?.id;
+    } else {
+      // Pour les autres rôles : toujours utiliser leur premier magasin assigné
+      targetStoreId = (stores[0] as any)?.id;
+    }
     
     const dlcData: InsertDlcProduct = {
       ...data,
-      dlcDate,
+      expiryDate,
       quantity: 1, // Valeur par défaut
       unit: "unité", // Valeur par défaut
       location: "Magasin", // Valeur par défaut
       alertThreshold: 15, // Toujours 15 jours
-      groupId: selectedStoreId || stores[0]?.id || 2, // Utilise le magasin sélectionné ou le premier disponible
+      groupId: targetStoreId,
     };
+
+    console.log('🚀 Creating DLC product with data:', dlcData);
 
     if (editingProduct) {
       updateMutation.mutate({ id: editingProduct.id, data: dlcData });
