@@ -33,25 +33,28 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
     
     // 1. Récupérer toutes les livraisons validées sans référence facture
     const deliveries = await storage.getDeliveries();
-    const unReconciledDeliveries = deliveries.filter(delivery => 
+    const allUnreconciledDeliveries = deliveries.filter(delivery => 
       delivery.status === 'delivered' && 
-      delivery.blNumber && 
       !delivery.invoiceReference
     );
 
-    console.log(`🔍 [BL-RECONCILIATION] ${unReconciledDeliveries.length} livraisons non rapprochées trouvées`);
+    // Séparer les livraisons avec et sans numéro de BL
+    const deliveriesWithBL = allUnreconciledDeliveries.filter(d => d.blNumber);
+    const deliveriesWithoutBL = allUnreconciledDeliveries.filter(d => !d.blNumber);
+
+    console.log(`🔍 [BL-RECONCILIATION] ${deliveriesWithBL.length} livraisons avec N° BL à rapprocher`);
+    console.log(`🔍 [BL-RECONCILIATION] ${deliveriesWithoutBL.length} livraisons sans N° BL à rapprocher`);
     
-    if (unReconciledDeliveries.length === 0) {
+    if (allUnreconciledDeliveries.length === 0) {
       console.log("✅ [BL-RECONCILIATION] Aucune livraison à rapprocher");
       return result;
     }
 
-    // 2. Traiter chaque livraison
-    for (const delivery of unReconciledDeliveries) {
+    // 2. Traiter d'abord les livraisons avec numéro de BL
+    for (const delivery of deliveriesWithBL) {
       result.processedDeliveries++;
       
       try {
-        // 3. Rechercher dans NocoDB par numéro de BL
         const invoiceData = await searchInvoiceByBLNumber(
           delivery.groupId,
           delivery.blNumber!,
@@ -59,7 +62,6 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
         );
 
         if (invoiceData) {
-          // 4. Mettre à jour la livraison avec les données de facture
           await storage.updateDelivery(delivery.id, {
             invoiceReference: invoiceData.invoiceRef,
             invoiceAmount: invoiceData.amount,
@@ -75,7 +77,7 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
             amount: invoiceData.amount
           });
 
-          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée: BL ${delivery.blNumber} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
+          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée par BL: ${delivery.blNumber} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
         } else {
           result.details.push({
             deliveryId: delivery.id,
@@ -91,6 +93,56 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
         result.details.push({
           deliveryId: delivery.id,
           blNumber: delivery.blNumber!,
+          status: 'error'
+        });
+        console.error(`💥 [BL-RECONCILIATION] ${errorMessage}`);
+      }
+    }
+
+    // 3. Traiter ensuite les livraisons sans numéro de BL par d'autres critères
+    for (const delivery of deliveriesWithoutBL) {
+      result.processedDeliveries++;
+      
+      try {
+        const invoiceData = await searchInvoiceByAlternateCriteria(
+          delivery.groupId,
+          delivery.supplier?.name,
+          delivery.blAmount,
+          delivery.scheduledDate
+        );
+
+        if (invoiceData) {
+          await storage.updateDelivery(delivery.id, {
+            invoiceReference: invoiceData.invoiceRef,
+            invoiceAmount: invoiceData.amount,
+            reconciled: true
+          });
+
+          result.reconciledDeliveries++;
+          result.details.push({
+            deliveryId: delivery.id,
+            blNumber: 'N/A',
+            status: 'reconciled',
+            invoiceRef: invoiceData.invoiceRef,
+            amount: invoiceData.amount
+          });
+
+          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée par critères alternatifs: ${delivery.supplier?.name} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
+        } else {
+          result.details.push({
+            deliveryId: delivery.id,
+            blNumber: 'N/A',
+            status: 'not_found'
+          });
+
+          console.log(`❌ [BL-RECONCILIATION] Livraison ${delivery.id}: Aucune facture trouvée pour ${delivery.supplier?.name}`);
+        }
+      } catch (error) {
+        const errorMessage = `Erreur lors du traitement de la livraison ${delivery.id}: ${error}`;
+        result.errors.push(errorMessage);
+        result.details.push({
+          deliveryId: delivery.id,
+          blNumber: 'N/A',
           status: 'error'
         });
         console.error(`💥 [BL-RECONCILIATION] ${errorMessage}`);
