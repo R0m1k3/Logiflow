@@ -1335,6 +1335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('👤 PRODUCTION - User found:', user.username, 'role:', user.role);
       
       // Pour l'admin, retourner toutes les permissions
+      console.log('🔍 PRODUCTION - Checking admin role:', { userRole: user.role, isAdmin: user.role === 'admin' });
       if (user.role === 'admin') {
         const allPermissionsResult = await pool.query(`
           SELECT id, name, display_name as "displayName", description, category, action, resource, is_system as "isSystem", created_at as "createdAt"
@@ -1342,6 +1343,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ORDER BY category, name
         `);
         console.log('🔧 PRODUCTION - Admin user, returning all permissions:', allPermissionsResult.rows.length);
+        return res.json(allPermissionsResult.rows);
+      }
+      
+      // FALLBACK: Si l'utilisateur a le username 'admin', le traiter comme admin même si le rôle n'est pas défini
+      if (user.username === 'admin') {
+        console.log('🔧 PRODUCTION - Username is admin, treating as admin user');
+        const allPermissionsResult = await pool.query(`
+          SELECT id, name, display_name as "displayName", description, category, action, resource, is_system as "isSystem", created_at as "createdAt"
+          FROM permissions 
+          ORDER BY category, name
+        `);
+        console.log('🔧 PRODUCTION - Admin by username, returning all permissions:', allPermissionsResult.rows.length);
         return res.json(allPermissionsResult.rows);
       }
       
