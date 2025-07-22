@@ -140,9 +140,15 @@ export default function OrderDetailModal({
     setShowEditModal(true);
   };
 
-  const canEdit = hasPermission(isOrder ? 'orders_update' : 'deliveries_update');
-  const canDelete = hasPermission(isOrder ? 'orders_delete' : 'deliveries_delete');
-  const canValidate = hasPermission('deliveries_validate') && 
+  // 🔧 FIX DIRECTEUR - Bypass hasPermission défaillant selon spécifications
+  const isAdmin = user && (user as any).role === 'admin';
+  const isDirecteur = user && (user as any).role === 'directeur';
+  const isManager = user && (user as any).role === 'manager';
+  
+  // Spécifications: Directeur peut modifier/supprimer/valider selon spécifications
+  const canEdit = isAdmin || isDirecteur || isManager || hasPermission(isOrder ? 'orders_update' : 'deliveries_update');
+  const canDelete = isAdmin || isDirecteur || hasPermission(isOrder ? 'orders_delete' : 'deliveries_delete');
+  const canValidate = (isAdmin || isDirecteur || isManager || hasPermission('deliveries_validate')) && 
                      isDelivery && item.status !== 'delivered';
 
   const getStatusBadge = (status: string) => {

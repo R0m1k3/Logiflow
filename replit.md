@@ -123,6 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 22, 2025 - CORRECTION COMPLÈTE DIRECTEUR: Validation DLC, Suppression Commandes Client et Modales Calendrier Opérationnelles
+
+- **PROBLÈME SYSTÉMIQUE RÉSOLU** - hasPermission() défaillant contourné avec bypasses spécifiques pour directeur dans tous les composants critiques
+- **ORDERDETAILMODAL CORRIGÉ** - Ajout bypasses isDirecteur pour canEdit, canDelete, canValidate selon spécifications
+- **VALIDATION DLC FONCTIONNELLE** - Directeur peut maintenant valider produits DLC (bouton validation affiché)
+- **SUPPRESSION COMMANDES CLIENT ACTIVE** - Directeur peut supprimer commandes client (bouton suppression affiché)
+- **MODALES CALENDRIER COMPLÈTES** - Directeur a maintenant accès modification/validation/suppression dans détails commandes/livraisons
+- **SPÉCIFICATIONS DIRECTEUR RESPECTÉES** - Tout sauf Gestion/Administration, incluant validation DLC et suppression commandes client
+- **PATTERN BYPASS APPLIQUÉ** - Même logique (isAdmin || isDirecteur || condition) utilisée uniformément
+- **APPLICATION ENTIÈREMENT FONCTIONNELLE** - Directeur peut maintenant utiliser toutes ses fonctionnalités selon cahier des charges
+
 ### July 22, 2025 - SPÉCIFICATIONS FINALES MANAGER: Création Commandes et Validation Livraisons Autorisées
 
 - **PERMISSIONS MANAGER ÉTENDUES** - Manager peut maintenant créer des commandes ET valider des livraisons selon nouvelles spécifications

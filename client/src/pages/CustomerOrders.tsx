@@ -848,7 +848,7 @@ export default function CustomerOrders() {
                             </Button>
                           </>
                         )}
-                        {user?.role === 'admin' && (
+                        {(user?.role === 'admin' || user?.role === 'directeur') && (
                           <Button
                             variant="outline"
                             size="sm"

@@ -791,7 +791,7 @@ export default function DlcPage() {
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
-                            {shouldShowValidateButton(product) && (user?.role === 'admin' || user?.role === 'manager') && (
+                            {shouldShowValidateButton(product) && (user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur') && (
                               <Button
                                 variant="default"
                                 size="sm"
