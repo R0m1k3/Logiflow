@@ -282,8 +282,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(userData: UpsertUser): Promise<User> {
+    console.log('🔍 PRODUCTION createUser - Starting with data:', userData);
+    
     // Hash password if provided
     const hashedPassword = userData.password ? await hashPassword(userData.password) : null;
+    console.log('🔑 Password hashed:', !!hashedPassword);
     
     // Ensure username is not null - use email prefix or generate from name
     let username = userData.username;
@@ -305,9 +308,14 @@ export class DatabaseStorage implements IStorage {
       email = null;
     }
     
+    const userId = userData.id || nanoid();
+    
     console.log('🔍 PRODUCTION createUser - Generated:', {
+      userId,
       username,
       email,
+      hashedPassword: !!hashedPassword,
+      role: userData.role || 'employee',
       originalData: {
         originalUsername: userData.username,
         originalEmail: userData.email,
@@ -317,23 +325,44 @@ export class DatabaseStorage implements IStorage {
       }
     });
     
-    const result = await pool.query(`
-      INSERT INTO users (id, username, email, name, first_name, last_name, profile_image_url, password, role, password_changed)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *
-    `, [
-      userData.id || nanoid(),
-      username,
-      email,
-      userData.name,
-      userData.firstName,
-      userData.lastName,
-      userData.profileImageUrl,
-      hashedPassword,
-      userData.role || 'employee',
-      userData.passwordChanged || false
-    ]);
-    return result.rows[0];
+    try {
+      const result = await pool.query(`
+        INSERT INTO users (id, username, email, name, first_name, last_name, profile_image_url, password, role, password_changed)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING *
+      `, [
+        userId,
+        username,
+        email,
+        userData.name,
+        userData.firstName,
+        userData.lastName,
+        userData.profileImageUrl,
+        hashedPassword,
+        userData.role || 'employee',
+        userData.passwordChanged || false
+      ]);
+      
+      console.log('✅ PRODUCTION createUser - SQL successful, rows affected:', result.rowCount);
+      console.log('✅ PRODUCTION createUser - Created user:', result.rows[0]);
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('❌ PRODUCTION createUser - SQL Error:', error);
+      console.error('❌ SQL Parameters were:', [
+        userId,
+        username,
+        email,
+        userData.name,
+        userData.firstName,
+        userData.lastName,
+        userData.profileImageUrl,
+        hashedPassword,
+        userData.role || 'employee',
+        userData.passwordChanged || false
+      ]);
+      throw error;
+    }
   }
 
   async updateUser(id: string, userData: Partial<UpsertUser>): Promise<User> {
