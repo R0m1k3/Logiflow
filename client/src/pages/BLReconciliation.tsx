@@ -43,10 +43,13 @@ export default function BLReconciliation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // 🔧 FIX ADMIN - Admin doit avoir accès au rapprochement
+  // 🔧 FIX TOUS RÔLES - Seuls Admin et Directeur peuvent accéder au rapprochement
   const isAdmin = user && (user as any).role === 'admin';
-  // Redirection pour les employés (mais pas pour admin)
-  if (user?.role === 'employee' && !isAdmin) {
+  const isDirecteur = user && (user as any).role === 'directeur';
+  const hasReconciliationAccess = isAdmin || isDirecteur;
+  
+  // Redirection pour les employés et managers (selon spécifications)
+  if (!hasReconciliationAccess) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
@@ -57,7 +60,7 @@ export default function BLReconciliation() {
             <div className="ml-3">
               <p className="text-sm text-orange-700">
                 <strong>Accès restreint</strong><br />
-                Seuls les managers et administrateurs peuvent accéder au module de rapprochement BL/Factures.
+                Seuls les administrateurs et directeurs peuvent accéder au module de rapprochement BL/Factures.
               </p>
             </div>
           </div>

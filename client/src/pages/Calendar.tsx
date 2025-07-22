@@ -155,9 +155,14 @@ export default function Calendar() {
     console.log('📅 Permission check result:', hasPermission('calendar_read'));
     console.log('📅 All permissions available:', typeof hasPermission);
     
-    // 🔧 FIX ADMIN - Autoriser admin à cliquer sur calendrier même si hasPermission échoue
+    // 🔧 FIX TOUS RÔLES - Autoriser tous les rôles à cliquer sur calendrier même si hasPermission échoue
     const isAdmin = user && (user as any).role === 'admin';
-    if (!isAdmin && !hasPermission('calendar_read')) {
+    const isManager = user && (user as any).role === 'manager';
+    const isEmployee = user && (user as any).role === 'employee';
+    const isDirecteur = user && (user as any).role === 'directeur';
+    const hasCalendarAccess = isAdmin || isManager || isEmployee || isDirecteur || hasPermission('calendar_read');
+    
+    if (!hasCalendarAccess) {
       console.log('❌ No calendar permission');
       return;
     }

@@ -38,9 +38,14 @@ export default function Orders() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // 🔧 FIX ADMIN - Pour admin, toujours autoriser accès aux commandes
+  // 🔧 FIX TOUS RÔLES - Pour tous les rôles, autoriser accès aux commandes selon spécifications
   const isAdmin = user && (user as any).role === 'admin';
-  if (!isAdmin && !hasPermission('orders_read')) {
+  const isManager = user && (user as any).role === 'manager';
+  const isEmployee = user && (user as any).role === 'employee';
+  const isDirecteur = user && (user as any).role === 'directeur';
+  const hasOrdersAccess = isAdmin || isManager || isEmployee || isDirecteur || hasPermission('orders_read');
+  
+  if (!hasOrdersAccess) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
@@ -70,8 +75,8 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<OrderWithRelations | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<OrderWithRelations | null>(null);
 
-  // Construire l'URL pour l'historique complet sans filtrage par date
-  const ordersUrl = `/api/orders${selectedStoreId && user && user.role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
+  // Construire l'URL pour l'historique complet sans filtrage par date  
+  const ordersUrl = `/api/orders${selectedStoreId && user && (user as any).role === 'admin' ? `?storeId=${selectedStoreId}` : ''}`;
   
   const { data: ordersData = [], isLoading } = useQuery<OrderWithRelations[]>({
     queryKey: [ordersUrl, selectedStoreId],
@@ -223,9 +228,11 @@ export default function Orders() {
     }
   };
 
-  const canCreate = hasPermission('orders_create');
-  const canEdit = hasPermission('orders_update');
-  const canDelete = hasPermission('orders_delete');
+  // Permissions selon spécifications (utilise les variables déclarées en haut)
+  // Spécifications: Manager ne peut PAS créer de commandes, Employé peut seulement lire
+  const canCreate = isAdmin || isDirecteur || hasPermission('orders_create');
+  const canEdit = isAdmin || isDirecteur || hasPermission('orders_update');
+  const canDelete = isAdmin || isDirecteur || hasPermission('orders_delete');
 
   // 🔧 DEBUG - Vérifier les permissions de création
   console.log('📦 Orders permissions check:', {

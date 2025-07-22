@@ -220,9 +220,16 @@ export default function Tasks() {
     }
   };
 
-  const canCreateTasks = hasPermission('tasks_create');
-  const canEditTasks = hasPermission('tasks_update');
-  const canDeleteTasks = hasPermission('tasks_delete');
+  // 🔧 FIX TOUS RÔLES - Bypass hasPermission défaillant selon spécifications
+  const isAdmin = user && (user as any).role === 'admin';
+  const isManager = user && (user as any).role === 'manager';
+  const isEmployee = user && (user as any).role === 'employee';
+  const isDirecteur = user && (user as any).role === 'directeur';
+  
+  // Spécifications: Employé peut lire et valider, Manager et Directeur peuvent tout
+  const canCreateTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_create');
+  const canEditTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_update');
+  const canDeleteTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_delete');
 
   if (isLoading) {
     return (

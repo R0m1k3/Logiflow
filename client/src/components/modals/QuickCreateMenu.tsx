@@ -20,10 +20,15 @@ export default function QuickCreateMenu({
   const { user } = useAuthUnified();
   const { hasPermission } = usePermissions();
   
-  // 🔧 FIX ADMIN - Pour admin, toujours autoriser création commandes/livraisons
+  // 🔧 FIX TOUS RÔLES - Pour tous les rôles, autoriser création selon spécifications
   const isAdmin = user && (user as any).role === 'admin';
-  const ordersAllowed = isAdmin || hasPermission('orders_create');
-  const deliveriesAllowed = isAdmin || hasPermission('deliveries_create');
+  const isManager = user && (user as any).role === 'manager';
+  const isEmployee = user && (user as any).role === 'employee';
+  const isDirecteur = user && (user as any).role === 'directeur';
+  
+  // Spécifications: Manager ne peut PAS créer de commandes, mais peut créer des livraisons
+  const ordersAllowed = isAdmin || isDirecteur || hasPermission('orders_create');
+  const deliveriesAllowed = isAdmin || isManager || isDirecteur || hasPermission('deliveries_create');
 
 
 

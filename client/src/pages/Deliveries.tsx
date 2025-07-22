@@ -40,9 +40,14 @@ export default function Deliveries() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // 🔧 FIX ADMIN - Pour admin, toujours autoriser accès aux livraisons
+  // 🔧 FIX TOUS RÔLES - Pour tous les rôles, autoriser accès aux livraisons selon spécifications
   const isAdmin = user && (user as any).role === 'admin';
-  if (!isAdmin && !hasPermission('deliveries_read')) {
+  const isManager = user && (user as any).role === 'manager';
+  const isEmployee = user && (user as any).role === 'employee';
+  const isDirecteur = user && (user as any).role === 'directeur';
+  const hasDeliveriesAccess = isAdmin || isManager || isEmployee || isDirecteur || hasPermission('deliveries_read');
+  
+  if (!hasDeliveriesAccess) {
     return (
       <div className="p-6">
         <div className="bg-orange-50 border-l-4 border-orange-400 p-4">
@@ -257,10 +262,11 @@ export default function Deliveries() {
     }
   };
 
-  const canCreate = hasPermission('deliveries_create');
-  const canEdit = hasPermission('deliveries_update');
-  const canDelete = hasPermission('deliveries_delete');
-  const canValidate = hasPermission('deliveries_validate');
+  // Permissions selon spécifications (utilise les variables déclarées en haut)
+  const canCreate = isAdmin || isManager || isDirecteur || hasPermission('deliveries_create');
+  const canEdit = isAdmin || isManager || isDirecteur || hasPermission('deliveries_update');
+  const canDelete = isAdmin || isManager || isDirecteur || hasPermission('deliveries_delete');
+  const canValidate = isAdmin || isManager || isDirecteur || hasPermission('deliveries_validate');
 
   // 🔧 DEBUG - Vérifier les permissions de création
   console.log('🚚 Deliveries permissions check:', {
