@@ -2444,6 +2444,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserWithGroups(userId);
       console.log("👤 User data:", user);
       
+      // Check if user has permission to validate tasks (employees cannot validate)
+      if (user?.role === 'employee') {
+        console.log("❌ Employee cannot validate tasks");
+        return res.status(403).json({ message: "Insufficient permissions to validate tasks" });
+      }
+      
       if (user?.role !== 'admin') {
         const userGroupIds = user?.userGroups.map(ug => ug.group.id) || [];
         if (!userGroupIds.includes(existingTask.groupId)) {

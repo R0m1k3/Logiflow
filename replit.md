@@ -123,6 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 23, 2025 - RESTRICTION VALIDATION TÂCHES: Employés Exclus de la Validation
+
+- **INTERFACE TÂCHES CORRIGÉE** - Bouton de validation (CheckCircle) maintenant caché pour les employés avec vérification canValidateTasks
+- **PERMISSIONS VALIDATION DÉFINIES** - canValidateTasks = admin || manager || directeur (employés exclus)
+- **ROUTES BACKEND SÉCURISÉES** - Vérification rôle employé ajoutée dans routes.ts et routes.production.ts pour empêcher validation API
+- **ERREUR 403 POUR EMPLOYÉS** - Message "Insufficient permissions to validate tasks" retourné si employé tente de valider
+- **COHÉRENCE FRONTEND/BACKEND** - Interface et API alignées pour empêcher les employés de valider des tâches
+- **SPÉCIFICATIONS RESPECTÉES** - Validation tâches réservée aux rôles admin, manager et directeur uniquement
+- **SÉCURITÉ RENFORCÉE** - Double vérification côté client (UI cachée) et serveur (erreur 403) pour protection complète
+
 ### July 22, 2025 - RAPPROCHEMENT AUTOMATIQUE BL AMÉLIORÉ: Recherche Multi-Critères et Sécurité Renforcée
 
 - **RECHERCHE INTELLIGENTE MULTI-ÉTAPES** - Logique de rapprochement en 3 étapes : BL number, fournisseur+montant, fournisseur+date

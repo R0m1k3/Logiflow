@@ -226,10 +226,11 @@ export default function Tasks() {
   const isEmployee = user && (user as any).role === 'employee';
   const isDirecteur = user && (user as any).role === 'directeur';
   
-  // Spécifications: Employé peut lire et valider, Manager et Directeur peuvent tout
+  // Spécifications: Employé peut lire/créer/modifier, Manager et Directeur peuvent tout (Y COMPRIS VALIDATION)
   const canCreateTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_create');
   const canEditTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_update');
   const canDeleteTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_delete');
+  const canValidateTasks = isAdmin || isManager || isDirecteur || hasPermission('tasks_validate');
 
   if (isLoading) {
     return (
@@ -393,14 +394,16 @@ export default function Tasks() {
                                   </div>
                                   
                                   <div className="flex items-center gap-2 ml-4">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleCompleteTask(task.id)}
-                                      className="text-green-600 hover:text-green-700"
-                                    >
-                                      <CheckCircle className="w-4 h-4" />
-                                    </Button>
+                                    {canValidateTasks && (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleCompleteTask(task.id)}
+                                        className="text-green-600 hover:text-green-700"
+                                      >
+                                        <CheckCircle className="w-4 h-4" />
+                                      </Button>
+                                    )}
                                     {canEditTasks && (
                                       <Button
                                         size="sm"
