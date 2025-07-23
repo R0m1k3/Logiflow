@@ -201,6 +201,23 @@ The application uses a sophisticated dual authentication approach:
 - **PERMISSIONS HARDCODÉES CONFIRMÉES** - Système à 4 rôles fixes entièrement opérationnel avec contournement hasPermission() dans tous composants critiques
 - **WORKFLOW VALIDATION COMPLET** - Directeur peut maintenant : cliquer calendrier → ouvrir modales → créer/modifier → valider livraisons → statut commande automatiquement mis à jour
 
+### July 23, 2025 - PERMISSIONS MANAGERS FINALISÉES: Suppression Commandes, Commandes Client et Modals Calendrier
+
+- **PERMISSIONS SUPPRESSION COMMANDES CORRIGÉES** - Managers peuvent maintenant supprimer les commandes selon demande utilisateur
+- **ROUTE BACKEND PRODUCTION SÉCURISÉE** - Route DELETE `/api/orders/:id` en production corrigée avec vérifications permissions (admin, manager, directeur) et accès groupes
+- **INTERFACE ORDERS.TSX MISE À JOUR** - Permissions `canDelete` incluent maintenant les managers pour affichage bouton suppression
+- **MODALS CALENDRIER CORRIGÉS** - `OrderDetailModal.tsx` permet aux managers de supprimer commandes et livraisons dans les modals du calendrier
+- **COMMANDES CLIENT INTERFACE CORRIGÉE** - Bouton suppression des commandes client maintenant visible pour les managers dans `CustomerOrders.tsx`
+- **BACKEND COMMANDES CLIENT CONFIRMÉ** - Routes production et développement permettaient déjà aux managers de supprimer les commandes client
+- **SPÉCIFICATIONS MANAGERS COMPLÈTES** - Managers peuvent maintenant :
+  - ✅ Supprimer des commandes (avec vérification accès magasin)
+  - ✅ Supprimer des commandes client
+  - ✅ Supprimer dans les modals du calendrier (commandes et livraisons)
+  - ✅ Toutes autres permissions existantes (création, modification, validation)
+- **SÉCURITÉ MAINTENUE** - Vérifications d'accès aux groupes/magasins conservées pour les managers
+- **COHÉRENCE FRONTEND/BACKEND** - Permissions interface alignées avec autorisations API backend
+- **FONCTIONNALITÉS TESTÉES** - Toutes les corrections appliquées et prêtes pour utilisation
+
 ### July 22, 2025 - RÉSOLUTION FINALE COMPLÈTE: Admin Sidebar Production - Bug Permissions Entièrement Résolu
 
 - **PROBLÈME ROOT CAUSE IDENTIFIÉ ET RÉSOLU** - Admin en production n'affichait que menu DLC au lieu de sidebar complète avec tous les menus

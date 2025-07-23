@@ -340,7 +340,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/orders/:id', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUserWithGroups(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       const id = parseInt(req.params.id);
+      const order = await storage.getOrder(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Check permissions - Admin, Manager et Directeur peuvent supprimer
+      if (user.role !== 'admin' && user.role !== 'manager' && user.role !== 'directeur') {
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
+
+      if (user.role === 'manager') {
+        const userGroupIds = user.userGroups.map((ug: any) => ug.groupId);
+        if (!userGroupIds.includes(order.groupId)) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+      }
+
       console.log('🗑️ Production - Deleting order:', id);
       await storage.deleteOrder(id);
       console.log('✅ Production - Order deleted successfully:', id);

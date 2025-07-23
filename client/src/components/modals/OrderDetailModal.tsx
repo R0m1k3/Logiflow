@@ -145,9 +145,9 @@ export default function OrderDetailModal({
   const isDirecteur = user && (user as any).role === 'directeur';
   const isManager = user && (user as any).role === 'manager';
   
-  // Spécifications: Directeur peut modifier/supprimer/valider selon spécifications
+  // Spécifications: Manager peut aussi modifier/supprimer/valider selon nouvelles spécifications
   const canEdit = isAdmin || isDirecteur || isManager || hasPermission(isOrder ? 'orders_update' : 'deliveries_update');
-  const canDelete = isAdmin || isDirecteur || hasPermission(isOrder ? 'orders_delete' : 'deliveries_delete');
+  const canDelete = isAdmin || isDirecteur || isManager || hasPermission(isOrder ? 'orders_delete' : 'deliveries_delete');
   const canValidate = (isAdmin || isDirecteur || isManager || hasPermission('deliveries_validate')) && 
                      isDelivery && item.status !== 'delivered';
 
