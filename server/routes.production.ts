@@ -832,7 +832,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/publicities', isAuthenticated, async (req: any, res) => {
     try {
       const year = req.query.year ? parseInt(req.query.year as string) : undefined;
-      const publicities = await storage.getPublicities(year);
+      const storeId = req.query.storeId as string;
+
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUserWithGroups(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      let groupIds: number[] | undefined;
+      if (user.role === 'admin') {
+        // Admin can see all publicities, unless specific store filter is applied
+        groupIds = storeId ? [parseInt(storeId)] : undefined;
+      } else {
+        // Managers, directeurs, and employees only see publicities from their assigned stores
+        groupIds = user.userGroups.map((ug: any) => ug.groupId);
+      }
+
+      console.log('🎯 Publicities API - User:', user.role, 'GroupIds:', groupIds);
+      const publicities = await storage.getPublicities(year, groupIds);
       res.json(publicities);
     } catch (error) {
       console.error("Error fetching publicities:", error);

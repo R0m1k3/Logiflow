@@ -654,6 +654,17 @@ async function addMissingColumns() {
       console.log('✅ Added completed_by column to tasks');
     }
 
+    // Check and add start_date column to tasks
+    const tasksStartDateExists = await pool.query(`
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_name = 'tasks' AND column_name = 'start_date'
+    `);
+    
+    if (tasksStartDateExists.rows.length === 0) {
+      await pool.query('ALTER TABLE tasks ADD COLUMN start_date TIMESTAMP');
+      console.log('✅ Added start_date column to tasks');
+    }
+
     // FORCE FIX PRODUCTION ISSUE: Recreate tasks table completed columns (Critical Fix v2)
     console.log('🔧 CRITICAL FIX v2: Forcing tasks table completed columns for production...');
     

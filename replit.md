@@ -123,6 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 23, 2025 - FONCTIONNALITÉ TÂCHES: Date de Début avec Valeur par Défaut et Filtrage Intelligent
+
+- **DATE DÉBUT PAR DÉFAUT IMPLÉMENTÉE** - Formulaire de création de tâches pré-remplit automatiquement la date de début avec la date du jour
+- **SYSTÈME VISIBILITÉ INTELLIGENT** - Tâches invisibles jusqu'à leur date de début pour employés/managers, admin/directeur voient toujours tout
+- **INDICATEUR "À VENIR" AJOUTÉ** - Badge bleu "À venir" affiché pour les tâches futures avec icône calendrier
+- **AFFICHAGE DATE DÉBUT** - Date de début affichée dans les détails des tâches avec icône calendrier distincte de l'échéance
+- **FILTRAGE RÔLE-BASÉ** - Logique isTaskVisible() et isTaskUpcoming() pour gérer l'affichage selon les permissions utilisateur
+- **INTERFACE UTILISATEUR ENRICHIE** - TaskForm.tsx étendu avec champ startDate, validation Zod et gestion des valeurs par défaut
+- **BACKEND COMPATIBLE** - Routes création/modification tâches supportent le nouveau champ startDate avec conversion ISO
+- **SCHÉMA DATABASE SYNCHRONISÉ** - Colonne start_date disponible et migrée en développement et production
+
 ### July 23, 2025 - CORRECTION CRITIQUE: Filtrage Publicités Calendrier - Accès Restreint par Magasin
 
 - **PROBLÈME FILTRAGE RÉSOLU** - Employés voyaient toutes les publicités au lieu de seulement celles de leurs magasins assignés

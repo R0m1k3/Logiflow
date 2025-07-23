@@ -20,7 +20,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Edit,
-  Trash2
+  Trash2,
+  Calendar
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -159,8 +160,42 @@ export default function Tasks() {
     }
   };
 
+  // Fonction pour vérifier si une tâche doit être visible selon les règles de date de début
+  const isTaskVisible = (task: TaskWithRelations) => {
+    // Admins et directeurs voient toutes les tâches
+    if (user?.role === 'admin' || user?.role === 'directeur') {
+      return true;
+    }
+
+    // Si pas de date de début, la tâche est visible
+    if (!task.startDate) {
+      return true;
+    }
+
+    // La tâche n'est visible qu'après sa date de début
+    const now = new Date();
+    const startDate = new Date(task.startDate);
+    return startDate <= now;
+  };
+
+  // Fonction pour vérifier si une tâche est "à venir"
+  const isTaskUpcoming = (task: TaskWithRelations) => {
+    if (!task.startDate) {
+      return false;
+    }
+
+    const now = new Date();
+    const startDate = new Date(task.startDate);
+    return startDate > now;
+  };
+
   // Filtrer les tâches
   const filteredTasks = tasks.filter((task: TaskWithRelations) => {
+    // Filtre par visibilité selon date de début
+    if (!isTaskVisible(task)) {
+      return false;
+    }
+
     // Filtre par recherche
     if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
         !task.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -375,6 +410,12 @@ export default function Tasks() {
                                         <PriorityIcon className="w-3 h-3" />
                                         {priorityConfig.label}
                                       </Badge>
+                                      {isTaskUpcoming(task) && (
+                                        <Badge variant="outline" className="flex items-center gap-1 text-blue-600 border-blue-200">
+                                          <Calendar className="w-3 h-3" />
+                                          À venir
+                                        </Badge>
+                                      )}
                                     </div>
                                     
                                     {task.description && (
@@ -390,6 +431,12 @@ export default function Tasks() {
                                       <span>
                                         Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                                       </span>
+                                      {task.startDate && (
+                                        <span className="text-blue-600 font-medium">
+                                          <Calendar className="w-3 h-3 inline mr-1" />
+                                          Début: {format(new Date(task.startDate), 'dd/MM/yyyy', { locale: fr })}
+                                        </span>
+                                      )}
                                       {task.dueDate && (
                                         <span className="text-orange-600 font-medium">
                                           <Clock className="w-3 h-3 inline mr-1" />

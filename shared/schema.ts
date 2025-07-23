@@ -264,6 +264,7 @@ export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(), // Titre de la tâche (requis)
   description: text("description"), // Description de la tâche (optionnel)
+  startDate: timestamp("start_date"), // Date de début (optionnel)
   dueDate: timestamp("due_date"), // Date d'échéance (optionnel)
   priority: varchar("priority").notNull().default("medium"), // low, medium, high
   status: varchar("status").notNull().default("pending"), // pending, completed
@@ -571,6 +572,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   completedAt: true,
   completedBy: true,
 }).extend({
+  startDate: z.coerce.date().optional().nullable(), // Date de début de la tâche
   dueDate: z.coerce.date().optional().nullable(), // Convertit automatiquement les chaînes en Date
 });
 

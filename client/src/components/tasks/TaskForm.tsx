@@ -21,10 +21,11 @@ type TaskWithRelations = Task & {
   group: { id: number; name: string; color: string; };
 };
 
-// Schéma avec date d'échéance incluse
+// Schéma avec date de début et date d'échéance incluses
 const taskFormSchema = z.object({
   title: z.string().min(1, "Le titre est requis"),
   description: z.string().optional(),
+  startDate: z.string().optional().nullable(),
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["pending", "completed"]),
   assignedTo: z.string().min(1, "L'assignation est requise"),
@@ -113,6 +114,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
     defaultValues: {
       title: task?.title || "",
       description: task?.description || "",
+      startDate: task?.startDate ? new Date(task.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       priority: task?.priority || "medium",
       status: task?.status || "pending",
       assignedTo: task?.assignedTo || "",
@@ -128,6 +130,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
         ...data,
         groupId: localSelectedStoreId,
         createdBy: user?.id,
+        startDate: data.startDate ? new Date(data.startDate).toISOString() : null,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null
       };
       console.log('🚀 Creating task with data:', taskData);
@@ -187,6 +190,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
       const submitData = {
         title: data.title,
         description: data.description,
+        startDate: data.startDate ? new Date(data.startDate).toISOString() : null,
         priority: data.priority,
         status: data.status,
         assignedTo: data.assignedTo,
@@ -296,6 +300,26 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
                   placeholder="Description détaillée de la tâche (optionnel)"
                   rows={3}
                   {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Date de début */}
+        <FormField
+          control={form.control}
+          name="startDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date de début</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date"
+                  placeholder="Date de début (optionnel)"
+                  {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
