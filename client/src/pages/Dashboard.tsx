@@ -554,7 +554,7 @@ export default function Dashboard() {
                             {priorityConfig.label}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-600 truncate mb-1">{task.assignedTo}</p>
+                        <p className="text-sm text-gray-600 truncate mb-1">Assigné à: {task.assignedTo}</p>
                         <div className="flex items-center gap-3 text-xs text-gray-500">
                           <span>Créée: {safeFormat(task.createdAt, "d MMM")}</span>
                           {task.dueDate && (
