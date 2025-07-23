@@ -189,6 +189,16 @@ The application uses a sophisticated dual authentication approach:
 - **FENÊTRE TEMPORELLE MAINTENUE** - Période de blocage de 15 minutes conservée pour réinitialisation automatique
 - **PRODUCTION ET DÉVELOPPEMENT** - Changement appliqué aux deux environnements pour cohérence
 
+### July 23, 2025 - REDIRECTION AUTHENTIFICATION AUTOMATIQUE: Session Expirée Gérée
+
+- **HOOK AUTHENTIFICATION AMÉLIORÉ** - useAuthUnified détecte automatiquement les erreurs 401/Unauthorized et redirige vers /auth
+- **VÉRIFICATION PÉRIODIQUE AJOUTÉE** - Contrôle automatique toutes les 5 minutes et au focus de fenêtre pour détecter sessions expirées
+- **GESTION GLOBALE ERREURS 401** - Interception des erreurs d'authentification dans queryClient et apiRequest avec redirection automatique
+- **REDIRECTION SÉCURISÉE** - Utilisation window.location.href pour éviter problèmes de hooks React
+- **EXPÉRIENCE UTILISATEUR FLUIDE** - Plus besoin de recharger manuellement, redirection automatique vers authentification
+- **PROTECTION COMPLÈTE** - Détection sur toutes les requêtes API (queries et mutations) avec logs de traçabilité
+- **CACHE INTELLIGENT** - Données valides 2 minutes avec revalidation automatique selon contexte
+
 ### July 23, 2025 - RESTRICTION VALIDATION TÂCHES: Employés Exclus de la Validation
 
 - **INTERFACE TÂCHES CORRIGÉE** - Bouton de validation (CheckCircle) maintenant caché pour les employés avec vérification canValidateTasks

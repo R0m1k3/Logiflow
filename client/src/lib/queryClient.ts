@@ -3,7 +3,15 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    const error = new Error(`${res.status}: ${text}`);
+    
+    // Redirection automatique pour les erreurs 401
+    if (res.status === 401) {
+      console.log('🔒 Session expirée, redirection vers authentification');
+      window.location.href = '/auth';
+    }
+    
+    throw error;
   }
 }
 
@@ -68,6 +76,8 @@ export const queryClient = new QueryClient({
       retry: (failureCount, error: any) => {
         // Ne pas retry les erreurs d'authentification
         if (error?.message?.includes('401') || error?.message?.includes('Unauthorized')) {
+          console.log('🔒 Erreur 401 détectée, redirection vers authentification');
+          window.location.href = '/auth';
           return false;
         }
         return failureCount < 2;
