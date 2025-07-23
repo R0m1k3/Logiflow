@@ -138,6 +138,7 @@ The application uses a sophisticated dual authentication approach:
 - **SCHÉMA DATABASE SYNCHRONISÉ** - Colonne start_date disponible et utilisée correctement en développement et production
 - **DATE PAR DÉFAUT AJOUTÉE** - Formulaire TaskForm.tsx affiche automatiquement la date du jour dans le champ "Date de début"
 - **DASHBOARD CORRIGÉ** - Carte "Tâches à faire" n'affiche plus les tâches futures, filtre `!isTaskUpcoming(task)` ajouté
+- **PERMISSIONS SUPPRESSION DIRECTEUR CORRIGÉES** - Routes DELETE /api/tasks/:id permettent maintenant au directeur de supprimer toutes les tâches (admin ET directeur)
 
 ### July 23, 2025 - CORRECTION CRITIQUE: Filtrage Publicités Calendrier - Accès Restreint par Magasin
 

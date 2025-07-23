@@ -2683,12 +2683,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserWithGroups(userId);
-      if (user?.role !== 'admin') {
+      // Admin et directeur peuvent supprimer toutes les tâches
+      if (user?.role !== 'admin' && user?.role !== 'directeur') {
         const userGroupIds = user?.userGroups.map((ug: any) => ug.group.id) || [];
         if (!userGroupIds.includes(existingTask.groupId)) {
           return res.status(403).json({ message: "Access denied" });
         }
         
+        // Seuls les employés et managers sont limités à leurs propres tâches
         if (existingTask.createdBy !== userId) {
           return res.status(403).json({ message: "Can only delete your own tasks" });
         }
