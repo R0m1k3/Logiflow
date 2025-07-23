@@ -883,36 +883,32 @@ export default function CustomerOrders() {
 
       {/* Create Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="max-w-3xl" style={{ height: 'auto', maxHeight: 'none' }}>
+        <DialogContent className="mx-4 max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nouvelle Commande Client</DialogTitle>
           </DialogHeader>
-          <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111%' }}>
-            <CustomerOrderForm
-              onSubmit={handleCreateOrder}
-              onCancel={() => setShowCreateModal(false)}
-              isLoading={createMutation.isPending}
-            />
-          </div>
+          <CustomerOrderForm
+            onSubmit={handleCreateOrder}
+            onCancel={() => setShowCreateModal(false)}
+            isLoading={createMutation.isPending}
+          />
         </DialogContent>
       </Dialog>
 
       {/* Edit Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-3xl" style={{ height: 'auto', maxHeight: 'none' }}>
+        <DialogContent className="mx-4 max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifier la Commande</DialogTitle>
           </DialogHeader>
-          <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111%' }}>
-            {selectedOrder && (
-              <CustomerOrderForm
-                order={selectedOrder}
-                onSubmit={handleEditOrder}
-                onCancel={() => setShowEditModal(false)}
-                isLoading={updateMutation.isPending}
-              />
-            )}
-          </div>
+          {selectedOrder && (
+            <CustomerOrderForm
+              order={selectedOrder}
+              onSubmit={handleEditOrder}
+              onCancel={() => setShowEditModal(false)}
+              isLoading={updateMutation.isPending}
+            />
+          )}
         </DialogContent>
       </Dialog>
 

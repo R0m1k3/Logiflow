@@ -159,7 +159,8 @@ export function CustomerOrderForm({
         <div className="space-y-4">
           {/* Informations de commande */}
           <h3 className="text-lg font-medium">Informations de commande</h3>
-            
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="orderTaker"
@@ -226,6 +227,7 @@ export function CustomerOrderForm({
                 </FormItem>
               )}
             />
+          </div>
 
             {/* Magasin automatiquement sélectionné - pas de champ visible */}
           
@@ -249,33 +251,35 @@ export function CustomerOrderForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="productReference"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Référence (optionnel)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="REF-123456" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="productReference"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Référence (optionnel)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="REF-123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="gencode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gencode (obligatoire)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Code à barres" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="gencode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gencode (obligatoire)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Code à barres" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

@@ -486,7 +486,7 @@ export default function DlcPage() {
                 Nouveau produit DLC
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="mx-4 max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? "Modifier le produit DLC" : "Nouveau produit DLC"}
