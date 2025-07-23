@@ -114,7 +114,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
     defaultValues: {
       title: "",
       description: "",
-      startDate: "",
+      startDate: new Date().toISOString().split('T')[0], // Date du jour par défaut
       priority: "medium",
       status: "pending",
       assignedTo: "",
