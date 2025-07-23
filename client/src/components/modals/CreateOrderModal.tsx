@@ -177,6 +177,7 @@ export default function CreateOrderModal({
       groupId: parseInt(formData.groupId),
       plannedDate: formData.plannedDate,
       notes: formData.notes || undefined,
+      createdBy: user?.id,
     });
   };
 
