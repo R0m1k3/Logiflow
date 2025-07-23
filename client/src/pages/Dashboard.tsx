@@ -5,7 +5,7 @@ import { useStore } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare } from "lucide-react";
+import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare, Circle } from "lucide-react";
 import { safeFormat, safeDate } from "@/lib/dateUtils";
 import type { PublicityWithRelations } from "@shared/schema";
 
@@ -65,6 +65,36 @@ export default function Dashboard() {
   });
 
   // Récupérer les publicités à venir (chercher dans 2024 ET 2025) - TOUTES les publicités
+  // Fonction utilitaire pour obtenir la configuration de priorité
+  const getPriorityConfig = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return { 
+          color: 'bg-red-100 text-red-800 border-red-200', 
+          icon: AlertTriangle, 
+          label: 'Élevée' 
+        };
+      case 'medium':
+        return { 
+          color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+          icon: Clock, 
+          label: 'Moyenne' 
+        };
+      case 'low':
+        return { 
+          color: 'bg-green-100 text-green-800 border-green-200', 
+          icon: Circle, 
+          label: 'Faible' 
+        };
+      default:
+        return { 
+          color: 'bg-gray-100 text-gray-800 border-gray-200', 
+          icon: Circle, 
+          label: 'Moyenne' 
+        };
+    }
+  };
+
   const { data: upcomingPublicities = [] } = useQuery<PublicityWithRelations[]>({
     queryKey: ['/api/publicities', 'upcoming'],
     queryFn: async () => {
@@ -508,28 +538,45 @@ export default function Dashboard() {
                 return (dateA ? dateA.getTime() : 0) - (dateB ? dateB.getTime() : 0);
               })
               .slice(0, 5)
-              .map((task: any) => (
-                <div key={task.id} className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-blue-500">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-2 w-2 bg-blue-500"></div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 truncate">{task.title}</p>
-                      <p className="text-sm text-gray-600 truncate">{task.assignedTo}</p>
+              .map((task: any) => {
+                const priorityConfig = getPriorityConfig(task.priority);
+                const PriorityIcon = priorityConfig.icon;
+                
+                return (
+                  <div key={task.id} className="flex items-start justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-blue-500">
+                    <div className="flex items-start space-x-3 flex-1 min-w-0">
+                      <div className="h-2 w-2 bg-blue-500 mt-2 flex-shrink-0"></div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-gray-900 truncate">{task.title}</p>
+                          <Badge className={`${priorityConfig.color} border text-xs flex items-center gap-1`}>
+                            <PriorityIcon className="w-2.5 h-2.5" />
+                            {priorityConfig.label}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate mb-1">{task.assignedTo}</p>
+                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                          <span>Créée: {safeFormat(task.createdAt, "d MMM")}</span>
+                          {task.dueDate && (
+                            <span className="text-orange-600 font-medium flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              Échéance: {safeFormat(task.dueDate, "d MMM")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-3">
+                      <Badge 
+                        variant={task.status === 'completed' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {task.status === 'completed' ? 'Terminé' : 'En cours'}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge 
-                      variant={task.status === 'completed' ? 'default' : 'secondary'}
-                      className="text-xs"
-                    >
-                      {task.status === 'completed' ? 'Terminé' : 'En cours'}
-                    </Badge>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {safeFormat(task.createdAt, "d MMM")}
-                    </p>
-                  </div>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div className="text-center py-8">
                   <p className="text-gray-600">Aucune tâche en cours</p>
                   <p className="text-xs text-gray-400 mt-1">Toutes les tâches sont terminées</p>
