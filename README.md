@@ -29,10 +29,12 @@ LogiFlow est une application web complète de gestion logistique conçue spécia
 - **Traçabilité** : Suivi des actions utilisateurs
 
 ### 📋 Gestion des Tâches
-- **Planification** : Création et assignation de tâches avec dates d'échéance
+- **Planification Avancée** : Création et assignation de tâches avec dates de début et d'échéance
+- **Système "À Venir"** : Tâches futures avec badges distinctifs et visibilité contrôlée
 - **Calendrier Intégré** : Vue calendrier pour la planification des tâches
-- **Suivi de Progression** : Statuts et validation des tâches terminées
-- **Filtres** : Tri par priorité, statut et dates
+- **Suivi de Progression** : Statuts et validation des tâches terminées avec traçabilité
+- **Filtres Intelligents** : Tri par priorité, statut, dates avec pagination adaptative
+- **Dashboard Intégré** : Carte "Tâches à faire" excluant automatiquement les tâches futures
 
 ### 🛒 Commandes Clients
 - **Point de Vente** : Gestion des commandes clients avec génération de codes-barres
@@ -94,7 +96,10 @@ npm run dev
 L'application sera accessible sur `http://localhost:5000`
 
 ### Comptes par Défaut
-- **Administrateur** : admin / admin
+- **Administrateur** : admin / admin (54 permissions)
+- **Directeur** : directeur / directeur (50 permissions, supervision multi-magasins)
+- **Manager** : manager / manager (48 permissions, gestion opérationnelle)
+- **Employé** : ff292 / ff292 (15 permissions, opérations quotidiennes)
 - **Base de données** : Initialisation automatique avec données de test
 
 ## 🔐 Système de Permissions
@@ -116,12 +121,19 @@ L'application dispose d'un système de permissions granulaire avec 54 permission
 - **Administration** : Configuration système et maintenance
 
 ### Rôles Prédéfinis
-- **Admin** : Accès complet à toutes les fonctionnalités
-- **Directeur** : Accès étendu avec supervision multi-magasins
-- **Manager** : Gestion opérationnelle d'un magasin
-- **Employé** : Accès aux opérations quotidiennes
+- **Admin** : Accès complet à toutes les fonctionnalités (54 permissions)
+- **Directeur** : Accès étendu avec supervision multi-magasins, peut supprimer toutes les tâches (50 permissions)
+- **Manager** : Gestion opérationnelle d'un magasin, validation des livraisons (48 permissions)
+- **Employé** : Accès aux opérations quotidiennes, validation des tâches uniquement (15 permissions)
 
 ## 📊 Fonctionnalités Avancées
+
+### Système de Tâches Intelligent
+- **Dates de début programmables** : Tâches avec dates de début personnalisées
+- **Badges "À Venir"** : Identification visuelle des tâches futures
+- **Visibilité contrôlée** : Tâches futures invisibles aux employés/managers jusqu'à leur date de début
+- **Dashboard filtré** : Exclusion automatique des tâches futures de la carte "Tâches à faire"
+- **Permissions granulaires** : Admin et directeur peuvent supprimer toutes les tâches
 
 ### Pagination Intelligente
 - **Pagination adaptative** : 10 éléments pour les vues détaillées, 20 pour les vues de synthèse
@@ -198,3 +210,20 @@ Application propriétaire développée pour Frodis.
 ---
 
 **LogiFlow** - Optimisation logistique pour un commerce moderne
+
+---
+
+## 🔄 Dernières Mises à Jour
+
+### Juillet 2025 - Système de Tâches Avancé
+- **Dates de début programmables** : Planification de tâches avec dates de début futures
+- **Badges "À Venir"** : Identification visuelle des tâches programmées
+- **Dashboard intelligent** : Exclusion automatique des tâches futures de la vue "Tâches à faire"
+- **Permissions directeur** : Le directeur peut maintenant supprimer toutes les tâches
+- **Visibilité contrôlée** : Système de masquage automatique des tâches jusqu'à leur date de début
+
+### Performance et Sécurité
+- **Base de données optimisée** : Migrations automatiques et contraintes améliorées
+- **Système de logs** : Traçabilité complète des actions utilisateurs
+- **Authentification renforcée** : Support dual développement/production
+- **Interface responsive** : Optimisations mobiles et desktop
