@@ -68,6 +68,14 @@ export default function Tasks() {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
+      }).then(data => {
+        console.log('📋 Tasks received from API:', data.map((task: any) => ({
+          id: task.id,
+          title: task.title,
+          startDate: task.startDate,
+          status: task.status
+        })));
+        return data;
       });
     },
     enabled: !!user,
@@ -181,6 +189,7 @@ export default function Tasks() {
   // Fonction pour vérifier si une tâche est "à venir"
   const isTaskUpcoming = (task: TaskWithRelations) => {
     if (!task.startDate) {
+      console.log(`🔍 Task "${task.title}" - PAS de startDate, retourne false`);
       return false;
     }
 
