@@ -123,6 +123,14 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 23, 2025 - SYSTÈME BLOCAGE MOT DE PASSE: Seuil Augmenté de 5 à 10 Tentatives
+
+- **SEUIL BLOCAGE CORRIGÉ** - Limiteur d'authentification modifié de 5 à 10 tentatives par fenêtre de 15 minutes
+- **LOGS DIAGNOSTIC AJOUTÉS** - Handler personnalisé pour tracer les blocages d'IP avec username et timestamp  
+- **SÉCURITÉ ÉQUILIBRÉE** - Protection contre les attaques par force brute maintenue avec seuil plus tolérant pour utilisateurs légitimes
+- **FENÊTRE TEMPORELLE MAINTENUE** - Période de blocage de 15 minutes conservée pour réinitialisation automatique
+- **PRODUCTION ET DÉVELOPPEMENT** - Changement appliqué aux deux environnements pour cohérence
+
 ### July 23, 2025 - RESTRICTION VALIDATION TÂCHES: Employés Exclus de la Validation
 
 - **INTERFACE TÂCHES CORRIGÉE** - Bouton de validation (CheckCircle) maintenant caché pour les employés avec vérification canValidateTasks

@@ -55,13 +55,19 @@ export function setupRateLimiting(app: Express) {
   // Limiteur pour l'authentification
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limite les tentatives de connexion
+    max: 10, // limite les tentatives de connexion à 10 au lieu de 5
     message: {
       error: 'Trop de tentatives de connexion, veuillez réessayer plus tard.',
     },
     standardHeaders: true,
     legacyHeaders: false,
     trustProxy: 1, // Configuration sécurisée pour Docker (1 proxy de confiance)
+    handler: (req, res) => {
+      console.warn(`🚨 Auth rate limit reached for IP: ${req.ip} - ${req.body?.username || 'unknown'} at ${new Date().toISOString()}`);
+      res.status(429).json({
+        error: 'Trop de tentatives de connexion, veuillez réessayer plus tard.',
+      });
+    }
   });
 
   // Limiteur pour l'API - adapté pour une utilisation normale
