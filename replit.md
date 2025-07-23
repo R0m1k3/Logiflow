@@ -123,6 +123,19 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 23, 2025 - FONCTIONNALITÉ SIDEBAR COLLAPSE: Réduction en Mode Icônes Uniquement
+
+- **BOUTON TOGGLE SIDEBAR AJOUTÉ** - Bouton avec icônes Menu/ChevronLeft pour basculer entre mode normal et collapsed
+- **SIDEBAR RESPONSIVE COMPLÈTE** - Largeur dynamique : 256px (w-64) en mode normal, 64px (w-16) en mode collapsed
+- **TRANSITION FLUIDE** - Animation CSS (transition-all duration-300) pour passage seamless entre les modes
+- **AFFICHAGE ICÔNES SEULES** - En mode collapsed : seules les icônes sont visibles avec tooltips informatifs
+- **ADAPTATION SECTIONS COMPLÈTE** - Logo, navigation principale, gestion, administration et profil utilisateur s'adaptent au mode collapsed
+- **TOOLTIPS INTELLIGENTS** - Titres descriptifs au survol des icônes en mode collapsed pour navigation intuitive
+- **CENTRAGE AUTOMATIQUE** - Icônes automatiquement centrées avec justify-center en mode collapsed
+- **PROFIL UTILISATEUR OPTIMISÉ** - Mode collapsed affiche initiales et bouton logout vertical, mode normal garde affichage complet
+- **ÉTATS LOADING/ERROR GÉRÉS** - Modes collapsed fonctionnels même en états de chargement et d'erreur
+- **ESPACEMENT INTELLIGENT** - Marges et padding adaptés automatiquement selon le mode actif
+
 ### July 23, 2025 - RESPONSIVITÉ MODALES COMPLÈTE: Adaptation PC, Tablette et Mobile Finalisée
 
 - **PROBLÈME RESPONSIVITÉ RÉSOLU COMPLÈTEMENT** - Toutes les modales s'adaptent maintenant parfaitement aux écrans PC, tablette et mobile

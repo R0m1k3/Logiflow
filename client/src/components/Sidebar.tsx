@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { 
   Store, 
   Calendar, 
@@ -17,13 +18,16 @@ import {
   Database,
   ShoppingCart,
   Clock,
-  ListTodo
+  ListTodo,
+  Menu,
+  ChevronLeft
 } from "lucide-react";
 
 export default function Sidebar() {
   const { user, isLoading: userLoading, error } = useAuthUnified();
   const { hasPermission, isLoading: permissionsLoading, userPermissions } = usePermissions();
   const [location] = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isLoading = userLoading || permissionsLoading;
 
@@ -160,16 +164,24 @@ export default function Sidebar() {
 
   if (isLoading) {
     return (
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
+      <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white border-r border-gray-200 flex flex-col shadow-lg transition-all duration-300`}>
         <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-white">
-          <div className="flex items-center space-x-3">
+          {isCollapsed ? (
             <Store className="h-6 w-6 text-blue-600" />
-            <span className="text-lg font-semibold text-gray-900">LogiFlow</span>
-          </div>
+          ) : (
+            <div className="flex items-center space-x-3">
+              <Store className="h-6 w-6 text-blue-600" />
+              <span className="text-lg font-semibold text-gray-900">LogiFlow</span>
+            </div>
+          )}
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-500">
-            <p>Chargement...</p>
+            {isCollapsed ? (
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+            ) : (
+              <p>Chargement...</p>
+            )}
           </div>
         </div>
       </aside>
@@ -178,16 +190,24 @@ export default function Sidebar() {
 
   if (error || !user) {
     return (
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
+      <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white border-r border-gray-200 flex flex-col shadow-lg transition-all duration-300`}>
         <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-white">
-          <div className="flex items-center space-x-3">
+          {isCollapsed ? (
             <Store className="h-6 w-6 text-blue-600" />
-            <span className="text-lg font-semibold text-gray-900">LogiFlow</span>
-          </div>
+          ) : (
+            <div className="flex items-center space-x-3">
+              <Store className="h-6 w-6 text-blue-600" />
+              <span className="text-lg font-semibold text-gray-900">LogiFlow</span>
+            </div>
+          )}
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-gray-500">
-            <p>Authentification requise</p>
+            {isCollapsed ? (
+              <LogOut className="h-4 w-4" />
+            ) : (
+              <p>Authentification requise</p>
+            )}
           </div>
         </div>
       </aside>
@@ -195,13 +215,31 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg">
-      {/* Logo */}
-      <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-white">
-        <div className="flex items-center space-x-3">
-          <Store className="h-6 w-6 text-blue-600" />
-          <span className="text-lg font-semibold text-gray-900">LogiFlow</span>
-        </div>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white border-r border-gray-200 flex flex-col shadow-lg transition-all duration-300`}>
+      {/* Logo & Toggle Button */}
+      <div className="h-16 flex items-center justify-between border-b border-gray-200 bg-white px-3">
+        {isCollapsed ? (
+          <Store className="h-6 w-6 text-blue-600 mx-auto" />
+        ) : (
+          <div className="flex items-center space-x-3">
+            <Store className="h-6 w-6 text-blue-600" />
+            <span className="text-lg font-semibold text-gray-900">LogiFlow</span>
+          </div>
+        )}
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="h-8 w-8 p-0 hover:bg-gray-100"
+          title={isCollapsed ? "Agrandir la sidebar" : "Réduire la sidebar"}
+        >
+          {isCollapsed ? (
+            <Menu className="h-4 w-4 text-gray-600" />
+          ) : (
+            <ChevronLeft className="h-4 w-4 text-gray-600" />
+          )}
+        </Button>
       </div>
 
       {/* Navigation */}
@@ -238,10 +276,11 @@ export default function Sidebar() {
                     active
                       ? 'bg-gray-100 text-gray-900 border-r-2 border-gray-700'
                       : 'text-gray-700'
-                  }`}
+                  } ${isCollapsed ? 'justify-center' : ''}`}
+                  title={isCollapsed ? item.label : ''}
                 >
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.label}
+                  <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-3'}`} />
+                  {!isCollapsed && item.label}
                 </div>
               </Link>
             );
@@ -255,12 +294,14 @@ export default function Sidebar() {
           return isAdmin;
         })() && (
           <>
-            <div className="mt-6 mb-2">
-              <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Gestion
-              </h3>
-            </div>
-            <div className="space-y-1">
+            {!isCollapsed && (
+              <div className="mt-6 mb-2">
+                <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Gestion
+                </h3>
+              </div>
+            )}
+            <div className={`space-y-1 ${isCollapsed ? 'mt-6' : ''}`}>
               {managementItems.map((item) => {
                 // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus gestion (déjà filtré par section)
                 const isAdmin = user && (user as any).role === 'admin';
@@ -278,10 +319,11 @@ export default function Sidebar() {
                         active
                           ? 'bg-gray-100 text-gray-900 border-r-2 border-gray-700'
                           : 'text-gray-700'
-                      }`}
+                      } ${isCollapsed ? 'justify-center' : ''}`}
+                      title={isCollapsed ? item.label : ''}
                     >
-                      <Icon className="mr-3 h-4 w-4" />
-                      {item.label}
+                      <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-3'}`} />
+                      {!isCollapsed && item.label}
                     </div>
                   </Link>
                 );
@@ -298,11 +340,13 @@ export default function Sidebar() {
         return isAdmin;
       })() && (
         <div className="border-t border-gray-200 py-4 px-3">
-          <div className="mb-2">
-            <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Administration
-            </h3>
-          </div>
+          {!isCollapsed && (
+            <div className="mb-2">
+              <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Administration
+              </h3>
+            </div>
+          )}
           <div className="space-y-1">
             {adminItems.map((item) => {
               // 🔧 FIX ADMIN - Pour admin, toujours afficher les menus administration (déjà filtré par section)
@@ -321,10 +365,11 @@ export default function Sidebar() {
                       active
                         ? 'bg-gray-100 text-gray-900 border-r-2 border-gray-700'
                         : 'text-gray-700'
-                    }`}
+                    } ${isCollapsed ? 'justify-center' : ''}`}
+                    title={isCollapsed ? item.label : ''}
                   >
-                    <Icon className="mr-3 h-4 w-4" />
-                    {item.label}
+                    <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-3'}`} />
+                    {!isCollapsed && item.label}
                   </div>
                 </Link>
               );
@@ -335,47 +380,83 @@ export default function Sidebar() {
 
       {/* User Profile & Logout */}
       <div className="border-t border-gray-200 p-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="h-8 w-8 bg-gray-100 flex items-center justify-center rounded-full">
-            <span className="text-xs font-medium text-gray-700">
-              {getInitials((user as any)?.firstName, (user as any)?.lastName, (user as any)?.username)}
-            </span>
+        {isCollapsed ? (
+          // Mode collapsed : seulement initiales et bouton logout en icône
+          <div className="flex flex-col items-center space-y-3">
+            <div className="h-8 w-8 bg-gray-100 flex items-center justify-center rounded-full" title={(() => {
+              const u = user as any;
+              if (u?.firstName && u?.lastName) {
+                return `${u.firstName} ${u.lastName}`;
+              }
+              if (u?.firstName && u.firstName.trim()) {
+                return u.firstName;
+              }
+              if (u?.lastName && u.lastName.trim()) {
+                return u.lastName;
+              }
+              return u?.username || 'Utilisateur';
+            })()}>
+              <span className="text-xs font-medium text-gray-700">
+                {getInitials((user as any)?.firstName, (user as any)?.lastName, (user as any)?.username)}
+              </span>
+            </div>
+            
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 hover:text-red-600 hover:border-red-300"
+              title="Déconnexion"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {(() => {
-                const u = user as any;
-                if (u?.firstName && u?.lastName) {
-                  return `${u.firstName} ${u.lastName}`;
-                }
-                if (u?.firstName && u.firstName.trim()) {
-                  return u.firstName;
-                }
-                if (u?.lastName && u.lastName.trim()) {
-                  return u.lastName;
-                }
-                return u?.username || 'Utilisateur';
-              })()}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {(user as any)?.role === 'admin' ? 'Administrateur' :
-               (user as any)?.role === 'employee' ? 'Employé' :
-               (user as any)?.role === 'manager' ? 'Manager' :
-               (user as any)?.role === 'directeur' ? 'Directeur' :
-               (user as any)?.role}
-            </p>
-          </div>
-        </div>
-        
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          size="sm"
-          className="w-full justify-start text-gray-600 hover:text-red-600 hover:border-red-300"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Déconnexion
-        </Button>
+        ) : (
+          // Mode normal : profil complet
+          <>
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="h-8 w-8 bg-gray-100 flex items-center justify-center rounded-full">
+                <span className="text-xs font-medium text-gray-700">
+                  {getInitials((user as any)?.firstName, (user as any)?.lastName, (user as any)?.username)}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {(() => {
+                    const u = user as any;
+                    if (u?.firstName && u?.lastName) {
+                      return `${u.firstName} ${u.lastName}`;
+                    }
+                    if (u?.firstName && u.firstName.trim()) {
+                      return u.firstName;
+                    }
+                    if (u?.lastName && u.lastName.trim()) {
+                      return u.lastName;
+                    }
+                    return u?.username || 'Utilisateur';
+                  })()}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {(user as any)?.role === 'admin' ? 'Administrateur' :
+                   (user as any)?.role === 'employee' ? 'Employé' :
+                   (user as any)?.role === 'manager' ? 'Manager' :
+                   (user as any)?.role === 'directeur' ? 'Directeur' :
+                   (user as any)?.role}
+                </p>
+              </div>
+            </div>
+            
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="w-full justify-start text-gray-600 hover:text-red-600 hover:border-red-300"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Déconnexion
+            </Button>
+          </>
+        )}
       </div>
     </aside>
   );
