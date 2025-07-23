@@ -190,7 +190,17 @@ export default function Tasks() {
     const startDate = new Date(task.startDate);
     startDate.setHours(0, 0, 0, 0); // Normaliser à minuit
     
-    return startDate > now;
+    const isUpcoming = startDate > now;
+    
+    console.log(`🔍 Task "${task.title}" upcoming check:`, {
+      taskId: task.id,
+      startDate: task.startDate,
+      normalizedStartDate: startDate.toISOString(),
+      normalizedNow: now.toISOString(),
+      isUpcoming
+    });
+    
+    return isUpcoming;
   };
 
   // Filtrer les tâches
@@ -401,20 +411,22 @@ export default function Tasks() {
                           const priorityConfig = getPriorityConfig(task.priority);
                           const PriorityIcon = priorityConfig.icon;
                           
+                          const isUpcoming = isTaskUpcoming(task);
+                          
                           return (
-                            <Card key={task.id} className="hover:shadow-md transition-shadow">
+                            <Card key={task.id} className={`hover:shadow-md transition-shadow ${isUpcoming ? 'opacity-60 bg-gray-50' : ''}`}>
                               <CardContent className="p-4">
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-3 mb-2">
-                                      <h5 className="font-medium text-gray-900 truncate">
+                                      <h5 className={`font-medium truncate ${isUpcoming ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
                                         {task.title}
                                       </h5>
                                       <Badge variant={priorityConfig.color} className="flex items-center gap-1">
                                         <PriorityIcon className="w-3 h-3" />
                                         {priorityConfig.label}
                                       </Badge>
-                                      {isTaskUpcoming(task) && (
+                                      {isUpcoming && (
                                         <Badge variant="outline" className="flex items-center gap-1 text-blue-600 border-blue-200">
                                           <Calendar className="w-3 h-3" />
                                           À venir
