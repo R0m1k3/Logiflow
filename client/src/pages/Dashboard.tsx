@@ -151,6 +151,21 @@ export default function Dashboard() {
     },
   });
 
+  // Fonction pour vérifier si une tâche est à venir (future)
+  const isTaskUpcoming = (task: any) => {
+    if (!task.startDate) {
+      return false;
+    }
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normaliser à minuit pour une comparaison jour par jour
+    
+    const startDate = new Date(task.startDate);
+    startDate.setHours(0, 0, 0, 0); // Normaliser à minuit
+    
+    return startDate > now;
+  };
+
   // Données dérivées pour les sections
   const recentOrders = Array.isArray(allOrders) ? allOrders
     .sort((a: any, b: any) => {
@@ -531,7 +546,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3 p-6">
             {Array.isArray(tasks) && tasks.length > 0 ? tasks
-              .filter((task: any) => task.status !== 'completed')
+              .filter((task: any) => task.status !== 'completed' && !isTaskUpcoming(task))
               .sort((a: any, b: any) => {
                 const dateA = safeDate(a.createdAt);
                 const dateB = safeDate(b.createdAt);

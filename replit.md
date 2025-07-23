@@ -136,6 +136,8 @@ The application uses a sophisticated dual authentication approach:
 - **DEBUG LOGS AJOUTÉS** - Traçabilité complète pour diagnostic des dates et visibilité des tâches
 - **BACKEND PRODUCTION READY** - Toutes les fonctions storage production corrigées pour gestion complète des dates de début
 - **SCHÉMA DATABASE SYNCHRONISÉ** - Colonne start_date disponible et utilisée correctement en développement et production
+- **DATE PAR DÉFAUT AJOUTÉE** - Formulaire TaskForm.tsx affiche automatiquement la date du jour dans le champ "Date de début"
+- **DASHBOARD CORRIGÉ** - Carte "Tâches à faire" n'affiche plus les tâches futures, filtre `!isTaskUpcoming(task)` ajouté
 
 ### July 23, 2025 - CORRECTION CRITIQUE: Filtrage Publicités Calendrier - Accès Restreint par Magasin
 
