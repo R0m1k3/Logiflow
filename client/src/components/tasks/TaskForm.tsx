@@ -319,7 +319,6 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
                   type="date"
                   placeholder="Date de début (optionnel)"
                   {...field}
-                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
