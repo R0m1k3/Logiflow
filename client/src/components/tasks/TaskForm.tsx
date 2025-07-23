@@ -25,7 +25,7 @@ type TaskWithRelations = Task & {
 const taskFormSchema = z.object({
   title: z.string().min(1, "Le titre est requis"),
   description: z.string().optional(),
-  startDate: z.string().optional().nullable(),
+  startDate: z.string().optional(),
   priority: z.enum(["low", "medium", "high"]),
   status: z.enum(["pending", "completed"]),
   assignedTo: z.string().min(1, "L'assignation est requise"),
@@ -114,7 +114,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
     defaultValues: {
       title: task?.title || "",
       description: task?.description || "",
-      startDate: task?.startDate ? new Date(task.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      startDate: task?.startDate ? new Date(task.startDate).toISOString().split('T')[0] : "",
       priority: (task?.priority as "low" | "medium" | "high") || "medium",
       status: (task?.status as "pending" | "completed") || "pending",
       assignedTo: task?.assignedTo || "",
