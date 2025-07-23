@@ -125,18 +125,17 @@ The application uses a sophisticated dual authentication approach:
 
 ### July 23, 2025 - CORRECTION FINALE TÂCHES: Date de Début et Badge "À Venir" Entièrement Fonctionnels
 
-- **FORMULAIRE ÉDITION CORRIGÉ** - Ajout useEffect avec form.reset() pour remplir automatiquement tous les champs lors de l'édition
-- **DATE DÉBUT ÉDITION FONCTIONNELLE** - Les dates de début s'affichent maintenant correctement quand on modifie une tâche existante
-- **BADGE "À VENIR" CORRIGÉ** - Normalisation des dates à minuit dans isTaskUpcoming() pour comparaison jour par jour précise
-- **CHAMP DATE DÉBUT OPTIONNEL** - Suppression de la date par défaut automatique, champ vide par défaut pour nouvelles tâches
-- **VALIDATION ZOD SIMPLIFIÉE** - Schéma startDate simplifié sans .nullable() pour éviter conflits
-- **ERREUR TYPESCRIPT RÉSOLUE** - Correction cast (user as any)?.role pour éviter erreurs de compilation
+- **PROBLÈME CRITIQUE RÉSOLU** - Fonction createTask dans storage.production.ts ne sauvegardait pas le champ start_date en base de données
+- **CRÉATION TÂCHES CORRIGÉE** - Ajout start_date dans INSERT query et paramètre this.formatDate(task.startDate) pour sauvegarder la date
+- **MODIFICATION TÂCHES CORRIGÉE** - Ajout start_date dans updateTask avec condition task.startDate !== undefined pour mise à jour
+- **MAPPING API COMPLET** - startDate maintenant mappé dans getTasks() et getTask() pour récupération et édition des tâches
+- **FORMULAIRE ÉDITION FONCTIONNEL** - Les dates de début s'affichent maintenant correctement lors de l'édition d'une tâche existante
+- **BADGE "À VENIR" OPÉRATIONNEL** - Badge bleu "À venir" avec logique isTaskUpcoming() pour tâches avec date future
 - **SYSTÈME VISIBILITÉ INTELLIGENT** - Tâches invisibles jusqu'à leur date de début pour employés/managers, admin/directeur voient toujours tout
-- **INDICATEUR "À VENIR" OPÉRATIONNEL** - Badge bleu "À venir" affiché correctement pour les tâches futures avec icône calendrier
-- **AFFICHAGE DATE DÉBUT** - Date de début affichée dans les détails des tâches avec icône calendrier distincte de l'échéance
-- **FILTRAGE RÔLE-BASÉ** - Logique isTaskVisible() et isTaskUpcoming() pour gérer l'affichage selon les permissions utilisateur
-- **BACKEND COMPATIBLE** - Routes création/modification tâches supportent le nouveau champ startDate avec conversion ISO
-- **SCHÉMA DATABASE SYNCHRONISÉ** - Colonne start_date disponible et migrée en développement et production
+- **STYLE GRISÉ FONCTIONNEL** - Tâches futures affichées avec opacité réduite et style distinct
+- **DEBUG LOGS AJOUTÉS** - Traçabilité complète pour diagnostic des dates et visibilité des tâches
+- **BACKEND PRODUCTION READY** - Toutes les fonctions storage production corrigées pour gestion complète des dates de début
+- **SCHÉMA DATABASE SYNCHRONISÉ** - Colonne start_date disponible et utilisée correctement en développement et production
 
 ### July 23, 2025 - CORRECTION CRITIQUE: Filtrage Publicités Calendrier - Accès Restreint par Magasin
 
