@@ -67,14 +67,14 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
       groupsLength: groups.length,
       selectedStoreId,
       localSelectedStoreId,
-      userRole: user?.role,
+      userRole: (user as any)?.role,
       allGroups: groups.map(g => ({ id: g.id, name: g.name })),
     });
     
     if (groups.length > 0 && !localSelectedStoreId) {
       let defaultStoreId: number | null = null;
       
-      if (user?.role === 'admin') {
+      if ((user as any)?.role === 'admin') {
         // Pour l'admin : utiliser le magasin sélectionné dans le header (filtré), sinon le premier de la liste
         if (selectedStoreId && groups.find(g => g.id === selectedStoreId)) {
           defaultStoreId = selectedStoreId;
@@ -100,14 +100,14 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
     }
     
     // Mettre à jour localSelectedStoreId si selectedStoreId change (pour les admins)
-    if (user?.role === 'admin' && selectedStoreId && selectedStoreId !== localSelectedStoreId) {
+    if ((user as any)?.role === 'admin' && selectedStoreId && selectedStoreId !== localSelectedStoreId) {
       console.log('🔄 Updating task form store because header store changed:', { 
         oldStoreId: localSelectedStoreId, 
         newStoreId: selectedStoreId 
       });
       setLocalSelectedStoreId(selectedStoreId);
     }
-  }, [groups, selectedStoreId, user?.role, localSelectedStoreId]);
+  }, [groups, selectedStoreId, (user as any)?.role, localSelectedStoreId]);
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
@@ -115,8 +115,8 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
       title: task?.title || "",
       description: task?.description || "",
       startDate: task?.startDate ? new Date(task.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      priority: task?.priority || "medium",
-      status: task?.status || "pending",
+      priority: (task?.priority as "low" | "medium" | "high") || "medium",
+      status: (task?.status as "pending" | "completed") || "pending",
       assignedTo: task?.assignedTo || "",
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : null,
     },
@@ -129,7 +129,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
       const taskData = {
         ...data,
         groupId: localSelectedStoreId,
-        createdBy: user?.id,
+        createdBy: (user as any)?.id,
         startDate: data.startDate ? new Date(data.startDate).toISOString() : null,
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null
       };
@@ -319,6 +319,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
                   type="date"
                   placeholder="Date de début (optionnel)"
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
