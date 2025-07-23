@@ -439,7 +439,7 @@ export default function Groups() {
                     </div>
 
                     <div className="border-t pt-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="text-center">
                           <div className="flex items-center justify-center text-primary mb-1">
                             <Package className="w-4 h-4 mr-1" />
@@ -524,7 +524,7 @@ export default function Groups() {
                   />
                   <span className="text-sm text-gray-500">{formData.color}</span>
                 </div>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {colorOptions.map(option => (
                     <button
                       key={option.value}

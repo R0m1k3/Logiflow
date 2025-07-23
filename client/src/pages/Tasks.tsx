@@ -320,7 +320,7 @@ export default function Tasks() {
                   Nouvelle Tâche
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Créer une nouvelle tâche</DialogTitle>
                 </DialogHeader>
@@ -607,7 +607,7 @@ export default function Tasks() {
 
       {/* Modal d'édition */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifier la tâche</DialogTitle>
           </DialogHeader>

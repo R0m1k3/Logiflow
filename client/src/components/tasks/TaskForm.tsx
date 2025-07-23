@@ -342,7 +342,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Priorité */}
           <FormField
             control={form.control}
@@ -430,7 +430,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
         />
 
         {/* Boutons d'action */}
-        <div className="flex justify-end space-x-3 pt-6">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-6">
           <Button type="button" variant="outline" onClick={onClose}>
             Annuler
           </Button>

@@ -368,7 +368,7 @@ export function CustomerOrderForm({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
           <Button 
             type="button" 
             variant="outline" 
