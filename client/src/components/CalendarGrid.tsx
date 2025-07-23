@@ -11,6 +11,7 @@ interface CalendarGridProps {
   deliveries: DeliveryWithRelations[];
   publicities: PublicityWithRelations[];
   userRole: string;
+  userGroups?: { groupId: number; group: { id: number; name: string; color: string; } }[];
   onDateClick: (date: Date) => void;
   onItemClick: (item: any, type: 'order' | 'delivery') => void;
 }
@@ -21,6 +22,7 @@ export default function CalendarGrid({
   deliveries,
   publicities,
   userRole,
+  userGroups = [],
   onDateClick,
   onItemClick,
 }: CalendarGridProps) {
@@ -227,10 +229,9 @@ export default function CalendarGrid({
                         
                         if (userRole !== 'admin') {
                           // For non-admin users, only show publicities where their store participates
+                          const userGroupIds = userGroups.map(ug => ug.groupId);
                           relevantParticipations = relevantParticipations.filter(p => 
-                            // This would need to be matched against user's assigned stores
-                            // For now, show all since we don't have user store info here
-                            true
+                            userGroupIds.includes(p.groupId)
                           );
                           
                           // Don't show publicity if user's store doesn't participate

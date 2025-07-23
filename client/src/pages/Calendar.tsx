@@ -280,6 +280,7 @@ export default function Calendar() {
             deliveries={deliveries}
             publicities={publicities}
             userRole={user?.role || 'employee'}
+            userGroups={(user as any)?.userGroups || []}
             onDateClick={handleDateClick}
             onItemClick={handleItemClick}
           />

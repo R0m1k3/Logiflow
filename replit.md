@@ -123,6 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### July 23, 2025 - CORRECTION CRITIQUE: Filtrage Publicités Calendrier - Accès Restreint par Magasin
+
+- **PROBLÈME FILTRAGE RÉSOLU** - Employés voyaient toutes les publicités au lieu de seulement celles de leurs magasins assignés
+- **LOGIC FILTRAGE CORRIGÉE** - CalendarGrid.tsx utilise maintenant les userGroups réels de l'utilisateur au lieu de toujours retourner `true`
+- **INTERFACE CALENDARGRID ÉTENDUE** - Ajout paramètre `userGroups` pour passer les informations des magasins assignés à l'utilisateur
+- **FILTRAGE RÔLE-BASÉ IMPLÉMENTÉ** - Admins voient toutes les publicités avec points colorés, employés ne voient que les publicités où leurs magasins participent
+- **SÉCURITÉ DONNÉES RENFORCÉE** - Les employés ne peuvent plus voir les publicités des autres magasins sur le calendrier
+- **PRODUCTION/DÉVELOPPEMENT** - Correction appliquée aux deux environnements pour cohérence d'accès
+
 ### July 23, 2025 - SYSTÈME BLOCAGE MOT DE PASSE: Seuil Augmenté de 5 à 10 Tentatives
 
 - **SEUIL BLOCAGE CORRIGÉ** - Limiteur d'authentification modifié de 5 à 10 tentatives par fenêtre de 15 minutes
