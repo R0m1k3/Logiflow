@@ -2973,7 +2973,7 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('📊 DLC Stats - groupIds:', groupIds);
       
-      // Query to get all products with date calculations
+      // Query to get all products with date calculations, excluding validated products
       let query = `
         SELECT 
           status,
@@ -2987,11 +2987,12 @@ export class DatabaseStorage implements IStorage {
             ELSE 'active'
           END as calculated_status
         FROM dlc_products
+        WHERE status != 'valides'
       `;
       
       const params: any[] = [];
       if (groupIds && groupIds.length > 0) {
-        query += ` WHERE group_id = ANY($1)`;
+        query += ` AND group_id = ANY($1)`;
         params.push(groupIds);
       }
       

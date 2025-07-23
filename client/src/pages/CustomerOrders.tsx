@@ -824,15 +824,13 @@ export default function CustomerOrders() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {user?.role !== 'employee' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditModal(order)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditModal(order)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
                         {canShowButtons(order.status) && (
                           <>
                             <Button

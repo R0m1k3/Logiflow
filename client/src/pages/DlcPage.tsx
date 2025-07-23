@@ -733,13 +733,7 @@ export default function DlcPage() {
       <div>
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Produits DLC ({totalItems})</CardTitle>
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Exporter PDF
-              </Button>
-            </div>
+            <CardTitle>Produits DLC ({totalItems})</CardTitle>
           </CardHeader>
           <CardContent>
             {productsLoading ? (

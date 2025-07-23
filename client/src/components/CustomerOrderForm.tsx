@@ -83,7 +83,7 @@ export function CustomerOrderForm({
       gencode: order?.gencode || "",
       quantity: order?.quantity || 1,
       supplierId: order?.supplierId || undefined,
-      status: "En attente de Commande", // Statut fixe
+      status: order?.status || "En attente de Commande", // Préserver le statut existant lors de l'édition
       deposit: order?.deposit ? order.deposit.toString() : "0",
       isPromotionalPrice: order?.isPromotionalPrice || false,
       customerNotified: order?.customerNotified || false,
