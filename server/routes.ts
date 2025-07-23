@@ -1661,11 +1661,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Customer order not found" });
       }
 
-      // Admin, Manager et Directeur peuvent modifier les commandes client selon spécifications
+      // Seuls Admin, Manager et Directeur peuvent modifier les commandes client
       if (!['admin', 'manager', 'directeur'].includes(user.role)) {
+        return res.status(403).json({ message: "Insufficient permissions to modify customer orders" });
+      }
+
+      // Vérification de l'accès au groupe pour les non-admin
+      if (user.role !== 'admin') {
         const userGroupIds = user.userGroups.map(ug => ug.groupId);
         if (!userGroupIds.includes(existingOrder.groupId)) {
-          return res.status(403).json({ message: "Access denied" });
+          return res.status(403).json({ message: "Access denied to this group" });
         }
       }
 

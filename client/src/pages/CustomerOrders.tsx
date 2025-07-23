@@ -799,12 +799,18 @@ export default function CustomerOrders() {
                       </code>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        className={`${getStatusColor(order.status)} cursor-pointer hover:opacity-80 transition-opacity rounded-none`}
-                        onClick={() => openStatusModal(order)}
-                      >
-                        {order.status}
-                      </Badge>
+                      {user?.role === 'employee' ? (
+                        <Badge className={`${getStatusColor(order.status)} rounded-none`}>
+                          {order.status}
+                        </Badge>
+                      ) : (
+                        <Badge 
+                          className={`${getStatusColor(order.status)} cursor-pointer hover:opacity-80 transition-opacity rounded-none`}
+                          onClick={() => openStatusModal(order)}
+                        >
+                          {order.status}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {safeFormat(order.createdAt, 'dd/MM/yyyy')}
@@ -818,13 +824,15 @@ export default function CustomerOrders() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditModal(order)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        {user?.role !== 'employee' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditModal(order)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
                         {canShowButtons(order.status) && (
                           <>
                             <Button
