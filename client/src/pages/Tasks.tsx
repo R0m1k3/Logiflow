@@ -185,7 +185,11 @@ export default function Tasks() {
     }
 
     const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normaliser à minuit pour une comparaison jour par jour
+    
     const startDate = new Date(task.startDate);
+    startDate.setHours(0, 0, 0, 0); // Normaliser à minuit
+    
     return startDate > now;
   };
 

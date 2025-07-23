@@ -56,7 +56,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
   
   // Filtrer les groupes selon le magasin sélectionné pour les admins
   const groups = Array.isArray(groupsData) ? (
-    user?.role === 'admin' && selectedStoreId 
+    (user as any)?.role === 'admin' && selectedStoreId 
       ? groupsData.filter(g => g.id === selectedStoreId)
       : groupsData
   ) : [];
@@ -112,15 +112,30 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
-      title: task?.title || "",
-      description: task?.description || "",
-      startDate: task?.startDate ? new Date(task.startDate).toISOString().split('T')[0] : "",
-      priority: (task?.priority as "low" | "medium" | "high") || "medium",
-      status: (task?.status as "pending" | "completed") || "pending",
-      assignedTo: task?.assignedTo || "",
-      dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : null,
+      title: "",
+      description: "",
+      startDate: "",
+      priority: "medium",
+      status: "pending",
+      assignedTo: "",
+      dueDate: null,
     },
   });
+
+  // Mettre à jour le formulaire quand une tâche est sélectionnée pour l'édition
+  useEffect(() => {
+    if (task) {
+      form.reset({
+        title: task.title || "",
+        description: task.description || "",
+        startDate: task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : "",
+        priority: (task.priority as "low" | "medium" | "high") || "medium",
+        status: (task.status as "pending" | "completed") || "pending",
+        assignedTo: task.assignedTo || "",
+        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : null,
+      });
+    }
+  }, [task, form]);
 
   // Mutation pour créer/modifier une tâche
   const createMutation = useMutation({

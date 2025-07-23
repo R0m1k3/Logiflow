@@ -123,14 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### July 23, 2025 - FONCTIONNALITÉ TÂCHES: Date de Début avec Valeur par Défaut et Filtrage Intelligent
+### July 23, 2025 - CORRECTION FINALE TÂCHES: Date de Début et Badge "À Venir" Entièrement Fonctionnels
 
-- **DATE DÉBUT PAR DÉFAUT IMPLÉMENTÉE** - Formulaire de création de tâches pré-remplit automatiquement la date de début avec la date du jour
+- **FORMULAIRE ÉDITION CORRIGÉ** - Ajout useEffect avec form.reset() pour remplir automatiquement tous les champs lors de l'édition
+- **DATE DÉBUT ÉDITION FONCTIONNELLE** - Les dates de début s'affichent maintenant correctement quand on modifie une tâche existante
+- **BADGE "À VENIR" CORRIGÉ** - Normalisation des dates à minuit dans isTaskUpcoming() pour comparaison jour par jour précise
+- **CHAMP DATE DÉBUT OPTIONNEL** - Suppression de la date par défaut automatique, champ vide par défaut pour nouvelles tâches
+- **VALIDATION ZOD SIMPLIFIÉE** - Schéma startDate simplifié sans .nullable() pour éviter conflits
+- **ERREUR TYPESCRIPT RÉSOLUE** - Correction cast (user as any)?.role pour éviter erreurs de compilation
 - **SYSTÈME VISIBILITÉ INTELLIGENT** - Tâches invisibles jusqu'à leur date de début pour employés/managers, admin/directeur voient toujours tout
-- **INDICATEUR "À VENIR" AJOUTÉ** - Badge bleu "À venir" affiché pour les tâches futures avec icône calendrier
+- **INDICATEUR "À VENIR" OPÉRATIONNEL** - Badge bleu "À venir" affiché correctement pour les tâches futures avec icône calendrier
 - **AFFICHAGE DATE DÉBUT** - Date de début affichée dans les détails des tâches avec icône calendrier distincte de l'échéance
 - **FILTRAGE RÔLE-BASÉ** - Logique isTaskVisible() et isTaskUpcoming() pour gérer l'affichage selon les permissions utilisateur
-- **INTERFACE UTILISATEUR ENRICHIE** - TaskForm.tsx étendu avec champ startDate, validation Zod et gestion des valeurs par défaut
 - **BACKEND COMPATIBLE** - Routes création/modification tâches supportent le nouveau champ startDate avec conversion ISO
 - **SCHÉMA DATABASE SYNCHRONISÉ** - Colonne start_date disponible et migrée en développement et production
 
