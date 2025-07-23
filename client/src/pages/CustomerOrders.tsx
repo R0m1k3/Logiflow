@@ -346,16 +346,14 @@ export default function CustomerOrders() {
               body { 
                 font-family: Arial, sans-serif; 
                 padding: 20px; 
-                background-color: #f5f5f5;
+                background-color: white;
                 margin: 0;
               }
               .container {
                 max-width: 600px;
                 margin: 0 auto;
                 background: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                padding: 0;
               }
               .header { 
                 display: flex;
@@ -363,7 +361,7 @@ export default function CustomerOrders() {
                 align-items: center;
                 margin-bottom: 20px;
                 padding-bottom: 15px;
-                border-bottom: 1px solid #e5e7eb;
+                border-bottom: 1px solid #000000;
               }
               .title {
                 font-size: 20px;
@@ -374,7 +372,7 @@ export default function CustomerOrders() {
                 background-color: #fef3c7;
                 color: #92400e;
                 padding: 4px 12px;
-                border-radius: 4px;
+                border: 1px solid #000000;
                 font-size: 12px;
                 font-weight: 500;
               }
@@ -382,8 +380,7 @@ export default function CustomerOrders() {
                 margin-bottom: 20px;
                 padding: 15px;
                 background-color: #f9fafb;
-                border-radius: 6px;
-                border: 1px solid #e5e7eb;
+                border: 1px solid #000000;
               }
               .section-title {
                 font-size: 16px;
@@ -414,7 +411,7 @@ export default function CustomerOrders() {
               .reference-code {
                 background-color: #f3f4f6;
                 padding: 2px 6px;
-                border-radius: 3px;
+                border: 1px solid #000000;
                 font-family: 'Courier New', monospace;
                 font-size: 13px;
                 color: #374151;
@@ -423,7 +420,7 @@ export default function CustomerOrders() {
                 background-color: #10b981;
                 color: white;
                 padding: 2px 8px;
-                border-radius: 12px;
+                border: 1px solid #000000;
                 font-size: 12px;
                 font-weight: 600;
                 display: inline-block;
@@ -442,7 +439,7 @@ export default function CustomerOrders() {
                 line-height: 0.8;
                 background: white;
                 padding: 8px 12px;
-                border: 1px solid #ddd;
+                border: 1px solid #000000;
                 text-align: center;
                 word-spacing: -2px;
               }
@@ -450,7 +447,7 @@ export default function CustomerOrders() {
                 max-width: 300px;
                 height: auto;
                 margin: 10px 0;
-                border: 1px solid #ddd;
+                border: 1px solid #000000;
               }
               .barcode-number {
                 font-size: 14px;
@@ -461,7 +458,7 @@ export default function CustomerOrders() {
                 background-color: #dbeafe;
                 color: #1e40af;
                 padding: 4px 12px;
-                border-radius: 4px;
+                border: 1px solid #000000;
                 font-size: 13px;
                 font-weight: 500;
                 display: inline-block;
@@ -474,20 +471,18 @@ export default function CustomerOrders() {
                 background-color: #fef3c7;
                 color: #92400e;
                 padding: 8px 12px;
-                border-radius: 6px;
                 font-weight: 600;
                 margin: 10px 0;
-                border: 1px solid #fbbf24;
+                border: 1px solid #000000;
               }
               .promo-badge {
                 background-color: #fef2f2;
                 color: #dc2626;
                 padding: 4px 8px;
-                border-radius: 4px;
                 font-size: 12px;
                 font-weight: 600;
                 display: inline-block;
-                border: 1px solid #fecaca;
+                border: 1px solid #000000;
               }
             </style>
           </head>
@@ -532,7 +527,7 @@ export default function CustomerOrders() {
                   <div class="field-row">
                     <span class="field-label">Désignation:</span>
                   </div>
-                  <div style="background-color: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
+                  <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #000000; margin-bottom: 12px;">
                     ${order.productDesignation}
                   </div>
                   ${order.productReference ? `
