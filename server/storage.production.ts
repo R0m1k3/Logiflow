@@ -3147,10 +3147,10 @@ export class DatabaseStorage implements IStorage {
   async createTask(task: InsertTask): Promise<Task> {
     const result = await pool.query(`
       INSERT INTO tasks (
-        title, description, status, priority, due_date,
+        title, description, status, priority, due_date, start_date,
         assigned_to, group_id, created_by
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `, [
       task.title,
@@ -3158,6 +3158,7 @@ export class DatabaseStorage implements IStorage {
       task.status || 'pending',
       task.priority || 'medium',
       this.formatDate(task.dueDate),
+      this.formatDate(task.startDate),
       task.assignedTo,
       task.groupId,
       task.createdBy
@@ -3196,6 +3197,10 @@ export class DatabaseStorage implements IStorage {
     if (task.dueDate !== undefined) {
       updateFields.push(`due_date = $${paramCount++}`);
       values.push(this.formatDate(task.dueDate));
+    }
+    if (task.startDate !== undefined) {
+      updateFields.push(`start_date = $${paramCount++}`);
+      values.push(this.formatDate(task.startDate));
     }
     if (task.assignedTo !== undefined) {
       updateFields.push(`assigned_to = $${paramCount++}`);
