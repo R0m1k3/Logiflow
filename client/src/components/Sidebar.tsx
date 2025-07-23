@@ -385,15 +385,19 @@ export default function Sidebar() {
           <div className="flex flex-col items-center space-y-3">
             <div className="h-8 w-8 bg-gray-100 flex items-center justify-center rounded-full" title={(() => {
               const u = user as any;
-              if (u?.firstName && u?.lastName) {
-                return `${u.firstName} ${u.lastName}`;
-              }
+              // Prioriser le prénom s'il existe
               if (u?.firstName && u.firstName.trim()) {
                 return u.firstName;
               }
+              // Sinon prénom + nom si les deux existent
+              if (u?.firstName && u?.lastName) {
+                return `${u.firstName} ${u.lastName}`;
+              }
+              // Sinon nom seul
               if (u?.lastName && u.lastName.trim()) {
                 return u.lastName;
               }
+              // Fallback sur username
               return u?.username || 'Utilisateur';
             })()}>
               <span className="text-xs font-medium text-gray-700">
@@ -424,15 +428,19 @@ export default function Sidebar() {
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {(() => {
                     const u = user as any;
-                    if (u?.firstName && u?.lastName) {
-                      return `${u.firstName} ${u.lastName}`;
-                    }
+                    // Prioriser le prénom s'il existe
                     if (u?.firstName && u.firstName.trim()) {
                       return u.firstName;
                     }
+                    // Sinon prénom + nom si les deux existent
+                    if (u?.firstName && u?.lastName) {
+                      return `${u.firstName} ${u.lastName}`;
+                    }
+                    // Sinon nom seul
                     if (u?.lastName && u.lastName.trim()) {
                       return u.lastName;
                     }
+                    // Fallback sur username
                     return u?.username || 'Utilisateur';
                   })()}
                 </p>

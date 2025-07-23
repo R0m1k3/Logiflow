@@ -112,7 +112,22 @@ export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     return this.retryQuery(async () => {
       const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-      return result.rows[0] || undefined;
+      const user = result.rows[0];
+      
+      if (!user) return undefined;
+      
+      // Map snake_case to camelCase for frontend compatibility
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at
+      };
     });
   }
 
