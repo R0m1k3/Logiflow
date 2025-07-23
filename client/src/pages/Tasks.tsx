@@ -390,6 +390,12 @@ export default function Tasks() {
                                       <span>
                                         Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                                       </span>
+                                      {task.dueDate && (
+                                        <span className="text-orange-600 font-medium">
+                                          <Clock className="w-3 h-3 inline mr-1" />
+                                          Échéance: {format(new Date(task.dueDate), 'dd/MM/yyyy', { locale: fr })}
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                   
@@ -474,6 +480,12 @@ export default function Tasks() {
                                       <span>
                                         Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                                       </span>
+                                      {task.dueDate && (
+                                        <span className="text-gray-400">
+                                          <Clock className="w-3 h-3 inline mr-1" />
+                                          Échéance: {format(new Date(task.dueDate), 'dd/MM/yyyy', { locale: fr })}
+                                        </span>
+                                      )}
                                       {task.completedAt && (
                                         <span>
                                           Terminée: {format(new Date(task.completedAt), 'dd/MM/yyyy HH:mm', { locale: fr })}

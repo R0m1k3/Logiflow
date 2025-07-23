@@ -21,15 +21,15 @@ type TaskWithRelations = Task & {
   group: { id: number; name: string; color: string; };
 };
 
-// Schéma simplifié sans magasin et sans date d'échéance
-const taskFormSchema = insertTaskSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  completedAt: true,
-  createdBy: true,
-  groupId: true,
-  dueDate: true, // Suppression du champ échéance
+// Schéma avec date d'échéance incluse
+const taskFormSchema = z.object({
+  title: z.string().min(1, "Le titre est requis"),
+  description: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]),
+  status: z.enum(["pending", "completed"]),
+  assignedTo: z.string().min(1, "L'assignation est requise"),
+  dueDate: z.string().optional().nullable(),
+  completedBy: z.string().optional().nullable(),
 });
 
 type TaskFormData = z.infer<typeof taskFormSchema>;
@@ -116,7 +116,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
       priority: task?.priority || "medium",
       status: task?.status || "pending",
       assignedTo: task?.assignedTo || "",
-
+      dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : null,
     },
   });
 
@@ -128,7 +128,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
         ...data,
         groupId: localSelectedStoreId,
         createdBy: user?.id,
-        dueDate: data.dueDate || null
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null
       };
       console.log('🚀 Creating task with data:', taskData);
       return apiRequest("/api/tasks", "POST", taskData);
@@ -190,6 +190,7 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
         priority: data.priority,
         status: data.status,
         assignedTo: data.assignedTo,
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
       };
       updateMutation.mutate(submitData);
     } else {
@@ -369,7 +370,25 @@ export default function TaskForm({ task, onClose }: TaskFormProps) {
           )}
         />
 
-
+        {/* Date d'échéance */}
+        <FormField
+          control={form.control}
+          name="dueDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date d'échéance</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date"
+                  placeholder="Date d'échéance (optionnel)"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Boutons d'action */}
         <div className="flex justify-end space-x-3 pt-6">
