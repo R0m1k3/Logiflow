@@ -243,6 +243,19 @@ The application uses a sophisticated dual authentication approach:
 - **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
 - **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
 
+### July 24, 2025 - PAGE PUBLICITÉS: Remplacement Carte "À Venir" par Carte "Participation" avec Statistiques Annuelles
+
+- **CARTE PARTICIPATION CRÉÉE** - Nouvelle carte "Participation {année}" remplace l'ancienne carte "À venir" dans la page publicités
+- **STATISTIQUES PAR MAGASIN** - Affiche le nombre de participations de chaque magasin pour l'année sélectionnée
+- **LOGIQUE ADMIN "TOUS"** - Admin avec sélecteur "tous" voit tous les magasins avec leurs statistiques de participation
+- **LOGIQUE MAGASIN SPÉCIFIQUE** - Autres utilisateurs voient uniquement leur(s) magasin(s) assigné(s)
+- **COULEURS MAGASINS INTÉGRÉES** - Chaque magasin affiché avec sa couleur définie dans le module magasin/groupe
+- **TRI INTELLIGENT** - Magasins triés par nombre de participations décroissant (plus actifs en haut)
+- **INTERFACE SCROLLABLE** - Carte avec hauteur maximale et scroll automatique pour gérer de nombreux magasins
+- **TOTAUX CALCULÉS** - Affichage du total des participations en bas de carte pour vue d'ensemble
+- **ICÔNE BARCHARTT3** - Utilise l'icône BarChart3 pour représenter les statistiques de participation
+- **RESPONSIVE ET ACCESSIBLE** - Interface adaptée avec hover effects et transitions fluides
+
 ### July 24, 2025 - DASHBOARD COULEURS MAGASINS: Publicités Utilisent Maintenant les Couleurs Définies
 
 - **COULEURS BADGES AMÉLIORÉES** - Carte "Publicités à Venir" utilise maintenant les vraies couleurs des magasins/groupes

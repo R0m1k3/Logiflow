@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Calendar, Edit, Trash2, Eye, Filter, Grid, List } from "lucide-react";
+import { Plus, Calendar, Edit, Trash2, Eye, Filter, Grid, List, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -246,6 +246,39 @@ export default function Publicities() {
   const canCreateOrEdit = user?.role === 'admin' || user?.role === 'manager';
   const canDelete = user?.role === 'admin';
 
+  // Calculer les statistiques de participation par magasin pour l'année sélectionnée
+  const getParticipationStats = () => {
+    if (!Array.isArray(publicities) || !Array.isArray(groups)) {
+      return [];
+    }
+
+    // Si admin avec "tous" sélectionné (selectedStoreId === null), afficher tous les magasins
+    // Sinon, filtrer selon les magasins disponibles
+    const relevantGroups = user?.role === 'admin' && !selectedStoreId 
+      ? groups // Admin avec "tous" : tous les magasins
+      : groups.filter(group => !selectedStoreId || group.id === selectedStoreId); // Magasin spécifique
+
+    return relevantGroups.map(group => {
+      // Compter le nombre de publicités où ce magasin participe pour l'année sélectionnée
+      const participationCount = publicities.reduce((count, publicity) => {
+        if (!publicity.participations || !Array.isArray(publicity.participations)) {
+          return count;
+        }
+        const isParticipating = publicity.participations.some(p => p.groupId === group.id);
+        return isParticipating ? count + 1 : count;
+      }, 0);
+
+      return {
+        groupId: group.id,
+        groupName: group.name,
+        groupColor: group.color || '#666666',
+        participationCount
+      };
+    }).sort((a, b) => b.participationCount - a.participationCount); // Trier par nombre de participations décroissant
+  };
+
+  const participationStats = getParticipationStats();
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -380,21 +413,52 @@ export default function Publicities() {
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">À venir</p>
-                <p className="text-2xl font-semibold">
-                  {publicities.filter(p => {
-                    const startDate = safeDate(p.startDate);
-                    return startDate && startDate > new Date();
-                  }).length}
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2 text-purple-600" />
+              Participation {selectedYear}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 max-h-64 overflow-y-auto">
+            <div className="space-y-2">
+              {participationStats.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-4">
+                  Aucun magasin trouvé
                 </p>
-              </div>
+              ) : (
+                participationStats.map((stat) => (
+                  <div key={stat.groupId} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                        style={{ backgroundColor: stat.groupColor }}
+                      />
+                      <span className="text-sm font-medium text-gray-900 truncate">
+                        {stat.groupName}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg font-semibold text-gray-800">
+                        {stat.participationCount}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        pub{stat.participationCount !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
+            {participationStats.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Total participations</span>
+                  <span className="font-semibold text-gray-800">
+                    {participationStats.reduce((sum, stat) => sum + stat.participationCount, 0)}
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
