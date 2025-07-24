@@ -499,8 +499,8 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                    <div className="text-right flex-shrink-0">
+                      <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
                         À venir
                       </Badge>
                       <p className="text-xs text-gray-500 mt-1">

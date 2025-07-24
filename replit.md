@@ -247,9 +247,10 @@ The application uses a sophisticated dual authentication approach:
 
 - **PROBLÈME TAILLE RÉSOLU** - Carte "Publicités à Venir" avait des lignes plus grandes que les autres cartes du dashboard
 - **MAGASINS PARTICIPANTS INTÉGRÉS** - Badges des magasins affichés de manière compacte sur la même ligne que la désignation
-- **BADGES ULTRA-COMPACTS** - Taille réduite (h-4, fontSize 10px) avec maximum 2 magasins visibles + compteur pour les autres
+- **BADGES ULTRA-COMPACTS** - Taille réduite (h-4, fontSize 9px) avec maximum 2 magasins visibles + compteur pour les autres
 - **COULEURS MAGASINS PRÉSERVÉES** - Utilisation des vraies couleurs des magasins avec ring effect pour le magasin actuel
 - **FORMAT UNIFORME MAINTENU** - Même hauteur de ligne pour toutes les cartes avec informations complètes
+- **BADGE "À VENIR" CORRIGÉ** - Ajout flex-shrink-0 et whitespace-nowrap pour éviter retour à la ligne du badge
 - **SOLUTION ÉQUILIBRÉE** - Visibilité des magasins participants sans compromettre la cohérence visuelle
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
