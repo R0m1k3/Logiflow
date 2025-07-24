@@ -246,12 +246,13 @@ The application uses a sophisticated dual authentication approach:
 ### July 24, 2025 - DASHBOARD: Harmonisation Taille des Cartes avec Affichage Magasins Participants Compacte
 
 - **PROBLÈME TAILLE RÉSOLU** - Carte "Publicités à Venir" avait des lignes plus grandes que les autres cartes du dashboard
-- **MAGASINS PARTICIPANTS INTÉGRÉS** - Badges des magasins affichés de manière compacte sur la même ligne que la désignation
+- **REPOSITIONNEMENT BADGES MAGASINS** - Badges des magasins participants déplacés à côté du badge "À venir" en haut à droite
 - **BADGES ULTRA-COMPACTS** - Taille réduite (h-4, fontSize 9px) avec maximum 2 magasins visibles + compteur pour les autres
 - **COULEURS MAGASINS PRÉSERVÉES** - Utilisation des vraies couleurs des magasins avec ring effect pour le magasin actuel
 - **FORMAT UNIFORME MAINTENU** - Même hauteur de ligne pour toutes les cartes avec informations complètes
 - **BADGE "À VENIR" CORRIGÉ** - Ajout flex-shrink-0 et whitespace-nowrap pour éviter retour à la ligne du badge
-- **SOLUTION ÉQUILIBRÉE** - Visibilité des magasins participants sans compromettre la cohérence visuelle
+- **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
+- **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
 ### July 24, 2025 - PAGE RAPPROCHEMENT: Tri Modifié pour Afficher les Plus Récentes en Premier
 

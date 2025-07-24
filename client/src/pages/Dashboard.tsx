@@ -467,43 +467,45 @@ export default function Dashboard() {
                         <p className="font-medium text-gray-900">{publicity.pubNumber}</p>
                         <div className="flex items-center gap-2">
                           <p className="text-sm text-gray-600 flex-1">{publicity.designation}</p>
-                          {/* Magasins participants - version compacte */}
-                          {participatingStores.length > 0 && (
-                            <div className="flex gap-1 items-center">
-                              {participatingStores.slice(0, 2).map((participation: any) => {
-                                const groupColor = participation.group?.color || '#666666';
-                                const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
-                                
-                                return (
-                                  <Badge 
-                                    key={participation.groupId} 
-                                    className={`text-xs border text-white px-1.5 py-0 h-4 min-w-0 ${isCurrentStore ? 'ring-1 ring-offset-1 ring-opacity-50' : ''}`}
-                                    style={{ 
-                                      backgroundColor: groupColor,
-                                      borderColor: groupColor,
-                                      color: 'white',
-                                      fontSize: '9px',
-                                      lineHeight: '1',
-                                      ...(isCurrentStore && { ringColor: groupColor })
-                                    }}
-                                  >
-                                    {participation.group.name}
-                                  </Badge>
-                                );
-                              })}
-                              {participatingStores.length > 2 && (
-                                <span className="text-xs text-gray-400 font-medium">+{participatingStores.length - 2}</span>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
-                        À venir
-                      </Badge>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <div className="flex items-center gap-2 justify-end mb-1">
+                        <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
+                          À venir
+                        </Badge>
+                        {/* Magasins participants à côté du badge */}
+                        {participatingStores.length > 0 && (
+                          <div className="flex gap-1 items-center">
+                            {participatingStores.slice(0, 2).map((participation: any) => {
+                              const groupColor = participation.group?.color || '#666666';
+                              const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
+                              
+                              return (
+                                <Badge 
+                                  key={participation.groupId} 
+                                  className={`text-xs border text-white px-1.5 py-0 h-4 min-w-0 ${isCurrentStore ? 'ring-1 ring-offset-1 ring-opacity-50' : ''}`}
+                                  style={{ 
+                                    backgroundColor: groupColor,
+                                    borderColor: groupColor,
+                                    color: 'white',
+                                    fontSize: '9px',
+                                    lineHeight: '1',
+                                    ...(isCurrentStore && { ringColor: groupColor })
+                                  }}
+                                >
+                                  {participation.group.name}
+                                </Badge>
+                              );
+                            })}
+                            {participatingStores.length > 2 && (
+                              <span className="text-xs text-gray-400 font-medium">+{participatingStores.length - 2}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500">
                         {safeFormat(publicity.startDate, "d MMM")}
                       </p>
                     </div>
