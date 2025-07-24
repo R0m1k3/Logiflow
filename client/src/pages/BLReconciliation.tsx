@@ -144,29 +144,35 @@ export default function BLReconciliation() {
         }
       }
       
-      // Trier par ordre décroissant pour avoir les plus récentes en premier
-      // CORRECTION: Prioriser les livraisons avec deliveredDate en premier
-      return filtered.sort((a: any, b: any) => {
-        // 1. Les livraisons avec deliveredDate en premier
-        const hasDeliveredA = !!a.deliveredDate;
-        const hasDeliveredB = !!b.deliveredDate;
+      // CORRECTION PRODUCTION: Trier spécifiquement par date de livraison validée
+      const sorted = filtered.sort((a: any, b: any) => {
+        const dateA = a.deliveredDate ? new Date(a.deliveredDate) : null;
+        const dateB = b.deliveredDate ? new Date(b.deliveredDate) : null;
         
-        if (hasDeliveredA && !hasDeliveredB) return -1; // A avant B
-        if (!hasDeliveredA && hasDeliveredB) return 1;  // B avant A
+        // Les livraisons avec deliveredDate en premier, triées par date décroissante
+        if (dateA && dateB) {
+          // Tri décroissant par deliveredDate (plus récent en premier)
+          return dateB.getTime() - dateA.getTime();
+        }
         
-        // 2. Si les deux ont deliveredDate OU les deux n'en ont pas, trier par date effective
-        const getEffectiveDate = (delivery: any) => {
-          if (delivery.deliveredDate) return new Date(delivery.deliveredDate);
-          if (delivery.scheduledDate) return new Date(delivery.scheduledDate);
-          return new Date(delivery.createdAt);
-        };
+        // Si une seule a deliveredDate, elle passe en premier
+        if (dateA && !dateB) return -1;
+        if (!dateA && dateB) return 1;
         
-        const dateA = getEffectiveDate(a);
-        const dateB = getEffectiveDate(b);
-        
-        // Tri décroissant (plus récent en premier)
-        return dateB.getTime() - dateA.getTime();
+        // Si aucune n'a deliveredDate, trier par scheduledDate puis createdAt
+        const fallbackA = a.scheduledDate ? new Date(a.scheduledDate) : new Date(a.createdAt);
+        const fallbackB = b.scheduledDate ? new Date(b.scheduledDate) : new Date(b.createdAt);
+        return fallbackB.getTime() - fallbackA.getTime();
       });
+      
+      console.log('🔧 BL Reconciliation - Tri appliqué:', sorted.map(d => ({
+        id: d.id,
+        supplier: d.supplier?.name,
+        deliveredDate: d.deliveredDate,
+        scheduledDate: d.scheduledDate
+      })).slice(0, 5));
+      
+      return sorted;
     },
   });
 

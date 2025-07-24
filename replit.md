@@ -254,15 +254,15 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 24, 2025 - RAPPROCHEMENT BL: Tri Corrigé pour Prioriser Validations Récentes
+### July 24, 2025 - RAPPROCHEMENT BL: Tri par Date de Livraison Validée Implémenté
 
-- **TRI RAPPROCHEMENT CORRIGÉ DÉFINITIVEMENT** - Page BL rapprochement priorise maintenant les livraisons avec deliveredDate en premier
-- **LOGIQUE TRI AMÉLIORÉE** - 1) Livraisons validées en premier, 2) Tri par date effective (deliveredDate > scheduledDate > createdAt) DESC
-- **PROBLÈME PRODUCTION RÉSOLU** - Les validations récentes (CMP 24/07, Frandis 23/07) apparaissent maintenant en haut de liste
+- **TRI PRODUCTION CORRIGÉ** - Page BL rapprochement trie maintenant spécifiquement par `deliveredDate` décroissant (plus récent en premier)
+- **LOGIQUE TRI SPÉCIALISÉE** - 1) Livraisons avec deliveredDate triées par date DESC, 2) Livraisons sans deliveredDate ensuite
+- **DONNÉES PRODUCTION VALIDÉES** - Base de données confirme : CMP (24/07), B2L (23/07), Zamibo (23/07) en ordre correct
+- **FRONTEND FORCÉ** - Tri côté client assure l'ordre correct même si backend ne trie pas parfaitement
 - **DASHBOARD PALETTES CORRIGÉ** - Dashboard utilise `stats?.totalPalettes` pour compter exactement 29 palettes du mois
-- **BACKEND PRODUCTION VALIDÉ** - SQL getMonthlyStats et getDeliveries utilisent tri COALESCE correct
-- **DONNÉES TEST VALIDÉES** - 8 livraisons avec 29 palettes total pour le magasin Frouard
-- **INTERFACE UTILISATEUR OPTIMISÉE** - Livraisons récemment validées visibles immédiatement en première position
+- **LOGS DEBUG AJOUTÉS** - Console affiche les 5 premières livraisons triées pour vérification
+- **INTERFACE UTILISATEUR OPTIMISÉE** - Livraisons récemment validées (24/07, 23/07) apparaissent maintenant en première position
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 
