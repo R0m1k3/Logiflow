@@ -74,10 +74,16 @@ export default function CreateDeliveryModal({
     queryKey: ['/api/orders'],
   });
 
-  // Filtrer les commandes par fournisseur sélectionné - montrer toutes les commandes non livrées
-  const availableOrders = allOrders.filter(order => 
-    formData.supplierId ? (order.supplierId === parseInt(formData.supplierId) && order.status !== 'delivered') : false
-  );
+  // Filtrer les commandes par fournisseur ET magasin - restriction même magasin uniquement
+  const availableOrders = allOrders.filter(order => {
+    // Doit avoir un fournisseur et un magasin sélectionnés
+    if (!formData.supplierId || !formData.groupId) return false;
+    
+    // La commande doit être du même fournisseur ET du même magasin (groupId)
+    return order.supplierId === parseInt(formData.supplierId) && 
+           order.groupId === parseInt(formData.groupId) && 
+           order.status !== 'delivered';
+  });
 
   // Auto-sélectionner le magasin selon les règles
   useEffect(() => {

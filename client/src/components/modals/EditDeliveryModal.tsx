@@ -41,7 +41,7 @@ export default function EditDeliveryModal({
 
   const { data: suppliers = [] } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
-    enabled: user?.role === 'admin' || user?.role === 'manager' || user?.role === 'directeur' || user?.role === 'employee',
+    enabled: !!user && ('role' in user) && ((user as any).role === 'admin' || (user as any).role === 'manager' || (user as any).role === 'directeur' || (user as any).role === 'employee'),
   });
 
   const { data: groups = [] } = useQuery<Group[]>({
@@ -52,10 +52,16 @@ export default function EditDeliveryModal({
     queryKey: ['/api/orders'],
   });
 
-  // Filtrer les commandes par fournisseur sélectionné - montrer toutes les commandes non livrées
-  const availableOrders = allOrders.filter(order => 
-    formData.supplierId ? (order.supplierId === parseInt(formData.supplierId) && order.status !== 'delivered') : false
-  );
+  // Filtrer les commandes par fournisseur ET magasin - restriction même magasin uniquement
+  const availableOrders = allOrders.filter(order => {
+    // Doit avoir un fournisseur et un magasin sélectionnés
+    if (!formData.supplierId || !formData.groupId) return false;
+    
+    // La commande doit être du même fournisseur ET du même magasin (groupId)
+    return order.supplierId === parseInt(formData.supplierId) && 
+           order.groupId === parseInt(formData.groupId) && 
+           order.status !== 'delivered';
+  });
 
   // Initialiser le formulaire avec les données de la livraison
   useEffect(() => {
@@ -154,7 +160,7 @@ export default function EditDeliveryModal({
                 <SelectValue placeholder="Sélectionnez un fournisseur" />
               </SelectTrigger>
               <SelectContent>
-                {suppliers.map((supplier) => (
+                {suppliers.map((supplier: any) => (
                   <SelectItem key={supplier.id} value={supplier.id.toString()}>
                     {supplier.name}
                   </SelectItem>

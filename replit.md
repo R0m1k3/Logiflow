@@ -209,6 +209,17 @@ The application uses a sophisticated dual authentication approach:
 - **SPÉCIFICATIONS RESPECTÉES** - Validation tâches réservée aux rôles admin, manager et directeur uniquement
 - **SÉCURITÉ RENFORCÉE** - Double vérification côté client (UI cachée) et serveur (erreur 403) pour protection complète
 
+### July 24, 2025 - RESTRICTION LIAISON LIVRAISONS-COMMANDES: Même Magasin Uniquement
+
+- **RESTRICTION MAGASIN IMPLÉMENTÉE** - Livraisons peuvent désormais uniquement être liées à des commandes du même magasin
+- **FILTRAGE INTELLIGENT COMMANDES** - Logic de filtrage `availableOrders` modifiée pour inclure critère magasin (groupId)
+- **COHÉRENCE CRÉATION/MODIFICATION** - Restriction appliquée dans CreateDeliveryModal ET EditDeliveryModal
+- **SÉCURITÉ DONNÉES RENFORCÉE** - Empêche liaisons erronées entre magasins différents pour intégrité des données
+- **LOGIQUE FILTRAGE AMÉLIORÉE** - Triple critère: fournisseur + magasin + statut non livré pour sélection commandes
+- **EXPÉRIENCE UTILISATEUR COHÉRENTE** - Interface masque automatiquement commandes incompatibles selon magasin sélectionné
+- **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
+- **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
+
 ### July 24, 2025 - PRÉVENTION DOUBLONS RAPPROCHEMENT BL/FACTURES: Interface Temps Réel avec Alertes Visuelles
 
 - **SYSTÈME PRÉVENTION DOUBLONS COMPLET** - Nouvelle API `/api/check-invoice-usage` pour vérifier en temps réel l'usage des factures
