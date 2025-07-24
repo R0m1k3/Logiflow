@@ -1137,6 +1137,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour vérifier si une facture est déjà utilisée par une autre livraison
+  app.post("/api/check-invoice-usage", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUser(userId);
+      
+      // Vérifier les permissions de rapprochement (admin ou directeur)
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Accès refusé - permissions de rapprochement requises" });
+      }
+
+      const { invoiceReference, excludeDeliveryId } = req.body;
+      
+      if (!invoiceReference) {
+        return res.status(400).json({ message: "invoiceReference is required" });
+      }
+
+      // Récupérer toutes les livraisons pour vérifier l'usage de la facture
+      const deliveries = await storage.getDeliveries();
+      const alreadyUsed = deliveries.find(delivery => 
+        delivery.invoiceReference === invoiceReference && 
+        delivery.reconciled === true &&
+        delivery.id !== excludeDeliveryId
+      );
+      
+      res.json({ 
+        isUsed: !!alreadyUsed,
+        usedBy: alreadyUsed ? {
+          deliveryId: alreadyUsed.id,
+          blNumber: alreadyUsed.blNumber,
+          supplierName: alreadyUsed.supplier?.name,
+          amount: alreadyUsed.invoiceAmount
+        } : null
+      });
+    } catch (error) {
+      console.error("Error checking invoice usage:", error);
+      res.status(500).json({ message: "Failed to check invoice usage" });
+    }
+  });
+
   // ===== ROLE MANAGEMENT ROUTES =====
 
   // Roles routes

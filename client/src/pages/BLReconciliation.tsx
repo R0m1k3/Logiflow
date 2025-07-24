@@ -17,7 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2 } from "lucide-react";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
@@ -76,7 +76,7 @@ export default function BLReconciliation() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deliveryToDelete, setDeliveryToDelete] = useState<any>(null);
-  const [invoiceVerifications, setInvoiceVerifications] = useState<Record<number, { exists: boolean; error?: string }>>({});
+  const [invoiceVerifications, setInvoiceVerifications] = useState<Record<number, { exists: boolean; error?: string; isUsed?: boolean; usedBy?: any }>>({});
   const [isVerifyingInvoices, setIsVerifyingInvoices] = useState(false);
   const [isVerifyingCurrentInvoice, setIsVerifyingCurrentInvoice] = useState(false);
 
@@ -322,6 +322,8 @@ export default function BLReconciliation() {
         const verifyInvoice = async () => {
           try {
             console.log('🔍 Immediate verification for:', variables.invoiceReference);
+            
+            // 1. Vérifier si la facture existe dans NocoDB
             const verificationResponse = await fetch('/api/verify-invoices', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -335,23 +337,59 @@ export default function BLReconciliation() {
                 }]
               }),
             });
+
+            // 2. Vérifier si la facture est déjà utilisée par une autre livraison
+            const usageResponse = await fetch('/api/check-invoice-usage', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ 
+                invoiceReference: variables.invoiceReference,
+                excludeDeliveryId: variables.id
+              }),
+            });
             
+            let verificationResults = {};
+            let usageResult = null;
+
             if (verificationResponse.ok) {
-              const verificationResults = await verificationResponse.json();
+              verificationResults = await verificationResponse.json();
               console.log('✅ Immediate verification result:', verificationResults);
-              setInvoiceVerifications(prev => ({ ...prev, ...verificationResults }));
-              
-              // Notification du résultat
-              const result = verificationResults[variables.id];
-              if (result) {
-                toast({
-                  title: result.exists ? "Facture trouvée" : "Facture non trouvée",
-                  description: result.exists ? 
-                    `La facture ${variables.invoiceReference} a été trouvée dans NocoDB` :
-                    `La facture ${variables.invoiceReference} n'a pas été trouvée dans NocoDB`,
-                  variant: result.exists ? "default" : "destructive",
-                });
-              }
+            }
+
+            if (usageResponse.ok) {
+              usageResult = await usageResponse.json();
+              console.log('✅ Usage check result:', usageResult);
+            }
+
+            // Combiner les résultats
+            const result = verificationResults[variables.id] || {};
+            const finalResult = {
+              ...result,
+              isUsed: usageResult?.isUsed || false,
+              usedBy: usageResult?.usedBy || null
+            };
+
+            setInvoiceVerifications(prev => ({ 
+              ...prev, 
+              [variables.id]: finalResult
+            }));
+            
+            // Notification du résultat
+            if (finalResult.isUsed) {
+              toast({
+                title: "Facture déjà utilisée",
+                description: `La facture ${variables.invoiceReference} est déjà utilisée par la livraison BL ${finalResult.usedBy?.blNumber}`,
+                variant: "destructive",
+              });
+            } else if (finalResult.exists !== undefined) {
+              toast({
+                title: finalResult.exists ? "Facture trouvée" : "Facture non trouvée",
+                description: finalResult.exists ? 
+                  `La facture ${variables.invoiceReference} a été trouvée dans NocoDB` :
+                  `La facture ${variables.invoiceReference} n'a pas été trouvée dans NocoDB`,
+                variant: finalResult.exists ? "default" : "destructive",
+              });
             }
           } catch (error) {
             console.error('Error verifying invoice reference:', error);
@@ -523,6 +561,12 @@ export default function BLReconciliation() {
   };
 
   const canValidate = (delivery: any) => {
+    // Vérifier si la facture est déjà utilisée
+    const verificationResult = invoiceVerifications[delivery.id];
+    if (verificationResult?.isUsed) {
+      return false;
+    }
+    
     return delivery.invoiceReference && delivery.invoiceAmount && !delivery.reconciled;
   };
 
@@ -977,7 +1021,9 @@ export default function BLReconciliation() {
                             )}
                             {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id] && (
                               <div className="flex items-center space-x-1">
-                                {invoiceVerifications[selectedDelivery.id].exists ? (
+                                {invoiceVerifications[selectedDelivery.id].isUsed ? (
+                                  <AlertTriangle className="w-4 h-4 text-red-600" title={`Facture déjà utilisée par BL ${invoiceVerifications[selectedDelivery.id].usedBy?.blNumber}`} />
+                                ) : invoiceVerifications[selectedDelivery.id].exists ? (
                                   <CheckCircle className="w-4 h-4 text-green-500" title="Facture trouvée dans NocoDB" />
                                 ) : (
                                   <X className="w-4 h-4 text-red-500" title="Facture non trouvée dans NocoDB" />
@@ -991,7 +1037,20 @@ export default function BLReconciliation() {
                       {/* Status de vérification */}
                       {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id] && (
                         <div className="mt-2">
-                          {invoiceVerifications[selectedDelivery.id].exists ? (
+                          {invoiceVerifications[selectedDelivery.id].isUsed ? (
+                            <div className="space-y-1">
+                              <p className="text-sm text-red-600 flex items-center space-x-1">
+                                <AlertTriangle className="w-3 h-3" />
+                                <span>Facture déjà utilisée</span>
+                              </p>
+                              <p className="text-xs text-gray-500 ml-4">
+                                Utilisée par la livraison BL {invoiceVerifications[selectedDelivery.id].usedBy?.blNumber}
+                                {invoiceVerifications[selectedDelivery.id].usedBy?.supplierName && 
+                                  ` (${invoiceVerifications[selectedDelivery.id].usedBy.supplierName})`
+                                }
+                              </p>
+                            </div>
+                          ) : invoiceVerifications[selectedDelivery.id].exists ? (
                             <p className="text-sm text-green-600 flex items-center space-x-1">
                               <CheckCircle className="w-3 h-3" />
                               <span>Facture trouvée dans NocoDB</span>

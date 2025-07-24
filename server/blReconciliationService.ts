@@ -8,7 +8,7 @@ export interface BLReconciliationResult {
   details: Array<{
     deliveryId: number;
     blNumber: string;
-    status: 'reconciled' | 'not_found' | 'error';
+    status: 'reconciled' | 'not_found' | 'error' | 'already_used';
     invoiceRef?: string;
     amount?: string;
   }>;
@@ -18,6 +18,28 @@ export interface NocoDBInvoiceData {
   invoiceRef: string;
   amount: string;
   supplier: string;
+}
+
+// Fonction pour vérifier si une facture est déjà utilisée par une autre livraison
+async function isInvoiceAlreadyUsed(invoiceReference: string, excludeDeliveryId?: number): Promise<boolean> {
+  try {
+    const deliveries = await storage.getDeliveries();
+    const alreadyUsed = deliveries.some(delivery => 
+      delivery.invoiceReference === invoiceReference && 
+      delivery.reconciled === true &&
+      delivery.id !== excludeDeliveryId
+    );
+    
+    if (alreadyUsed) {
+      console.log(`⚠️ [BL-RECONCILIATION] Facture ${invoiceReference} déjà utilisée par une autre livraison`);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error(`💥 [BL-RECONCILIATION] Erreur lors de la vérification de la facture ${invoiceReference}:`, error);
+    return false;
+  }
 }
 
 export async function performBLReconciliation(): Promise<BLReconciliationResult> {
@@ -80,23 +102,37 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
         }
 
         if (invoiceData) {
-          // 6. Mettre à jour la livraison avec les données de facture
-          await storage.updateDelivery(delivery.id, {
-            invoiceReference: invoiceData.invoiceRef,
-            invoiceAmount: invoiceData.amount,
-            reconciled: true
-          });
+          // 6. Vérifier si la facture trouvée n'est pas déjà utilisée par une autre livraison
+          const isAlreadyUsed = await isInvoiceAlreadyUsed(invoiceData.invoiceRef, delivery.id);
+          
+          if (isAlreadyUsed) {
+            result.details.push({
+              deliveryId: delivery.id,
+              blNumber: delivery.blNumber!,
+              status: 'already_used',
+              invoiceRef: invoiceData.invoiceRef
+            });
 
-          result.reconciledDeliveries++;
-          result.details.push({
-            deliveryId: delivery.id,
-            blNumber: delivery.blNumber!,
-            status: 'reconciled',
-            invoiceRef: invoiceData.invoiceRef,
-            amount: invoiceData.amount
-          });
+            console.log(`⚠️ [BL-RECONCILIATION] Livraison ${delivery.id}: Facture ${invoiceData.invoiceRef} déjà validée, ignorée`);
+          } else {
+            // 7. Mettre à jour la livraison avec les données de facture
+            await storage.updateDelivery(delivery.id, {
+              invoiceReference: invoiceData.invoiceRef,
+              invoiceAmount: invoiceData.amount,
+              reconciled: true
+            });
 
-          console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée: BL ${delivery.blNumber} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
+            result.reconciledDeliveries++;
+            result.details.push({
+              deliveryId: delivery.id,
+              blNumber: delivery.blNumber!,
+              status: 'reconciled',
+              invoiceRef: invoiceData.invoiceRef,
+              amount: invoiceData.amount
+            });
+
+            console.log(`✅ [BL-RECONCILIATION] Livraison ${delivery.id} rapprochée: BL ${delivery.blNumber} -> ${invoiceData.invoiceRef} (${invoiceData.amount}€)`);
+          }
         } else {
           result.details.push({
             deliveryId: delivery.id,

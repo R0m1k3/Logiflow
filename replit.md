@@ -209,6 +209,19 @@ The application uses a sophisticated dual authentication approach:
 - **SPÉCIFICATIONS RESPECTÉES** - Validation tâches réservée aux rôles admin, manager et directeur uniquement
 - **SÉCURITÉ RENFORCÉE** - Double vérification côté client (UI cachée) et serveur (erreur 403) pour protection complète
 
+### July 24, 2025 - PRÉVENTION DOUBLONS RAPPROCHEMENT BL/FACTURES: Interface Temps Réel avec Alertes Visuelles
+
+- **SYSTÈME PRÉVENTION DOUBLONS COMPLET** - Nouvelle API `/api/check-invoice-usage` pour vérifier en temps réel l'usage des factures
+- **ALERTES VISUELLES TEMPS RÉEL** - Interface affiche icônes AlertTriangle et messages explicites pour factures déjà utilisées
+- **VALIDATION BLOQUANTE INTÉGRÉE** - Fonction `canValidate()` empêche validation de rapprochements avec factures déjà utilisées
+- **INFORMATION CONTEXTUELLE DÉTAILLÉE** - Messages d'erreur précisent quelle livraison utilise déjà la facture (BL, fournisseur)
+- **IMPORT ICÔNES OPTIMISÉ** - AlertTriangle ajouté aux imports Lucide React pour cohérence interface
+- **PRODUCTION/DÉVELOPPEMENT HARMONISÉS** - Route API ajoutée dans routes.production.ts avec mêmes permissions (admin/directeur)
+- **SÉCURITÉ PERMISSIONS RENFORCÉE** - Vérification stricte des rôles admin et directeur pour accès à la vérification d'usage
+- **EXPÉRIENCE UTILISATEUR AMÉLIORÉE** - Prévention des erreurs de saisie en amont avec feedback visuel immédiat
+- **ARCHITECTURE ROBUSTE** - Exclusion automatique de la livraison en cours d'édition via paramètre `excludeDeliveryId`
+- **INTÉGRATION SEAMLESS** - Fonctionnalité intégrée dans le workflow existant sans perturbation de l'interface utilisateur
+
 ### July 22, 2025 - RAPPROCHEMENT AUTOMATIQUE BL AMÉLIORÉ: Recherche Multi-Critères et Sécurité Renforcée
 
 - **RECHERCHE INTELLIGENTE MULTI-ÉTAPES** - Logique de rapprochement en 3 étapes : BL number, fournisseur+montant, fournisseur+date

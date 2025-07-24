@@ -1284,6 +1284,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour vérifier si une facture est déjà utilisée par une autre livraison
+  app.post("/api/check-invoice-usage", isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const { invoiceReference, excludeDeliveryId } = req.body;
+      
+      if (!invoiceReference) {
+        return res.status(400).json({ message: "invoiceReference is required" });
+      }
+
+      // Récupérer toutes les livraisons pour vérifier l'usage de la facture
+      const deliveries = await storage.getDeliveries();
+      const alreadyUsed = deliveries.find(delivery => 
+        delivery.invoiceReference === invoiceReference && 
+        delivery.reconciled === true &&
+        delivery.id !== excludeDeliveryId
+      );
+      
+      res.json({ 
+        isUsed: !!alreadyUsed,
+        usedBy: alreadyUsed ? {
+          deliveryId: alreadyUsed.id,
+          blNumber: alreadyUsed.blNumber,
+          supplierName: alreadyUsed.supplier?.name,
+          amount: alreadyUsed.invoiceAmount
+        } : null
+      });
+    } catch (error) {
+      console.error("Error checking invoice usage:", error);
+      res.status(500).json({ message: "Failed to check invoice usage" });
+    }
+  });
+
   // NocoDB Configuration routes
   app.get('/api/nocodb-config', isAuthenticated, async (req: any, res) => {
     try {
