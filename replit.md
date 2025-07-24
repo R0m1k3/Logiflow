@@ -243,6 +243,19 @@ The application uses a sophisticated dual authentication approach:
 - **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
 - **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
 
+### July 24, 2025 - RÉSOLUTION CRITIQUE: Bug Suppression Commandes Manager - Données Orphelines Gérées
+
+- **PROBLÈME ROOT CAUSE IDENTIFIÉ** - Erreur manager lors suppression : orderGroupId undefined dans logs alors que manager a groupId 2 correct
+- **CORRECTION STRUCTURE DONNÉES** - Fonction getOrder() production retourne group_id (SQL brut) au lieu de groupId (camelCase)
+- **NORMALISATION OBJET ORDER** - Route DELETE gère maintenant order.group_id ET order.groupId pour compatibilité totale
+- **LOGS DÉBOGAGE ULTRA-DÉTAILLÉS** - Ajout traçabilité complète : request user, permissions étapes, structures données brutes
+- **GESTION DONNÉES ORPHELINES** - Directeur peut supprimer commandes sans groupId, manager bloqué avec message explicite
+- **VALIDATION EXISTENCE COMMANDE** - Commande ID 22 n'existait pas (max ID = 6), correction gestion erreurs 404
+- **PERMISSIONS ROBUSTES** - Double vérification role + group avec fallback intelligent pour données incohérentes
+- **ARCHITECTURE SÉCURISÉE** - Messages erreur précis selon contexte (commande inexistante vs permissions insuffisantes)
+- **TEST PRODUCTION COMPLET** - Base données vérifiée : toutes commandes ont group_id NOT NULL, structure cohérente
+- **SYSTÈME ENTIÈREMENT OPÉRATIONNEL** - Manager peut maintenant supprimer commandes de ses magasins assignés
+
 ### July 24, 2025 - PRÉVENTION DOUBLONS RAPPROCHEMENT BL/FACTURES: Interface Temps Réel avec Alertes Visuelles
 
 - **SYSTÈME PRÉVENTION DOUBLONS COMPLET** - Nouvelle API `/api/check-invoice-usage` pour vérifier en temps réel l'usage des factures

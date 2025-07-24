@@ -826,7 +826,33 @@ export class DatabaseStorage implements IStorage {
       LEFT JOIN users u ON o.created_by = u.id
       WHERE o.id = $1
     `, [id]);
-    return result.rows[0] || undefined;
+    
+    const row = result.rows[0];
+    if (!row) return undefined;
+    
+    // Transformer pour correspondre au format attendu avec groupId en camelCase
+    return {
+      id: row.id,
+      supplierId: row.supplier_id,
+      groupId: row.group_id,  // Important: convertir group_id vers groupId
+      plannedDate: row.planned_date,
+      quantity: row.quantity,
+      unit: row.unit,
+      status: row.status,
+      notes: row.notes,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      supplier: row.supplier_name ? {
+        id: row.supplier_id,
+        name: row.supplier_name
+      } : null,
+      group: row.group_name ? {
+        id: row.group_id,
+        name: row.group_name,
+        color: row.group_color || '#666666'
+      } : null
+    };
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
