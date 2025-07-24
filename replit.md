@@ -209,6 +209,16 @@ The application uses a sophisticated dual authentication approach:
 - **SPÉCIFICATIONS RESPECTÉES** - Validation tâches réservée aux rôles admin, manager et directeur uniquement
 - **SÉCURITÉ RENFORCÉE** - Double vérification côté client (UI cachée) et serveur (erreur 403) pour protection complète
 
+### July 24, 2025 - DASHBOARD ALERTE OPTIMISÉE: Commandes Anciennes Non Liées Uniquement
+
+- **CRITÈRES D'ALERTE AFFINÉS** - Dashboard n'alerte que pour commandes de plus de 10 jours ET non liées à livraison
+- **FILTRAGE INTELLIGENT** - Logique complexe vérifiant âge commande (createdAt/plannedDate) et absence liaison deliveries
+- **MESSAGE PRÉCIS** - Alerte indique "commandes anciennes (plus de 10 jours, non liées) nécessitent attention"
+- **PERFORMANCE OPTIMISÉE** - Calcul daysDiff efficient avec Math.floor et gestion dates null/undefined
+- **LOGS DIAGNOSTIC** - Traçabilité complète des vérifications (orderId, status, daysDiff, hasLinkedDelivery)
+- **EXPÉRIENCE UTILISATEUR AMÉLIORÉE** - Réduction du bruit d'alertes, focus sur vrais problèmes opérationnels
+- **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de filtrage plus restrictif
+
 ### July 24, 2025 - CALENDRIER AMÉLIORÉ: Icône Loupe pour Jours Surchargés et Modal Détaillé
 
 - **ICÔNE LOUPE INTELLIGENTE** - Affichage automatique icône Search quand plus de 2 éléments dans une case calendrier

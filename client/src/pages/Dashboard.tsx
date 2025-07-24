@@ -187,7 +187,34 @@ export default function Dashboard() {
   console.log('🚚 Dashboard - Upcoming deliveries result:', upcomingDeliveries.length, upcomingDeliveries);
 
   // Calculs pour les statistiques
-  const pendingOrdersCount = Array.isArray(allOrders) ? allOrders.filter((order: any) => order.status === 'pending').length : 0;
+  const pendingOrdersCount = Array.isArray(allOrders) ? allOrders.filter((order: any) => {
+    // Ne compter que les commandes en attente
+    if (order.status !== 'pending') return false;
+    
+    // Vérifier si la commande a plus de 10 jours
+    const orderDate = safeDate(order.createdAt || order.plannedDate);
+    if (!orderDate) return false;
+    
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Ne compter que si plus de 10 jours
+    if (daysDiff <= 10) return false;
+    
+    // Vérifier si la commande n'est pas liée à une livraison
+    const hasLinkedDelivery = order.deliveries && order.deliveries.length > 0;
+    
+    console.log('🚨 Dashboard Alert - Order check:', {
+      orderId: order.id,
+      status: order.status,
+      daysDiff,
+      hasLinkedDelivery,
+      shouldAlert: !hasLinkedDelivery
+    });
+    
+    // Ne compter que si pas de livraison liée
+    return !hasLinkedDelivery;
+  }).length : 0;
   const averageDeliveryTime = Math.round(stats?.averageDeliveryTime || 0);
   const deliveredThisMonth = Array.isArray(allDeliveries) ? allDeliveries.filter((delivery: any) => {
     const deliveryDate = safeDate(delivery.deliveredDate || delivery.createdAt);
@@ -260,7 +287,7 @@ export default function Dashboard() {
           <div className="bg-orange-50 border-l-4 border-orange-400 p-4 flex items-center space-x-3 shadow-sm">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
             <span className="text-sm font-medium text-orange-800">
-              <strong>{pendingOrdersCount} commande(s) en attente</strong> nécessitent une planification
+              <strong>{pendingOrdersCount} commande(s) anciennes</strong> (plus de 10 jours, non liées) nécessitent une attention
             </span>
           </div>
         )}
