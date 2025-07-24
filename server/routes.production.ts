@@ -343,6 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
       console.log('🗑️ Production DELETE order - User ID:', userId);
+      console.log('🗑️ Production DELETE order - Full request user object:', JSON.stringify(req.user, null, 2));
       
       const user = await storage.getUserWithGroups(userId);
       if (!user) {
@@ -357,6 +358,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userGroupsCount: user.userGroups?.length || 0,
         userGroups: user.userGroups?.map((ug: any) => ({ groupId: ug.groupId, groupName: ug.group?.name }))
       });
+      
+      console.log('👤 Production DELETE order - Raw userGroups structure:', JSON.stringify(user.userGroups, null, 2));
 
       const id = parseInt(req.params.id);
       const order = await storage.getOrder(id);
@@ -373,10 +376,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Check permissions - Admin, Manager et Directeur peuvent supprimer
+      console.log('🔐 Production DELETE order - Permission check:', {
+        userRole: user.role,
+        isAdmin: user.role === 'admin',
+        isManager: user.role === 'manager', 
+        isDirecteur: user.role === 'directeur'
+      });
+      
       if (user.role !== 'admin' && user.role !== 'manager' && user.role !== 'directeur') {
         console.log('❌ Production DELETE order - Insufficient permissions, role:', user.role);
         return res.status(403).json({ message: "Insufficient permissions" });
       }
+
+      console.log('✅ Production DELETE order - Role permission passed');
 
       // For managers and directeurs, check store access
       if (user.role === 'manager' || user.role === 'directeur') {
@@ -385,11 +397,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userRole: user.role,
           userGroupIds,
           orderGroupId: order.groupId,
+          userGroupsRaw: user.userGroups,
           hasAccess: userGroupIds.includes(order.groupId)
         });
         
         if (!userGroupIds.includes(order.groupId)) {
           console.log('❌ Production DELETE order - Access denied - group mismatch');
+          console.log('❌ Production DELETE order - Detailed group analysis:', {
+            availableGroups: userGroupIds,
+            requiredGroup: order.groupId,
+            groupType: typeof order.groupId,
+            availableGroupTypes: userGroupIds.map(id => typeof id)
+          });
           return res.status(403).json({ message: "Access denied - insufficient store permissions" });
         }
       }
