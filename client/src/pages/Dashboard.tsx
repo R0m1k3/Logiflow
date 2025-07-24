@@ -465,7 +465,35 @@ export default function Dashboard() {
                       <div className="h-2 w-2 bg-purple-500"></div>
                       <div>
                         <p className="font-medium text-gray-900">{publicity.pubNumber}</p>
-                        <p className="text-sm text-gray-600">{publicity.designation}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-gray-600">{publicity.designation}</p>
+                          {/* Magasins participants - version compacte */}
+                          <div className="flex gap-1">
+                            {participatingStores.slice(0, 2).map((participation: any) => {
+                              const groupColor = participation.group?.color || '#666666';
+                              const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
+                              
+                              return (
+                                <Badge 
+                                  key={participation.groupId} 
+                                  className={`text-xs border text-white px-1 py-0 h-4 ${isCurrentStore ? 'ring-1 ring-offset-1 ring-opacity-50' : ''}`}
+                                  style={{ 
+                                    backgroundColor: groupColor,
+                                    borderColor: groupColor,
+                                    color: 'white',
+                                    fontSize: '10px',
+                                    ...(isCurrentStore && { ringColor: groupColor })
+                                  }}
+                                >
+                                  {participation.group.name}
+                                </Badge>
+                              );
+                            })}
+                            {participatingStores.length > 2 && (
+                              <span className="text-xs text-gray-400">+{participatingStores.length - 2}</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">

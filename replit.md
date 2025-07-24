@@ -243,13 +243,14 @@ The application uses a sophisticated dual authentication approach:
 - **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
 - **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
 
-### July 24, 2025 - DASHBOARD: Harmonisation Taille des Cartes - Uniformité Visuelle Complète
+### July 24, 2025 - DASHBOARD: Harmonisation Taille des Cartes avec Affichage Magasins Participants Compacte
 
 - **PROBLÈME TAILLE RÉSOLU** - Carte "Publicités à Venir" avait des lignes plus grandes que les autres cartes du dashboard
-- **STRUCTURE HARMONISÉE** - Suppression de la section "Magasins participants" qui créait un espacement vertical supplémentaire
-- **FORMAT UNIFORME** - Toutes les cartes utilisent maintenant le même layout : flex items-center justify-between p-4
-- **COHÉRENCE VISUELLE** - Même hauteur de ligne et espacement pour les 3 cartes du dashboard principal
-- **INTERFACE ÉPURÉE** - Design simplifié pour une meilleure lisibilité et cohérence visuelle
+- **MAGASINS PARTICIPANTS INTÉGRÉS** - Badges des magasins affichés de manière compacte sur la même ligne que la désignation
+- **BADGES ULTRA-COMPACTS** - Taille réduite (h-4, fontSize 10px) avec maximum 2 magasins visibles + compteur pour les autres
+- **COULEURS MAGASINS PRÉSERVÉES** - Utilisation des vraies couleurs des magasins avec ring effect pour le magasin actuel
+- **FORMAT UNIFORME MAINTENU** - Même hauteur de ligne pour toutes les cartes avec informations complètes
+- **SOLUTION ÉQUILIBRÉE** - Visibilité des magasins participants sans compromettre la cohérence visuelle
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 
