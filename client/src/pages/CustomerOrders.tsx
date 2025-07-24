@@ -750,6 +750,7 @@ export default function CustomerOrders() {
                   <TableHead>Client</TableHead>
                   <TableHead>Téléphone</TableHead>
                   <TableHead>Produit</TableHead>
+                  <TableHead>Référence</TableHead>
                   <TableHead>Quantité</TableHead>
                   <TableHead>Fournisseur</TableHead>
                   <TableHead>Gencode</TableHead>
@@ -769,14 +770,16 @@ export default function CustomerOrders() {
                     </TableCell>
                     <TableCell>{order.customerPhone}</TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{order.productDesignation}</div>
-                        {order.productReference && (
-                          <div className="text-sm text-muted-foreground">
-                            Ref: {order.productReference}
-                          </div>
-                        )}
-                      </div>
+                      <div className="font-medium">{order.productDesignation}</div>
+                    </TableCell>
+                    <TableCell>
+                      {order.productReference ? (
+                        <code className="bg-blue-50 text-blue-800 px-2 py-1 rounded text-sm font-medium">
+                          {order.productReference}
+                        </code>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="secondary" className="font-mono">

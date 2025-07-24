@@ -243,6 +243,14 @@ The application uses a sophisticated dual authentication approach:
 - **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
 - **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
 
+### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
+
+- **COLONNE RÉFÉRENCE AJOUTÉE** - Nouvelle colonne "Référence" dans la liste des commandes client pour affichage direct
+- **STYLE DISTINCTIF** - Référence affichée avec style code (fond bleu clair, texte bleu foncé) pour visibilité optimale
+- **GESTION VALEURS VIDES** - Affichage d'un tiret gris quand aucune référence n'est disponible
+- **POSITIONNEMENT LOGIQUE** - Colonne située entre "Produit" et "Quantité" pour organisation cohérente
+- **AMÉLIORATION UX** - Plus besoin de cliquer sur détails pour voir la référence produit
+
 ### July 24, 2025 - PAGE PUBLICITÉS: Remplacement Carte "À Venir" par Carte "Participation" avec Statistiques Annuelles
 
 - **CARTE PARTICIPATION CRÉÉE** - Nouvelle carte "Participation {année}" remplace l'ancienne carte "À venir" dans la page publicités
