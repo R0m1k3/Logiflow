@@ -486,18 +486,26 @@ export default function Dashboard() {
                         <span className="text-red-400">Aucun magasin</span>
                       ) : (
                         <div className="flex flex-wrap gap-1">
-                          {participatingStores.map((participation: any) => (
-                            <Badge 
-                              key={participation.groupId} 
-                              className={`text-xs ${
-                                selectedStoreId && participation.groupId === parseInt(selectedStoreId)
-                                  ? 'bg-green-100 text-green-800 border border-green-300'
-                                  : 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {participation.group.name}
-                            </Badge>
-                          ))}
+                          {participatingStores.map((participation: any) => {
+                            // Utiliser la couleur définie dans le module magasin/groupe
+                            const groupColor = participation.group?.color || '#666666';
+                            const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
+                            
+                            return (
+                              <Badge 
+                                key={participation.groupId} 
+                                className={`text-xs border text-white ${isCurrentStore ? 'ring-2 ring-offset-1 ring-opacity-50' : ''}`}
+                                style={{ 
+                                  backgroundColor: groupColor,
+                                  borderColor: groupColor,
+                                  color: 'white',
+                                  ...(isCurrentStore && { ringColor: groupColor })
+                                }}
+                              >
+                                {participation.group.name}
+                              </Badge>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

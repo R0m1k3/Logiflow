@@ -243,6 +243,17 @@ The application uses a sophisticated dual authentication approach:
 - **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
 - **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
 
+### July 24, 2025 - DASHBOARD COULEURS MAGASINS: Publicités Utilisent Maintenant les Couleurs Définies
+
+- **COULEURS BADGES AMÉLIORÉES** - Carte "Publicités à Venir" utilise maintenant les vraies couleurs des magasins/groupes
+- **SUPPRESSION COULEURS STATIQUES** - Remplacement des couleurs hardcodées (bg-green-100, bg-gray-100) par les couleurs dynamiques
+- **RÉCUPÉRATION COULEUR GROUPE** - Utilisation de `participation.group?.color` pour chaque badge de magasin participant
+- **EFFET VISUEL MAGASIN ACTUEL** - Ring effect sur le badge du magasin actuellement sélectionné pour le mettre en évidence
+- **COULEUR FALLBACK** - Gris (#666666) si aucune couleur n'est définie pour un magasin
+- **COHÉRENCE VISUELLE** - Les couleurs des badges correspondent maintenant aux couleurs définies dans le module magasin
+- **INTERFACE PERSONNALISÉE** - Chaque magasin a sa propre couleur distinctive selon sa configuration système
+- **LISIBILITÉ OPTIMISÉE** - Texte blanc sur fond coloré pour un meilleur contraste et lisibilité
+
 ### July 24, 2025 - RÉSOLUTION CRITIQUE: Bug Suppression Commandes Manager - Données Orphelines Gérées
 
 - **PROBLÈME ROOT CAUSE IDENTIFIÉ** - Erreur manager lors suppression : orderGroupId undefined dans logs alors que manager a groupId 2 correct
@@ -251,7 +262,7 @@ The application uses a sophisticated dual authentication approach:
 - **LOGS DÉBOGAGE ULTRA-DÉTAILLÉS** - Ajout traçabilité complète : request user, permissions étapes, structures données brutes
 - **GESTION DONNÉES ORPHELINES** - Directeur peut supprimer commandes sans groupId, manager bloqué avec message explicite
 - **VALIDATION EXISTENCE COMMANDE** - Commande ID 22 n'existait pas (max ID = 6), correction gestion erreurs 404
-- **PERMISSIONS ROBUSTES** - Double vérification role + group avec fallback intelligent pour données incohérentes
+- **PERMISSIONS ROBUSTES** - Double vérification role + group avec fallback intelligent pour données incohérences
 - **ARCHITECTURE SÉCURISÉE** - Messages erreur précis selon contexte (commande inexistante vs permissions insuffisantes)
 - **TEST PRODUCTION COMPLET** - Base données vérifiée : toutes commandes ont group_id NOT NULL, structure cohérente
 - **SYSTÈME ENTIÈREMENT OPÉRATIONNEL** - Manager peut maintenant supprimer commandes de ses magasins assignés
