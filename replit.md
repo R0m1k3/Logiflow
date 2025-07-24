@@ -254,6 +254,15 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
+### July 24, 2025 - CORRECTION TOTALE PALETTES: Uniquement Livraisons Livrées Comptabilisées
+
+- **CALCUL PALETTES CORRIGÉ** - Total palettes ne compte plus que les livraisons avec statut "delivered" pour le magasin sélectionné
+- **SUPPRESSION COMPTAGE COMMANDES** - Quantités des commandes exclues du calcul total des palettes
+- **REQUÊTE SQL OPTIMISÉE** - getMonthlyStats production modifiée pour filtrer `AND status = 'delivered'` sur les livraisons
+- **TOTAL RÉALISTE AFFICHÉ** - Dashboard affiche maintenant 21 palettes au lieu de 2027 (somme erronée commandes+livraisons)
+- **SPÉCIFICATIONS RESPECTÉES** - Palettes comptent uniquement les quantités réellement reçues via livraisons validées
+- **LOGIQUE MÉTIER CORRECTE** - Séparation claire entre commandes planifiées et livraisons effectives
+
 ### July 24, 2025 - DASHBOARD CARTE "COMMANDES EN ATTENTE": Correction Affichage Simple
 
 - **CARTE COMMANDES EN ATTENTE CORRIGÉE** - Dashboard affiche maintenant le nombre total de commandes avec statut "pending" 

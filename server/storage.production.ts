@@ -1399,21 +1399,21 @@ export class DatabaseStorage implements IStorage {
       pool.query(`SELECT COUNT(*) FROM orders WHERE planned_date BETWEEN $1 AND $2${whereClause}`, params),
       pool.query(`SELECT COUNT(*) FROM deliveries WHERE scheduled_date BETWEEN $1 AND $2${whereClause}`, params),
       
-      // Order statistics with pending count and totals
+      // Order statistics with pending count only (no palettes from orders)
       pool.query(`
         SELECT 
           COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
-          COALESCE(SUM(CASE WHEN unit = 'palettes' THEN quantity ELSE 0 END), 0) as total_palettes,
-          COALESCE(SUM(CASE WHEN unit = 'colis' THEN quantity ELSE 0 END), 0) as total_packages
+          0 as total_palettes,
+          0 as total_packages
         FROM orders 
         WHERE planned_date BETWEEN $1 AND $2${whereClause}
       `, params),
       
-      // Delivery statistics
+      // Delivery statistics - ONLY DELIVERED deliveries count for palettes
       pool.query(`
         SELECT 
-          COALESCE(SUM(CASE WHEN unit = 'palettes' THEN quantity ELSE 0 END), 0) as total_palettes,
-          COALESCE(SUM(CASE WHEN unit = 'colis' THEN quantity ELSE 0 END), 0) as total_packages
+          COALESCE(SUM(CASE WHEN unit = 'palettes' AND status = 'delivered' THEN quantity ELSE 0 END), 0) as total_palettes,
+          COALESCE(SUM(CASE WHEN unit = 'colis' AND status = 'delivered' THEN quantity ELSE 0 END), 0) as total_packages
         FROM deliveries 
         WHERE scheduled_date BETWEEN $1 AND $2${whereClause}
       `, params)
