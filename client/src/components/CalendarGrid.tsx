@@ -1,7 +1,7 @@
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, isToday, isWithinInterval, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { safeDate } from "@/lib/dateUtils";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { OrderWithRelations, DeliveryWithRelations, PublicityWithRelations } from "@shared/schema";
 
@@ -14,6 +14,7 @@ interface CalendarGridProps {
   userGroups?: { groupId: number; group: { id: number; name: string; color: string; } }[];
   onDateClick: (date: Date) => void;
   onItemClick: (item: any, type: 'order' | 'delivery') => void;
+  onShowDayDetail?: (date: Date, orders: any[], deliveries: any[]) => void;
 }
 
 export default function CalendarGrid({
@@ -25,6 +26,7 @@ export default function CalendarGrid({
   userGroups = [],
   onDateClick,
   onItemClick,
+  onShowDayDetail,
 }: CalendarGridProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -272,68 +274,162 @@ export default function CalendarGrid({
                 
                 {/* Orders and Deliveries */}
                 <div className="mt-1 space-y-1">
-                  {dayOrders.map((order) => {
-                    // Vérifier si la commande a une livraison liée (peu importe le statut)
-                    const hasLinkedDelivery = order.deliveries && order.deliveries.length > 0;
+                  {(() => {
+                    const totalItems = dayOrders.length + dayDeliveries.length;
+                    const maxVisibleItems = 2; // Limite à 2 éléments visibles par case
                     
-                    const colorClass = order.status === 'delivered' 
-                      ? 'bg-delivered text-white' 
-                      : order.status === 'planned'
-                      ? 'bg-orange-500 text-white border-2 border-orange-300'
-                      : 'bg-primary text-white';
+                    // Si trop d'éléments, montrer seulement quelques-uns + icône loupe
+                    if (totalItems > maxVisibleItems) {
+                      const visibleOrders = dayOrders.slice(0, maxVisibleItems);
+                      const visibleDeliveries = dayDeliveries.slice(0, Math.max(0, maxVisibleItems - dayOrders.length));
+                      
+                      return (
+                        <>
+                          {/* Afficher les commandes visibles */}
+                          {visibleOrders.map((order) => {
+                            const colorClass = order.status === 'delivered' 
+                              ? 'bg-delivered text-white' 
+                              : order.status === 'planned'
+                              ? 'bg-orange-500 text-white border-2 border-orange-300'
+                              : 'bg-primary text-white';
+                            
+                            return (
+                              <div
+                                key={`order-${order.id}`}
+                                className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${colorClass}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onItemClick(order, 'order');
+                                }}
+                              >
+                                <span className="truncate">
+                                  {order.supplier.name}
+                                </span>
+                                <div className="flex items-center ml-1 flex-shrink-0">
+                                  {order.status === 'planned' && (
+                                    <span className="w-2 h-2 bg-yellow-300 mr-1" title="Commande planifiée (liée à une livraison)" />
+                                  )}
+                                  {order.status === 'delivered' && (
+                                    <Check className="w-3 h-3" />
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          
+                          {/* Afficher les livraisons visibles */}
+                          {visibleDeliveries.map((delivery) => (
+                            <div
+                              key={`delivery-${delivery.id}`}
+                              className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${
+                                delivery.status === 'delivered' 
+                                  ? 'bg-delivered text-white' 
+                                  : delivery.status === 'pending'
+                                  ? 'bg-yellow-500 text-white border-2 border-yellow-300'
+                                  : 'bg-secondary text-white'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onItemClick(delivery, 'delivery');
+                              }}
+                            >
+                              <span className="truncate">
+                                {delivery.supplier.name} - {formatQuantity(delivery.quantity, delivery.unit)}
+                              </span>
+                              <div className="flex items-center ml-1 flex-shrink-0">
+                                {delivery.status === 'pending' && (
+                                  <span className="w-2 h-2 bg-orange-300 mr-1" title="En attente de validation" />
+                                )}
+                                {delivery.status === 'delivered' && (
+                                  <Check className="w-3 h-3" />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {/* Bouton loupe pour voir tous les éléments */}
+                          <div
+                            className="flex items-center justify-center py-1 px-2 bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onShowDayDetail) {
+                                onShowDayDetail(date, dayOrders, dayDeliveries);
+                              }
+                            }}
+                            title={`Voir tous les éléments (${totalItems})`}
+                          >
+                            <Search className="w-3 h-3 mr-1 text-gray-600" />
+                            <span className="text-gray-700 font-medium">+{totalItems - maxVisibleItems}</span>
+                          </div>
+                        </>
+                      );
+                    }
                     
+                    // Si peu d'éléments, afficher normalement
                     return (
-                      <div
-                        key={`order-${order.id}`}
-                        className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${colorClass}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onItemClick(order, 'order');
-                        }}
-                      >
-                        <span className="truncate">
-                          {order.supplier.name}
-                        </span>
-                        <div className="flex items-center ml-1 flex-shrink-0">
-                          {order.status === 'planned' && (
-                            <span className="w-2 h-2 bg-yellow-300 mr-1" title="Commande planifiée (liée à une livraison)" />
-                          )}
-                          {order.status === 'delivered' && (
-                            <Check className="w-3 h-3" />
-                          )}
-                        </div>
-                      </div>
+                      <>
+                        {dayOrders.map((order) => {
+                          const colorClass = order.status === 'delivered' 
+                            ? 'bg-delivered text-white' 
+                            : order.status === 'planned'
+                            ? 'bg-orange-500 text-white border-2 border-orange-300'
+                            : 'bg-primary text-white';
+                          
+                          return (
+                            <div
+                              key={`order-${order.id}`}
+                              className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${colorClass}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onItemClick(order, 'order');
+                              }}
+                            >
+                              <span className="truncate">
+                                {order.supplier.name}
+                              </span>
+                              <div className="flex items-center ml-1 flex-shrink-0">
+                                {order.status === 'planned' && (
+                                  <span className="w-2 h-2 bg-yellow-300 mr-1" title="Commande planifiée (liée à une livraison)" />
+                                )}
+                                {order.status === 'delivered' && (
+                                  <Check className="w-3 h-3" />
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        
+                        {dayDeliveries.map((delivery) => (
+                          <div
+                            key={`delivery-${delivery.id}`}
+                            className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${
+                              delivery.status === 'delivered' 
+                                ? 'bg-delivered text-white' 
+                                : delivery.status === 'pending'
+                                ? 'bg-yellow-500 text-white border-2 border-yellow-300'
+                                : 'bg-secondary text-white'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onItemClick(delivery, 'delivery');
+                            }}
+                          >
+                            <span className="truncate">
+                              {delivery.supplier.name} - {formatQuantity(delivery.quantity, delivery.unit)}
+                            </span>
+                            <div className="flex items-center ml-1 flex-shrink-0">
+                              {delivery.status === 'pending' && (
+                                <span className="w-2 h-2 bg-orange-300 mr-1" title="En attente de validation" />
+                              )}
+                              {delivery.status === 'delivered' && (
+                                <Check className="w-3 h-3" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </>
                     );
-                  })}
-                  
-                  {dayDeliveries.map((delivery) => (
-                    <div
-                      key={`delivery-${delivery.id}`}
-                      className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${
-                        delivery.status === 'delivered' 
-                          ? 'bg-delivered text-white' 
-                          : delivery.status === 'pending'
-                          ? 'bg-yellow-500 text-white border-2 border-yellow-300'
-                          : 'bg-secondary text-white'
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onItemClick(delivery, 'delivery');
-                      }}
-                    >
-                      <span className="truncate">
-                        {delivery.supplier.name} - {formatQuantity(delivery.quantity, delivery.unit)}
-                      </span>
-                      <div className="flex items-center ml-1 flex-shrink-0">
-                        {delivery.status === 'pending' && (
-                          <span className="w-2 h-2 bg-orange-300 mr-1" title="En attente de validation" />
-                        )}
-                        {delivery.status === 'delivered' && (
-                          <Check className="w-3 h-3" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  })()}
                 </div>
               </div>
               

@@ -209,6 +209,19 @@ The application uses a sophisticated dual authentication approach:
 - **SPÉCIFICATIONS RESPECTÉES** - Validation tâches réservée aux rôles admin, manager et directeur uniquement
 - **SÉCURITÉ RENFORCÉE** - Double vérification côté client (UI cachée) et serveur (erreur 403) pour protection complète
 
+### July 24, 2025 - CALENDRIER AMÉLIORÉ: Icône Loupe pour Jours Surchargés et Modal Détaillé
+
+- **ICÔNE LOUPE INTELLIGENTE** - Affichage automatique icône Search quand plus de 2 éléments dans une case calendrier
+- **MODAL DÉTAIL DU JOUR** - Nouveau modal avec liste complète des commandes et livraisons du jour sélectionné
+- **LIMITATION AFFICHAGE** - Maximum 2 éléments visibles par case, reste accessible via bouton "+X" avec icône loupe
+- **INTERFACE INTERACTIVE** - Clic sur éléments du modal redirige vers détails complets (OrderDetailModal)
+- **NAVIGATION FLUIDE** - Modal se ferme automatiquement lors du clic sur un élément pour afficher ses détails
+- **ORGANISATION VISUELLE** - Sections distinctes commandes/livraisons avec compteurs et codes couleur cohérents
+- **ÉTAT VIDE GÉRÉ** - Message informatif quand aucun élément à afficher pour le jour sélectionné
+- **RESPONSIVE DESIGN** - Modal adaptatif avec scroll automatique et taille maximale 80vh
+- **PERFORMANCE OPTIMISÉE** - Logique de slice() efficace pour affichage partiel sans impact mémoire
+- **EXPÉRIENCE UTILISATEUR FLUIDE** - Tooltip informatif sur bouton loupe avec nombre total d'éléments cachés
+
 ### July 24, 2025 - RESTRICTION LIAISON LIVRAISONS-COMMANDES: Même Magasin Uniquement
 
 - **RESTRICTION MAGASIN IMPLÉMENTÉE** - Livraisons peuvent désormais uniquement être liées à des commandes du même magasin

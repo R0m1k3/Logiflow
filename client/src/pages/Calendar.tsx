@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CalendarGrid from "@/components/CalendarGrid";
 import QuickCreateMenu from "@/components/modals/QuickCreateMenu";
 import OrderDetailModal from "@/components/modals/OrderDetailModal";
@@ -29,6 +30,8 @@ export default function Calendar() {
   const [showCreateOrder, setShowCreateOrder] = useState(false);
   const [showCreateDelivery, setShowCreateDelivery] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showDayDetail, setShowDayDetail] = useState(false);
+  const [selectedDayItems, setSelectedDayItems] = useState<{orders: any[], deliveries: any[], date: Date | null}>({orders: [], deliveries: [], date: null});
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -193,6 +196,21 @@ export default function Calendar() {
     setShowCreateDelivery(true);
   };
 
+  const handleShowDayDetail = (date: Date, dayOrders: any[], dayDeliveries: any[]) => {
+    console.log('🔍 Opening day detail modal:', {
+      date: format(date, 'yyyy-MM-dd'),
+      ordersCount: dayOrders.length,
+      deliveriesCount: dayDeliveries.length
+    });
+    
+    setSelectedDayItems({
+      orders: dayOrders,
+      deliveries: dayDeliveries,
+      date
+    });
+    setShowDayDetail(true);
+  };
+
   const isLoading = loadingOrders || loadingDeliveries || loadingPublicities;
 
   return (
@@ -283,6 +301,7 @@ export default function Calendar() {
             userGroups={(user as any)?.userGroups || []}
             onDateClick={handleDateClick}
             onItemClick={handleItemClick}
+            onShowDayDetail={handleShowDayDetail}
           />
         )}
       </div>
@@ -319,6 +338,129 @@ export default function Calendar() {
           onClose={() => setShowCreateDelivery(false)}
           selectedDate={selectedDate}
         />
+      )}
+
+      {/* Day Detail Modal */}
+      {showDayDetail && (
+        <Dialog open={showDayDetail} onOpenChange={setShowDayDetail}>
+          <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5" />
+                Détail du {selectedDayItems.date ? format(selectedDayItems.date, 'dd MMMM yyyy', { locale: fr }) : ''}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Orders Section */}
+              {selectedDayItems.orders.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <div className="w-3 h-3 bg-primary rounded"></div>
+                    Commandes ({selectedDayItems.orders.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedDayItems.orders.map((order: any) => (
+                      <div
+                        key={order.id}
+                        className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setShowDayDetail(false);
+                          handleItemClick(order, 'order');
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: order.group?.color }}
+                            />
+                            <div>
+                              <p className="font-medium text-gray-900">
+                                {order.supplier?.name || 'Fournisseur inconnu'}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {order.group?.name} • {order.quantity} {order.unit}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                            order.status === 'planned' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {order.status === 'delivered' ? 'Livré' :
+                             order.status === 'planned' ? 'Planifié' : 'En attente'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Deliveries Section */}
+              {selectedDayItems.deliveries.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <div className="w-3 h-3 bg-secondary rounded"></div>
+                    Livraisons ({selectedDayItems.deliveries.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedDayItems.deliveries.map((delivery: any) => (
+                      <div
+                        key={delivery.id}
+                        className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setShowDayDetail(false);
+                          handleItemClick(delivery, 'delivery');
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: delivery.group?.color }}
+                            />
+                            <div>
+                              <p className="font-medium text-gray-900">
+                                {delivery.supplier?.name || 'Fournisseur inconnu'}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {delivery.group?.name} • {delivery.quantity} {delivery.unit}
+                              </p>
+                              {delivery.order && (
+                                <p className="text-xs text-blue-600">
+                                  Liée à la commande #{delivery.order.id}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            delivery.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                            delivery.status === 'planned' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {delivery.status === 'delivered' ? 'Livré' :
+                             delivery.status === 'planned' ? 'Planifié' : 'En attente'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {selectedDayItems.orders.length === 0 && selectedDayItems.deliveries.length === 0 && (
+                <div className="text-center py-8">
+                  <Search className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-500">Aucune commande ou livraison ce jour-là</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Stats Panel */}
