@@ -256,13 +256,13 @@ The application uses a sophisticated dual authentication approach:
 
 ### July 24, 2025 - DASHBOARD STATISTIQUES PALETTES: Calcul Corrigé et Tri Rapprochement Optimisé
 
-- **CALCUL PALETTES CORRIGÉ** - Dashboard compte maintenant uniquement les palettes des livraisons (quantités réellement reçues) au lieu d'additionner commandes + livraisons
-- **PROBLÈME DOUBLE COMPTAGE RÉSOLU** - Suppression de l'addition erronée entre orderStats et deliveryStats pour les palettes
-- **LOGIQUE MÉTIER CLARIFIÉE** - Les commandes définissent les besoins, les livraisons comptabilisent les quantités reçues
-- **PRODUCTION HARMONISÉE** - Fonction getMonthlyStats en production utilise seulement deliveryStats pour totalPalettes
-- **TRI RAPPROCHEMENT FINALISÉ** - Page BL Rapprochement avec tri intelligent : deliveredDate > scheduledDate > createdAt DESC
-- **DONNÉES TEST AJOUTÉES** - Livraisons de test créées pour validation du tri (24/07 en premier, 15/07 en dernier)
-- **STATISTIQUES EXACTES** - Total palettes dashboard reflète maintenant les 29 palettes réellement livrées
+- **CALCUL PALETTES DASHBOARD CORRIGÉ** - Dashboard utilise maintenant `stats?.totalPalettes` au lieu de calculer toutes les livraisons manuellement
+- **BACKEND PRODUCTION VALIDÉ** - getMonthlyStats retourne exactement 29 palettes pour juillet 2025 (livraisons du mois)
+- **LOGIQUE MÉTIER CLARIFIÉE** - Dashboard affiche les palettes du mois en cours via l'API /api/stats/monthly
+- **TRI RAPPROCHEMENT BACKEND CORRECT** - SQL production utilise `ORDER BY COALESCE(delivered_date, scheduled_date, created_at) DESC`
+- **TRI RAPPROCHEMENT FRONTEND CORRECT** - Page BL utilise même logique de tri avec getEffectiveDate()
+- **DONNÉES TEST VALIDÉES** - 8 livraisons avec 29 palettes total pour le magasin Frouard
+- **PROBLÈME CACHE POSSIBLE** - Si tri rapprochement incorrect, vider cache navigateur ou forcer rechargement
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 

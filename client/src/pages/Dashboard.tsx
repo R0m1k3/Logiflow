@@ -224,13 +224,8 @@ export default function Dashboard() {
            delivery.status === 'delivered';
   }).length : 0;
 
-  // Calculer le total réel des palettes
-  const totalPalettes = Array.isArray(allDeliveries) ? allDeliveries.reduce((total: number, delivery: any) => {
-    if (delivery.unit === 'palettes') {
-      return total + (delivery.quantity || 0);
-    }
-    return total;
-  }, 0) : 0;
+  // Utiliser les statistiques du mois en cours depuis l'API
+  const totalPalettes = stats?.totalPalettes || 0;
 
   console.log('📊 Dashboard Debug - Raw Data:', {
     allOrders: Array.isArray(allOrders) ? allOrders.length : 'NOT_ARRAY',
