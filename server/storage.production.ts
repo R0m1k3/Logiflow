@@ -949,7 +949,7 @@ export class DatabaseStorage implements IStorage {
       LEFT JOIN users u ON d.created_by = u.id
       LEFT JOIN orders o ON d.order_id = o.id
       ${whereClause}
-      ORDER BY d.created_at DESC
+      ORDER BY COALESCE(d.delivered_date, d.scheduled_date, d.created_at) DESC
     `, params);
     
     // Transformer pour correspondre exactement à la structure Drizzle
@@ -1023,7 +1023,7 @@ export class DatabaseStorage implements IStorage {
       LEFT JOIN users u ON d.created_by = u.id
       LEFT JOIN orders o ON d.order_id = o.id
       ${whereClause}
-      ORDER BY d.created_at DESC
+      ORDER BY COALESCE(d.delivered_date, d.scheduled_date, d.created_at) DESC
     `, params);
     
     console.log('🚛 getDeliveriesByDateRange debug:', { startDate, endDate, groupIds, deliveryCount: result.rows.length });

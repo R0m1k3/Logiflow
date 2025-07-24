@@ -144,7 +144,12 @@ export default function BLReconciliation() {
         }
       }
       
-      return filtered.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      // Trier par date de livraison (deliveredDate) ou date programmée (scheduledDate) si pas encore livrée, puis par date de création
+      return filtered.sort((a: any, b: any) => {
+        const dateA = a.deliveredDate || a.scheduledDate || a.createdAt;
+        const dateB = b.deliveredDate || b.scheduledDate || b.createdAt;
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
     },
   });
 

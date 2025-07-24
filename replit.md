@@ -256,11 +256,12 @@ The application uses a sophisticated dual authentication approach:
 
 ### July 24, 2025 - PAGE RAPPROCHEMENT: Tri Modifié pour Afficher les Plus Récentes en Premier
 
-- **TRI CORRIGÉ** - Page BL Rapprochement modifiée pour trier par date de création (createdAt) au lieu de date de livraison (deliveredDate)
-- **ORDRE DÉCROISSANT** - Les livraisons les plus récemment créées apparaissent maintenant en premier dans la liste
-- **COHÉRENCE BACKEND/FRONTEND** - Tri frontend aligné avec le tri backend qui utilise déjà ORDER BY created_at DESC
-- **GESTION VALEURS NULL** - Utilisation de createdAt évite les problèmes avec deliveredDate qui peut être null
-- **EXPÉRIENCE UTILISATEUR AMÉLIORÉE** - Interface plus intuitive avec les dernières entrées visibles en premier
+- **TRI CORRIGÉ DÉFINITIVEMENT** - Page BL Rapprochement utilise maintenant un tri intelligent par date de livraison effective
+- **LOGIQUE TRI OPTIMISÉE** - Priorité : deliveredDate > scheduledDate > createdAt pour classement chronologique optimal
+- **BACKEND HARMONISÉ** - Requêtes SQL utilisent COALESCE(delivered_date, scheduled_date, created_at) DESC
+- **FRONTEND ALIGNÉ** - Même logique de tri côté client pour cohérence complète
+- **RÉSOLUTION PROBLÈME UTILISATEUR** - Les livraisons du 24/07 apparaissent maintenant avant celles du 15/07 et 16/07
+- **GESTION VALEURS NULL ROBUSTE** - Fallback intelligent sur dates programmées puis création si livraison pas encore effective
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 
