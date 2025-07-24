@@ -449,16 +449,6 @@ export default function Publicities() {
                 ))
               )}
             </div>
-            {participationStats.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Total participations</span>
-                  <span className="font-semibold text-gray-800">
-                    {participationStats.reduce((sum, stat) => sum + stat.participationCount, 0)}
-                  </span>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

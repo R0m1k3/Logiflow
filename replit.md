@@ -252,7 +252,7 @@ The application uses a sophisticated dual authentication approach:
 - **COULEURS MAGASINS INTÉGRÉES** - Chaque magasin affiché avec sa couleur définie dans le module magasin/groupe
 - **TRI INTELLIGENT** - Magasins triés par nombre de participations décroissant (plus actifs en haut)
 - **INTERFACE SCROLLABLE** - Carte avec hauteur maximale et scroll automatique pour gérer de nombreux magasins
-- **TOTAUX CALCULÉS** - Affichage du total des participations en bas de carte pour vue d'ensemble
+- **AFFICHAGE ÉPURÉ** - Suppression du total des participations selon demande utilisateur pour interface plus simple
 - **ICÔNE BARCHARTT3** - Utilise l'icône BarChart3 pour représenter les statistiques de participation
 - **RESPONSIVE ET ACCESSIBLE** - Interface adaptée avec hover effects et transitions fluides
 
