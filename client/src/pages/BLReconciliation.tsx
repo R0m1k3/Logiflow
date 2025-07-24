@@ -145,8 +145,16 @@ export default function BLReconciliation() {
       }
       
       // Trier par ordre décroissant pour avoir les plus récentes en premier
+      // CORRECTION: Prioriser les livraisons avec deliveredDate en premier
       return filtered.sort((a: any, b: any) => {
-        // Priorité : deliveredDate > scheduledDate > createdAt
+        // 1. Les livraisons avec deliveredDate en premier
+        const hasDeliveredA = !!a.deliveredDate;
+        const hasDeliveredB = !!b.deliveredDate;
+        
+        if (hasDeliveredA && !hasDeliveredB) return -1; // A avant B
+        if (!hasDeliveredA && hasDeliveredB) return 1;  // B avant A
+        
+        // 2. Si les deux ont deliveredDate OU les deux n'en ont pas, trier par date effective
         const getEffectiveDate = (delivery: any) => {
           if (delivery.deliveredDate) return new Date(delivery.deliveredDate);
           if (delivery.scheduledDate) return new Date(delivery.scheduledDate);

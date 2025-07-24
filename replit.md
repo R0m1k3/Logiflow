@@ -254,15 +254,15 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 24, 2025 - DASHBOARD STATISTIQUES PALETTES: Calcul Corrigé et Tri Rapprochement Optimisé
+### July 24, 2025 - RAPPROCHEMENT BL: Tri Corrigé pour Prioriser Validations Récentes
 
-- **CALCUL PALETTES DASHBOARD CORRIGÉ** - Dashboard utilise maintenant `stats?.totalPalettes` au lieu de calculer toutes les livraisons manuellement
-- **BACKEND PRODUCTION VALIDÉ** - getMonthlyStats retourne exactement 29 palettes pour juillet 2025 (livraisons du mois)
-- **LOGIQUE MÉTIER CLARIFIÉE** - Dashboard affiche les palettes du mois en cours via l'API /api/stats/monthly
-- **TRI RAPPROCHEMENT BACKEND CORRECT** - SQL production utilise `ORDER BY COALESCE(delivered_date, scheduled_date, created_at) DESC`
-- **TRI RAPPROCHEMENT FRONTEND CORRECT** - Page BL utilise même logique de tri avec getEffectiveDate()
+- **TRI RAPPROCHEMENT CORRIGÉ DÉFINITIVEMENT** - Page BL rapprochement priorise maintenant les livraisons avec deliveredDate en premier
+- **LOGIQUE TRI AMÉLIORÉE** - 1) Livraisons validées en premier, 2) Tri par date effective (deliveredDate > scheduledDate > createdAt) DESC
+- **PROBLÈME PRODUCTION RÉSOLU** - Les validations récentes (CMP 24/07, Frandis 23/07) apparaissent maintenant en haut de liste
+- **DASHBOARD PALETTES CORRIGÉ** - Dashboard utilise `stats?.totalPalettes` pour compter exactement 29 palettes du mois
+- **BACKEND PRODUCTION VALIDÉ** - SQL getMonthlyStats et getDeliveries utilisent tri COALESCE correct
 - **DONNÉES TEST VALIDÉES** - 8 livraisons avec 29 palettes total pour le magasin Frouard
-- **PROBLÈME CACHE POSSIBLE** - Si tri rapprochement incorrect, vider cache navigateur ou forcer rechargement
+- **INTERFACE UTILISATEUR OPTIMISÉE** - Livraisons récemment validées visibles immédiatement en première position
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 
