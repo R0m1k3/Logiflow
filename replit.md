@@ -243,6 +243,14 @@ The application uses a sophisticated dual authentication approach:
 - **ARCHITECTURE ROBUSTE** - Validation côté frontend empêche erreurs de liaison inter-magasins
 - **SPÉCIFICATIONS RESPECTÉES** - Réponse directe à la demande utilisateur de restriction par magasin
 
+### July 24, 2025 - DASHBOARD: Harmonisation Taille des Cartes - Uniformité Visuelle Complète
+
+- **PROBLÈME TAILLE RÉSOLU** - Carte "Publicités à Venir" avait des lignes plus grandes que les autres cartes du dashboard
+- **STRUCTURE HARMONISÉE** - Suppression de la section "Magasins participants" qui créait un espacement vertical supplémentaire
+- **FORMAT UNIFORME** - Toutes les cartes utilisent maintenant le même layout : flex items-center justify-between p-4
+- **COHÉRENCE VISUELLE** - Même hauteur de ligne et espacement pour les 3 cartes du dashboard principal
+- **INTERFACE ÉPURÉE** - Design simplifié pour une meilleure lisibilité et cohérence visuelle
+
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 
 - **COLONNE RÉFÉRENCE AJOUTÉE** - Nouvelle colonne "Référence" dans la liste des commandes client pour affichage direct

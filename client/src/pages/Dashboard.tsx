@@ -460,54 +460,21 @@ export default function Dashboard() {
                 const isCurrentStoreParticipating = selectedStoreId && participatingStores.some((p: any) => p.groupId === parseInt(selectedStoreId));
                 
                 return (
-                  <div key={publicity.id} className="p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-purple-500 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-2 w-2 bg-purple-500"></div>
-                        <div>
-                          <p className="font-medium text-gray-900">{publicity.pubNumber}</p>
-                          <p className="text-sm text-gray-600 truncate max-w-40">{publicity.designation}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className="bg-blue-100 text-blue-800 text-xs">
-                          À venir
-                        </Badge>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {safeFormat(publicity.startDate, "d MMM")}
-                        </p>
+                  <div key={publicity.id} className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-purple-500">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-2 w-2 bg-purple-500"></div>
+                      <div>
+                        <p className="font-medium text-gray-900">{publicity.pubNumber}</p>
+                        <p className="text-sm text-gray-600">{publicity.designation}</p>
                       </div>
                     </div>
-                    
-                    {/* Magasins participants */}
-                    <div className="flex items-center space-x-2 text-xs">
-                      <span className="text-gray-500">Magasins:</span>
-                      {participatingStores.length === 0 ? (
-                        <span className="text-red-400">Aucun magasin</span>
-                      ) : (
-                        <div className="flex flex-wrap gap-1">
-                          {participatingStores.map((participation: any) => {
-                            // Utiliser la couleur définie dans le module magasin/groupe
-                            const groupColor = participation.group?.color || '#666666';
-                            const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
-                            
-                            return (
-                              <Badge 
-                                key={participation.groupId} 
-                                className={`text-xs border text-white ${isCurrentStore ? 'ring-2 ring-offset-1 ring-opacity-50' : ''}`}
-                                style={{ 
-                                  backgroundColor: groupColor,
-                                  borderColor: groupColor,
-                                  color: 'white',
-                                  ...(isCurrentStore && { ringColor: groupColor })
-                                }}
-                              >
-                                {participation.group.name}
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                      )}
+                    <div className="text-right">
+                      <Badge className="bg-blue-100 text-blue-800 text-xs">
+                        À venir
+                      </Badge>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {safeFormat(publicity.startDate, "d MMM")}
+                      </p>
                     </div>
                   </div>
                 );
