@@ -144,7 +144,7 @@ export default function BLReconciliation() {
         }
       }
       
-      return filtered.sort((a: any, b: any) => new Date(b.deliveredDate).getTime() - new Date(a.deliveredDate).getTime());
+      return filtered.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     },
   });
 

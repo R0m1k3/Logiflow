@@ -253,6 +253,14 @@ The application uses a sophisticated dual authentication approach:
 - **BADGE "À VENIR" CORRIGÉ** - Ajout flex-shrink-0 et whitespace-nowrap pour éviter retour à la ligne du badge
 - **SOLUTION ÉQUILIBRÉE** - Visibilité des magasins participants sans compromettre la cohérence visuelle
 
+### July 24, 2025 - PAGE RAPPROCHEMENT: Tri Modifié pour Afficher les Plus Récentes en Premier
+
+- **TRI CORRIGÉ** - Page BL Rapprochement modifiée pour trier par date de création (createdAt) au lieu de date de livraison (deliveredDate)
+- **ORDRE DÉCROISSANT** - Les livraisons les plus récemment créées apparaissent maintenant en premier dans la liste
+- **COHÉRENCE BACKEND/FRONTEND** - Tri frontend aligné avec le tri backend qui utilise déjà ORDER BY created_at DESC
+- **GESTION VALEURS NULL** - Utilisation de createdAt évite les problèmes avec deliveredDate qui peut être null
+- **EXPÉRIENCE UTILISATEUR AMÉLIORÉE** - Interface plus intuitive avec les dernières entrées visibles en premier
+
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 
 - **COLONNE RÉFÉRENCE AJOUTÉE** - Nouvelle colonne "Référence" dans la liste des commandes client pour affichage direct
