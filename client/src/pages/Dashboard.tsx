@@ -472,10 +472,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className="flex items-center gap-2 justify-end mb-1">
-                        <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
-                          À venir
-                        </Badge>
-                        {/* Magasins participants à côté du badge */}
+                        {/* Magasins participants à gauche du badge */}
                         {participatingStores.length > 0 && (
                           <div className="flex gap-1 items-center">
                             {participatingStores.slice(0, 2).map((participation: any) => {
@@ -504,6 +501,9 @@ export default function Dashboard() {
                             )}
                           </div>
                         )}
+                        <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
+                          À venir
+                        </Badge>
                       </div>
                       <p className="text-xs text-gray-500">
                         {safeFormat(publicity.startDate, "d MMM")}
