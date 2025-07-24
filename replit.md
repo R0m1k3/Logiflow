@@ -254,6 +254,14 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
+### July 24, 2025 - DASHBOARD CARTE "COMMANDES EN ATTENTE": Correction Affichage Simple
+
+- **CARTE COMMANDES EN ATTENTE CORRIGÉE** - Dashboard affiche maintenant le nombre total de commandes avec statut "pending" 
+- **LOGIQUE SIMPLIFIÉE** - Remplacement de `pendingOrdersCount` (logique d'alerte 10 jours) par `ordersByStatus.pending` (simple comptage)
+- **AFFICHAGE CORRECT** - Carte montre maintenant 3 commandes en attente au lieu de 0 (alertes complexes)
+- **SÉPARATION MÉTIER** - Carte basique pour comptage total, alertes complexes restent dans logique spécifique
+- **INTERFACE UTILISATEUR CLARIFIÉE** - Dashboard affiche maintenant les vraies statistiques simples et compréhensibles
+
 ### July 24, 2025 - RAPPROCHEMENT BL: Tri par Date de Livraison Validée Implémenté
 
 - **TRI PRODUCTION CORRIGÉ** - Page BL rapprochement trie maintenant spécifiquement par `deliveredDate` décroissant (plus récent en premier)

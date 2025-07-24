@@ -327,7 +327,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Commandes en attente</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{pendingOrdersCount}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{ordersByStatus.pending}</p>
               </div>
               <div className="h-12 w-12 bg-orange-100 flex items-center justify-center">
                 <Clock className="h-6 w-6 text-orange-600" />
