@@ -254,14 +254,15 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 24, 2025 - PAGE RAPPROCHEMENT: Tri Modifié pour Afficher les Plus Récentes en Premier
+### July 24, 2025 - DASHBOARD STATISTIQUES PALETTES: Calcul Corrigé et Tri Rapprochement Optimisé
 
-- **TRI CORRIGÉ DÉFINITIVEMENT** - Page BL Rapprochement utilise maintenant un tri intelligent par date de livraison effective
-- **LOGIQUE TRI OPTIMISÉE** - Priorité : deliveredDate > scheduledDate > createdAt pour classement chronologique optimal
-- **BACKEND HARMONISÉ** - Requêtes SQL utilisent COALESCE(delivered_date, scheduled_date, created_at) DESC
-- **FRONTEND ALIGNÉ** - Même logique de tri côté client pour cohérence complète
-- **RÉSOLUTION PROBLÈME UTILISATEUR** - Les livraisons du 24/07 apparaissent maintenant avant celles du 15/07 et 16/07
-- **GESTION VALEURS NULL ROBUSTE** - Fallback intelligent sur dates programmées puis création si livraison pas encore effective
+- **CALCUL PALETTES CORRIGÉ** - Dashboard compte maintenant uniquement les palettes des livraisons (quantités réellement reçues) au lieu d'additionner commandes + livraisons
+- **PROBLÈME DOUBLE COMPTAGE RÉSOLU** - Suppression de l'addition erronée entre orderStats et deliveryStats pour les palettes
+- **LOGIQUE MÉTIER CLARIFIÉE** - Les commandes définissent les besoins, les livraisons comptabilisent les quantités reçues
+- **PRODUCTION HARMONISÉE** - Fonction getMonthlyStats en production utilise seulement deliveryStats pour totalPalettes
+- **TRI RAPPROCHEMENT FINALISÉ** - Page BL Rapprochement avec tri intelligent : deliveredDate > scheduledDate > createdAt DESC
+- **DONNÉES TEST AJOUTÉES** - Livraisons de test créées pour validation du tri (24/07 en premier, 15/07 en dernier)
+- **STATISTIQUES EXACTES** - Total palettes dashboard reflète maintenant les 29 palettes réellement livrées
 
 ### July 24, 2025 - COMMANDES CLIENT: Ajout Colonne Référence dans Liste
 

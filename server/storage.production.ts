@@ -1458,8 +1458,9 @@ export class DatabaseStorage implements IStorage {
       deliveriesCount: parseInt(deliveriesResult.rows[0].count) || 0,
       pendingOrdersCount: parseInt(orderStatsResult.rows[0].pending_count) || 0,
       averageDeliveryTime: averageDeliveryTime,
-      totalPalettes: (parseInt(orderStatsResult.rows[0].total_palettes) || 0) + (parseInt(deliveryStatsResult.rows[0].total_palettes) || 0),
-      totalPackages: (parseInt(orderStatsResult.rows[0].total_packages) || 0) + (parseInt(deliveryStatsResult.rows[0].total_packages) || 0)
+      // Compter seulement les livraisons pour les palettes (quantités réellement reçues)
+      totalPalettes: parseInt(deliveryStatsResult.rows[0].total_palettes) || 0,
+      totalPackages: parseInt(deliveryStatsResult.rows[0].total_packages) || 0
     };
 
     console.log('📊 Final stats:', stats);
