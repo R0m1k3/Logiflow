@@ -144,11 +144,20 @@ export default function BLReconciliation() {
         }
       }
       
-      // Trier par date de livraison (deliveredDate) ou date programmée (scheduledDate) si pas encore livrée, puis par date de création
+      // Trier par ordre décroissant pour avoir les plus récentes en premier
       return filtered.sort((a: any, b: any) => {
-        const dateA = a.deliveredDate || a.scheduledDate || a.createdAt;
-        const dateB = b.deliveredDate || b.scheduledDate || b.createdAt;
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
+        // Priorité : deliveredDate > scheduledDate > createdAt
+        const getEffectiveDate = (delivery: any) => {
+          if (delivery.deliveredDate) return new Date(delivery.deliveredDate);
+          if (delivery.scheduledDate) return new Date(delivery.scheduledDate);
+          return new Date(delivery.createdAt);
+        };
+        
+        const dateA = getEffectiveDate(a);
+        const dateB = getEffectiveDate(b);
+        
+        // Tri décroissant (plus récent en premier)
+        return dateB.getTime() - dateA.getTime();
       });
     },
   });
