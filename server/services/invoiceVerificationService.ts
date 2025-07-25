@@ -158,7 +158,9 @@ class InvoiceVerificationService {
 
     try {
       const searchUrl = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`;
-      const whereClause = `(${groupConfig.invoiceColumnName || 'RefFacture'},eq,${invoiceRef})`;
+      
+      // Essayer d'abord une recherche exacte
+      let whereClause = `(${groupConfig.invoiceColumnName || 'RefFacture'},eq,${invoiceRef})`;
       
       nocodbLogger.debug('SEARCH_BY_INVOICE_REF_REQUEST', {
         searchUrl,
@@ -167,7 +169,7 @@ class InvoiceVerificationService {
         apiToken: nocodbConfig.apiToken ? `${nocodbConfig.apiToken.substring(0, 10)}...` : 'NOT_SET'
       }, groupConfig.id, groupConfig.name);
       
-      const response = await axios.get(searchUrl, {
+      let response = await axios.get(searchUrl, {
         headers: {
           'xc-token': nocodbConfig.apiToken,
           'Content-Type': 'application/json'
@@ -177,6 +179,26 @@ class InvoiceVerificationService {
         },
         timeout: 10000
       });
+
+      // Si la recherche exacte ne donne rien, essayer une recherche approximative
+      if (!response.data?.list?.length) {
+        nocodbLogger.debug('SEARCH_BY_INVOICE_REF_FALLBACK_TO_LIKE', {
+          originalSearch: whereClause,
+          newSearch: `(${groupConfig.invoiceColumnName || 'RefFacture'},like,%${invoiceRef}%)`
+        }, groupConfig.id, groupConfig.name);
+        
+        whereClause = `(${groupConfig.invoiceColumnName || 'RefFacture'},like,%${invoiceRef}%)`;
+        response = await axios.get(searchUrl, {
+          headers: {
+            'xc-token': nocodbConfig.apiToken,
+            'Content-Type': 'application/json'
+          },
+          params: {
+            where: whereClause
+          },
+          timeout: 10000
+        });
+      }
 
       nocodbLogger.debug('SEARCH_BY_INVOICE_REF_HTTP_DETAILS', {
         requestUrl: `${searchUrl}?where=${encodeURIComponent(whereClause)}`,
