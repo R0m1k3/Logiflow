@@ -720,6 +720,21 @@ export default function BLReconciliation() {
         </div>
       </div>
 
+      {/* Pagination du haut */}
+      {totalItems > 0 && (
+        <div className="px-4 pb-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+            className="border-b border-gray-200 pb-4"
+          />
+        </div>
+      )}
+
       {/* Table */}
       <div className="p-4">
         {totalItems === 0 ? (
@@ -945,18 +960,16 @@ export default function BLReconciliation() {
             </table>
           </div>
           
-          {/* Pagination */}
-          {totalItems > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={setItemsPerPage}
-              className="mt-4 border-t border-gray-200 pt-4"
-            />
-          )}
+          {/* Pagination du bas */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+            className="mt-4 border-t border-gray-200 pt-4"
+          />
         </div>
       )}
     </div>

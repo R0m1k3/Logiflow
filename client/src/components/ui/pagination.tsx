@@ -54,7 +54,8 @@ export function Pagination({
     return rangeWithDots;
   };
 
-  if (totalPages <= 1) return null;
+  // Toujours afficher la pagination pour permettre le changement du nombre d'éléments par page
+  if (totalPages <= 1 && !onItemsPerPageChange) return null;
 
   return (
     <div className={`flex items-center justify-between px-2 ${className}`}>

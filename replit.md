@@ -254,12 +254,13 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 25, 2025 - PAGE RAPPROCHEMENT BL: Pagination par Défaut 20 Éléments
+### July 25, 2025 - PAGINATION RAPPROCHEMENT BL: Double Affichage et Correction Bug Disparition
 
-- **PAGINATION PAR DÉFAUT AUGMENTÉE** - Page Rapprochement BL affiche maintenant 20 éléments par défaut au lieu de 10
-- **PARAMÈTRE USEPAGINATION MODIFIÉ** - Valeur par défaut changée de 10 à 20 dans BLReconciliation.tsx
-- **AFFICHAGE OPTIMISÉ** - Plus de livraisons visibles sans changement de page pour améliorer l'efficacité
-- **EXPÉRIENCE UTILISATEUR AMÉLIORÉE** - Moins de clics de pagination nécessaires pour parcourir les livraisons
+- **PAGINATION DOUBLE AJOUTÉE** - Contrôles de pagination maintenant visibles au-dessus ET en dessous de la liste
+- **BUG DISPARITION CORRIGÉ** - Pagination ne disparaît plus lors du changement du nombre d'éléments par page
+- **CONDITION PAGINATION AMÉLIORÉE** - Composant Pagination affiche toujours les contrôles quand onItemsPerPageChange est disponible
+- **PAGINATION PAR DÉFAUT 20** - Page affiche 20 éléments par défaut au lieu de 10 pour une meilleure efficacité
+- **EXPÉRIENCE UTILISATEUR OPTIMISÉE** - Navigation plus fluide avec contrôles accessibles en haut et bas de liste
 
 ### July 25, 2025 - CORRECTION COMMANDES CLIENT: Sauvegarde Commentaires à la Création Fonctionnelle
 
