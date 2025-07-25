@@ -854,12 +854,12 @@ export default function BLReconciliation() {
                               <div className="flex items-center space-x-1">
                                 <span className="truncate max-w-28">{delivery.invoiceReference}</span>
                                 {/* Affichage coche basé sur existence dans NocoDB ou impossibilité de vérifier */}
-                                {invoiceVerifications[delivery.id] ? (
+                                {invoiceVerifications[delivery.id.toString()] ? (
                                   <div className="flex items-center">
-                                    {invoiceVerifications[delivery.id].exists ? (
+                                    {invoiceVerifications[delivery.id.toString()].exists ? (
                                       <CheckCircle className="w-3 h-3 text-green-600" title="Facture trouvée dans NocoDB" />
-                                    ) : invoiceVerifications[delivery.id].error ? (
-                                      <AlertTriangle className="w-3 h-3 text-orange-500" title={`Impossible de vérifier: ${invoiceVerifications[delivery.id].error}`} />
+                                    ) : invoiceVerifications[delivery.id.toString()].error ? (
+                                      <AlertTriangle className="w-3 h-3 text-orange-500" title={`Impossible de vérifier: ${invoiceVerifications[delivery.id.toString()].error}`} />
                                     ) : (
                                       <X className="w-3 h-3 text-red-600" title="Facture non trouvée dans NocoDB" />
                                     )}
@@ -1062,11 +1062,11 @@ export default function BLReconciliation() {
                             {isVerifyingCurrentInvoice && (
                               <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
                             )}
-                            {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id] && (
+                            {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id.toString()] && (
                               <div className="flex items-center space-x-1">
-                                {invoiceVerifications[selectedDelivery.id].isUsed ? (
-                                  <AlertTriangle className="w-4 h-4 text-red-600" title={`Facture déjà utilisée par BL ${invoiceVerifications[selectedDelivery.id].usedBy?.blNumber}`} />
-                                ) : invoiceVerifications[selectedDelivery.id].exists ? (
+                                {invoiceVerifications[selectedDelivery.id.toString()].isUsed ? (
+                                  <AlertTriangle className="w-4 h-4 text-red-600" title={`Facture déjà utilisée par BL ${invoiceVerifications[selectedDelivery.id.toString()].usedBy?.blNumber}`} />
+                                ) : invoiceVerifications[selectedDelivery.id.toString()].exists ? (
                                   <CheckCircle className="w-4 h-4 text-green-500" title="Facture trouvée dans NocoDB" />
                                 ) : (
                                   <X className="w-4 h-4 text-red-500" title="Facture non trouvée dans NocoDB" />
@@ -1078,22 +1078,22 @@ export default function BLReconciliation() {
                       </FormControl>
                       <FormMessage />
                       {/* Status de vérification */}
-                      {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id] && (
+                      {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id.toString()] && (
                         <div className="mt-2">
-                          {invoiceVerifications[selectedDelivery.id].isUsed ? (
+                          {invoiceVerifications[selectedDelivery.id.toString()].isUsed ? (
                             <div className="space-y-1">
                               <p className="text-sm text-red-600 flex items-center space-x-1">
                                 <AlertTriangle className="w-3 h-3" />
                                 <span>Facture déjà utilisée</span>
                               </p>
                               <p className="text-xs text-gray-500 ml-4">
-                                Utilisée par la livraison BL {invoiceVerifications[selectedDelivery.id].usedBy?.blNumber}
-                                {invoiceVerifications[selectedDelivery.id].usedBy?.supplierName && 
-                                  ` (${invoiceVerifications[selectedDelivery.id].usedBy.supplierName})`
+                                Utilisée par la livraison BL {invoiceVerifications[selectedDelivery.id.toString()].usedBy?.blNumber}
+                                {invoiceVerifications[selectedDelivery.id.toString()].usedBy?.supplierName && 
+                                  ` (${invoiceVerifications[selectedDelivery.id.toString()].usedBy.supplierName})`
                                 }
                               </p>
                             </div>
-                          ) : invoiceVerifications[selectedDelivery.id].exists ? (
+                          ) : invoiceVerifications[selectedDelivery.id.toString()].exists ? (
                             <p className="text-sm text-green-600 flex items-center space-x-1">
                               <CheckCircle className="w-3 h-3" />
                               <span>Facture trouvée dans NocoDB</span>
