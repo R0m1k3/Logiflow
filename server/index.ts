@@ -72,7 +72,7 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
       console.log('✅ Successfully loaded production module, stopping execution here');
       return; // Exit early since production module will handle everything
     } catch (error) {
-      console.warn('⚠️  Production module not available, continuing with current process:', error.message);
+      console.warn('⚠️  Production module not available, continuing with current process:', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
@@ -88,7 +88,7 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
       serveStatic = viteDev.serveStatic;
       log = viteDev.log;
     } catch (error) {
-      console.error("❌ Failed to import vite.ts, falling back to production mode:", error.message);
+      console.error("❌ Failed to import vite.ts, falling back to production mode:", error instanceof Error ? error.message : 'Unknown error');
       // Fallback to production vite if development vite fails
       const viteProduction = await import("./vite.production.ts");
       setupVite = viteProduction.setupVite;
@@ -160,7 +160,23 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     });
   });
 
-  const server = await registerRoutes(app);
+  // Setup routes - use appropriate routes based on storage mode
+  let server;
+  if (process.env.STORAGE_MODE === 'production') {
+    console.log('🔄 Loading production routes...');
+    try {
+      const { registerRoutes: registerProductionRoutes } = await import("./routes.production");
+      server = await registerProductionRoutes(app);
+    } catch (error) {
+      console.error('❌ Failed to load production routes, falling back to development routes:', error instanceof Error ? error.message : 'Unknown error');
+      const { registerRoutes } = await import("./routes");
+      server = await registerRoutes(app);
+    }
+  } else {
+    console.log('🔄 Loading development routes...');
+    const { registerRoutes } = await import("./routes");
+    server = await registerRoutes(app);
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

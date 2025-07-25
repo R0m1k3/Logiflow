@@ -101,16 +101,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(group);
     } catch (error) {
       console.error("❌ Error creating group:", error);
+      const errorObj = error as any;
       console.error("📊 Full error details:", {
-        message: error.message,
-        stack: error.stack,
-        code: error.code,
-        detail: error.detail
+        message: errorObj?.message,
+        stack: errorObj?.stack,
+        code: errorObj?.code,
+        detail: errorObj?.detail
       });
       res.status(500).json({ 
         message: "Failed to create group",
-        error: error.message,
-        details: error.detail || "Database error occurred"
+        error: errorObj?.message || 'Unknown error',
+        details: errorObj?.detail || "Database error occurred"
       });
     }
   });
@@ -207,16 +208,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(supplier);
     } catch (error) {
       console.error("❌ Error creating supplier:", error);
+      const errorObj = error as any;
       console.error("📊 Full error details:", {
-        message: error.message,
-        stack: error.stack,
-        code: error.code,
-        detail: error.detail
+        message: errorObj?.message,
+        stack: errorObj?.stack,
+        code: errorObj?.code,
+        detail: errorObj?.detail
       });
       res.status(500).json({ 
         message: "Failed to create supplier",
-        error: error.message,
-        details: error.detail || "Database error occurred"
+        error: errorObj?.message || 'Unknown error',
+        details: errorObj?.detail || "Database error occurred"
       });
     }
   });

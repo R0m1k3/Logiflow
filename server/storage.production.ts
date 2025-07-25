@@ -3482,6 +3482,39 @@ export class DatabaseStorage implements IStorage {
   async deleteTask(id: number): Promise<void> {
     await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
   }
+
+  // Permission checking method - missing method that routes.production.ts needs
+  async getUserPermissions(userId: string): Promise<Permission[]> {
+    return this.getUserEffectivePermissions(userId);
+  }
+
+  async getUserEffectivePermissions(userId: string): Promise<Permission[]> {
+    try {
+      const result = await pool.query(`
+        SELECT DISTINCT p.id, p.name, p.display_name, p.description, p.category, p.action, p.resource, p.is_system, p.created_at
+        FROM permissions p
+        INNER JOIN role_permissions rp ON p.id = rp.permission_id
+        INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+        WHERE ur.user_id = $1
+        ORDER BY p.category, p.name
+      `, [userId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        displayName: row.display_name || row.name,
+        description: row.description || '',
+        category: row.category,
+        action: row.action || 'read',
+        resource: row.resource,
+        isSystem: row.is_system || false,
+        createdAt: row.created_at
+      }));
+    } catch (error) {
+      console.error("Error getting user effective permissions:", error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

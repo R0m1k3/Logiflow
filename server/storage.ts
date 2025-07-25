@@ -189,6 +189,7 @@ export interface IStorage {
   userHasPermission(userId: string, permissionName: string): Promise<boolean>;
   userHasRole(userId: string, roleName: string): Promise<boolean>;
   getUserEffectivePermissions(userId: string): Promise<Permission[]>;
+  getUserPermissions(userId: string): Promise<Permission[]>;
 
   // Task operations
   getTasks(groupIds?: number[]): Promise<any[]>;
