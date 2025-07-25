@@ -2364,6 +2364,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const testResult = await invoiceVerificationService.testConnection(nocodbConfig);
+      
+      if (testResult.success) {
+        res.json({ 
+          success: true, 
+          message: "Connexion réussie", 
+          data: testResult.data 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: testResult.error || "Erreur de connexion" 
+        });
+      }
+
+    } catch (error) {
+      nocodbLogger.error('TEST_CONNECTION_API_ERROR', error as Error);
+      console.error("Error testing NocoDB connection:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Erreur lors du test de connexion" 
+      });
+    }
+  });ervice.testConnection(nocodbConfig);
       res.json(testResult);
 
     } catch (error) {
