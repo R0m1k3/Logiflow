@@ -26,6 +26,8 @@ import {
 } from "../shared/schema";
 import { z } from "zod";
 import { requirePermission } from "./permissions";
+import { nocodbLogger } from "./services/nocodbLogger.js";
+import { invoiceVerificationService } from "./services/invoiceVerificationService.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker
@@ -2241,6 +2243,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error triggering manual backup:", error);
       res.status(500).json({ message: "Erreur lors de la sauvegarde manuelle" });
+    }
+  });
+
+  // ===== NOCODB LOGGING AND VERIFICATION ROUTES =====
+  
+  // Vérification d'une facture/BL avec logging complet
+  app.post('/api/nocodb/verify-invoice', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent vérifier les factures" });
+      }
+
+      const { blNumber, supplierName, amount, groupId, excludeDeliveryId } = req.body;
+      
+      if (!blNumber || !supplierName || !amount || !groupId) {
+        return res.status(400).json({ 
+          message: "Paramètres manquants: blNumber, supplierName, amount, groupId requis" 
+        });
+      }
+
+      nocodbLogger.info('VERIFY_INVOICE_REQUEST', {
+        blNumber,
+        supplierName,
+        amount,
+        groupId,
+        excludeDeliveryId,
+        userId: user.id,
+        userRole: user.role
+      });
+
+      // Récupérer la configuration du groupe
+      const group = await storage.getGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Groupe non trouvé" });
+      }
+
+      // Récupérer la configuration NocoDB
+      if (!group.nocodbConfigId) {
+        nocodbLogger.warn('NO_NOCODB_CONFIG', { groupId, groupName: group.name });
+        return res.status(400).json({ message: "Aucune configuration NocoDB définie pour ce groupe" });
+      }
+
+      const nocodbConfigs = await storage.getNocodbConfigs();
+      const nocodbConfig = nocodbConfigs.find(config => config.id === group.nocodbConfigId);
+      
+      if (!nocodbConfig) {
+        nocodbLogger.warn('NOCODB_CONFIG_NOT_FOUND', { 
+          configId: group.nocodbConfigId, 
+          groupId, 
+          groupName: group.name 
+        });
+        return res.status(404).json({ message: "Configuration NocoDB non trouvée" });
+      }
+
+      // Effectuer la vérification avec logging
+      const verificationResult = await invoiceVerificationService.verifyInvoice(
+        blNumber,
+        supplierName,
+        amount,
+        {
+          id: group.id,
+          name: group.name,
+          nocodbConfigId: group.nocodbConfigId,
+          nocodbTableId: group.nocodbTableId,
+          nocodbTableName: group.nocodbTableName,
+          invoiceColumnName: group.invoiceColumnName,
+          nocodbBlColumnName: group.nocodbBlColumnName,
+          nocodbAmountColumnName: group.nocodbAmountColumnName,
+          nocodbSupplierColumnName: group.nocodbSupplierColumnName
+        },
+        nocodbConfig,
+        excludeDeliveryId
+      );
+
+      res.json(verificationResult);
+
+    } catch (error) {
+      nocodbLogger.error('VERIFY_INVOICE_API_ERROR', error as Error);
+      console.error("Error verifying invoice:", error);
+      res.status(500).json({ message: "Erreur lors de la vérification de la facture" });
+    }
+  });
+
+  // Test de connexion NocoDB avec logging
+  app.post('/api/nocodb/test-connection', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent tester les connexions" });
+      }
+
+      const { configId } = req.body;
+      
+      if (!configId) {
+        return res.status(400).json({ message: "configId requis" });
+      }
+
+      const nocodbConfigs = await storage.getNocodbConfigs();
+      const nocodbConfig = nocodbConfigs.find(config => config.id === configId);
+      
+      if (!nocodbConfig) {
+        return res.status(404).json({ message: "Configuration NocoDB non trouvée" });
+      }
+
+      nocodbLogger.info('TEST_CONNECTION_REQUEST', {
+        configId,
+        userId: user.id,
+        userRole: user.role
+      });
+
+      const testResult = await invoiceVerificationService.testConnection(nocodbConfig);
+      res.json(testResult);
+
+    } catch (error) {
+      nocodbLogger.error('TEST_CONNECTION_API_ERROR', error as Error);
+      console.error("Error testing NocoDB connection:", error);
+      res.status(500).json({ message: "Erreur lors du test de connexion" });
+    }
+  });
+
+  // Récupération des logs NocoDB récents
+  app.get('/api/nocodb/logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent consulter les logs" });
+      }
+
+      const lines = parseInt(req.query.lines as string) || 100;
+      const logs = nocodbLogger.getRecentLogs(lines);
+      
+      res.json({
+        logs,
+        totalLines: logs.length,
+        requestedLines: lines
+      });
+
+    } catch (error) {
+      console.error("Error fetching NocoDB logs:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération des logs" });
+    }
+  });
+
+  // Nettoyage des anciens logs
+  app.post('/api/nocodb/logs/cleanup', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent nettoyer les logs" });
+      }
+
+      const daysToKeep = parseInt(req.body.daysToKeep) || 7;
+      nocodbLogger.cleanOldLogs(daysToKeep);
+      
+      res.json({ 
+        message: `Logs antérieurs à ${daysToKeep} jours supprimés avec succès` 
+      });
+
+    } catch (error) {
+      console.error("Error cleaning NocoDB logs:", error);
+      res.status(500).json({ message: "Erreur lors du nettoyage des logs" });
     }
   });
 

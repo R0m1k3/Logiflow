@@ -13,6 +13,7 @@ import BLReconciliation from "@/pages/BLReconciliation";
 import Publicities from "@/pages/Publicities";
 
 import NocoDBConfig from "@/pages/NocoDBConfig";
+import NocoDBDiagnostic from "@/pages/NocoDBDiagnostic";
 import CustomerOrders from "@/pages/CustomerOrders";
 
 import DlcPage from "@/pages/DlcPage";
@@ -63,6 +64,7 @@ function RouterProduction() {
           <Route path="/tasks" component={Tasks} />
           <Route path="/database-backup" component={DatabaseBackup} />
           <Route path="/nocodb-config" component={NocoDBConfig} />
+          <Route path="/nocodb-diagnostic" component={NocoDBDiagnostic} />
           <Route component={NotFound} />
         </Switch>
       </Layout>

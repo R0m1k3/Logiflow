@@ -20,7 +20,8 @@ import {
   Clock,
   ListTodo,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  Search
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -158,6 +159,12 @@ export default function Sidebar() {
       path: "/nocodb-config", 
       label: "Configuration NocoDB", 
       icon: Database, 
+      permission: "system_admin" 
+    },
+    { 
+      path: "/nocodb-diagnostic", 
+      label: "Diagnostic NocoDB", 
+      icon: Search, 
       permission: "system_admin" 
     },
   ];
