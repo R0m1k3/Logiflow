@@ -1080,6 +1080,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour vérifier une facture par numéro BL (logique simplifiée)
+  app.post("/api/nocodb/verify-bl", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUser(userId);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: 'Accès refusé. Seuls les administrateurs et directeurs peuvent vérifier les BL.' });
+      }
+
+      const { blNumber, supplierName, groupId } = req.body;
+
+      if (!blNumber || !supplierName || !groupId) {
+        return res.status(400).json({ message: "Numéro BL, fournisseur et groupe requis" });
+      }
+
+      // Récupérer la configuration du groupe
+      const group = await storage.getGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Groupe non trouvé" });
+      }
+
+      // Récupérer la configuration NocoDB
+      if (!group.nocodbConfigId) {
+        return res.status(400).json({ message: "Aucune configuration NocoDB définie pour ce groupe" });
+      }
+
+      const nocodbConfig = await storage.getNocodbConfig(group.nocodbConfigId);
+      
+      if (!nocodbConfig) {
+        return res.status(404).json({ message: "Configuration NocoDB non trouvée" });
+      }
+
+      // Effectuer la vérification simplifiée par BL
+      const { invoiceVerificationService } = await import('./services/invoiceVerificationService.js');
+      const verificationResult = await invoiceVerificationService.searchByBLSimple(
+        blNumber,
+        supplierName,
+        {
+          id: group.id,
+          name: group.name,
+          nocodbTableId: group.nocodbTableId,
+          invoiceColumnName: group.invoiceColumnName,
+          nocodbBlColumnName: group.nocodbBlColumnName,
+          nocodbAmountColumnName: group.nocodbAmountColumnName,
+          nocodbSupplierColumnName: group.nocodbSupplierColumnName
+        },
+        nocodbConfig
+      );
+
+      res.json(verificationResult);
+    } catch (error) {
+      console.error("Error verifying BL:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de la vérification du BL",
+        error: error instanceof Error ? error.message : 'Erreur inconnue'
+      });
+    }
+  });
+
   // Route supprimée - utiliser /api/verify-invoices à la place
 
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {

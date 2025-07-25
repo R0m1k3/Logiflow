@@ -123,6 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### 2025-07-25 - VÉRIFICATION BL SIMPLIFIÉE FINALISÉE: Logique 2-Étapes et Interface de Test Complète
+✓ MÉTHODE BL SIMPLIFIÉE CRÉÉE - searchByBLSimple() avec logique stricte : trouve BL → vérifie fournisseur → retourne facture
+✓ API ENDPOINT DÉDIÉ AJOUTÉ - /api/nocodb/verify-bl pour vérification BL avec authentification admin/directeur
+✓ MÉTHODE RENDUE PUBLIQUE - Changement de private à public pour permettre l'accès depuis les routes API
+✓ INTERFACE TEST INTÉGRÉE - Section "Test Vérification BL Simplifiée" dans NocoDBDiagnostic.tsx
+✓ MUTATION REACT QUERY - testBlMutation avec gestion d'erreurs et affichage résultats en temps réel
+✓ FORMULAIRE COMPLET - Champs BL, fournisseur, sélecteur magasin avec validation
+✓ AFFICHAGE RÉSULTATS DÉTAILLÉ - Icônes vertes/rouges, badges match type, détails vérification JSON
+✓ LOGIQUE MÉTIER RESPECTÉE - BL trouvé + fournisseur vérifié = succès, sinon échec
+✓ SYSTÈME PRODUCTION READY - Toutes corrections appliquées routes production et services
+✓ INTERFACE UTILISATEUR INTUITIVE - Page diagnostic accessible via Administration pour tests directs
+
 ### 2025-07-25 - RÉSOLUTION FINALE DNS TIMEOUT: Système de Retry Unifié NocoDB COMPLÉTÉ
 ✓ PROBLÈME RACINE RÉSOLU - Erreurs DNS intermittentes (EAI_AGAIN) sur nocodb.ffnancy.fr empêchaient affichage CheckCircles
 ✓ FONCTION RETRY ROBUSTE CRÉÉE - axiosWithAutoRetry avec backoff exponentiel (2s, 4s, 6s) pour tous appels NocoDB

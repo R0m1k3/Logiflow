@@ -43,6 +43,11 @@ export default function NocoDBDiagnostic() {
   const [invoiceRef, setInvoiceRef] = useState('');
   const [supplierName, setSupplierName] = useState('');
   const [amount, setAmount] = useState('');
+  
+  // States pour le test BL simplifié
+  const [testBlNumber, setTestBlNumber] = useState('');
+  const [testBlSupplier, setTestBlSupplier] = useState('');
+  const [testBlGroupId, setTestBlGroupId] = useState('');
   const [groupId, setGroupId] = useState('');
 
   // Récupération des groupes
@@ -120,6 +125,28 @@ export default function NocoDBDiagnostic() {
     }
   });
 
+  // Mutation pour tester la vérification BL simplifiée
+  const testBlMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest(`/api/nocodb/verify-bl`, {
+        method: 'POST',
+        body: {
+          blNumber: testBlNumber.trim(),
+          supplierName: testBlSupplier.trim(),
+          groupId: parseInt(testBlGroupId)
+        }
+      });
+      return response;
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur lors du test BL",
+        description: error.message || "Une erreur s'est produite lors du test du BL",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleVerifyInvoice = () => {
     if (!invoiceRef || !supplierName || !amount || !groupId) {
       toast({
@@ -143,6 +170,25 @@ export default function NocoDBDiagnostic() {
       amount: parseFloat(amount),
       groupId: parseInt(groupId)
     });
+  };
+
+  const handleTestBL = () => {
+    if (!testBlNumber || !testBlSupplier || !testBlGroupId) {
+      toast({
+        title: "Champs manquants",
+        description: "Veuillez remplir tous les champs pour le test BL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('🔍 Diagnostic BL - Données envoyées:', {
+      blNumber: testBlNumber,
+      supplierName: testBlSupplier,
+      groupId: parseInt(testBlGroupId)
+    });
+
+    testBlMutation.mutate();
   };
 
   const getLogLevelBadge = (level: string) => {
@@ -334,13 +380,13 @@ export default function NocoDBDiagnostic() {
                   <span className="font-medium">Étape 1:</span> Recherche par numéro de BL exact dans la colonne configurée
                 </div>
                 <div>
-                  <span className="font-medium">Étape 2:</span> Si non trouvé, recherche par fournisseur + montant exact (tolérance ±0.01€)
+                  <span className="font-medium">Étape 2:</span> Vérification que le fournisseur correspond
                 </div>
                 <div>
-                  <span className="font-medium">Étape 3:</span> Si non trouvé, recherche par fournisseur + date approximative
+                  <span className="font-medium">Étape 3:</span> Si tout correspond, récupération du numéro de facture et montant
                 </div>
                 <div>
-                  <span className="font-medium">Sécurité:</span> Toutes les recherches vérifient obligatoirement le fournisseur
+                  <span className="font-medium">Sécurité:</span> Vérification obligatoire de la correspondance fournisseur
                 </div>
                 <div>
                   <span className="font-medium">Retry:</span> 3 tentatives automatiques avec délai exponentiel en cas d'erreur DNS
@@ -357,6 +403,114 @@ export default function NocoDBDiagnostic() {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Section Test BL Simplifié */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Test Vérification BL Simplifiée
+            </CardTitle>
+            <CardDescription>
+              Tester la nouvelle logique de vérification par numéro de BL
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="test-bl-number">Numéro BL</Label>
+                <Input
+                  id="test-bl-number"
+                  placeholder="Ex: BL2025001"
+                  value={testBlNumber}
+                  onChange={(e) => setTestBlNumber(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="test-bl-supplier">Fournisseur</Label>
+                <Input
+                  id="test-bl-supplier"
+                  placeholder="Ex: Lidis"
+                  value={testBlSupplier}
+                  onChange={(e) => setTestBlSupplier(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="test-bl-group">Magasin/Groupe</Label>
+                <select
+                  id="test-bl-group"
+                  className="w-full p-2 border rounded"
+                  value={testBlGroupId}
+                  onChange={(e) => setTestBlGroupId(e.target.value)}
+                >
+                  <option value="">Sélectionner un magasin</option>
+                  {(groups as any[]).map((group: any) => (
+                    <option key={group.id} value={group.id}>
+                      {group.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleTestBL}
+              disabled={testBlMutation.isPending}
+              className="w-full"
+            >
+              {testBlMutation.isPending ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Test en cours...
+                </>
+              ) : (
+                <>
+                  <Search className="h-4 w-4 mr-2" />
+                  Tester Vérification BL
+                </>
+              )}
+            </Button>
+
+            {/* Résultat du test BL */}
+            {testBlMutation.data && (
+              <div className="mt-4 p-4 border rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  {testBlMutation.data.found ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                  )}
+                  <span className="font-medium">
+                    {testBlMutation.data.found ? 'BL trouvé et vérifié' : 'BL non trouvé ou fournisseur incorrect'}
+                  </span>
+                  {testBlMutation.data.matchType && (
+                    <Badge variant="outline">
+                      {testBlMutation.data.matchType}
+                    </Badge>
+                  )}
+                </div>
+                {testBlMutation.data.found && testBlMutation.data.verificationDetails && (
+                  <div className="bg-green-50 p-3 rounded border border-green-200 mb-3">
+                    <div className="font-medium text-green-800 mb-2">Résultat de la vérification:</div>
+                    <div className="space-y-1 text-sm text-green-700">
+                      {testBlMutation.data.verificationDetails.invoiceRef && (
+                        <div><strong>Numéro de facture:</strong> {testBlMutation.data.verificationDetails.invoiceRef}</div>
+                      )}
+                      {testBlMutation.data.verificationDetails.amount && (
+                        <div><strong>Montant:</strong> {testBlMutation.data.verificationDetails.amount}€</div>
+                      )}
+                      <div><strong>BL trouvé:</strong> {testBlMutation.data.verificationDetails.blNumber}</div>
+                      <div><strong>Fournisseur vérifié:</strong> {testBlMutation.data.verificationDetails.supplierName}</div>
+                    </div>
+                  </div>
+                )}
+                <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-40">
+                  {JSON.stringify(testBlMutation.data.verificationDetails, null, 2)}
+                </pre>
+              </div>
+            )}
           </CardContent>
         </Card>
 

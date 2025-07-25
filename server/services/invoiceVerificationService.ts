@@ -128,35 +128,12 @@ class InvoiceVerificationService {
         throw new Error('Configuration NocoDB invalide');
       }
 
-      // Étape 1: Recherche par référence facture
+      // Étape 1: Recherche par référence facture (fallback uniquement)
       let result = await this.searchByInvoiceRef(invoiceRef, supplierName, groupConfig, nocodbConfig);
       if (result.found) {
         nocodbLogger.info('VERIFY_INVOICE_SUCCESS', {
           matchType: 'INVOICE_REF',
           invoiceRef,
-          invoice: result.invoice
-        }, groupConfig.id, groupConfig.name, Date.now() - startTime);
-        return result;
-      }
-
-      // Étape 2: Recherche par fournisseur + montant
-      result = await this.searchBySupplierAndAmount(supplierName, amount, groupConfig, nocodbConfig);
-      if (result.found) {
-        nocodbLogger.info('VERIFY_INVOICE_SUCCESS', {
-          matchType: 'SUPPLIER_AMOUNT',
-          supplierName,
-          amount,
-          invoice: result.invoice
-        }, groupConfig.id, groupConfig.name, Date.now() - startTime);
-        return result;
-      }
-
-      // Étape 3: Recherche par fournisseur + date approximative
-      result = await this.searchBySupplierAndDate(supplierName, new Date(), groupConfig, nocodbConfig);
-      if (result.found) {
-        nocodbLogger.info('VERIFY_INVOICE_SUCCESS', {
-          matchType: 'SUPPLIER_DATE',
-          supplierName,
           invoice: result.invoice
         }, groupConfig.id, groupConfig.name, Date.now() - startTime);
         return result;
@@ -385,6 +362,123 @@ class InvoiceVerificationService {
           invoiceRef,
           supplierName,
           error: error instanceof Error ? error.message : 'Erreur recherche référence facture'
+        }
+      };
+    }
+  }
+
+  /**
+   * Recherche BL simplifiée: trouve BL → vérifie fournisseur → retourne facture et montant
+   */
+  async searchByBLSimple(
+    blNumber: string,
+    supplierName: string,
+    groupConfig: GroupConfig,
+    nocodbConfig: NocoDBConfig
+  ): Promise<InvoiceVerificationResult> {
+    
+    nocodbLogger.info('SEARCH_BY_BL_SIMPLE_START', {
+      blNumber,
+      supplierName,
+      tableId: groupConfig.nocodbTableId
+    }, groupConfig.id, groupConfig.name);
+
+    try {
+      const searchUrl = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`;
+      
+      // Étape 1: Chercher le numéro de BL exact
+      const response = await axiosWithAutoRetry({
+        method: 'GET',
+        url: searchUrl,
+        headers: {
+          'xc-token': nocodbConfig.apiToken,
+          'Content-Type': 'application/json'
+        },
+        params: {
+          where: `(${groupConfig.nocodbBlColumnName},eq,${blNumber})`
+        },
+        timeout: 10000
+      });
+
+      nocodbLogger.debug('SEARCH_BY_BL_SIMPLE_RESPONSE', {
+        statusCode: response.status,
+        recordsFound: response.data?.list?.length || 0,
+        firstRecord: response.data?.list?.[0] || null
+      }, groupConfig.id, groupConfig.name);
+
+      if (response.data?.list?.length > 0) {
+        const invoice = response.data.list[0];
+        const invoiceSupplier = invoice[groupConfig.nocodbSupplierColumnName || 'Fournisseurs'];
+        
+        // Étape 2: Vérifier que le fournisseur correspond
+        if (this.suppliersMatch(supplierName, invoiceSupplier)) {
+          // Étape 3: Retourner le numéro de facture et montant
+          const invoiceRef = invoice[groupConfig.invoiceColumnName || 'RefFacture'];
+          const invoiceAmount = invoice[groupConfig.nocodbAmountColumnName || 'Montant HT'];
+          
+          nocodbLogger.info('SEARCH_BY_BL_SIMPLE_SUCCESS', {
+            blNumber,
+            supplierName,
+            invoiceRef,
+            invoiceAmount,
+            supplierMatch: true
+          }, groupConfig.id, groupConfig.name);
+          
+          return {
+            found: true,
+            matchType: 'BL_NUMBER',
+            invoice,
+            verificationDetails: {
+              blNumber,
+              supplierName,
+              invoiceRef,
+              amount: invoiceAmount,
+              searchUrl,
+              searchCriteria: { blNumber, expectedSupplier: supplierName, foundSupplier: invoiceSupplier },
+              responseData: response.data
+            }
+          };
+        } else {
+          nocodbLogger.warn('SEARCH_BY_BL_SIMPLE_SUPPLIER_MISMATCH', {
+            blNumber,
+            expectedSupplier: supplierName,
+            foundSupplier: invoiceSupplier
+          }, groupConfig.id, groupConfig.name);
+          
+          return {
+            found: false,
+            verificationDetails: {
+              blNumber,
+              supplierName,
+              error: `BL trouvé mais fournisseur ne correspond pas. Attendu: "${supplierName}", Trouvé: "${invoiceSupplier}"`
+            }
+          };
+        }
+      }
+
+      return {
+        found: false,
+        verificationDetails: {
+          blNumber,
+          supplierName,
+          searchUrl,
+          error: 'Numéro de BL non trouvé dans NocoDB',
+          responseData: response.data
+        }
+      };
+
+    } catch (error) {
+      nocodbLogger.error('SEARCH_BY_BL_SIMPLE_ERROR', error as Error, groupConfig.id, groupConfig.name, {
+        blNumber,
+        supplierName
+      });
+      
+      return {
+        found: false,
+        verificationDetails: {
+          blNumber,
+          supplierName,
+          error: error instanceof Error ? error.message : 'Erreur recherche BL simplifiée'
         }
       };
     }
