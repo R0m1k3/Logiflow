@@ -1130,6 +1130,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             isActive: nocodbConfig.isActive
           } : 'NULL');
           
+          // 🚨 ULTRA-DETAILED DEBUG FOR PRODUCTION PROJECT_ID ISSUE
+          console.log(`🚨 [CRITICAL-DEBUG] ULTRA-DETAILED NocodbConfig Analysis:`, {
+            configId: groupConfig.nocodbConfigId,
+            configExists: !!nocodbConfig,
+            rawConfig: nocodbConfig,
+            projectIdValue: nocodbConfig?.projectId,
+            projectIdType: typeof nocodbConfig?.projectId,
+            projectIdLength: nocodbConfig?.projectId?.length,
+            expectedProjectId: 'pcg4uw79ukvycxc',
+            isProjectIdCorrect: nocodbConfig?.projectId === 'pcg4uw79ukvycxc',
+            willConstructUrl: nocodbConfig ? `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}` : 'NO_CONFIG'
+          });
+          
           if (!nocodbConfig) {
             console.log(`❌ [VERIFY-INVOICES] NocoDB config not found for ID ${groupConfig.nocodbConfigId}`);
             results[ref.deliveryId] = { 

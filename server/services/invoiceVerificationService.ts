@@ -157,6 +157,24 @@ class InvoiceVerificationService {
     }, groupConfig.id, groupConfig.name);
 
     try {
+      // ULTRA-DETAILED LOGGING FOR DEBUG
+      nocodbLogger.debug('SEARCH_BY_INVOICE_REF_CONFIG_ULTRA_DETAILED', {
+        nocodbConfig: {
+          id: nocodbConfig.id,
+          name: nocodbConfig.name,
+          baseUrl: nocodbConfig.baseUrl,
+          projectId: nocodbConfig.projectId,  // THIS IS THE KEY FIELD TO CHECK
+          apiToken: nocodbConfig.apiToken ? `${nocodbConfig.apiToken.substring(0, 10)}...` : 'NOT_SET'
+        },
+        groupConfig: {
+          id: groupConfig.id,
+          name: groupConfig.name,
+          nocodbTableId: groupConfig.nocodbTableId,
+          invoiceColumnName: groupConfig.invoiceColumnName,
+          nocodbConfigId: groupConfig.nocodbConfigId
+        }
+      }, groupConfig.id, groupConfig.name);
+
       const searchUrl = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`;
       
       // Essayer d'abord une recherche exacte
@@ -166,7 +184,12 @@ class InvoiceVerificationService {
         searchUrl,
         whereClause,
         invoiceColumnName: groupConfig.invoiceColumnName,
-        apiToken: nocodbConfig.apiToken ? `${nocodbConfig.apiToken.substring(0, 10)}...` : 'NOT_SET'
+        apiToken: nocodbConfig.apiToken ? `${nocodbConfig.apiToken.substring(0, 10)}...` : 'NOT_SET',
+        CRITICAL_CHECK: {
+          actualProjectId: nocodbConfig.projectId,
+          expectedProjectId: 'pcg4uw79ukvycxc',
+          isCorrect: nocodbConfig.projectId === 'pcg4uw79ukvycxc'
+        }
       }, groupConfig.id, groupConfig.name);
       
       let response = await axios.get(searchUrl, {
