@@ -1114,9 +1114,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const ref of invoiceReferences) {
         try {
+          console.log(`🔍 [VERIFY-INVOICES] Processing delivery ${ref.deliveryId} - Invoice: ${ref.invoiceReference}, Supplier: ${ref.supplierName}, Group: ${ref.groupId}`);
+          
           // Get group and nocodb configurations
           const groupConfig = await storage.getGroup(ref.groupId);
+          console.log(`🔍 [VERIFY-INVOICES] Group config retrieved:`, groupConfig ? {
+            id: groupConfig.id,
+            name: groupConfig.name,
+            nocodbConfigId: groupConfig.nocodbConfigId,
+            nocodbTableId: groupConfig.nocodbTableId,
+            invoiceColumnName: groupConfig.invoiceColumnName,
+            nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName
+          } : 'NULL');
+          
           if (!groupConfig || !groupConfig.nocodbConfigId) {
+            console.log(`❌ [VERIFY-INVOICES] Missing NocoDB config for group ${ref.groupId}`);
             results[ref.deliveryId] = { 
               exists: false, 
               error: 'Configuration NocoDB manquante pour ce groupe' 
@@ -1125,13 +1137,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           const nocodbConfig = await storage.getNocodbConfig(groupConfig.nocodbConfigId);
+          console.log(`🔍 [VERIFY-INVOICES] NocoDB config retrieved:`, nocodbConfig ? {
+            id: nocodbConfig.id,
+            name: nocodbConfig.name,
+            baseUrl: nocodbConfig.baseUrl,
+            projectId: nocodbConfig.projectId,
+            isActive: nocodbConfig.isActive
+          } : 'NULL');
+          
           if (!nocodbConfig) {
+            console.log(`❌ [VERIFY-INVOICES] NocoDB config not found for ID ${groupConfig.nocodbConfigId}`);
             results[ref.deliveryId] = { 
               exists: false, 
               error: 'Configuration NocoDB introuvable' 
             };
             continue;
           }
+
+          console.log(`🚀 [VERIFY-INVOICES] Starting verification with service for delivery ${ref.deliveryId}`);
+          console.log(`🚀 [VERIFY-INVOICES] Parameters:`, {
+            invoiceRef: ref.invoiceReference,
+            supplierName: ref.supplierName,
+            amount: parseFloat(ref.amount || '0'),
+            groupId: groupConfig.id,
+            nocodbUrl: `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`
+          });
 
           const result = await invoiceVerificationService.verifyInvoice(
             ref.invoiceReference,
@@ -1142,6 +1172,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ref.deliveryId
           );
           
+          console.log(`🔍 [VERIFY-INVOICES] Service result for delivery ${ref.deliveryId}:`, {
+            found: result.found,
+            matchType: result.matchType,
+            hasInvoice: !!result.invoice,
+            verificationDetails: result.verificationDetails
+          });
+          
           results[ref.deliveryId] = { 
             exists: result.found,
             matchType: result.matchType,
@@ -1151,6 +1188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${result.found ? '✅ FOUND' : '❌ NOT FOUND'}`);
         } catch (error: any) {
           console.error(`❌ [VERIFY-INVOICES] Error verifying delivery ${ref.deliveryId}:`, error);
+          console.error(`❌ [VERIFY-INVOICES] Error stack:`, error?.stack);
           results[ref.deliveryId] = { exists: false, error: error?.message || 'Erreur inconnue' };
         }
       }
