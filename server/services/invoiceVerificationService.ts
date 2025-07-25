@@ -198,6 +198,25 @@ class InvoiceVerificationService {
           },
           timeout: 10000
         });
+
+        // Si toujours rien, essayer de chercher par nom de fournisseur
+        if (!response.data?.list?.length) {
+          nocodbLogger.debug('SEARCH_BY_INVOICE_REF_FALLBACK_TO_SUPPLIER', {
+            supplierSearch: `(${groupConfig.nocodbSupplierColumnName || 'Fournisseurs'},like,%${invoiceRef}%)`
+          }, groupConfig.id, groupConfig.name);
+          
+          whereClause = `(${groupConfig.nocodbSupplierColumnName || 'Fournisseurs'},like,%${invoiceRef}%)`;
+          response = await axios.get(searchUrl, {
+            headers: {
+              'xc-token': nocodbConfig.apiToken,
+              'Content-Type': 'application/json'
+            },
+            params: {
+              where: whereClause
+            },
+            timeout: 10000
+          });
+        }
       }
 
       nocodbLogger.debug('SEARCH_BY_INVOICE_REF_HTTP_DETAILS', {
@@ -214,7 +233,9 @@ class InvoiceVerificationService {
       nocodbLogger.debug('SEARCH_BY_INVOICE_REF_RESPONSE', {
         statusCode: response.status,
         recordsFound: response.data?.list?.length || 0,
-        firstRecord: response.data?.list?.[0] || null
+        firstRecord: response.data?.list?.[0] || null,
+        searchMethod: 'final_attempt',
+        finalWhereClause: whereClause
       }, groupConfig.id, groupConfig.name);
 
       if (response.data?.list?.length > 0) {
