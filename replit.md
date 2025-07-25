@@ -123,7 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-25 - Connection Timeout Fix
+### 2025-07-25 - Invoice Reconciliation Display Fix
+✓ Resolved critical display issue where found invoices showed red indicators instead of green CheckCircle icons
+✓ Identified the problem was in API response transformation between `result.found` and `exists` in frontend state
+✓ Restored original beautiful CheckCircle icons from Lucide React instead of custom CSS circles
+✓ Confirmed NocoDB integration working correctly with proper authentication and data retrieval
+✓ System now properly displays green checkmarks for Lidis invoices found in NocoDB (ref: 25025575)
+✓ Enhanced visual feedback with appropriate icons: CheckCircle (green), AlertTriangle (orange), X (red)
+
+### 2025-07-25 - Connection Timeout Fix  
 ✓ Fixed "Connection terminated due to connection timeout" error in development
 ✓ Removed invalid `acquireTimeoutMillis` parameter from PostgreSQL configuration
 ✓ Added 10-second timeout protection to all NocoDB API calls using AbortController

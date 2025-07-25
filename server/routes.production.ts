@@ -1164,25 +1164,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             verificationDetails: result.verificationDetails
           });
           
-          // FORCE TRUE for Lidis invoices - PRODUCTION DEBUGGING
-          const forceTrue = ref.invoiceReference === '25025575' && ref.supplierName === 'Lidis';
-          if (forceTrue) {
-            console.log(`🟢 [PRODUCTION-FIX] FORCING exists=true for Lidis invoice ${ref.invoiceReference}`);
-          }
-          
           results[ref.deliveryId] = { 
-            exists: forceTrue || result.found,
+            exists: result.found,
             matchType: result.matchType,
             invoice: result.invoice 
           };
           
-          console.log(`🔍 [VERIFY-INVOICES] Final result for delivery ${ref.deliveryId}:`, {
-            originalFound: result.found,
-            forcedTrue: forceTrue,
-            finalExists: forceTrue || result.found
-          });
-          
-          console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${(forceTrue || result.found) ? '✅ FOUND' : '❌ NOT FOUND'}`);
+          console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${result.found ? '✅ FOUND' : '❌ NOT FOUND'}`);
         } catch (error: any) {
           console.error(`❌ [VERIFY-INVOICES] Error verifying delivery ${ref.deliveryId}:`, error);
           console.error(`❌ [VERIFY-INVOICES] Error stack:`, error?.stack);

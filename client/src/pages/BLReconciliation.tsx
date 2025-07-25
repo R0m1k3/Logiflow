@@ -861,91 +861,28 @@ export default function BLReconciliation() {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
                                   
-                                  // Debug PRODUCTION vs DEV pour identifier la différence
-                                  console.log(`🔍 PRODUCTION DEBUG delivery ${delivery.id} (${delivery.invoiceReference}):`, { 
-                                    verificationKey, 
-                                    verification,
-                                    verificationExists: !!verification,
-                                    verificationExistsValue: verification?.exists,
-                                    verificationError: verification?.error,
-                                    verificationMatchType: verification?.matchType,
-                                    hasInvoiceData: !!verification?.invoice,
-                                    allKeys: Object.keys(invoiceVerifications),
-                                    stateKeys: Object.keys(invoiceVerifications).map(k => `${k}: ${invoiceVerifications[k]?.exists}`)
-                                  });
-                                  
                                   if (verification) {
-                                    console.log(`✅ PRODUCTION RENDERING for delivery ${delivery.id}:`, {
-                                      exists: verification.exists,
-                                      error: verification.error,
-                                      matchType: verification.matchType,
-                                      hasInvoice: !!verification.invoice
-                                    });
                                     
-                                    // Force un rendu très explicite avec débuggage DOM
+                                    // Affichage des icônes basé sur la vérification NocoDB
                                     if (verification.exists === true) {
-                                      console.log(`🟢 FORCING GREEN CHECK for delivery ${delivery.id}`);
                                       return (
-                                        <div className="flex items-center ml-1" data-testid={`green-check-${delivery.id}`}>
-                                          <div style={{
-                                            width: '16px',
-                                            height: '16px',
-                                            backgroundColor: '#16a34a',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                            fontSize: '12px',
-                                            fontWeight: 'bold'
-                                          }} title="Facture trouvée dans NocoDB">
-                                            ✓
-                                          </div>
+                                        <div className="flex items-center ml-1">
+                                          <CheckCircle className="w-4 h-4 text-green-600" title="Facture trouvée dans NocoDB" />
                                         </div>
                                       );
                                     } else if (verification.error) {
-                                      console.log(`🟠 FORCING TRIANGLE for delivery ${delivery.id}: ${verification.error}`);
                                       return (
-                                        <div className="flex items-center ml-1" data-testid={`triangle-${delivery.id}`}>
-                                          <div style={{
-                                            width: '16px',
-                                            height: '16px',
-                                            backgroundColor: '#f59e0b',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                            fontSize: '12px',
-                                            fontWeight: 'bold'
-                                          }} title={`Impossible de vérifier: ${verification.error}`}>
-                                            ⚠
-                                          </div>
+                                        <div className="flex items-center ml-1">
+                                          <AlertTriangle className="w-4 h-4 text-orange-500" title={`Erreur de configuration: ${verification.error}`} />
                                         </div>
                                       );
                                     } else {
-                                      console.log(`🔴 FORCING RED X for delivery ${delivery.id}`);
                                       return (
-                                        <div className="flex items-center ml-1" data-testid={`red-x-${delivery.id}`}>
-                                          <div style={{
-                                            width: '16px',
-                                            height: '16px',
-                                            backgroundColor: '#dc2626',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                            fontSize: '12px',
-                                            fontWeight: 'bold'
-                                          }} title="Facture non trouvée dans NocoDB">
-                                            ✗
-                                          </div>
+                                        <div className="flex items-center ml-1">
+                                          <X className="w-4 h-4 text-red-600" title="Facture non trouvée dans NocoDB" />
                                         </div>
                                       );
                                     }
-                                  } else {
-                                    console.log(`❌ NO VERIFICATION for delivery ${delivery.id}`);
                                   }
                                   return null;
                                 })()}
