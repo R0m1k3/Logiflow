@@ -862,33 +862,20 @@ export default function BLReconciliation() {
                                   const verification = invoiceVerifications[verificationKey];
                                   
                                   if (verification) {
-                                    console.log(`🎯 [RENDER] Delivery ${delivery.id} ICON DECISION:`, {
-                                      exists: verification.exists,
-                                      existsType: typeof verification.exists,
-                                      existsStrictCheck: verification.exists === true,
-                                      error: verification.error,
-                                      willShowGreen: verification.exists === true,
-                                      willShowOrange: !!verification.error,
-                                      willShowRed: !verification.error && verification.exists !== true
-                                    });
-                                    
                                     // Affichage des icônes basé sur la vérification NocoDB
                                     if (verification.exists === true) {
-                                      console.log(`✅ [RENDER] Delivery ${delivery.id} SHOWING GREEN CheckCircle`);
                                       return (
                                         <div className="flex items-center ml-1" title="Facture trouvée dans NocoDB">
                                           <CheckCircle className="w-4 h-4 text-green-600" />
                                         </div>
                                       );
                                     } else if (verification.error) {
-                                      console.log(`⚠️ [RENDER] Delivery ${delivery.id} SHOWING ORANGE AlertTriangle`);
                                       return (
                                         <div className="flex items-center ml-1" title={`Erreur de configuration: ${verification.error}`}>
                                           <AlertTriangle className="w-4 h-4 text-orange-500" />
                                         </div>
                                       );
                                     } else {
-                                      console.log(`❌ [RENDER] Delivery ${delivery.id} SHOWING RED X`);
                                       return (
                                         <div className="flex items-center ml-1" title="Facture non trouvée dans NocoDB">
                                           <X className="w-4 h-4 text-red-600" />
