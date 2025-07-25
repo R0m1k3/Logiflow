@@ -158,6 +158,14 @@ class InvoiceVerificationService {
 
     try {
       const searchUrl = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`;
+      const whereClause = `(${groupConfig.invoiceColumnName || 'RefFacture'},eq,${invoiceRef})`;
+      
+      nocodbLogger.debug('SEARCH_BY_INVOICE_REF_REQUEST', {
+        searchUrl,
+        whereClause,
+        invoiceColumnName: groupConfig.invoiceColumnName,
+        apiToken: nocodbConfig.apiToken ? `${nocodbConfig.apiToken.substring(0, 10)}...` : 'NOT_SET'
+      }, groupConfig.id, groupConfig.name);
       
       const response = await axios.get(searchUrl, {
         headers: {
@@ -165,7 +173,7 @@ class InvoiceVerificationService {
           'Content-Type': 'application/json'
         },
         params: {
-          where: `(${groupConfig.invoiceColumnName || 'RefFacture'},eq,${invoiceRef})`
+          where: whereClause
         }
       });
 

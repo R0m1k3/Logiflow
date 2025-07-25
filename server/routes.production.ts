@@ -2274,8 +2274,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userRole: user.role
       });
 
-      // Récupérer la configuration du groupe
+      // Récupérer la configuration du groupe avec diagnostic
+      console.log('🔍 [VERIFY-INVOICE] Récupération groupe ID:', groupId);
       const group = await storage.getGroup(groupId);
+      console.log('🔍 [VERIFY-INVOICE] Groupe récupéré:', group ? {
+        id: group.id,
+        name: group.name,
+        nocodbConfigId: group.nocodbConfigId,
+        nocodbTableId: group.nocodbTableId,
+        invoiceColumnName: group.invoiceColumnName
+      } : null);
+      
       if (!group) {
         return res.status(404).json({ message: "Groupe non trouvé" });
       }

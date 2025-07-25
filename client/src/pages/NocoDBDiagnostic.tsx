@@ -120,6 +120,13 @@ export default function NocoDBDiagnostic() {
       return;
     }
 
+    console.log('🔍 Diagnostic - Données envoyées:', {
+      invoiceRef,
+      supplierName,
+      amount: parseFloat(amount),
+      groupId: parseInt(groupId)
+    });
+
     verifyInvoiceMutation.mutate({
       invoiceRef,
       supplierName,
