@@ -631,9 +631,9 @@ export default function BLReconciliation() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
@@ -653,7 +653,7 @@ export default function BLReconciliation() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+      <div className="bg-gray-50 border border-gray-200 p-4 mx-6 mt-6 rounded-lg">
         <div className="flex items-center space-x-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -720,23 +720,25 @@ export default function BLReconciliation() {
         </div>
       </div>
 
-      {/* Pagination du haut */}
-      {totalItems > 0 && (
-        <div className="px-4 pb-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-            onItemsPerPageChange={setItemsPerPage}
-            className="border-b border-gray-200 pb-4"
-          />
-        </div>
-      )}
+      {/* Contenu principal avec scrolling */}
+      <div className="flex-1 overflow-hidden mx-6 mb-6">
+        {/* Pagination du haut */}
+        {totalItems > 0 && (
+          <div className="pb-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+              className="border-b border-gray-200 pb-4"
+            />
+          </div>
+        )}
 
-      {/* Table */}
-      <div className="p-4">
+        {/* Table */}
+        <div className="flex-1">
         {totalItems === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -748,8 +750,8 @@ export default function BLReconciliation() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white border border-gray-200 shadow-lg overflow-hidden rounded-lg">
+            <div className="overflow-auto max-h-[calc(100vh-400px)]">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -960,19 +962,21 @@ export default function BLReconciliation() {
             </table>
           </div>
           
-          {/* Pagination du bas */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-            onItemsPerPageChange={setItemsPerPage}
-            className="mt-4 border-t border-gray-200 pt-4"
-          />
+            {/* Pagination du bas */}
+            <div className="border-t border-gray-200 bg-white p-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+            </div>
+          </div>
+        )}
         </div>
-      )}
-    </div>
+      </div>
 
       {/* Reconciliation Modal */}
       <Dialog open={showReconciliationModal} onOpenChange={setShowReconciliationModal}>

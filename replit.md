@@ -254,13 +254,15 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 25, 2025 - PAGINATION RAPPROCHEMENT BL: Double Affichage et Correction Bug Disparition
+### July 25, 2025 - RAPPROCHEMENT BL: Correction Double Ascenseur et Optimisation Layout
 
-- **PAGINATION DOUBLE AJOUTÉE** - Contrôles de pagination maintenant visibles au-dessus ET en dessous de la liste
-- **BUG DISPARITION CORRIGÉ** - Pagination ne disparaît plus lors du changement du nombre d'éléments par page
-- **CONDITION PAGINATION AMÉLIORÉE** - Composant Pagination affiche toujours les contrôles quand onItemsPerPageChange est disponible
-- **PAGINATION PAR DÉFAUT 20** - Page affiche 20 éléments par défaut au lieu de 10 pour une meilleure efficacité
-- **EXPÉRIENCE UTILISATEUR OPTIMISÉE** - Navigation plus fluide avec contrôles accessibles en haut et bas de liste
+- **PROBLÈME DOUBLE ASCENSEUR RÉSOLU** - Restructuration complète du layout avec flex-col et overflow intelligent
+- **LAYOUT OPTIMISÉ** - Header fixe, contenu scrollable avec hauteur calculée dynamiquement max-h-[calc(100vh-400px)]
+- **PAGINATION DOUBLE MAINTENUE** - Contrôles de pagination au-dessus ET en dessous de la liste
+- **STRUCTURE FLEX AMÉLIORÉE** - Conteneur principal en flex-1 pour gestion optimale de l'espace vertical
+- **OVERFLOW INTELLIGENT** - Un seul conteneur scrollable au lieu de multiples overlaps créant les doubles ascenseurs
+- **INTERFACE COHÉRENTE** - Marges et espacement harmonisés pour une meilleure expérience utilisateur
+- **PERFORMANCE ACCRUE** - Scrolling fluide même avec de nombreuses lignes grâce à la structure optimisée
 
 ### July 25, 2025 - CORRECTION COMMANDES CLIENT: Sauvegarde Commentaires à la Création Fonctionnelle
 
