@@ -1080,22 +1080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Invoice verification routes (simplified for production)
-  app.post('/api/verify-invoice', isAuthenticated, async (req: any, res) => {
-    try {
-      const { groupId, invoiceReference } = req.body;
-      
-      if (!groupId || !invoiceReference) {
-        return res.status(400).json({ message: "groupId and invoiceReference are required" });
-      }
-
-      // Simplified verification - always return false for production
-      res.json({ exists: false });
-    } catch (error) {
-      console.error("Error verifying invoice:", error);
-      res.status(500).json({ message: "Failed to verify invoice" });
-    }
-  });
+  // Route supprimée - utiliser /api/verify-invoices à la place
 
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
     try {
