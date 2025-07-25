@@ -16,13 +16,31 @@ class NocoDBLogger {
   private logFile: string;
 
   constructor() {
-    // Créer le répertoire de logs s'il n'existe pas
-    const logsDir = path.join(process.cwd(), 'logs');
-    if (!fs.existsSync(logsDir)) {
-      fs.mkdirSync(logsDir, { recursive: true });
+    // Détecter l'environnement et choisir le répertoire approprié
+    let logsDir: string;
+    
+    // En production (Docker), utiliser /tmp qui est accessible en écriture
+    if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV) {
+      logsDir = '/tmp/nocodb-logs';
+    } else {
+      // En développement, utiliser le répertoire courant
+      logsDir = path.join(process.cwd(), 'logs');
     }
     
-    this.logFile = path.join(logsDir, 'nocodb.log');
+    try {
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+      this.logFile = path.join(logsDir, 'nocodb.log');
+      
+      // Test d'écriture pour vérifier les permissions
+      fs.writeFileSync(this.logFile, `[${new Date().toISOString()}] [INFO] [LOGGER_INIT] NocoDBLogger initialized\n`, { flag: 'a' });
+      
+    } catch (error) {
+      // Fallback vers la console uniquement si impossible d'écrire
+      console.warn('⚠️ NocoDBLogger: Impossible d\'écrire dans', logsDir, '- Mode console uniquement');
+      this.logFile = '';
+    }
   }
 
   private formatLog(entry: NocoDBLogEntry): string {
@@ -48,14 +66,20 @@ class NocoDBLogger {
   private writeLog(entry: NocoDBLogEntry): void {
     try {
       const logLine = this.formatLog(entry);
-      fs.appendFileSync(this.logFile, logLine);
       
-      // Console log pour développement
-      if (process.env.NODE_ENV === 'development') {
+      // Écrire dans le fichier si possible
+      if (this.logFile) {
+        fs.appendFileSync(this.logFile, logLine);
+      }
+      
+      // Toujours afficher en console pour développement ou si pas de fichier
+      if (process.env.NODE_ENV === 'development' || !this.logFile) {
         console.log(`🗃️ [NOCODB] ${entry.operation}:`, entry.data || entry.error || 'Success');
       }
     } catch (err) {
       console.error('Erreur écriture log NocoDB:', err);
+      // En cas d'erreur, au moins afficher en console
+      console.log(`🗃️ [NOCODB] ${entry.operation}:`, entry.data || entry.error || 'Success');
     }
   }
 
@@ -108,8 +132,8 @@ class NocoDBLogger {
   // Méthode pour lire les logs récents
   getRecentLogs(lines: number = 100): string[] {
     try {
-      if (!fs.existsSync(this.logFile)) {
-        return [];
+      if (!this.logFile || !fs.existsSync(this.logFile)) {
+        return [`[${new Date().toISOString()}] [INFO] [LOGS_UNAVAILABLE] Logs fichier non disponible - Mode console uniquement`];
       }
       
       const content = fs.readFileSync(this.logFile, 'utf-8');
@@ -118,14 +142,14 @@ class NocoDBLogger {
       return allLines.slice(-lines);
     } catch (err) {
       console.error('Erreur lecture logs NocoDB:', err);
-      return [];
+      return [`[${new Date().toISOString()}] [ERROR] [LOGS_READ_ERROR] ${err instanceof Error ? err.message : String(err)}`];
     }
   }
 
   // Méthode pour nettoyer les vieux logs
   cleanOldLogs(daysToKeep: number = 7): void {
     try {
-      if (!fs.existsSync(this.logFile)) {
+      if (!this.logFile || !fs.existsSync(this.logFile)) {
         return;
       }
       

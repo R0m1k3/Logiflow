@@ -254,6 +254,19 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
+### July 25, 2025 - SYSTÈME DIAGNOSTIC NOCODB COMPLET: Logging et Vérification Factures/BL Finalisés
+
+- **SERVICE LOGGING NOCODB CRÉÉ** - nocodbLogger.ts avec gestion intelligente des répertoires (logs/ en dev, /tmp/nocodb-logs en prod)
+- **SERVICE VÉRIFICATION AVANCÉ** - invoiceVerificationService.ts avec 3 stratégies: BL number, fournisseur+montant, fournisseur+date
+- **ROUTES API COMPLÈTES** - /api/nocodb/verify-invoice, test-connection, logs, cleanup avec permissions admin/directeur
+- **INTERFACE DIAGNOSTIC INTÉGRÉE** - NocoDBDiagnostic.tsx accessible via Administration > Diagnostic NocoDB
+- **GESTION PERMISSIONS PRODUCTION** - Fallback console si impossible d'écrire fichiers, compatible Docker/Replit
+- **LOGS TEMPS RÉEL** - Historique détaillé opérations avec niveaux INFO/WARN/ERROR/DEBUG et parsing intelligent
+- **TESTS CONNEXION NOCODB** - Vérification directe configuration avec logging complet des erreurs/succès
+- **NETTOYAGE AUTOMATIQUE** - Suppression logs anciens avec paramétrage jours à conserver
+- **DIAGNOSTIC COMPLET** - Interface permet test factures réelles avec feedback visuel et détails techniques
+- **ARCHITECTURE ROBUSTE** - Système entièrement opérationnel prêt pour diagnostic problèmes vérification BL/factures
+
 ### July 25, 2025 - RÉSOLUTION FINALE CONFIGURATION NOCODB: Système Entièrement Opérationnel et Testé
 
 - **PROBLÈME ROOT CAUSE RÉSOLU DÉFINITIVEMENT** - Fallbacks inutiles dans getGroups() et getGroup() empêchaient la lecture des vraies configurations NocoDB
