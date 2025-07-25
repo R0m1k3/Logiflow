@@ -54,16 +54,34 @@ export default function Groups() {
     nocodbSupplierColumnName: "Fournisseur",
   });
 
-  const { data: groups = [], isLoading } = useQuery<Group[]>({
+  const groupsQueryResult = useQuery<Group[]>({
     queryKey: ['/api/groups'],
   });
+  
+  const groups = groupsQueryResult.data || [];
+  const isLoading = groupsQueryResult.isLoading;
 
   // Debug: log groups data
   console.log('🏪 Frontend Groups Debug:', { 
     groups, 
     groupsCount: groups.length, 
     isLoading,
-    sample: groups[0]
+    sample: groups[0],
+    groupsType: typeof groups,
+    isArray: Array.isArray(groups)
+  });
+
+  // Debug: force log query data
+  const groupsQuery = useQuery<Group[]>({
+    queryKey: ['/api/groups'],
+  });
+  
+  console.log('🏪 Frontend Query Debug:', {
+    data: groupsQuery.data,
+    isLoading: groupsQuery.isLoading,
+    isError: groupsQuery.isError,
+    error: groupsQuery.error,
+    status: groupsQuery.status
   });
 
   const { data: rawNocodbConfigs = [] } = useQuery<NocodbConfig[]>({
