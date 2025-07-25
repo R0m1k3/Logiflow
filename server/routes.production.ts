@@ -2339,8 +2339,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test de connexion NocoDB avec logging
   app.post('/api/nocodb/test-connection', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('🔍 TEST_CONNECTION called:', { 
+        hasUser: !!req.user, 
+        userClaims: req.user?.claims?.sub, 
+        userId: req.user?.id,
+        body: req.body 
+      });
+      
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      console.log('🔍 User found:', { id: user?.id, role: user?.role });
+      
       if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        console.log('❌ Access denied for user:', user?.role);
         return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent tester les connexions" });
       }
 
@@ -2363,15 +2373,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userRole: user.role
       });
 
+      console.log('🔗 Testing connection with config:', { 
+        id: nocodbConfig.id, 
+        baseUrl: nocodbConfig.baseUrl,
+        projectId: nocodbConfig.projectId 
+      });
+
       const testResult = await invoiceVerificationService.testConnection(nocodbConfig);
       
+      console.log('📋 Test result:', testResult);
+      
       if (testResult.success) {
+        console.log('✅ Returning success response');
         res.json({ 
           success: true, 
           message: "Connexion réussie", 
           data: testResult.data 
         });
       } else {
+        console.log('❌ Returning error response:', testResult.error);
         res.status(500).json({ 
           success: false, 
           message: testResult.error || "Erreur de connexion" 
@@ -2380,10 +2400,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       nocodbLogger.error('TEST_CONNECTION_API_ERROR', error as Error);
-      console.error("Error testing NocoDB connection:", error);
+      console.error("❌ CRITICAL ERROR testing NocoDB connection:", error);
       res.status(500).json({ 
         success: false, 
-        message: "Erreur lors du test de connexion" 
+        message: "Erreur lors du test de connexion",
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });ervice.testConnection(nocodbConfig);
