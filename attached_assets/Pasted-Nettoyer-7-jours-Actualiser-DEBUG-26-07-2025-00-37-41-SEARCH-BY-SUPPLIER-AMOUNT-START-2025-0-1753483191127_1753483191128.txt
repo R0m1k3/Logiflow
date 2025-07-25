@@ -1,0 +1,202 @@
+Nettoyer (7 jours)
+Actualiser
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T22:37:41.581Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","amount":0,"tableId":"my7zunxprumahmm"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_ERROR
+[2025-07-25T22:37:41.587Z] [ERROR] [SEARCH_BY_INVOICE_REF_ERROR] [Group:1] [Frouard] Data: {"invoiceRef":"22529151","supplierName":"Sovacom","errorDetails":{"status":404,"statusText":"Not Found","responseData":{"error":"BASE_NOT_FOUND","message":"Base 'nocodb' not found"},"requestUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b","fullUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b?where=(RefFacture%2Ceq%2C22529151)"}} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T22:37:41.587Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:1] [Frouard] Data: {"supplierName":"Sovacom","amount":0,"tableId":"mrr733dfb8wtt9b"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T22:37:41.592Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","amount":0} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T22:37:41.592Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","targetDate":"2025-07-25T22:37:41.592Z","tableId":"my7zunxprumahmm"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T22:37:41.593Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:1] [Frouard] Data: {"supplierName":"Sovacom","amount":0} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T22:37:41.593Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:1] [Frouard] Data: {"supplierName":"Sovacom","targetDate":"2025-07-25T22:37:41.593Z","tableId":"mrr733dfb8wtt9b"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T22:37:41.599Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","targetDate":"2025-07-25T22:37:41.592Z"} Error: Request failed with status code 404
+WARN
+26/07/2025 00:37:41
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T22:37:41.599Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:2] [Houdemont] Data: {"invoiceRef":"223604","supplierName":"BI2L","amount":0,"searchAttempts":3}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T22:37:41.604Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:1] [Frouard] Data: {"supplierName":"Sovacom","targetDate":"2025-07-25T22:37:41.593Z"} Error: Request failed with status code 404
+WARN
+26/07/2025 00:37:41
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T22:37:41.604Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:1] [Frouard] Data: {"invoiceRef":"22529151","supplierName":"Sovacom","amount":0,"searchAttempts":3}
+INFO
+26/07/2025 00:37:41
+VERIFY_INVOICE_START
+[2025-07-25T22:37:41.605Z] [INFO] [VERIFY_INVOICE_START] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","amount":0,"groupId":1,"excludeDeliveryId":27}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_START
+[2025-07-25T22:37:41.605Z] [DEBUG] [SEARCH_BY_INVOICE_REF_START] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","tableId":"mrr733dfb8wtt9b"}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_REQUEST
+[2025-07-25T22:37:41.605Z] [DEBUG] [SEARCH_BY_INVOICE_REF_REQUEST] [Group:1] [Frouard] Data: {"searchUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b","whereClause":"(RefFacture,eq,000752796)","invoiceColumnName":"RefFacture","apiToken":"z4BAwLo6dg..."}
+INFO
+26/07/2025 00:37:41
+VERIFY_INVOICE_START
+[2025-07-25T22:37:41.607Z] [INFO] [VERIFY_INVOICE_START] [Group:2] [Houdemont] Data: {"invoiceRef":"223590","supplierName":"BI2L","amount":0,"groupId":2,"excludeDeliveryId":16}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_START
+[2025-07-25T22:37:41.607Z] [DEBUG] [SEARCH_BY_INVOICE_REF_START] [Group:2] [Houdemont] Data: {"invoiceRef":"223590","supplierName":"BI2L","tableId":"my7zunxprumahmm"}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_REQUEST
+[2025-07-25T22:37:41.607Z] [DEBUG] [SEARCH_BY_INVOICE_REF_REQUEST] [Group:2] [Houdemont] Data: {"searchUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/my7zunxprumahmm","whereClause":"(RefFacture,eq,223590)","invoiceColumnName":"RefFacture","apiToken":"z4BAwLo6dg..."}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_ERROR
+[2025-07-25T22:37:41.612Z] [ERROR] [SEARCH_BY_INVOICE_REF_ERROR] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","errorDetails":{"status":404,"statusText":"Not Found","responseData":{"error":"BASE_NOT_FOUND","message":"Base 'nocodb' not found"},"requestUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b","fullUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b?where=(RefFacture%2Ceq%2C000752796)"}} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T22:37:41.612Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:1] [Frouard] Data: {"supplierName":"CMP","amount":0,"tableId":"mrr733dfb8wtt9b"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_ERROR
+[2025-07-25T22:37:41.614Z] [ERROR] [SEARCH_BY_INVOICE_REF_ERROR] [Group:2] [Houdemont] Data: {"invoiceRef":"223590","supplierName":"BI2L","errorDetails":{"status":404,"statusText":"Not Found","responseData":{"error":"BASE_NOT_FOUND","message":"Base 'nocodb' not found"},"requestUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/my7zunxprumahmm","fullUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/my7zunxprumahmm?where=(RefFacture%2Ceq%2C223590)"}} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T22:37:41.615Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","amount":0,"tableId":"my7zunxprumahmm"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T22:37:41.618Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:1] [Frouard] Data: {"supplierName":"CMP","amount":0} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T22:37:41.618Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:1] [Frouard] Data: {"supplierName":"CMP","targetDate":"2025-07-25T22:37:41.618Z","tableId":"mrr733dfb8wtt9b"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T22:37:41.620Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","amount":0} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T22:37:41.620Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","targetDate":"2025-07-25T22:37:41.620Z","tableId":"my7zunxprumahmm"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T22:37:41.626Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:1] [Frouard] Data: {"supplierName":"CMP","targetDate":"2025-07-25T22:37:41.618Z"} Error: Request failed with status code 404
+WARN
+26/07/2025 00:37:41
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T22:37:41.626Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","amount":0,"searchAttempts":3}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T22:37:41.630Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","targetDate":"2025-07-25T22:37:41.620Z"} Error: Request failed with status code 404
+WARN
+26/07/2025 00:37:41
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T22:37:41.630Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:2] [Houdemont] Data: {"invoiceRef":"223590","supplierName":"BI2L","amount":0,"searchAttempts":3}
+INFO
+26/07/2025 00:37:41
+VERIFY_INVOICE_START
+[2025-07-25T22:37:41.636Z] [INFO] [VERIFY_INVOICE_START] [Group:2] [Houdemont] Data: {"invoiceRef":"223604","supplierName":"BI2L","amount":0,"groupId":2,"excludeDeliveryId":39}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_START
+[2025-07-25T22:37:41.636Z] [DEBUG] [SEARCH_BY_INVOICE_REF_START] [Group:2] [Houdemont] Data: {"invoiceRef":"223604","supplierName":"BI2L","tableId":"my7zunxprumahmm"}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_REQUEST
+[2025-07-25T22:37:41.636Z] [DEBUG] [SEARCH_BY_INVOICE_REF_REQUEST] [Group:2] [Houdemont] Data: {"searchUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/my7zunxprumahmm","whereClause":"(RefFacture,eq,223604)","invoiceColumnName":"RefFacture","apiToken":"z4BAwLo6dg..."}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_ERROR
+[2025-07-25T22:37:41.640Z] [ERROR] [SEARCH_BY_INVOICE_REF_ERROR] [Group:2] [Houdemont] Data: {"invoiceRef":"223604","supplierName":"BI2L","errorDetails":{"status":404,"statusText":"Not Found","responseData":{"error":"BASE_NOT_FOUND","message":"Base 'nocodb' not found"},"requestUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/my7zunxprumahmm","fullUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/my7zunxprumahmm?where=(RefFacture%2Ceq%2C223604)"}} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T22:37:41.640Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","amount":0,"tableId":"my7zunxprumahmm"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T22:37:41.644Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","amount":0} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T22:37:41.644Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","targetDate":"2025-07-25T22:37:41.644Z","tableId":"my7zunxprumahmm"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T22:37:41.647Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:2] [Houdemont] Data: {"supplierName":"BI2L","targetDate":"2025-07-25T22:37:41.644Z"} Error: Request failed with status code 404
+WARN
+26/07/2025 00:37:41
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T22:37:41.647Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:2] [Houdemont] Data: {"invoiceRef":"223604","supplierName":"BI2L","amount":0,"searchAttempts":3}
+INFO
+26/07/2025 00:37:41
+VERIFY_INVOICE_START
+[2025-07-25T22:37:41.650Z] [INFO] [VERIFY_INVOICE_START] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","amount":0,"groupId":1,"excludeDeliveryId":27}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_START
+[2025-07-25T22:37:41.650Z] [DEBUG] [SEARCH_BY_INVOICE_REF_START] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","tableId":"mrr733dfb8wtt9b"}
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_REQUEST
+[2025-07-25T22:37:41.650Z] [DEBUG] [SEARCH_BY_INVOICE_REF_REQUEST] [Group:1] [Frouard] Data: {"searchUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b","whereClause":"(RefFacture,eq,000752796)","invoiceColumnName":"RefFacture","apiToken":"z4BAwLo6dg..."}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_INVOICE_REF_ERROR
+[2025-07-25T22:37:41.654Z] [ERROR] [SEARCH_BY_INVOICE_REF_ERROR] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","errorDetails":{"status":404,"statusText":"Not Found","responseData":{"error":"BASE_NOT_FOUND","message":"Base 'nocodb' not found"},"requestUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b","fullUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b?where=(RefFacture%2Ceq%2C000752796)"}} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T22:37:41.654Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:1] [Frouard] Data: {"supplierName":"CMP","amount":0,"tableId":"mrr733dfb8wtt9b"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T22:37:41.659Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:1] [Frouard] Data: {"supplierName":"CMP","amount":0} Error: Request failed with status code 404
+DEBUG
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T22:37:41.659Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:1] [Frouard] Data: {"supplierName":"CMP","targetDate":"2025-07-25T22:37:41.659Z","tableId":"mrr733dfb8wtt9b"}
+ERROR
+26/07/2025 00:37:41
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T22:37:41.664Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:1] [Frouard] Data: {"supplierName":"CMP","targetDate":"2025-07-25T22:37:41.659Z"} Error: Request failed with status code 404
+WARN
+26/07/2025 00:37:41
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T22:37:41.664Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:1] [Frouard] Data: {"invoiceRef":"000752796","supplierName":"CMP","amount":0,"searchAttempts":3}
+INFO
+26/07/2025 00:39:07
+TEST_CONNECTION_REQUEST
+[2025-07-25T22:39:07.292Z] [INFO] [TEST_CONNECTION_REQUEST] Data: {"configId":1,"userId":"admin_local","userRole":"admin"}
+INFO
+26/07/2025 00:39:07
+TEST_CONNECTION_START
+[2025-07-25T22:39:07.292Z] [INFO] [TEST_CONNECTION_START] Data: {"configId":1,"baseUrl":"https://nocodb.ffnancy.fr"}
+ERROR
+26/07/2025 00:39:07
+TEST_CONNECTION_ERROR
+[2025-07-25T22:39:07.311Z] [ERROR] [TEST_CONNECTION_ERROR] Data: {"configId":1,"baseUrl":"https://nocodb.ffnancy.fr"} Error: Request failed with status code 404
