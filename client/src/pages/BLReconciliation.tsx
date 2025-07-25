@@ -721,7 +721,7 @@ export default function BLReconciliation() {
       </div>
 
       {/* Contenu principal avec scrolling */}
-      <div className="flex-1 overflow-hidden mx-6 mb-6">
+<div className="flex-1 overflow-hidden flex flex-col -mx-6 mb-6 px-6">
         {/* Pagination du haut */}
         {totalItems > 0 && (
           <div className="pb-4">
@@ -738,7 +738,7 @@ export default function BLReconciliation() {
         )}
 
         {/* Table */}
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
         {totalItems === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />

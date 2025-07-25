@@ -299,9 +299,9 @@ export default function Tasks() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col p-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -mx-6 -mt-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
@@ -333,7 +333,7 @@ export default function Tasks() {
         </div>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex gap-6 flex-1 min-h-0">
         {/* Sidebar avec filtres */}
         <div className="w-80 bg-gray-50 border-r border-gray-200 p-4 flex-shrink-0">
           {/* Filtres */}
@@ -392,7 +392,7 @@ export default function Tasks() {
         </div>
 
         {/* Zone principale avec les tâches */}
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Liste des tâches */}
           <div className="p-6">
             {/* Pagination du haut */}
@@ -421,7 +421,7 @@ export default function Tasks() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto">
+              <div className="space-y-4 flex-1 overflow-y-auto">
                 {/* Tâches en cours */}
                 {paginatedTasks.filter(task => task.status === 'pending').length > 0 && (
                   <div>

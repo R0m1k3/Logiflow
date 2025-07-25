@@ -279,9 +279,9 @@ export default function Deliveries() {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col p-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -mx-6 -mt-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
@@ -305,7 +305,7 @@ export default function Deliveries() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg flex-shrink-0">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-64">
             <div className="relative">
@@ -362,21 +362,22 @@ export default function Deliveries() {
             )}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6">
-            {/* Pagination du haut */}
-            <div className="mb-4">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-                className="border-b border-gray-200 pb-4"
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 h-full flex flex-col">
+              {/* Pagination du haut */}
+              <div className="mb-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  className="border-b border-gray-200 pb-4"
               />
-            </div>
-            
-            <div className="bg-white border border-gray-200 shadow-lg overflow-hidden">
+              </div>
+              
+              <div className="bg-white border border-gray-200 shadow-lg overflow-hidden flex-1">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -519,6 +520,7 @@ export default function Deliveries() {
                   onPageChange={setCurrentPage}
                   onItemsPerPageChange={setItemsPerPage}
                 />
+              </div>
               </div>
             </div>
           </div>

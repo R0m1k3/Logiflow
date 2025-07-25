@@ -668,9 +668,9 @@ export default function CustomerOrders() {
   } = usePagination(sortedOrders, 10);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col p-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -mx-6 -mt-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
@@ -689,7 +689,7 @@ export default function CustomerOrders() {
       </div>
 
       {/* Search and Filters */}
-      <Card>
+      <Card className="flex-shrink-0">
         <CardHeader>
           <CardTitle className="text-lg">Recherche et Filtres</CardTitle>
         </CardHeader>
@@ -734,13 +734,13 @@ export default function CustomerOrders() {
       </Card>
 
       {/* Orders Table */}
-      <Card>
+      <Card className="flex-1 min-h-0">
         <CardHeader>
           <CardTitle className="text-lg">
             Commandes ({totalItems})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-full flex flex-col">
           {/* Pagination du haut */}
           {totalItems > 0 && (
             <div className="mb-4">
@@ -759,7 +759,7 @@ export default function CustomerOrders() {
           {isLoading ? (
             <div>Chargement...</div>
           ) : (
-            <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
+            <div className="flex-1 overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

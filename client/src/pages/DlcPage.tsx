@@ -466,9 +466,9 @@ export default function DlcPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col p-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -m-6 mb-6">
+      <div className="bg-white border-b border-gray-200 p-6 shadow-sm -mx-6 -mt-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
@@ -623,7 +623,7 @@ export default function DlcPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="flex-shrink-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
@@ -676,7 +676,7 @@ export default function DlcPage() {
       </Card>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-shrink-0">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Produits Actifs</CardTitle>
@@ -730,12 +730,12 @@ export default function DlcPage() {
       </div>
 
       {/* Products Table Section */}
-      <div>
-        <Card>
+      <div className="flex-1 min-h-0">
+        <Card className="h-full flex flex-col">
           <CardHeader>
             <CardTitle>Produits DLC ({totalItems})</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             {productsLoading ? (
               <div className="flex justify-center items-center h-32">Chargement des produits...</div>
             ) : totalItems === 0 ? (
@@ -743,7 +743,7 @@ export default function DlcPage() {
                 Aucun produit DLC trouvé
               </div>
             ) : (
-              <div>
+              <div className="flex-1 flex flex-col">
                 {/* Pagination du haut */}
                 {totalItems > 0 && (
                   <div className="mb-4">
@@ -759,7 +759,7 @@ export default function DlcPage() {
                   </div>
                 )}
                 
-                <div className="overflow-x-auto max-h-[calc(100vh-400px)] overflow-y-auto">
+                <div className="overflow-x-auto flex-1 overflow-y-auto">
                   <Table>
                     <TableHeader>
                     <TableRow>
