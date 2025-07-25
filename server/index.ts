@@ -178,18 +178,21 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
   // Setup routes - use appropriate routes based on storage mode
   let server;
   if (process.env.STORAGE_MODE === 'production') {
-    console.log('🔄 Loading production routes...');
+    console.log('🔄 Loading production routes... (STORAGE_MODE=production)');
     try {
       const { registerRoutes: registerProductionRoutes } = await import("./routes.production");
+      console.log('✅ Successfully loaded routes.production.ts');
       server = await registerProductionRoutes(app);
     } catch (error) {
       console.error('❌ Failed to load production routes, falling back to development routes:', error instanceof Error ? error.message : 'Unknown error');
       const { registerRoutes } = await import("./routes");
+      console.log('🔄 Fallback: loaded routes.ts (development)');
       server = await registerRoutes(app);
     }
   } else {
-    console.log('🔄 Loading development routes...');
+    console.log('🔄 Loading development routes... (STORAGE_MODE=development)');
     const { registerRoutes } = await import("./routes");
+    console.log('✅ Successfully loaded routes.ts');
     server = await registerRoutes(app);
   }
 
