@@ -254,6 +254,13 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
+### July 25, 2025 - PAGE RAPPROCHEMENT BL: Pagination par Défaut 20 Éléments
+
+- **PAGINATION PAR DÉFAUT AUGMENTÉE** - Page Rapprochement BL affiche maintenant 20 éléments par défaut au lieu de 10
+- **PARAMÈTRE USEPAGINATION MODIFIÉ** - Valeur par défaut changée de 10 à 20 dans BLReconciliation.tsx
+- **AFFICHAGE OPTIMISÉ** - Plus de livraisons visibles sans changement de page pour améliorer l'efficacité
+- **EXPÉRIENCE UTILISATEUR AMÉLIORÉE** - Moins de clics de pagination nécessaires pour parcourir les livraisons
+
 ### July 25, 2025 - CORRECTION COMMANDES CLIENT: Sauvegarde Commentaires à la Création Fonctionnelle
 
 - **PROBLÈME CRITIQUE RÉSOLU** - Champ `notes` manquant dans la requête INSERT de createCustomerOrder production
