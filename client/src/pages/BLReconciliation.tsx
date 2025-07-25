@@ -631,29 +631,27 @@ export default function BLReconciliation() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
-              <FileText className="w-6 h-6 mr-3 text-blue-600" />
-              Rapprochement
-            </h2>
-            <p className="text-gray-600 mt-1">
-              Rapprochement des bons de livraison et factures
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="outline" className="text-sm border border-gray-300">
-              {filteredDeliveries.length} bon(s) de livraison
-            </Badge>
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
+            <FileText className="w-6 h-6 mr-3 text-blue-600" />
+            Rapprochement
+          </h2>
+          <p className="text-gray-600 mt-1">
+            Rapprochement des bons de livraison et factures
+          </p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Badge variant="outline" className="text-sm border border-gray-300">
+            {filteredDeliveries.length} bon(s) de livraison
+          </Badge>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-50 border border-gray-200 p-4 mx-6 mt-6 rounded-lg">
+      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
         <div className="flex items-center space-x-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -720,11 +718,21 @@ export default function BLReconciliation() {
         </div>
       </div>
 
-      {/* Contenu principal avec scrolling */}
-<div className="flex-1 overflow-hidden flex flex-col -mx-6 mb-6 px-6">
-        {/* Pagination du haut */}
-        {totalItems > 0 && (
-          <div className="pb-4">
+      {/* Deliveries List */}
+      {filteredDeliveries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+          <FileText className="w-16 h-16 mb-4 text-gray-300" />
+          <h3 className="text-lg font-medium mb-2">Aucun BL trouvé</h3>
+          <p className="text-center max-w-md">
+            {searchTerm 
+              ? "Aucun BL ne correspond à vos critères de recherche."
+              : "Aucun BL disponible pour le rapprochement."}
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Pagination du haut */}
+          <div className="mb-4">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -735,23 +743,9 @@ export default function BLReconciliation() {
               className="border-b border-gray-200 pb-4"
             />
           </div>
-        )}
-
-        {/* Table */}
-        <div className="flex-1 min-h-0">
-        {totalItems === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Aucun BL trouvé
-            </h3>
-            <p className="text-gray-600">
-              Les livraisons validées avec numéro de BL apparaîtront ici.
-            </p>
-          </div>
-        ) : (
-          <div className="bg-white border border-gray-200 shadow-lg overflow-hidden rounded-lg">
-            <div className="overflow-auto max-h-[calc(100vh-400px)]">
+          
+          <div className="bg-white border border-gray-200 shadow-lg overflow-hidden">
+            <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -960,23 +954,22 @@ export default function BLReconciliation() {
                 })}
               </tbody>
             </table>
-          </div>
-          
-            {/* Pagination du bas */}
-            <div className="border-t border-gray-200 bg-white p-4">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-              />
             </div>
           </div>
-        )}
-        </div>
-      </div>
+          
+          {/* Pagination du bas */}
+          <div className="mt-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+            />
+          </div>
+        </>
+      )}
 
       {/* Reconciliation Modal */}
       <Dialog open={showReconciliationModal} onOpenChange={setShowReconciliationModal}>
