@@ -209,7 +209,7 @@ export default function BLReconciliation() {
     if (!deliveriesWithBL || deliveriesWithBL.length === 0) return;
     
     const invoiceReferencesToVerify = deliveriesWithBL
-      .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '')
+      .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId)
       .map((delivery: any) => ({
         groupId: delivery.groupId,
         invoiceReference: delivery.invoiceReference,
@@ -853,16 +853,20 @@ export default function BLReconciliation() {
                             {delivery.invoiceReference ? (
                               <div className="flex items-center space-x-1">
                                 <span className="truncate max-w-28">{delivery.invoiceReference}</span>
-                                {/* Affichage coche basé uniquement sur existence dans NocoDB */}
-                                {invoiceVerifications[delivery.id] && (
+                                {/* Affichage coche basé sur existence dans NocoDB ou impossibilité de vérifier */}
+                                {invoiceVerifications[delivery.id] ? (
                                   <div className="flex items-center">
                                     {invoiceVerifications[delivery.id].exists ? (
                                       <CheckCircle className="w-3 h-3 text-green-600" title="Facture trouvée dans NocoDB" />
+                                    ) : invoiceVerifications[delivery.id].error ? (
+                                      <AlertTriangle className="w-3 h-3 text-orange-500" title={`Impossible de vérifier: ${invoiceVerifications[delivery.id].error}`} />
                                     ) : (
                                       <X className="w-3 h-3 text-red-600" title="Facture non trouvée dans NocoDB" />
                                     )}
                                   </div>
-                                )}
+                                ) : !delivery.groupId ? (
+                                  <AlertTriangle className="w-3 h-3 text-gray-400" title="Aucun magasin assigné - impossible de vérifier" />
+                                ) : null}
                               </div>
                             ) : (
                               <button
