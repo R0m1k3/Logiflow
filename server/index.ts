@@ -100,29 +100,38 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     }
   }
 
-  // Logging optimisé (sans détails de réponse sensibles)
+  // Logging optimisé avec timeout pour requêtes lentes
   app.use((req, res, next) => {
     const start = Date.now();
     const path = req.path;
+    
+    // Skip logging for static assets and Vite requests to reduce noise
+    const skipLogging = path.includes('/@') || 
+                       path.includes('.js') || 
+                       path.includes('.css') || 
+                       path.includes('.map') ||
+                       path.includes('/src/');
 
-    res.on("finish", () => {
-      const duration = Date.now() - start;
-      if (path.startsWith("/api")) {
-        // Logging sécurisé sans données sensibles
-        let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-        
-        // Ne pas logger les données sensibles
-        if (path.includes('/login') || path.includes('/password')) {
-          logLine += ' :: [SENSITIVE DATA HIDDEN]';
+    if (!skipLogging) {
+      res.on("finish", () => {
+        const duration = Date.now() - start;
+        if (path.startsWith("/api")) {
+          // Logging sécurisé sans données sensibles
+          let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+          
+          // Ne pas logger les données sensibles
+          if (path.includes('/login') || path.includes('/password')) {
+            logLine += ' :: [SENSITIVE DATA HIDDEN]';
+          }
+
+          if (logLine.length > 80) {
+            logLine = logLine.slice(0, 79) + "…";
+          }
+
+          log(logLine);
         }
-
-        if (logLine.length > 80) {
-          logLine = logLine.slice(0, 79) + "…";
-        }
-
-        log(logLine);
-      }
-    });
+      });
+    }
 
     next();
   });

@@ -31,12 +31,15 @@ declare global {
 import { hashPassword, comparePasswords } from './auth-utils.production';
 
 export function setupLocalAuth(app: Express) {
-  // Configure session with PostgreSQL store
+  // Configure session with PostgreSQL store with timeout protection
   app.use(session({
     store: new PgSession({
       pool: pool,
       tableName: 'session',
-      createTableIfMissing: true
+      createTableIfMissing: true,
+      pruneSessionInterval: 60, // Clean expired sessions every 60 seconds
+      errorLog: console.error.bind(console),
+      ttl: 24 * 60 * 60 // 24 hours in seconds
     }),
     secret: process.env.SESSION_SECRET || 'LogiFlow_Super_Secret_Session_Key_2025_Production',
     resave: false,
