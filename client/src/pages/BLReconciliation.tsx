@@ -861,6 +861,15 @@ export default function BLReconciliation() {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
                                   
+                                  console.log(`🔍 [DEBUG] Delivery ${delivery.id} verification:`, {
+                                    verificationKey,
+                                    verification,
+                                    exists: verification?.exists,
+                                    existsType: typeof verification?.exists,
+                                    existsStrictlyTrue: verification?.exists === true,
+                                    invoiceReference: delivery.invoiceReference
+                                  });
+                                  
                                   if (verification) {
                                     
                                     // Affichage des icônes basé sur la vérification NocoDB
