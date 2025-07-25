@@ -1573,4 +1573,33 @@ async function ensureEmployeePermissions() {
   }
 }
 
-export { pool, ensureEmployeePermissions };
+async function ensureCorrectNocodbConfig() {
+  try {
+    console.log('🔧 CRITICAL FIX: Ensuring correct NocoDB project_id...');
+    
+    // Vérifier et corriger le project_id de la configuration NocoDB
+    const currentConfig = await pool.query(`
+      SELECT id, name, project_id FROM nocodb_config WHERE id = 1
+    `);
+    
+    if (currentConfig.rows.length > 0) {
+      const config = currentConfig.rows[0];
+      if (config.project_id === 'nocodb') {
+        // Corriger le project_id incorrect
+        await pool.query(`
+          UPDATE nocodb_config 
+          SET project_id = 'pcg4uw79ukvycxc', updated_at = CURRENT_TIMESTAMP 
+          WHERE id = 1
+        `);
+        console.log('✅ CRITICAL FIX: NocoDB project_id corrected from "nocodb" to "pcg4uw79ukvycxc"');
+      } else {
+        console.log(`✅ NocoDB project_id already correct: ${config.project_id}`);
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Error ensuring NocoDB config:', error);
+  }
+}
+
+export { pool, ensureEmployeePermissions, ensureCorrectNocodbConfig };

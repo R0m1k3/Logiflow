@@ -149,8 +149,11 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     try {
       await initDatabase();
       // CRITICAL FIX: Auto-fix employee permissions on every startup
-      const { ensureEmployeePermissions } = await import('./initDatabase.production');
+      const { ensureEmployeePermissions, ensureCorrectNocodbConfig } = await import('./initDatabase.production');
       await ensureEmployeePermissions();
+      
+      // CRITICAL FIX: Ensure correct NocoDB project_id on every startup
+      await ensureCorrectNocodbConfig();
       
       // Initialize all automatic services (backup and BL reconciliation)
       const { SchedulerService } = await import('./schedulerService.production.js');
