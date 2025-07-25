@@ -1107,19 +1107,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('🔍 [VERIFY-INVOICES] Processing', invoiceReferences.length, 'invoices for verification');
 
-      // Use the real invoice verification service
-      const { InvoiceVerificationService } = await import('./services/invoiceVerificationService.js');
-      const verificationService = new InvoiceVerificationService();
+      // Use the singleton instance of the verification service
+      const { invoiceVerificationService } = await import('./services/invoiceVerificationService.js');
       
       const results: any = {};
       
       for (const ref of invoiceReferences) {
         try {
-          const result = await verificationService.verifyInvoice(
+          // Get group and nocodb configurations
+          const groupConfig = await storage.getGroup(ref.groupId);
+          if (!groupConfig || !groupConfig.nocodbConfigId) {
+            results[ref.deliveryId] = { 
+              exists: false, 
+              error: 'Configuration NocoDB manquante pour ce groupe' 
+            };
+            continue;
+          }
+
+          const nocodbConfig = await storage.getNocodbConfig(groupConfig.nocodbConfigId);
+          if (!nocodbConfig) {
+            results[ref.deliveryId] = { 
+              exists: false, 
+              error: 'Configuration NocoDB introuvable' 
+            };
+            continue;
+          }
+
+          const result = await invoiceVerificationService.verifyInvoice(
             ref.invoiceReference,
             ref.supplierName,
             parseFloat(ref.amount || '0'),
-            ref.groupId
+            groupConfig,
+            nocodbConfig,
+            ref.deliveryId
           );
           
           results[ref.deliveryId] = { 
@@ -1129,14 +1149,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${result.found ? '✅ FOUND' : '❌ NOT FOUND'}`);
-        } catch (error) {
+        } catch (error: any) {
           console.error(`❌ [VERIFY-INVOICES] Error verifying delivery ${ref.deliveryId}:`, error);
-          results[ref.deliveryId] = { exists: false, error: error.message };
+          results[ref.deliveryId] = { exists: false, error: error?.message || 'Erreur inconnue' };
         }
       }
       
       res.json(results);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error verifying invoices:", error);
       res.status(500).json({ message: "Failed to verify invoices" });
     }
