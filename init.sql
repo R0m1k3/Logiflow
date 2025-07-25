@@ -38,7 +38,16 @@ CREATE TABLE groups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     color VARCHAR(7) DEFAULT '#1976D2',
+    address TEXT,
+    phone VARCHAR(255),
+    email VARCHAR(255),
+    nocodb_config_id INTEGER,
+    nocodb_table_id VARCHAR(255),
     nocodb_table_name VARCHAR(255),
+    invoice_column_name VARCHAR(255) DEFAULT 'Ref Facture',
+    nocodb_bl_column_name VARCHAR(255) DEFAULT 'Numéro de BL',
+    nocodb_amount_column_name VARCHAR(255) DEFAULT 'Montant HT',
+    nocodb_supplier_column_name VARCHAR(255) DEFAULT 'Fournisseur',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

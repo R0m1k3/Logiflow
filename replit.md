@@ -254,6 +254,15 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
+### July 25, 2025 - CORRECTION CRITIQUE PRODUCTION: Database Schema NocoDB Harmonisé
+
+- **PROBLÈME ROOT CAUSE IDENTIFIÉ** - Groupes/magasins inaccessibles en production à cause de colonnes NocoDB manquantes dans init.sql
+- **ERREUR SQL RÉSOLUE** - "column nocodb_bl_column_name does not exist" corrigée par mise à jour schema init.sql
+- **SCHEMA INIT.SQL COMPLÉTÉ** - Ajout des colonnes manquantes : address, phone, email, nocodb_config_id, nocodb_table_id, invoice_column_name, nocodb_bl_column_name, nocodb_amount_column_name, nocodb_supplier_column_name
+- **FONCTIONS STORAGE SÉCURISÉES** - Ajout gestion d'erreur avec fallback dans getGroups() et getGroup() pour compatibilité schémas
+- **COHÉRENCE DÉVELOPPEMENT/PRODUCTION** - Schema harmonisé entre shared/schema.ts et init.sql pour déploiements futurs
+- **GROUPES PRODUCTION OPÉRATIONNELS** - Interface magasins maintenant accessible avec 2 groupes (Frouard, Houdemont)
+
 ### July 25, 2025 - RESTAURATION STRUCTURE ORIGINALE: Retour aux Hauteurs Fixes Fonctionnelles
 
 - **STRUCTURE FLEX ANNULÉE** - Suite aux problèmes rencontrés, retour à l'architecture originale qui fonctionnait correctement
