@@ -734,11 +734,19 @@ class InvoiceVerificationService {
   async testConnection(nocodbConfig: NocoDBConfig): Promise<{ success: boolean; error?: string; data?: any }> {
     nocodbLogger.info('TEST_CONNECTION_START', {
       configId: nocodbConfig.id,
-      baseUrl: nocodbConfig.baseUrl
+      baseUrl: nocodbConfig.baseUrl,
+      projectId: nocodbConfig.projectId,
+      fullConfig: nocodbConfig
     });
 
     try {
       const testUrl = `${nocodbConfig.baseUrl}/api/v1/db/meta/projects/${nocodbConfig.projectId}/info`;
+      
+      nocodbLogger.info('TEST_CONNECTION_URL_CONSTRUCTED', {
+        testUrl,
+        projectId: nocodbConfig.projectId,
+        expectedProjectId: 'pcg4uw79ukvycxc'
+      });
       
       const response = await axiosWithAutoRetry({
         method: 'GET',
