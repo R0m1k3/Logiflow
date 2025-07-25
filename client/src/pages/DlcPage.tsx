@@ -759,7 +759,7 @@ export default function DlcPage() {
                   </div>
                 )}
                 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto max-h-[calc(100vh-400px)] overflow-y-auto">
                   <Table>
                     <TableHeader>
                     <TableRow>

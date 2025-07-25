@@ -421,7 +421,7 @@ export default function Tasks() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto">
                 {/* Tâches en cours */}
                 {paginatedTasks.filter(task => task.status === 'pending').length > 0 && (
                   <div>

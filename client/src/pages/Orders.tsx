@@ -325,7 +325,7 @@ export default function Orders() {
             )}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 p-6">
             {/* Pagination du haut */}
             <div className="mb-4">
               <Pagination
@@ -339,7 +339,7 @@ export default function Orders() {
               />
             </div>
             
-            <div className="bg-white border border-gray-200 shadow-lg overflow-hidden">
+            <div className="bg-white border border-gray-200 shadow-lg overflow-hidden max-h-[calc(100vh-300px)] overflow-y-auto">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">

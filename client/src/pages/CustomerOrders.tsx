@@ -759,22 +759,23 @@ export default function CustomerOrders() {
           {isLoading ? (
             <div>Chargement...</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead>Produit</TableHead>
-                  <TableHead>Référence</TableHead>
-                  <TableHead>Quantité</TableHead>
-                  <TableHead>Fournisseur</TableHead>
-                  <TableHead>Gencode</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Téléphone</TableHead>
+                    <TableHead>Produit</TableHead>
+                    <TableHead>Référence</TableHead>
+                    <TableHead>Quantité</TableHead>
+                    <TableHead>Fournisseur</TableHead>
+                    <TableHead>Gencode</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                 {paginatedOrders.map((order) => (
                   <TableRow
                     key={order.id}
@@ -882,6 +883,7 @@ export default function CustomerOrders() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
           
           {/* Pagination du bas */}

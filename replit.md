@@ -254,16 +254,19 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 25, 2025 - PAGINATION DOUBLE COMPLÈTE: Toutes les Pages de Liste avec Contrôles Haut/Bas
+### July 25, 2025 - PAGINATION DOUBLE ET RÉSOLUTION DOUBLE ASCENSEUR: Interface Optimisée
 
 - **ROLLOUT COMPLET PAGINATION DOUBLE** - Ajout pagination en haut ET en bas pour toutes les pages de liste principales
 - **PAGES COMPLÉTÉES** - Orders, CustomerOrders, Tasks et DlcPage avec pagination double fonctionnelle
+- **PROBLÈME DOUBLE ASCENSEUR RÉSOLU** - Correction des conteneurs overflow-y-auto imbriqués causant double barre défilement
+- **HAUTEURS CONTENEURS OPTIMISÉES** - Utilisation max-h-[calc(100vh-400px)] pour limiter hauteur des tableaux et listes
 - **STRUCTURE COHÉRENTE GÉNÉRALISÉE** - Pattern uniforme : pagination du haut avec border-b, pagination du bas avec border-t
 - **NAVIGATION OPTIMISÉE COMPLÈTE** - Utilisateurs peuvent naviguer depuis n'importe quelle position de la liste
 - **INTERFACE UNIFIÉE ÉTENDUE** - Design cohérent appliqué à travers toute l'application pour expérience utilisateur fluide
 - **EXPÉRIENCE UTILISATEUR MAXIMISÉE** - Élimination complète du besoin de scroll pour accéder aux contrôles de pagination
 - **COMPOSANT PAGINATION ROBUSTE** - Affichage conditionnel intelligent avec sélecteur éléments/page toujours disponible
 - **PATTERN ARCHITECTURAL ÉTABLI** - Standard de pagination double maintenant intégré pour futures fonctionnalités
+- **CONTENEURS SCROLL UNIFIÉS** - Une seule barre de défilement par page avec gestion optimale de la hauteur
 
 ### July 25, 2025 - CORRECTION COMMANDES CLIENT: Sauvegarde Commentaires à la Création Fonctionnelle
 
