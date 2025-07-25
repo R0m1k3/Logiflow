@@ -853,9 +853,12 @@ export default function BLReconciliation() {
                             {delivery.invoiceReference ? (
                               <div className="flex items-center space-x-1">
                                 <span className="truncate max-w-28">{delivery.invoiceReference}</span>
-                                {invoiceVerifications[delivery.id] && (
+                                {/* Affichage coche : verte si reconciled, sinon basée sur verification */}
+                                {(delivery.reconciled || invoiceVerifications[delivery.id]) && (
                                   <div className="flex items-center">
-                                    {invoiceVerifications[delivery.id].exists ? (
+                                    {delivery.reconciled ? (
+                                      <CheckCircle className="w-3 h-3 text-green-600" title="Facture réconciliée" />
+                                    ) : invoiceVerifications[delivery.id]?.exists ? (
                                       <CheckCircle className="w-3 h-3 text-green-600" title="Facture trouvée" />
                                     ) : (
                                       <X className="w-3 h-3 text-red-600" title="Facture non trouvée" />
