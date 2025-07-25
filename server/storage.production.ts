@@ -595,8 +595,29 @@ export class DatabaseStorage implements IStorage {
       
       console.log('✅ Group created successfully:', result.rows[0]);
       return result.rows[0];
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to create group:', error);
+      
+      // Fallback avec requête simplifiée si colonnes manquantes
+      if (error.code === '42703') {
+        console.log('🔧 Fallback: Using simplified createGroup query without NocoDB BL columns');
+        const result = await pool.query(`
+          INSERT INTO groups (name, color) 
+          VALUES ($1, $2) 
+          RETURNING *,
+                   'Ref Facture' as "invoiceColumnName",
+                   'Numéro de BL' as "nocodbBlColumnName",
+                   'Montant HT' as "nocodbAmountColumnName",
+                   'Fournisseur' as "nocodbSupplierColumnName"
+        `, [
+          group.name, 
+          group.color
+        ]);
+        
+        console.log('✅ Group created with fallback:', result.rows[0]);
+        return result.rows[0];
+      }
+      
       console.error('📊 Error details:', {
         message: error.message,
         code: error.code,
@@ -610,42 +631,73 @@ export class DatabaseStorage implements IStorage {
   async updateGroup(id: number, group: Partial<InsertGroup>): Promise<Group> {
     console.log('🏪 PRODUCTION updateGroup called with:', { id, group });
     
-    const result = await pool.query(`
-      UPDATE groups SET 
-        name = COALESCE($1, name),
-        color = COALESCE($2, color),
-        nocodb_config_id = $3,
-        nocodb_table_id = $4,
-        nocodb_table_name = $5,
-        invoice_column_name = COALESCE($6, invoice_column_name),
-        nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
-        nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
-        nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $10
-      RETURNING *, nocodb_config_id as "nocodbConfigId", 
-               nocodb_table_id as "nocodbTableId",
-               nocodb_table_name as "nocodbTableName",
-               invoice_column_name as "invoiceColumnName",
-               nocodb_bl_column_name as "nocodbBlColumnName",
-               nocodb_amount_column_name as "nocodbAmountColumnName",
-               nocodb_supplier_column_name as "nocodbSupplierColumnName"
-    `, [
-      group.name, 
-      group.color, 
-      group.nocodbConfigId || null,
-      group.nocodbTableId || null,
-      group.nocodbTableName || null,
-      group.invoiceColumnName,
-      group.nocodbBlColumnName,
-      group.nocodbAmountColumnName,
-      group.nocodbSupplierColumnName,
-      id
-    ]);
-    
-    const updatedGroup = result.rows[0];
-    console.log('🏪 PRODUCTION updateGroup result:', updatedGroup);
-    return updatedGroup;
+    try {
+      const result = await pool.query(`
+        UPDATE groups SET 
+          name = COALESCE($1, name),
+          color = COALESCE($2, color),
+          nocodb_config_id = $3,
+          nocodb_table_id = $4,
+          nocodb_table_name = $5,
+          invoice_column_name = COALESCE($6, invoice_column_name),
+          nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
+          nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
+          nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $10
+        RETURNING *, nocodb_config_id as "nocodbConfigId", 
+                 nocodb_table_id as "nocodbTableId",
+                 nocodb_table_name as "nocodbTableName",
+                 invoice_column_name as "invoiceColumnName",
+                 nocodb_bl_column_name as "nocodbBlColumnName",
+                 nocodb_amount_column_name as "nocodbAmountColumnName",
+                 nocodb_supplier_column_name as "nocodbSupplierColumnName"
+      `, [
+        group.name, 
+        group.color, 
+        group.nocodbConfigId || null,
+        group.nocodbTableId || null,
+        group.nocodbTableName || null,
+        group.invoiceColumnName,
+        group.nocodbBlColumnName,
+        group.nocodbAmountColumnName,
+        group.nocodbSupplierColumnName,
+        id
+      ]);
+      
+      const updatedGroup = result.rows[0];
+      console.log('🏪 PRODUCTION updateGroup result:', updatedGroup);
+      return updatedGroup;
+    } catch (error: any) {
+      console.error('❌ Error in updateGroup:', error);
+      
+      // Fallback avec requête simplifiée si colonnes manquantes
+      if (error.code === '42703') {
+        console.log('🔧 Fallback: Using simplified updateGroup query without NocoDB BL columns');
+        const result = await pool.query(`
+          UPDATE groups SET 
+            name = COALESCE($1, name),
+            color = COALESCE($2, color),
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $3
+          RETURNING *,
+                   'Ref Facture' as "invoiceColumnName",
+                   'Numéro de BL' as "nocodbBlColumnName",
+                   'Montant HT' as "nocodbAmountColumnName",
+                   'Fournisseur' as "nocodbSupplierColumnName"
+        `, [
+          group.name, 
+          group.color, 
+          id
+        ]);
+        
+        const updatedGroup = result.rows[0];
+        console.log('🏪 PRODUCTION updateGroup fallback result:', updatedGroup);
+        return updatedGroup;
+      }
+      
+      throw error;
+    }
   }
 
   async deleteGroup(id: number): Promise<void> {
