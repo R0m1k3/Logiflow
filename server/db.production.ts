@@ -5,13 +5,13 @@ import * as schema from '../shared/schema';
 // Production database configuration using standard PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false, // Docker internal connection doesn't need SSL
-  max: 10, // Reduced pool size for stability
-  idleTimeoutMillis: 60000, // Increased idle timeout
-  connectionTimeoutMillis: 10000, // Increased connection timeout
-  acquireTimeoutMillis: 60000, // Wait time for acquiring connection
-  maxUses: 7500, // Limit connection reuse
-  allowExitOnIdle: true // Allow pool to close when idle
+  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : true, // Enable SSL for external connections
+  max: 5, // Reduced pool size for Replit environment
+  idleTimeoutMillis: 30000, // Reduced idle timeout
+  connectionTimeoutMillis: 20000, // Increased connection timeout for Replit
+  acquireTimeoutMillis: 30000, // Reduced wait time
+  maxUses: 1000, // Reduced connection reuse
+  allowExitOnIdle: false // Keep pool alive in Replit
 });
 
 export const db = drizzle(pool, { schema });

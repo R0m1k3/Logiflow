@@ -57,6 +57,9 @@ setupCompression(app);
 app.use(monitor.middleware());
 setupMonitoringEndpoints(app);
 
+// Configure trust proxy for Replit environment  
+app.set('trust proxy', 1);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
