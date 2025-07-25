@@ -2357,6 +2357,8 @@ export class DatabaseStorage implements IStorage {
         ORDER BY created_at DESC
       `);
       
+      console.log('📊 [DEBUG] Raw database result for getNocodbConfigs:', result.rows);
+      
       // Transformation des données snake_case vers camelCase pour cohérence TypeScript
       const transformedData = result.rows.map(row => ({
         id: row.id,
@@ -2370,6 +2372,8 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }));
+      
+      console.log('📊 [DEBUG] Transformed data for getNocodbConfigs:', transformedData);
       
       console.log('📊 getNocodbConfigs result:', { 
         rows: transformedData.length, 
@@ -2385,6 +2389,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNocodbConfig(id: number): Promise<NocodbConfig | undefined> {
+    console.log(`📊 [DEBUG] getNocodbConfig called with id: ${id}`);
+    
     const result = await pool.query(`
       SELECT id, name, base_url, project_id, api_token, description, 
              is_active, created_by, created_at, updated_at
@@ -2392,11 +2398,16 @@ export class DatabaseStorage implements IStorage {
       WHERE id = $1
     `, [id]);
     
-    if (!result.rows[0]) return undefined;
+    console.log(`📊 [DEBUG] Raw database result for getNocodbConfig(${id}):`, result.rows[0]);
+    
+    if (!result.rows[0]) {
+      console.log(`📊 [DEBUG] No NocoDB config found for id: ${id}`);
+      return undefined;
+    }
     
     // Transformation des données snake_case vers camelCase
     const row = result.rows[0];
-    return {
+    const transformed = {
       id: row.id,
       name: row.name,
       baseUrl: row.base_url,
@@ -2408,6 +2419,10 @@ export class DatabaseStorage implements IStorage {
       createdAt: row.created_at,
       updatedAt: row.updated_at
     };
+    
+    console.log(`📊 [DEBUG] Transformed NocoDB config for id ${id}:`, transformed);
+    
+    return transformed;
   }
 
   async createNocodbConfig(config: InsertNocodbConfig): Promise<NocodbConfig> {

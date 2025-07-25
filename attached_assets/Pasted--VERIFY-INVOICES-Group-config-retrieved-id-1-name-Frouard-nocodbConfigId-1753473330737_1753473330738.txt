@@ -1,0 +1,200 @@
+🔍 [VERIFY-INVOICES] Group config retrieved: {
+
+  id: 1,
+
+  name: 'Frouard',
+
+  nocodbConfigId: 1,
+
+  nocodbTableId: 'mrr733dfb8wtt9b',
+
+  invoiceColumnName: 'RefFacture',
+
+  nocodbSupplierColumnName: 'Fournisseurs'
+
+}
+
+🔍 [VERIFY-INVOICES] NocoDB config retrieved: {
+
+  id: 1,
+
+  name: 'Nocodb',
+
+  baseUrl: 'https://nocodb.ffnancy.fr',
+
+  projectId: 'nocodb',
+
+  isActive: true
+
+}
+
+🚀 [VERIFY-INVOICES] Starting verification with service for delivery 13
+
+🚀 [VERIFY-INVOICES] Parameters: {
+
+  invoiceRef: '22529151',
+
+  supplierName: 'Sovacom',
+
+  amount: 0,
+
+  groupId: 1,
+
+  nocodbUrl: 'https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b'
+
+}
+
+🔍 [VERIFY-INVOICES] Service result for delivery 13: {
+
+  found: false,
+
+  matchType: 'NONE',
+
+  hasInvoice: false,
+
+  verificationDetails: {
+
+    invoiceRef: '22529151',
+
+    supplierName: 'Sovacom',
+
+    amount: 0,
+
+    error: 'Aucune facture correspondante trouvée'
+
+  }
+
+}
+
+🔍 [VERIFY-INVOICES] Delivery 13: ❌ NOT FOUND
+
+🔍 [VERIFY-INVOICES] Processing delivery 27 - Invoice: 000752796, Supplier: CMP, Group: 1
+
+🏪 PRODUCTION getGroup called with id: 1
+
+🏪 PRODUCTION getGroup result: {
+
+  id: 1,
+
+  group: {
+
+    id: 1,
+
+    name: 'Frouard',
+
+    color: '#00796B',
+
+    nocodb_config_id: 1,
+
+    nocodb_table_id: 'mrr733dfb8wtt9b',
+
+    nocodb_table_name: 'CommandeF',
+
+    invoice_column_name: 'RefFacture',
+
+    created_at: 2025-07-22T11:08:59.497Z,
+
+    updated_at: 2025-07-25T16:46:33.848Z,
+
+    nocodb_bl_column_name: 'Numero_BL',
+
+    nocodb_amount_column_name: 'Montant HT',
+
+    nocodb_supplier_column_name: 'Fournisseurs',
+
+    nocodbConfigId: 1,
+
+    nocodbTableId: 'mrr733dfb8wtt9b',
+
+    nocodbTableName: 'CommandeF',
+
+    invoiceColumnName: 'RefFacture',
+
+    nocodbBlColumnName: 'Numero_BL',
+
+    nocodbAmountColumnName: 'Montant HT',
+
+    nocodbSupplierColumnName: 'Fournisseurs'
+
+  }
+
+}
+
+🔍 [VERIFY-INVOICES] Group config retrieved: {
+
+  id: 1,
+
+  name: 'Frouard',
+
+  nocodbConfigId: 1,
+
+  nocodbTableId: 'mrr733dfb8wtt9b',
+
+  invoiceColumnName: 'RefFacture',
+
+  nocodbSupplierColumnName: 'Fournisseurs'
+
+}
+
+🔍 [VERIFY-INVOICES] NocoDB config retrieved: {
+
+  id: 1,
+
+  name: 'Nocodb',
+
+  baseUrl: 'https://nocodb.ffnancy.fr',
+
+  projectId: 'nocodb',
+
+  isActive: true
+
+}
+
+🚀 [VERIFY-INVOICES] Starting verification with service for delivery 27
+
+🚀 [VERIFY-INVOICES] Parameters: {
+
+  invoiceRef: '000752796',
+
+  supplierName: 'CMP',
+
+  amount: 0,
+
+  groupId: 1,
+
+  nocodbUrl: 'https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b'
+
+}
+
+🔍 [VERIFY-INVOICES] Service result for delivery 27: {
+
+  found: false,
+
+  matchType: 'NONE',
+
+  hasInvoice: false,
+
+  verificationDetails: {
+
+    invoiceRef: '000752796',
+
+    supplierName: 'CMP',
+
+    amount: 0,
+
+    error: 'Aucune facture correspondante trouvée'
+
+  }
+
+}
+
+🔍 [VERIFY-INVOICES] Delivery 27: ❌ NOT FOUND
+
+7:55:16 PM [express] POST /api/verify-invoices 200 in 76ms
+
+7:55:19 PM [express] HEAD /api/health 200 in 1ms
+
+
+      
+      
+    
