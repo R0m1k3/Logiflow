@@ -854,19 +854,34 @@ export default function BLReconciliation() {
                               <div className="flex items-center space-x-1">
                                 <span className="truncate max-w-28">{delivery.invoiceReference}</span>
                                 {/* Affichage coche basé sur existence dans NocoDB ou impossibilité de vérifier */}
-                                {invoiceVerifications[delivery.id.toString()] ? (
-                                  <div className="flex items-center">
-                                    {invoiceVerifications[delivery.id.toString()].exists ? (
-                                      <CheckCircle className="w-3 h-3 text-green-600" title="Facture trouvée dans NocoDB" />
-                                    ) : invoiceVerifications[delivery.id.toString()].error ? (
-                                      <AlertTriangle className="w-3 h-3 text-orange-500" title={`Impossible de vérifier: ${invoiceVerifications[delivery.id.toString()].error}`} />
-                                    ) : (
-                                      <X className="w-3 h-3 text-red-600" title="Facture non trouvée dans NocoDB" />
-                                    )}
-                                  </div>
-                                ) : !delivery.groupId ? (
+                                {(() => {
+                                  const verificationKey = delivery.id.toString();
+                                  const verification = invoiceVerifications[verificationKey];
+                                  console.log(`🔍 Debug verification for delivery ${delivery.id}:`, { 
+                                    verificationKey, 
+                                    verification, 
+                                    allKeys: Object.keys(invoiceVerifications),
+                                    invoiceRef: delivery.invoiceReference
+                                  });
+                                  
+                                  if (verification) {
+                                    return (
+                                      <div className="flex items-center">
+                                        {verification.exists ? (
+                                          <CheckCircle className="w-3 h-3 text-green-600" title="Facture trouvée dans NocoDB" />
+                                        ) : verification.error ? (
+                                          <AlertTriangle className="w-3 h-3 text-orange-500" title={`Impossible de vérifier: ${verification.error}`} />
+                                        ) : (
+                                          <X className="w-3 h-3 text-red-600" title="Facture non trouvée dans NocoDB" />
+                                        )}
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                {!invoiceVerifications[delivery.id.toString()] && !delivery.groupId && (
                                   <AlertTriangle className="w-3 h-3 text-gray-400" title="Aucun magasin assigné - impossible de vérifier" />
-                                ) : null}
+                                )}
                               </div>
                             ) : (
                               <button
