@@ -43,17 +43,17 @@ export class DatabaseStorage implements IStorage {
     maxRetries: number = 3,
     delay: number = 1000
   ): Promise<T> {
-    let lastError: Error;
+    let lastError: Error = new Error('Query failed');
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await queryFn();
-      } catch (error) {
+      } catch (error: any) {
         lastError = error as Error;
-        console.warn(`Query attempt ${attempt}/${maxRetries} failed:`, error.message);
+        console.warn(`Query attempt ${attempt}/${maxRetries} failed:`, error?.message);
         
         // Don't retry if it's not a connection error
-        if (!error.message.includes('connection') && !error.message.includes('timeout')) {
+        if (!error?.message?.includes('connection') && !error?.message?.includes('timeout')) {
           throw error;
         }
         
@@ -124,7 +124,10 @@ export class DatabaseStorage implements IStorage {
         name: user.name,
         firstName: user.first_name,
         lastName: user.last_name,
+        profileImageUrl: user.profile_image_url,
+        password: user.password,
         role: user.role,
+        passwordChanged: user.password_changed,
         createdAt: user.created_at,
         updatedAt: user.updated_at
       };
@@ -133,16 +136,48 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    return result.rows[0] || undefined;
+    const user = result.rows[0];
+    if (!user) return undefined;
+    
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      profileImageUrl: user.profile_image_url,
+      password: user.password,
+      role: user.role,
+      passwordChanged: user.password_changed,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
+    };
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    return result.rows[0] || undefined;
+    const user = result.rows[0];
+    if (!user) return undefined;
+    
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      profileImageUrl: user.profile_image_url,
+      password: user.password,
+      role: user.role,
+      passwordChanged: user.password_changed,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
+    };
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const existing = await this.getUserByEmail(userData.email);
+    const existing = await this.getUserByEmail(userData.email || '');
     if (existing) {
       return this.updateUser(existing.id, userData);
     }
