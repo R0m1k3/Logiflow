@@ -395,6 +395,21 @@ export default function Tasks() {
         <div className="flex-1">
           {/* Liste des tâches */}
           <div className="p-6">
+            {/* Pagination du haut */}
+            {totalItems > 0 && (
+              <div className="mb-6">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  className="border-b border-gray-200 pb-4"
+                />
+              </div>
+            )}
+            
             {totalItems === 0 ? (
               <div className="text-center py-12">
                 <ListTodo className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -589,17 +604,18 @@ export default function Tasks() {
               </div>
             )}
             
-            {/* Pagination */}
+            {/* Pagination du bas */}
             {totalItems > 0 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-                className="mt-4 border-t border-gray-200 pt-4 mx-6"
-              />
+              <div className="mt-6 border-t border-gray-200 pt-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                />
+              </div>
             )}
           </div>
         </div>

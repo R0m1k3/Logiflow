@@ -743,9 +743,25 @@ export default function DlcPage() {
                 Aucun produit DLC trouvé
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
+              <div>
+                {/* Pagination du haut */}
+                {totalItems > 0 && (
+                  <div className="mb-4">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      totalItems={totalItems}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={setCurrentPage}
+                      onItemsPerPageChange={setItemsPerPage}
+                      className="border-b border-gray-200 pb-4"
+                    />
+                  </div>
+                )}
+                
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
                     <TableRow>
                       <TableHead>Produit</TableHead>
                       <TableHead>Code EAN13</TableHead>
@@ -810,22 +826,24 @@ export default function DlcPage() {
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
             
-            {/* Pagination */}
+            {/* Pagination du bas */}
             {totalItems > 0 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-                className="mt-4 border-t border-gray-200 pt-4"
-              />
+              <div className="mt-4 border-t border-gray-200 pt-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                />
+              </div>
             )}
           </CardContent>
         </Card>
