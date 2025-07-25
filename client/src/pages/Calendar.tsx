@@ -4,10 +4,10 @@ import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Search } fro
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CalendarGrid from "@/components/CalendarGrid";
-import QuickCreateMenu from "@/components/modals/QuickCreateMenu";
-import OrderDetailModal from "@/components/modals/OrderDetailModal";
-import CreateOrderModal from "@/components/modals/CreateOrderModal";
-import CreateDeliveryModal from "@/components/modals/CreateDeliveryModal";
+import { QuickCreateMenu } from "@/components/modals/QuickCreateMenu";
+import { OrderDetailModal } from "@/components/modals/OrderDetailModal";
+import { CreateOrderModal } from "@/components/modals/CreateOrderModal";
+import { CreateDeliveryModal } from "@/components/modals/CreateDeliveryModal";
 import StatsPanel from "@/components/StatsPanel";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 import { usePermissions } from "@/hooks/usePermissions";

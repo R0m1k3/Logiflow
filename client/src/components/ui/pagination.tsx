@@ -140,3 +140,14 @@ export function Pagination({
     </div>
   );
 }
+
+// Additional components for compatibility
+export const PaginationContent = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+export const PaginationEllipsis = () => <span>...</span>;
+export const PaginationItem = ({ children }: { children: React.ReactNode }) => <span>{children}</span>;
+export const PaginationLink = ({ children }: { children: React.ReactNode }) => <span>{children}</span>;
+export const PaginationNext = ({ children }: { children: React.ReactNode }) => <span>{children}</span>;
+export const PaginationPrevious = ({ children }: { children: React.ReactNode }) => <span>{children}</span>;
+
+// Export usePagination hook
+export { usePagination } from "@/hooks/usePagination";

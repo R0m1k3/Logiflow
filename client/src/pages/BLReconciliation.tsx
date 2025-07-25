@@ -22,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
 import { DayPicker } from "react-day-picker";
-import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
+import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 
 const reconciliationSchema = z.object({
   blNumber: z.string().optional(),

@@ -11,7 +11,7 @@ interface QuickCreateMenuProps {
   onCreateDelivery: () => void;
 }
 
-export default function QuickCreateMenu({
+export function QuickCreateMenu({
   isOpen,
   onClose,
   onCreateOrder,

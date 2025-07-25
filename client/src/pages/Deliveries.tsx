@@ -27,10 +27,10 @@ import {
   Package
 } from "lucide-react";
 import { safeFormat } from "@/lib/dateUtils";
-import CreateDeliveryModal from "@/components/modals/CreateDeliveryModal";
-import EditDeliveryModal from "@/components/modals/EditDeliveryModal";
-import OrderDetailModal from "@/components/modals/OrderDetailModal";
-import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
+import { CreateDeliveryModal } from "@/components/modals/CreateDeliveryModal";
+import { EditDeliveryModal } from "@/components/modals/EditDeliveryModal";
+import { OrderDetailModal } from "@/components/modals/OrderDetailModal";
+import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import type { DeliveryWithRelations } from "@shared/schema";
 
 export default function Deliveries() {

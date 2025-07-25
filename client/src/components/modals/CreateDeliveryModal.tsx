@@ -21,7 +21,7 @@ interface CreateDeliveryModalProps {
   selectedDate: Date | null;
 }
 
-export default function CreateDeliveryModal({
+export function CreateDeliveryModal({
   isOpen,
   onClose,
   selectedDate,
