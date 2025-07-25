@@ -861,18 +861,26 @@ export default function BLReconciliation() {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
                                   
-                                  // Debug forcé pour identifier le problème
-                                  console.log(`🔍 FORCE DEBUG delivery ${delivery.id} (${delivery.invoiceReference}):`, { 
+                                  // Debug PRODUCTION vs DEV pour identifier la différence
+                                  console.log(`🔍 PRODUCTION DEBUG delivery ${delivery.id} (${delivery.invoiceReference}):`, { 
                                     verificationKey, 
                                     verification,
                                     verificationExists: !!verification,
                                     verificationExistsValue: verification?.exists,
+                                    verificationError: verification?.error,
+                                    verificationMatchType: verification?.matchType,
+                                    hasInvoiceData: !!verification?.invoice,
                                     allKeys: Object.keys(invoiceVerifications),
                                     stateKeys: Object.keys(invoiceVerifications).map(k => `${k}: ${invoiceVerifications[k]?.exists}`)
                                   });
                                   
                                   if (verification) {
-                                    console.log(`✅ RENDERING for delivery ${delivery.id}: exists=${verification.exists}`);
+                                    console.log(`✅ PRODUCTION RENDERING for delivery ${delivery.id}:`, {
+                                      exists: verification.exists,
+                                      error: verification.error,
+                                      matchType: verification.matchType,
+                                      hasInvoice: !!verification.invoice
+                                    });
                                     
                                     // Force un rendu très explicite avec débuggage DOM
                                     if (verification.exists === true) {
