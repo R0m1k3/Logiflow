@@ -1,0 +1,202 @@
+    at async assignFixedRolePermissions (file:///app/dist/index.js:1035:5)
+
+    at async ensureFixedRoles (file:///app/dist/index.js:993:5)
+
+    at async initRolesAndPermissionsProduction (file:///app/dist/index.js:1077:5)
+
+    at async initDatabase (file:///app/dist/index.js:105:5)
+
+    at async file:///app/dist/index.js:10981:5 {
+
+  length: 279,
+
+  severity: 'ERROR',
+
+  code: '23503',
+
+  detail: 'Key (assigned_by)=(system) is not present in table "users".',
+
+  hint: undefined,
+
+  position: undefined,
+
+  internalPosition: undefined,
+
+  internalQuery: undefined,
+
+  where: undefined,
+
+  schema: 'public',
+
+  table: 'user_roles',
+
+  column: undefined,
+
+  dataType: undefined,
+
+  constraint: 'user_roles_assigned_by_fkey',
+
+  file: 'ri_triggers.c',
+
+  line: '2596',
+
+  routine: 'ri_ReportViolation'
+
+}
+
+✅ Roles already exist, checking for missing DLC permissions...
+
+🔍 Checking for missing DLC permissions...
+
+✅ All DLC permissions already exist
+
+✅ Database initialization complete
+
+✅ Local authentication configured
+
+✅ Serving static files from: /app/dist/public
+
+🔧 Backup service using directory: /tmp/logiflow-backups (production storage: true)
+
+🔧 Backup service using directory: /tmp/logiflow-backups (production storage: true)
+
+✅ Scheduler service initialized successfully
+
+7:29:42 PM [express] Server running on port 3000
+
+❌ Failed to initialize backup service: Error: The server does not support SSL connections
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async BackupService.initBackupTable (file:///app/dist/index.js:7363:9)
+
+    at async initializeBackupService (file:///app/dist/index.js:9816:7)
+
+Error details: The server does not support SSL connections
+
+7:29:47 PM [express] HEAD /api/health 200 in 5ms
+
+Retrying in 1000ms...
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+7:30:17 PM [express] HEAD /api/health 200 in 1ms
+
+Retrying in 2000ms...
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+📍 Serving index.html for path: /bl-reconciliation
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Retrying in 1000ms...
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Retrying in 2000ms...
+
+Retrying in 1000ms...
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Retrying in 1000ms...
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Retrying in 1000ms...
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Retrying in 2000ms...
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Retrying in 1000ms...
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Retrying in 2000ms...
+
+Retrying in 2000ms...
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Retrying in 2000ms...
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Retrying in 1000ms...
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Retrying in 2000ms...
+
+Retrying in 1000ms...
+
+Query attempt 1/3 failed: The server does not support SSL connections
+
+Query attempt 2/3 failed: The server does not support SSL connections
+
+Retrying in 2000ms...
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Error fetching user with groups: Error: The server does not support SSL connections
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async file:///app/dist/index.js:2117:26
+
+    at async DatabaseStorage.retryQuery (file:///app/dist/index.js:2064:20)
+
+    at async file:///app/dist/index.js:2183:24
+
+    at async DatabaseStorage.retryQuery (file:///app/dist/index.js:2064:20)
+
+    at async file:///app/dist/index.js:5219:30
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Query attempt 3/3 failed: The server does not support SSL connections
+
+Error fetching user with groups: Error: The server does not support SSL connections
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async file:///app/dist/index.js:2117:26
+
+    at async DatabaseStorage.retryQuery (file:///app/dist/index.js:2064:20)
+
+    at async file:///app/dist/index.js:2183:24
+
+    at async DatabaseStorage.retryQuery (file:///app/dist/index.js:2064:20)
+
+    at async file:///app/dist/index.js:5219:30
+
+⚠️  Slow query detected: /api/user (12070ms)
+
+7:30:29 PM [express] GET /api/user 500 in 12070ms
+
+
+      

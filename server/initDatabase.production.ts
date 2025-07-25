@@ -5,7 +5,7 @@ const pool = new Pool({
   ssl: false,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 15000,
 });
 
 export async function initDatabase() {
@@ -24,6 +24,9 @@ export async function initDatabase() {
     
     // Run incremental migrations to update existing tables
     await runMigrations();
+    
+    // Create system user first (required for role assignments)
+    await createSystemUser();
     
     // Create default admin user only if it doesn't exist
     await createDefaultAdmin();
@@ -990,6 +993,37 @@ async function createRolesTables() {
   } catch (error) {
     console.error('❌ Error creating roles tables:', error);
     // Continue anyway, don't crash the app
+  }
+}
+
+async function createSystemUser() {
+  try {
+    // Check if system user exists
+    const existingSystem = await pool.query(
+      'SELECT id FROM users WHERE id = $1',
+      ['system']
+    );
+
+    if (existingSystem.rows.length === 0) {
+      await pool.query(`
+        INSERT INTO users (id, username, email, name, first_name, last_name, role, password_changed, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `, [
+        'system',
+        'system',
+        'system@logiflow.com',
+        'Utilisateur Système',
+        'Système',
+        '',
+        'admin',
+        true
+      ]);
+      console.log('✅ System user created for database constraints');
+    } else {
+      console.log('✅ System user already exists');
+    }
+  } catch (error) {
+    console.error('❌ Failed to create system user:', error);
   }
 }
 

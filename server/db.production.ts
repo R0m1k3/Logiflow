@@ -5,7 +5,7 @@ import * as schema from '../shared/schema';
 // Production database configuration using standard PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : true, // Enable SSL for external connections
+  ssl: false, // Disable SSL completely for production environment
   max: 3, // Further reduced pool size for stability
   min: 1, // Minimum connections to keep open
   idleTimeoutMillis: 20000, // Reduced idle timeout to 20 seconds
