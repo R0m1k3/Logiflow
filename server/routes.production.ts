@@ -1105,11 +1105,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "invoiceReferences must be an array" });
       }
 
-      // Simplified verification - always return false for production
+      console.log('🔍 [VERIFY-INVOICES] Processing', invoiceReferences.length, 'invoices for verification');
+
+      // Use the real invoice verification service
+      const { InvoiceVerificationService } = await import('./services/invoiceVerificationService.js');
+      const verificationService = new InvoiceVerificationService();
+      
       const results: any = {};
-      invoiceReferences.forEach((ref: any) => {
-        results[ref.deliveryId] = { exists: false };
-      });
+      
+      for (const ref of invoiceReferences) {
+        try {
+          const result = await verificationService.verifyInvoice(
+            ref.invoiceReference,
+            ref.supplierName,
+            parseFloat(ref.amount || '0'),
+            ref.groupId
+          );
+          
+          results[ref.deliveryId] = { 
+            exists: result.found,
+            matchType: result.matchType,
+            invoice: result.invoice 
+          };
+          
+          console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${result.found ? '✅ FOUND' : '❌ NOT FOUND'}`);
+        } catch (error) {
+          console.error(`❌ [VERIFY-INVOICES] Error verifying delivery ${ref.deliveryId}:`, error);
+          results[ref.deliveryId] = { exists: false, error: error.message };
+        }
+      }
       
       res.json(results);
     } catch (error) {
