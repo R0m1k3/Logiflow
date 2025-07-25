@@ -254,6 +254,14 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
+### July 25, 2025 - CORRECTION COMMANDES CLIENT: Sauvegarde Commentaires à la Création Fonctionnelle
+
+- **PROBLÈME CRITIQUE RÉSOLU** - Champ `notes` manquant dans la requête INSERT de createCustomerOrder production
+- **REQUÊTE SQL CORRIGÉE** - Ajout colonne `notes` dans l'INSERT avec paramètre $14 pour sauvegarder les commentaires
+- **COHÉRENCE CRUD ÉTABLIE** - Création et modification utilisent maintenant les mêmes champs (notes inclus)
+- **LOGIQUE PRODUCTION HARMONISÉE** - createCustomerOrder production alignée avec version développement
+- **PERSISTANCE COMMENTAIRES GARANTIE** - Les commentaires sont maintenant sauvegardés lors de la création ET modification
+
 ### July 24, 2025 - CORRECTION TOTALE PALETTES: Uniquement Livraisons Livrées Comptabilisées
 
 - **CALCUL PALETTES CORRIGÉ** - Total palettes ne compte plus que les livraisons avec statut "delivered" pour le magasin sélectionné

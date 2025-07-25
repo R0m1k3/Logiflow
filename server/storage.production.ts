@@ -2473,9 +2473,9 @@ export class DatabaseStorage implements IStorage {
         order_taker, customer_name, customer_phone, customer_email,
         product_designation, product_reference, gencode, quantity,
         supplier_id, status, deposit, is_promotional_price,
-        customer_notified, group_id, created_by
+        customer_notified, notes, group_id, created_by
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *
     `, [
       customerOrder.orderTaker,
@@ -2491,6 +2491,7 @@ export class DatabaseStorage implements IStorage {
       customerOrder.deposit || '0.00',
       customerOrder.isPromotionalPrice || false,
       customerOrder.customerNotified || false,
+      customerOrder.notes || null,
       customerOrder.groupId,
       customerOrder.createdBy
     ]);
