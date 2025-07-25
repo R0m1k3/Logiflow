@@ -161,7 +161,7 @@ export default function Orders() {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg flex-shrink-0">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-64">
             <div className="relative">
@@ -191,163 +191,35 @@ export default function Orders() {
       </div>
 
       {/* Orders List */}
-      <div className="bg-white border border-gray-200 shadow-lg overflow-hidden rounded-lg">
-        <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
-          {/* Pagination du haut */}
-          {totalItems > 0 && (
-            <div className="p-4 border-b border-gray-200">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-                className="border-b border-gray-200 pb-4"
-              />
-            </div>
-          )}
-          
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-          ) : filteredOrders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-              <Package className="w-16 h-16 mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium mb-2">Aucune commande trouvée</h3>
-              <p className="text-center max-w-md">
-                {searchTerm || statusFilter !== "all"
-                  ? "Aucune commande ne correspond à vos critères de recherche."
-                  : "Vous n'avez pas encore de commandes. Créez votre première commande pour commencer."}
-              </p>
-              {canCreate && !searchTerm && statusFilter === "all" && (
-                <Button
-                  onClick={() => setShowCreateModal(true)}
-                  className="mt-4 bg-primary hover:bg-blue-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Créer une commande
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div>
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fournisseur
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Groupe
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date prévue
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Créé par
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paginatedOrders.map((order) => (
-                    <tr 
-                      key={order.id} 
-                      className={`hover:bg-gray-50 ${
-                        order.status === 'delivered' 
-                          ? 'opacity-60 bg-gray-50' 
-                          : ''
-                      }`}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Building className="w-5 h-5 text-gray-400 mr-2" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {order.supplier?.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              #{order.id}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div 
-                            className="w-3 h-3 rounded-full mr-2" 
-                            style={{ backgroundColor: order.group?.color }}
-                          />
-                          <span className="text-sm text-gray-900">{order.group?.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                          {safeFormat(order.plannedDate, 'dd MMM yyyy')}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(order.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {order.createdBy}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowDetailModal(true);
-                            }}
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          {canEdit && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setShowEditModal(true);
-                              }}
-                              className="text-green-600 hover:text-green-700"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canDelete && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setOrderToDelete(order);
-                                setShowDeleteModal(true);
-                              }}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              {/* Pagination du bas */}
-              <div className="p-4 border-t border-gray-200">
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <Package className="w-16 h-16 mb-4 text-gray-300" />
+            <h3 className="text-lg font-medium mb-2">Aucune commande trouvée</h3>
+            <p className="text-center max-w-md">
+              {searchTerm || statusFilter !== "all"
+                ? "Aucune commande ne correspond à vos critères de recherche."
+                : "Vous n'avez pas encore de commandes. Créez votre première commande pour commencer."}
+            </p>
+            {canCreate && !searchTerm && statusFilter === "all" && (
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Créer une commande
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 h-full flex flex-col">
+              {/* Pagination du haut */}
+              <div className="mb-4">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -355,11 +227,141 @@ export default function Orders() {
                   itemsPerPage={itemsPerPage}
                   onPageChange={setCurrentPage}
                   onItemsPerPageChange={setItemsPerPage}
+                  className="border-b border-gray-200 pb-4"
                 />
               </div>
+              
+              <div className="bg-white border border-gray-200 shadow-lg overflow-hidden flex-1">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Fournisseur
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Groupe
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date prévue
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Statut
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Créé par
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {paginatedOrders.map((order) => (
+                        <tr 
+                          key={order.id} 
+                          className={`hover:bg-gray-50 ${
+                            order.status === 'delivered' 
+                              ? 'opacity-60 bg-gray-50' 
+                              : ''
+                          }`}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <Building className="w-5 h-5 text-gray-400 mr-2" />
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {order.supplier?.name}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  #{order.id}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2" 
+                                style={{ backgroundColor: order.group?.color }}
+                              />
+                              <span className="text-sm text-gray-900">{order.group?.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                              {safeFormat(order.plannedDate, 'dd MMM yyyy')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getStatusBadge(order.status)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {order.createdBy}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setShowDetailModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              {canEdit && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedOrder(order);
+                                    setShowEditModal(true);
+                                  }}
+                                  className="text-green-600 hover:text-green-700"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              )}
+                              {canDelete && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setOrderToDelete(order);
+                                    setShowDeleteModal(true);
+                                  }}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Pagination du bas */}
+                <div className="p-4 border-t border-gray-200">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                  />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
