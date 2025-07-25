@@ -9,7 +9,6 @@ const pool = new Pool({
   max: 5, // Reduced pool size for Replit environment
   idleTimeoutMillis: 30000, // Reduced idle timeout
   connectionTimeoutMillis: 20000, // Increased connection timeout for Replit
-  acquireTimeoutMillis: 30000, // Reduced wait time
   maxUses: 1000, // Reduced connection reuse
   allowExitOnIdle: false // Keep pool alive in Replit
 });

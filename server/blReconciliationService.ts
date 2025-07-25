@@ -203,14 +203,20 @@ async function searchInvoiceByBLNumber(
       supplier: supplierName
     });
     
-    // Appel à l'API NocoDB
+    // Appel à l'API NocoDB avec timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes de timeout
+    
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "xc-token": nocodbConfig.apiToken,
         "Content-Type": "application/json",
       },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error(`💥 [BL-RECONCILIATION] Erreur API NocoDB: ${response.status}`);
@@ -256,6 +262,16 @@ async function searchInvoiceByBLNumber(
     }
     
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.error(`⏱️ [BL-RECONCILIATION] Timeout de connexion lors de la recherche NocoDB pour BL ${blNumber}`);
+        return null;
+      }
+      if (error.message.includes('Connection terminated due to connection timeout')) {
+        console.error(`🔌 [BL-RECONCILIATION] Connexion terminée pour BL ${blNumber}: ${error.message}`);
+        return null;
+      }
+    }
     console.error(`💥 [BL-RECONCILIATION] Erreur recherche NocoDB:`, error);
     return null;
   }
@@ -288,13 +304,19 @@ async function searchInvoiceBySupplierAndAmount(
     
     const url = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${group.nocodbTableId}`;
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes de timeout
+    
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "xc-token": nocodbConfig.apiToken,
         "Content-Type": "application/json",
       },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       return null;
@@ -328,6 +350,16 @@ async function searchInvoiceBySupplierAndAmount(
     
     return null;
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.error(`⏱️ [BL-RECONCILIATION] Timeout de connexion lors de la recherche par fournisseur+montant`);
+        return null;
+      }
+      if (error.message.includes('Connection terminated due to connection timeout')) {
+        console.error(`🔌 [BL-RECONCILIATION] Connexion terminée lors de recherche par fournisseur+montant: ${error.message}`);
+        return null;
+      }
+    }
     console.error(`💥 [BL-RECONCILIATION] Erreur recherche par fournisseur+montant:`, error);
     return null;
   }
@@ -360,13 +392,19 @@ async function searchInvoiceBySupplierAndDate(
     
     const url = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${group.nocodbTableId}`;
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes de timeout
+    
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "xc-token": nocodbConfig.apiToken,
         "Content-Type": "application/json",
       },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       return null;
@@ -398,6 +436,16 @@ async function searchInvoiceBySupplierAndDate(
     
     return null;
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.error(`⏱️ [BL-RECONCILIATION] Timeout de connexion lors de la recherche par fournisseur+date`);
+        return null;
+      }
+      if (error.message.includes('Connection terminated due to connection timeout')) {
+        console.error(`🔌 [BL-RECONCILIATION] Connexion terminée lors de recherche par fournisseur+date: ${error.message}`);
+        return null;
+      }
+    }
     console.error(`💥 [BL-RECONCILIATION] Erreur recherche par fournisseur+date:`, error);
     return null;
   }

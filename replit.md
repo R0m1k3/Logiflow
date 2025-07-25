@@ -123,6 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### 2025-07-25 - Connection Timeout Fix
+✓ Fixed "Connection terminated due to connection timeout" error in development
+✓ Removed invalid `acquireTimeoutMillis` parameter from PostgreSQL configuration
+✓ Added 10-second timeout protection to all NocoDB API calls using AbortController
+✓ Enhanced error handling with specific timeout error detection and logging
+✓ Improved BL reconciliation service reliability during network instability
+
+## Previous Changes
+
 ### July 23, 2025 - FONCTIONNALITÉ SIDEBAR COLLAPSE: Réduction en Mode Icônes Uniquement
 
 - **BOUTON TOGGLE SIDEBAR AJOUTÉ** - Bouton avec icônes Menu/ChevronLeft pour basculer entre mode normal et collapsed

@@ -44,13 +44,19 @@ export async function verifyInvoiceReference(
       normalizedSearch: normalizedInvoiceRef
     });
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondes de timeout
+    
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "xc-token": nocodbConfig.apiToken,
         "Content-Type": "application/json",
       },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       return { exists: false, error: `NocoDB API error: ${response.status}` };
@@ -116,6 +122,16 @@ export async function verifyInvoiceReference(
     return { exists };
     
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.error(`⏱️ [NOCODB-SERVICE] Timeout de connexion lors de la vérification de la facture ${invoiceReference}`);
+        return { exists: false, error: "Connection timeout during invoice verification" };
+      }
+      if (error.message.includes('Connection terminated due to connection timeout')) {
+        console.error(`🔌 [NOCODB-SERVICE] Connexion terminée lors de la vérification de la facture ${invoiceReference}: ${error.message}`);
+        return { exists: false, error: "Connection terminated due to connection timeout" };
+      }
+    }
     console.error("Error verifying invoice reference:", error);
     return { exists: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
