@@ -238,6 +238,49 @@ export default function NocoDBDiagnostic() {
               </div>
             </div>
 
+            {/* Information de Configuration BL */}
+            {groupId && (
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Configuration BL pour ce magasin
+                </h4>
+                {(() => {
+                  const selectedGroup = (groups as any[]).find((g: any) => g.id.toString() === groupId);
+                  if (!selectedGroup) return <p className="text-sm text-blue-700">Magasin non trouvé</p>;
+                  
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="font-medium text-blue-800">Table NocoDB:</span>
+                        <div className="text-blue-700">{selectedGroup.nocodbTableName || 'Non configuré'}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">ID Table:</span>
+                        <div className="text-blue-700 font-mono text-xs">{selectedGroup.nocodbTableId || 'Non configuré'}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Colonne N° BL:</span>
+                        <div className="text-blue-700">{selectedGroup.nocodbBlColumnName || 'Non configuré'}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Colonne Montant:</span>
+                        <div className="text-blue-700">{selectedGroup.nocodbAmountColumnName || 'Non configuré'}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Colonne Fournisseur:</span>
+                        <div className="text-blue-700">{selectedGroup.nocodbSupplierColumnName || 'Non configuré'}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Colonne Facture:</span>
+                        <div className="text-blue-700">{selectedGroup.invoiceColumnName || 'Non configuré'}</div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
             <Button
               onClick={handleVerifyInvoice}
               disabled={verifyInvoiceMutation.isPending}
@@ -279,6 +322,41 @@ export default function NocoDBDiagnostic() {
                 </pre>
               </div>
             )}
+
+            {/* Section Processus de Vérification BL */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+              <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Processus de Vérification BL (Bon de Livraison)
+              </h4>
+              <div className="text-sm text-gray-700 space-y-2">
+                <div>
+                  <span className="font-medium">Étape 1:</span> Recherche par numéro de BL exact dans la colonne configurée
+                </div>
+                <div>
+                  <span className="font-medium">Étape 2:</span> Si non trouvé, recherche par fournisseur + montant exact (tolérance ±0.01€)
+                </div>
+                <div>
+                  <span className="font-medium">Étape 3:</span> Si non trouvé, recherche par fournisseur + date approximative
+                </div>
+                <div>
+                  <span className="font-medium">Sécurité:</span> Toutes les recherches vérifient obligatoirement le fournisseur
+                </div>
+                <div>
+                  <span className="font-medium">Retry:</span> 3 tentatives automatiques avec délai exponentiel en cas d'erreur DNS
+                </div>
+                <div className="mt-3 p-3 bg-blue-100 rounded border border-blue-300">
+                  <div className="font-medium text-blue-800 mb-1">Types de correspondance:</div>
+                  <div className="text-xs text-blue-700 space-y-1">
+                    <div><code>INVOICE_REF</code>: Trouvé par référence facture</div>
+                    <div><code>BL_NUMBER</code>: Trouvé par numéro de BL</div>
+                    <div><code>SUPPLIER_AMOUNT</code>: Trouvé par fournisseur + montant</div>
+                    <div><code>SUPPLIER_DATE</code>: Trouvé par fournisseur + date</div>
+                    <div><code>NONE</code>: Aucune correspondance trouvée</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
