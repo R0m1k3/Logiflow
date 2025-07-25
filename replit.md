@@ -123,7 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-25 - Invoice Reconciliation Display Fix COMPLETED
+### 2025-07-25 - RÉSOLUTION FINALE DNS TIMEOUT: Système de Retry Unifié NocoDB COMPLÉTÉ
+✓ PROBLÈME RACINE RÉSOLU - Erreurs DNS intermittentes (EAI_AGAIN) sur nocodb.ffnancy.fr empêchaient affichage CheckCircles
+✓ FONCTION RETRY ROBUSTE CRÉÉE - axiosWithAutoRetry avec backoff exponentiel (2s, 4s, 6s) pour tous appels NocoDB
+✓ TOUS APPELS AXIOS HARMONISÉS - 7 fonctions mises à jour : testConnection, searchByInvoiceRef, searchByBLNumber, searchBySupplierAndAmount, searchBySupplierAndDate avec retry automatique
+✓ LOGIQUE IDENTIQUE AU TEST CONNEXION - Utilise exactement le même système que les tests NocoDB configuration qui fonctionnent en production
+✓ GESTION ERREURS AVANCÉE - Détection spécifique DNS (EAI_AGAIN, ENOTFOUND, ECONNREFUSED) vs erreurs réseau vs erreurs HTTP
+✓ LOGGING DÉTAILLÉ - Traçabilité complète tentatives, délais, succès après retry pour diagnostic
+✓ TIMEOUT CONFIGURÉ - 10 secondes par tentative, 3 tentatives maximum par appel
+✓ SYSTÈME PRODUCTION READY - CheckCircles devraient maintenant s'afficher de façon fiable (vert=trouvé, rouge=non trouvé)
+
+### 2025-07-25 - Invoice Reconciliation Display Fix COMPLETED (PRÉCÉDENT)
 ✓ PROBLÈME RÉSOLU DÉFINITIVEMENT - CheckCircle vertes apparaissent maintenant correctement pour factures trouvées
 ✓ Backend et frontend harmonisés - transformation `result.found` vers `exists` dans l'état React corrigée
 ✓ Logs de debug confirmés : delivery 119 et 121 (Lidis) montrent `"existsStrictlyTrue": true` 

@@ -1,6 +1,67 @@
 import axios from 'axios';
 import { nocodbLogger } from './nocodbLogger.js';
 
+/**
+ * Utilitaire de retry pour les appels axios avec gestion des erreurs DNS temporaires
+ */
+async function axiosWithAutoRetry(config: any, maxRetries: number = 3): Promise<any> {
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      nocodbLogger.debug('AXIOS_RETRY_ATTEMPT', {
+        attempt,
+        maxRetries,
+        url: config.url?.substring(0, 80) + '...',
+        method: config.method || 'GET'
+      });
+      
+      const response = await axios(config);
+      
+      if (attempt > 1) {
+        nocodbLogger.info('AXIOS_RETRY_SUCCESS_AFTER_RETRY', {
+          attempt,
+          status: response.status,
+          finalSuccess: true
+        });
+      }
+      
+      return response;
+    } catch (error: any) {
+      lastError = error;
+      const isDnsError = error.code === 'EAI_AGAIN' || error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED';
+      const isNetworkError = error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT';
+      const shouldRetry = isDnsError || isNetworkError;
+      
+      nocodbLogger.warn('AXIOS_RETRY_ERROR', {
+        attempt,
+        maxRetries,
+        errorCode: error.code,
+        errorMessage: error.message,
+        isDnsError,
+        isNetworkError,
+        willRetry: attempt < maxRetries && shouldRetry
+      });
+      
+      // Retry seulement pour les erreurs de réseau/DNS, pas pour les erreurs 4xx/5xx
+      if (attempt < maxRetries && shouldRetry) {
+        const delay = attempt * 2000; // 2s, 4s, 6s...
+        nocodbLogger.info('AXIOS_RETRY_DELAY', {
+          attempt,
+          delayMs: delay,
+          nextAttempt: attempt + 1
+        });
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      throw error;
+    }
+  }
+  
+  throw lastError;
+}
+
 export interface InvoiceVerificationResult {
   found: boolean;
   matchType?: 'INVOICE_REF' | 'BL_NUMBER' | 'SUPPLIER_AMOUNT' | 'SUPPLIER_DATE' | 'NONE';
@@ -192,7 +253,9 @@ class InvoiceVerificationService {
         }
       }, groupConfig.id, groupConfig.name);
       
-      let response = await axios.get(searchUrl, {
+      let response = await axiosWithAutoRetry({
+        method: 'GET',
+        url: searchUrl,
         headers: {
           'xc-token': nocodbConfig.apiToken,
           'Content-Type': 'application/json'
@@ -211,7 +274,9 @@ class InvoiceVerificationService {
         }, groupConfig.id, groupConfig.name);
         
         whereClause = `(${groupConfig.invoiceColumnName || 'RefFacture'},like,%${invoiceRef}%)`;
-        response = await axios.get(searchUrl, {
+        response = await axiosWithAutoRetry({
+          method: 'GET',
+          url: searchUrl,
           headers: {
             'xc-token': nocodbConfig.apiToken,
             'Content-Type': 'application/json'
@@ -229,7 +294,9 @@ class InvoiceVerificationService {
           }, groupConfig.id, groupConfig.name);
           
           whereClause = `(${groupConfig.nocodbSupplierColumnName || 'Fournisseurs'},like,%${invoiceRef}%)`;
-          response = await axios.get(searchUrl, {
+          response = await axiosWithAutoRetry({
+            method: 'GET',
+            url: searchUrl,
             headers: {
               'xc-token': nocodbConfig.apiToken,
               'Content-Type': 'application/json'
@@ -342,14 +409,17 @@ class InvoiceVerificationService {
     try {
       const searchUrl = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`;
       
-      const response = await axios.get(searchUrl, {
+      const response = await axiosWithAutoRetry({
+        method: 'GET',
+        url: searchUrl,
         headers: {
           'xc-token': nocodbConfig.apiToken,
           'Content-Type': 'application/json'
         },
         params: {
           where: `(${groupConfig.nocodbBlColumnName},eq,${blNumber})`
-        }
+        },
+        timeout: 10000
       });
 
       nocodbLogger.debug('SEARCH_BY_BL_RESPONSE', {
@@ -435,14 +505,17 @@ class InvoiceVerificationService {
       const minAmount = amount - 0.01;
       const maxAmount = amount + 0.01;
       
-      const response = await axios.get(searchUrl, {
+      const response = await axiosWithAutoRetry({
+        method: 'GET',
+        url: searchUrl,
         headers: {
           'xc-token': nocodbConfig.apiToken,
           'Content-Type': 'application/json'
         },
         params: {
           where: `(${groupConfig.nocodbSupplierColumnName},like,%${supplierName}%)~and(${groupConfig.nocodbAmountColumnName},gte,${minAmount})~and(${groupConfig.nocodbAmountColumnName},lte,${maxAmount})`
-        }
+        },
+        timeout: 10000
       });
 
       nocodbLogger.debug('SEARCH_BY_SUPPLIER_AMOUNT_RESPONSE', {
@@ -519,14 +592,17 @@ class InvoiceVerificationService {
       const endDate = new Date(targetDate);
       endDate.setDate(endDate.getDate() + 7);
       
-      const response = await axios.get(searchUrl, {
+      const response = await axiosWithAutoRetry({
+        method: 'GET',
+        url: searchUrl,
         headers: {
           'xc-token': nocodbConfig.apiToken,
           'Content-Type': 'application/json'
         },
         params: {
           where: `(${groupConfig.nocodbSupplierColumnName},like,%${supplierName}%)`
-        }
+        },
+        timeout: 10000
       });
 
       nocodbLogger.debug('SEARCH_BY_SUPPLIER_DATE_RESPONSE', {
@@ -664,7 +740,9 @@ class InvoiceVerificationService {
     try {
       const testUrl = `${nocodbConfig.baseUrl}/api/v1/db/meta/projects/${nocodbConfig.projectId}/info`;
       
-      const response = await axios.get(testUrl, {
+      const response = await axiosWithAutoRetry({
+        method: 'GET',
+        url: testUrl,
         headers: {
           'xc-token': nocodbConfig.apiToken,
           'Content-Type': 'application/json'
