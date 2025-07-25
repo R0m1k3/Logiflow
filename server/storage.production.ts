@@ -467,40 +467,93 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getGroups(): Promise<Group[]> {
-    const result = await pool.query(`
-      SELECT *, 
-             nocodb_config_id as "nocodbConfigId", 
-             nocodb_table_id as "nocodbTableId",
-             nocodb_table_name as "nocodbTableName",
-             invoice_column_name as "invoiceColumnName",
-             nocodb_bl_column_name as "nocodbBlColumnName",
-             nocodb_amount_column_name as "nocodbAmountColumnName",
-             nocodb_supplier_column_name as "nocodbSupplierColumnName"
-      FROM groups 
-      ORDER BY name
-    `);
-    
-    console.log('🏪 PRODUCTION getGroups result:', { count: result.rows.length, sample: result.rows[0] });
-    return result.rows;
+    try {
+      const result = await pool.query(`
+        SELECT *, 
+               nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName"
+        FROM groups 
+        ORDER BY name
+      `);
+      
+      console.log('🏪 PRODUCTION getGroups result:', { count: result.rows.length, sample: result.rows[0] });
+      return result.rows;
+    } catch (error: any) {
+      console.error('❌ Error in getGroups:', error);
+      
+      // Fallback avec requête simplifiée si colonnes manquantes
+      if (error.code === '42703') {
+        console.log('🔧 Fallback: Using simplified query without NocoDB BL columns');
+        const result = await pool.query(`
+          SELECT *,
+                 nocodb_config_id as "nocodbConfigId", 
+                 nocodb_table_id as "nocodbTableId",
+                 nocodb_table_name as "nocodbTableName",
+                 invoice_column_name as "invoiceColumnName",
+                 'Numéro de BL' as "nocodbBlColumnName",
+                 'Montant HT' as "nocodbAmountColumnName",
+                 'Fournisseur' as "nocodbSupplierColumnName"
+          FROM groups 
+          ORDER BY name
+        `);
+        
+        console.log('🏪 PRODUCTION getGroups fallback result:', { count: result.rows.length, sample: result.rows[0] });
+        return result.rows;
+      }
+      
+      throw error;
+    }
   }
 
   async getGroup(id: number): Promise<Group | undefined> {
-    const result = await pool.query(`
-      SELECT *, 
-             nocodb_config_id as "nocodbConfigId", 
-             nocodb_table_id as "nocodbTableId",
-             nocodb_table_name as "nocodbTableName",
-             invoice_column_name as "invoiceColumnName",
-             nocodb_bl_column_name as "nocodbBlColumnName",
-             nocodb_amount_column_name as "nocodbAmountColumnName",
-             nocodb_supplier_column_name as "nocodbSupplierColumnName"
-      FROM groups 
-      WHERE id = $1
-    `, [id]);
-    
-    const group = result.rows[0];
-    console.log('🏪 PRODUCTION getGroup result:', { id, group });
-    return group || undefined;
+    try {
+      const result = await pool.query(`
+        SELECT *, 
+               nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName"
+        FROM groups 
+        WHERE id = $1
+      `, [id]);
+      
+      const group = result.rows[0];
+      console.log('🏪 PRODUCTION getGroup result:', { id, group });
+      return group || undefined;
+    } catch (error: any) {
+      console.error('❌ Error in getGroup:', error);
+      
+      // Fallback avec requête simplifiée si colonnes manquantes
+      if (error.code === '42703') {
+        console.log('🔧 Fallback: Using simplified getGroup query without NocoDB BL columns');
+        const result = await pool.query(`
+          SELECT *,
+                 nocodb_config_id as "nocodbConfigId", 
+                 nocodb_table_id as "nocodbTableId",
+                 nocodb_table_name as "nocodbTableName",
+                 invoice_column_name as "invoiceColumnName",
+                 'Numéro de BL' as "nocodbBlColumnName",
+                 'Montant HT' as "nocodbAmountColumnName",
+                 'Fournisseur' as "nocodbSupplierColumnName"
+          FROM groups 
+          WHERE id = $1
+        `, [id]);
+        
+        const group = result.rows[0];
+        console.log('🏪 PRODUCTION getGroup fallback result:', { id, group });
+        return group || undefined;
+      }
+      
+      throw error;
+    }
   }
 
   async createGroup(group: InsertGroup): Promise<Group> {
