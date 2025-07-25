@@ -861,34 +861,24 @@ export default function BLReconciliation() {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
                                   
-                                  console.log(`🔍 [DEBUG] Delivery ${delivery.id} verification:`, {
-                                    verificationKey,
-                                    verification,
-                                    exists: verification?.exists,
-                                    existsType: typeof verification?.exists,
-                                    existsStrictlyTrue: verification?.exists === true,
-                                    invoiceReference: delivery.invoiceReference
-                                  });
-                                  
                                   if (verification) {
-                                    
                                     // Affichage des icônes basé sur la vérification NocoDB
                                     if (verification.exists === true) {
                                       return (
-                                        <div className="flex items-center ml-1">
-                                          <CheckCircle className="w-4 h-4 text-green-600" title="Facture trouvée dans NocoDB" />
+                                        <div className="flex items-center ml-1" title="Facture trouvée dans NocoDB">
+                                          <CheckCircle className="w-4 h-4 text-green-600" />
                                         </div>
                                       );
                                     } else if (verification.error) {
                                       return (
-                                        <div className="flex items-center ml-1">
-                                          <AlertTriangle className="w-4 h-4 text-orange-500" title={`Erreur de configuration: ${verification.error}`} />
+                                        <div className="flex items-center ml-1" title={`Erreur de configuration: ${verification.error}`}>
+                                          <AlertTriangle className="w-4 h-4 text-orange-500" />
                                         </div>
                                       );
                                     } else {
                                       return (
-                                        <div className="flex items-center ml-1">
-                                          <X className="w-4 h-4 text-red-600" title="Facture non trouvée dans NocoDB" />
+                                        <div className="flex items-center ml-1" title="Facture non trouvée dans NocoDB">
+                                          <X className="w-4 h-4 text-red-600" />
                                         </div>
                                       );
                                     }
