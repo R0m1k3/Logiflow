@@ -363,6 +363,19 @@ export default function Deliveries() {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto p-6">
+            {/* Pagination du haut */}
+            <div className="mb-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                className="border-b border-gray-200 pb-4"
+              />
+            </div>
+            
             <div className="bg-white border border-gray-200 shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -496,16 +509,17 @@ export default function Deliveries() {
                 </table>
               </div>
               
-              {/* Pagination */}
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-                className="mt-4 p-4 border-t border-gray-200"
-              />
+              {/* Pagination du bas */}
+              <div className="border-t border-gray-200 bg-white p-4">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                />
+              </div>
             </div>
           </div>
         )}
