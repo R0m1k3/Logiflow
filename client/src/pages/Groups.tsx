@@ -58,6 +58,14 @@ export default function Groups() {
     queryKey: ['/api/groups'],
   });
 
+  // Debug: log groups data
+  console.log('🏪 Frontend Groups Debug:', { 
+    groups, 
+    groupsCount: groups.length, 
+    isLoading,
+    sample: groups[0]
+  });
+
   const { data: rawNocodbConfigs = [] } = useQuery<NocodbConfig[]>({
     queryKey: ['/api/nocodb-config'],
   });
