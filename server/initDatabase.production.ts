@@ -665,6 +665,40 @@ async function addMissingColumns() {
       console.log('✅ Added start_date column to tasks');
     }
 
+    // CRITICAL FIX: Add NocoDB BL columns to groups table
+    console.log('🔧 CRITICAL FIX: Ensuring NocoDB BL columns exist...');
+    
+    const nocodbBlColumns = [
+      { name: 'nocodb_bl_column_name', type: 'VARCHAR(255)' },
+      { name: 'nocodb_amount_column_name', type: 'VARCHAR(255)' },
+      { name: 'nocodb_supplier_column_name', type: 'VARCHAR(255)' }
+    ];
+
+    for (const column of nocodbBlColumns) {
+      const columnExists = await pool.query(`
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'groups' AND column_name = $1
+      `, [column.name]);
+      
+      if (columnExists.rows.length === 0) {
+        await pool.query(`ALTER TABLE groups ADD COLUMN ${column.name} ${column.type}`);
+        console.log(`✅ Added ${column.name} column to groups`);
+      }
+    }
+
+    // Update default values for NocoDB BL columns
+    await pool.query(`
+      UPDATE groups 
+      SET 
+          nocodb_bl_column_name = COALESCE(nocodb_bl_column_name, 'Numero_BL'),
+          nocodb_amount_column_name = COALESCE(nocodb_amount_column_name, 'Montant HT'),
+          nocodb_supplier_column_name = COALESCE(nocodb_supplier_column_name, 'Fournisseurs')
+      WHERE nocodb_bl_column_name IS NULL 
+         OR nocodb_amount_column_name IS NULL 
+         OR nocodb_supplier_column_name IS NULL
+    `);
+    console.log('✅ Updated NocoDB BL column default values');
+
     // FORCE FIX PRODUCTION ISSUE: Recreate tasks table completed columns (Critical Fix v2)
     console.log('🔧 CRITICAL FIX v2: Forcing tasks table completed columns for production...');
     
