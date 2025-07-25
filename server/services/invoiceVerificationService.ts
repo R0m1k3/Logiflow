@@ -583,7 +583,19 @@ class InvoiceVerificationService {
    * Comparaison intelligente des noms de fournisseurs
    */
   private suppliersMatch(supplier1: string, supplier2: string): boolean {
-    if (!supplier1 || !supplier2) return false;
+    console.log(`🔍 [SUPPLIERS-MATCH] Comparing suppliers:`, {
+      supplier1: `"${supplier1}"`,
+      supplier2: `"${supplier2}"`,
+      supplier1Type: typeof supplier1,
+      supplier2Type: typeof supplier2,
+      supplier1Length: supplier1?.length,
+      supplier2Length: supplier2?.length
+    });
+
+    if (!supplier1 || !supplier2) {
+      console.log(`❌ [SUPPLIERS-MATCH] One supplier is null/undefined`);
+      return false;
+    }
     
     const normalize = (str: string) => str
       .toLowerCase()
@@ -593,12 +605,27 @@ class InvoiceVerificationService {
     const norm1 = normalize(supplier1);
     const norm2 = normalize(supplier2);
     
+    console.log(`🔍 [SUPPLIERS-MATCH] Normalized:`, {
+      norm1: `"${norm1}"`,
+      norm2: `"${norm2}"`,
+      exactMatch: norm1 === norm2,
+      norm1IncludesNorm2: norm1.includes(norm2),
+      norm2IncludesNorm1: norm2.includes(norm1)
+    });
+    
     // Correspondance exacte
-    if (norm1 === norm2) return true;
+    if (norm1 === norm2) {
+      console.log(`✅ [SUPPLIERS-MATCH] Exact match found`);
+      return true;
+    }
     
     // Correspondance partielle (l'un contient l'autre)
-    if (norm1.includes(norm2) || norm2.includes(norm1)) return true;
+    if (norm1.includes(norm2) || norm2.includes(norm1)) {
+      console.log(`✅ [SUPPLIERS-MATCH] Partial match found`);
+      return true;
+    }
     
+    console.log(`❌ [SUPPLIERS-MATCH] No match found`);
     return false;
   }
 
