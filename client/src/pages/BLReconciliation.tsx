@@ -38,6 +38,7 @@ const reconciliationSchema = z.object({
 type ReconciliationForm = z.infer<typeof reconciliationSchema>;
 
 export default function BLReconciliation() {
+  console.log('🔥 BL RECONCILIATION NOUVELLE VERSION CHARGÉE - JAN 25 21:25');
   const { user } = useAuthUnified();
   const { selectedStoreId } = useStore();
   const { toast } = useToast();
@@ -853,7 +854,7 @@ export default function BLReconciliation() {
                             {delivery.invoiceReference ? (
                               <div className="flex items-center space-x-1">
                                 <span className="truncate max-w-28">{delivery.invoiceReference}</span>
-                                {/* Affichage coche basé sur existence dans NocoDB ou impossibilité de vérifier */}
+                                {/* NOUVEAU CODE - Affichage coche basé sur existence dans NocoDB */}
                                 {(() => {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
@@ -868,11 +869,17 @@ export default function BLReconciliation() {
                                     return (
                                       <div className="flex items-center">
                                         {verification.exists ? (
-                                          <CheckCircle className="w-3 h-3 text-green-600" title="Facture trouvée dans NocoDB" />
+                                          <div title="Facture trouvée dans NocoDB">
+                                            <CheckCircle className="w-3 h-3 text-green-600" />
+                                          </div>
                                         ) : verification.error ? (
-                                          <AlertTriangle className="w-3 h-3 text-orange-500" title={`Impossible de vérifier: ${verification.error}`} />
+                                          <div title={`Impossible de vérifier: ${verification.error}`}>
+                                            <AlertTriangle className="w-3 h-3 text-orange-500" />
+                                          </div>
                                         ) : (
-                                          <X className="w-3 h-3 text-red-600" title="Facture non trouvée dans NocoDB" />
+                                          <div title="Facture non trouvée dans NocoDB">
+                                            <X className="w-3 h-3 text-red-600" />
+                                          </div>
                                         )}
                                       </div>
                                     );
@@ -880,7 +887,9 @@ export default function BLReconciliation() {
                                   return null;
                                 })()}
                                 {!invoiceVerifications[delivery.id.toString()] && !delivery.groupId && (
-                                  <AlertTriangle className="w-3 h-3 text-gray-400" title="Aucun magasin assigné - impossible de vérifier" />
+                                  <div title="Aucun magasin assigné - impossible de vérifier">
+                                    <AlertTriangle className="w-3 h-3 text-gray-400" />
+                                  </div>
                                 )}
                               </div>
                             ) : (
