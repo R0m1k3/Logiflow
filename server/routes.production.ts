@@ -2256,16 +2256,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent vérifier les factures" });
       }
 
-      const { blNumber, supplierName, amount, groupId, excludeDeliveryId } = req.body;
+      const { invoiceRef, supplierName, amount, groupId, excludeDeliveryId } = req.body;
       
-      if (!blNumber || !supplierName || !amount || !groupId) {
+      if (!invoiceRef || !supplierName || !amount || !groupId) {
         return res.status(400).json({ 
-          message: "Paramètres manquants: blNumber, supplierName, amount, groupId requis" 
+          message: "Paramètres manquants: invoiceRef, supplierName, amount, groupId requis" 
         });
       }
 
       nocodbLogger.info('VERIFY_INVOICE_REQUEST', {
-        blNumber,
+        invoiceRef,
         supplierName,
         amount,
         groupId,
@@ -2300,7 +2300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Effectuer la vérification avec logging
       const verificationResult = await invoiceVerificationService.verifyInvoice(
-        blNumber,
+        invoiceRef,
         supplierName,
         amount,
         {

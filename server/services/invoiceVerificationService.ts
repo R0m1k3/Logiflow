@@ -3,9 +3,10 @@ import { nocodbLogger } from './nocodbLogger.js';
 
 export interface InvoiceVerificationResult {
   found: boolean;
-  matchType?: 'BL_NUMBER' | 'SUPPLIER_AMOUNT' | 'SUPPLIER_DATE' | 'NONE';
+  matchType?: 'INVOICE_REF' | 'BL_NUMBER' | 'SUPPLIER_AMOUNT' | 'SUPPLIER_DATE' | 'NONE';
   invoice?: any;
   verificationDetails: {
+    invoiceRef?: string;
     blNumber?: string;
     supplierName?: string;
     amount?: number;
@@ -43,7 +44,7 @@ class InvoiceVerificationService {
    * Vérification principale d'une facture/BL
    */
   async verifyInvoice(
-    blNumber: string,
+    invoiceRef: string,
     supplierName: string,
     amount: number,
     groupConfig: GroupConfig,
@@ -53,7 +54,7 @@ class InvoiceVerificationService {
     const startTime = Date.now();
     
     nocodbLogger.info('VERIFY_INVOICE_START', {
-      blNumber,
+      invoiceRef,
       supplierName,
       amount,
       groupId: groupConfig.id,
@@ -66,12 +67,12 @@ class InvoiceVerificationService {
         throw new Error('Configuration NocoDB invalide');
       }
 
-      // Étape 1: Recherche par numéro BL
-      let result = await this.searchByBLNumber(blNumber, supplierName, groupConfig, nocodbConfig);
+      // Étape 1: Recherche par référence facture
+      let result = await this.searchByInvoiceRef(invoiceRef, supplierName, groupConfig, nocodbConfig);
       if (result.found) {
         nocodbLogger.info('VERIFY_INVOICE_SUCCESS', {
-          matchType: 'BL_NUMBER',
-          blNumber,
+          matchType: 'INVOICE_REF',
+          invoiceRef,
           invoice: result.invoice
         }, groupConfig.id, groupConfig.name, Date.now() - startTime);
         return result;
@@ -102,7 +103,7 @@ class InvoiceVerificationService {
 
       // Aucune correspondance trouvée
       nocodbLogger.warn('VERIFY_INVOICE_NOT_FOUND', {
-        blNumber,
+        invoiceRef,
         supplierName,
         amount,
         searchAttempts: 3
@@ -112,7 +113,7 @@ class InvoiceVerificationService {
         found: false,
         matchType: 'NONE',
         verificationDetails: {
-          blNumber,
+          invoiceRef,
           supplierName,
           amount,
           error: 'Aucune facture correspondante trouvée'
@@ -121,7 +122,7 @@ class InvoiceVerificationService {
 
     } catch (error) {
       nocodbLogger.error('VERIFY_INVOICE_ERROR', error as Error, groupConfig.id, groupConfig.name, {
-        blNumber,
+        invoiceRef,
         supplierName,
         amount
       });
@@ -130,10 +131,99 @@ class InvoiceVerificationService {
         found: false,
         matchType: 'NONE',
         verificationDetails: {
-          blNumber,
+          invoiceRef,
           supplierName,
           amount,
           error: error instanceof Error ? error.message : 'Erreur inconnue'
+        }
+      };
+    }
+  }
+
+  /**
+   * Recherche par référence facture avec vérification fournisseur obligatoire
+   */
+  private async searchByInvoiceRef(
+    invoiceRef: string,
+    supplierName: string,
+    groupConfig: GroupConfig,
+    nocodbConfig: NocoDBConfig
+  ): Promise<InvoiceVerificationResult> {
+    
+    nocodbLogger.debug('SEARCH_BY_INVOICE_REF_START', {
+      invoiceRef,
+      supplierName,
+      tableId: groupConfig.nocodbTableId
+    }, groupConfig.id, groupConfig.name);
+
+    try {
+      const searchUrl = `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`;
+      
+      const response = await axios.get(searchUrl, {
+        headers: {
+          'xc-token': nocodbConfig.apiToken,
+          'Content-Type': 'application/json'
+        },
+        params: {
+          where: `(${groupConfig.invoiceColumnName || 'RefFacture'},eq,${invoiceRef})`
+        }
+      });
+
+      nocodbLogger.debug('SEARCH_BY_INVOICE_REF_RESPONSE', {
+        statusCode: response.status,
+        recordsFound: response.data?.list?.length || 0,
+        firstRecord: response.data?.list?.[0] || null
+      }, groupConfig.id, groupConfig.name);
+
+      if (response.data?.list?.length > 0) {
+        // Vérifier que le fournisseur correspond
+        const invoice = response.data.list[0];
+        const invoiceSupplier = invoice[groupConfig.nocodbSupplierColumnName || 'Fournisseurs'];
+        
+        if (this.suppliersMatch(supplierName, invoiceSupplier)) {
+          return {
+            found: true,
+            matchType: 'INVOICE_REF',
+            invoice,
+            verificationDetails: {
+              invoiceRef,
+              supplierName,
+              searchUrl,
+              searchCriteria: { invoiceRef, expectedSupplier: supplierName, foundSupplier: invoiceSupplier },
+              responseData: response.data
+            }
+          };
+        } else {
+          nocodbLogger.warn('SEARCH_BY_INVOICE_REF_SUPPLIER_MISMATCH', {
+            invoiceRef,
+            expectedSupplier: supplierName,
+            foundSupplier: invoiceSupplier
+          }, groupConfig.id, groupConfig.name);
+        }
+      }
+
+      return {
+        found: false,
+        verificationDetails: {
+          invoiceRef,
+          supplierName,
+          searchUrl,
+          responseData: response.data
+        }
+      };
+
+    } catch (error) {
+      nocodbLogger.error('SEARCH_BY_INVOICE_REF_ERROR', error as Error, groupConfig.id, groupConfig.name, {
+        invoiceRef,
+        supplierName
+      });
+      
+      return {
+        found: false,
+        verificationDetails: {
+          invoiceRef,
+          supplierName,
+          error: error instanceof Error ? error.message : 'Erreur recherche référence facture'
         }
       };
     }

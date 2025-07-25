@@ -13,9 +13,10 @@ import { apiRequest } from '@/lib/queryClient';
 
 interface VerificationResult {
   found: boolean;
-  matchType?: 'BL_NUMBER' | 'SUPPLIER_AMOUNT' | 'SUPPLIER_DATE' | 'NONE';
+  matchType?: 'INVOICE_REF' | 'BL_NUMBER' | 'SUPPLIER_AMOUNT' | 'SUPPLIER_DATE' | 'NONE';
   invoice?: any;
   verificationDetails: {
+    invoiceRef?: string;
     blNumber?: string;
     supplierName?: string;
     amount?: number;
@@ -39,7 +40,7 @@ export default function NocoDBDiagnostic() {
   const queryClient = useQueryClient();
   
   // States pour le formulaire de vérification
-  const [blNumber, setBlNumber] = useState('');
+  const [invoiceRef, setInvoiceRef] = useState('');
   const [supplierName, setSupplierName] = useState('');
   const [amount, setAmount] = useState('');
   const [groupId, setGroupId] = useState('');
@@ -62,11 +63,7 @@ export default function NocoDBDiagnostic() {
 
   // Mutation pour vérifier une facture
   const verifyInvoiceMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/nocodb/verify-invoice', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' }
-    }),
+    mutationFn: (data: any) => apiRequest('/api/nocodb/verify-invoice', 'POST', data),
     onSuccess: (result: VerificationResult) => {
       refetchLogs();
       toast({
@@ -88,11 +85,7 @@ export default function NocoDBDiagnostic() {
 
   // Mutation pour tester une connexion NocoDB
   const testConnectionMutation = useMutation({
-    mutationFn: (configId: number) => apiRequest('/api/nocodb/test-connection', {
-      method: 'POST',
-      body: JSON.stringify({ configId }),
-      headers: { 'Content-Type': 'application/json' }
-    }),
+    mutationFn: (configId: number) => apiRequest('/api/nocodb/test-connection', 'POST', { configId }),
     onSuccess: (result: any) => {
       refetchLogs();
       toast({
@@ -107,11 +100,7 @@ export default function NocoDBDiagnostic() {
 
   // Mutation pour nettoyer les logs
   const cleanLogsMutation = useMutation({
-    mutationFn: (daysToKeep: number) => apiRequest('/api/nocodb/logs/cleanup', {
-      method: 'POST',
-      body: JSON.stringify({ daysToKeep }),
-      headers: { 'Content-Type': 'application/json' }
-    }),
+    mutationFn: (daysToKeep: number) => apiRequest('/api/nocodb/logs/cleanup', 'POST', { daysToKeep }),
     onSuccess: () => {
       refetchLogs();
       toast({
@@ -122,7 +111,7 @@ export default function NocoDBDiagnostic() {
   });
 
   const handleVerifyInvoice = () => {
-    if (!blNumber || !supplierName || !amount || !groupId) {
+    if (!invoiceRef || !supplierName || !amount || !groupId) {
       toast({
         title: "Champs manquants",
         description: "Veuillez remplir tous les champs",
@@ -132,7 +121,7 @@ export default function NocoDBDiagnostic() {
     }
 
     verifyInvoiceMutation.mutate({
-      blNumber,
+      invoiceRef,
       supplierName,
       amount: parseFloat(amount),
       groupId: parseInt(groupId)
@@ -183,12 +172,12 @@ export default function NocoDBDiagnostic() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="blNumber">Numéro BL</Label>
+                <Label htmlFor="invoiceRef">Référence Facture</Label>
                 <Input
-                  id="blNumber"
-                  value={blNumber}
-                  onChange={(e) => setBlNumber(e.target.value)}
-                  placeholder="ex: BL123456"
+                  id="invoiceRef"
+                  value={invoiceRef}
+                  onChange={(e) => setInvoiceRef(e.target.value)}
+                  placeholder="ex: FAC123456"
                 />
               </div>
               <div>
@@ -223,7 +212,7 @@ export default function NocoDBDiagnostic() {
                   className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
                 >
                   <option value="">Sélectionner un magasin</option>
-                  {groups.map((group: any) => (
+                  {(groups as any[]).map((group: any) => (
                     <option key={group.id} value={group.id}>
                       {group.name}
                     </option>
@@ -288,11 +277,11 @@ export default function NocoDBDiagnostic() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {nocodbConfigs.length === 0 ? (
+            {(nocodbConfigs as any[]).length === 0 ? (
               <p className="text-muted-foreground">Aucune configuration NocoDB trouvée</p>
             ) : (
               <div className="space-y-2">
-                {nocodbConfigs.map((config: any) => (
+                {(nocodbConfigs as any[]).map((config: any) => (
                   <div
                     key={config.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
