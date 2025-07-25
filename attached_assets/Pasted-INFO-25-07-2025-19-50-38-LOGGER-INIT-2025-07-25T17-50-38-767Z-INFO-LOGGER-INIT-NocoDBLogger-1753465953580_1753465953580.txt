@@ -1,0 +1,44 @@
+INFO
+25/07/2025 19:50:38
+LOGGER_INIT
+[2025-07-25T17:50:38.767Z] [INFO] [LOGGER_INIT] NocoDBLogger initialized
+INFO
+25/07/2025 19:52:12
+VERIFY_INVOICE_REQUEST
+[2025-07-25T17:52:12.257Z] [INFO] [VERIFY_INVOICE_REQUEST] Data: {"invoiceRef":"25025575","supplierName":"Lidis","amount":22468.48,"groupId":1,"userId":"admin_local","userRole":"admin"}
+INFO
+25/07/2025 19:52:12
+VERIFY_INVOICE_START
+[2025-07-25T17:52:12.261Z] [INFO] [VERIFY_INVOICE_START] [Group:1] [Frouard] Data: {"invoiceRef":"25025575","supplierName":"Lidis","amount":22468.48,"groupId":1}
+DEBUG
+25/07/2025 19:52:12
+SEARCH_BY_INVOICE_REF_START
+[2025-07-25T17:52:12.261Z] [DEBUG] [SEARCH_BY_INVOICE_REF_START] [Group:1] [Frouard] Data: {"invoiceRef":"25025575","supplierName":"Lidis","tableId":"mrr733dfb8wtt9b"}
+DEBUG
+25/07/2025 19:52:12
+SEARCH_BY_INVOICE_REF_REQUEST
+[2025-07-25T17:52:12.261Z] [DEBUG] [SEARCH_BY_INVOICE_REF_REQUEST] [Group:1] [Frouard] Data: {"searchUrl":"https://nocodb.ffnancy.fr/api/v1/db/data/noco/nocodb/mrr733dfb8wtt9b","whereClause":"(RefFacture,eq,25025575)","invoiceColumnName":"RefFacture","apiToken":"z4BAwLo6dg..."}
+ERROR
+25/07/2025 19:52:12
+SEARCH_BY_INVOICE_REF_ERROR
+[2025-07-25T17:52:12.364Z] [ERROR] [SEARCH_BY_INVOICE_REF_ERROR] [Group:1] [Frouard] Data: {"invoiceRef":"25025575","supplierName":"Lidis"} Error: Request failed with status code 404
+DEBUG
+25/07/2025 19:52:12
+SEARCH_BY_SUPPLIER_AMOUNT_START
+[2025-07-25T17:52:12.364Z] [DEBUG] [SEARCH_BY_SUPPLIER_AMOUNT_START] [Group:1] [Frouard] Data: {"supplierName":"Lidis","amount":22468.48,"tableId":"mrr733dfb8wtt9b"}
+ERROR
+25/07/2025 19:52:12
+SEARCH_BY_SUPPLIER_AMOUNT_ERROR
+[2025-07-25T17:52:12.370Z] [ERROR] [SEARCH_BY_SUPPLIER_AMOUNT_ERROR] [Group:1] [Frouard] Data: {"supplierName":"Lidis","amount":22468.48} Error: Request failed with status code 404
+DEBUG
+25/07/2025 19:52:12
+SEARCH_BY_SUPPLIER_DATE_START
+[2025-07-25T17:52:12.370Z] [DEBUG] [SEARCH_BY_SUPPLIER_DATE_START] [Group:1] [Frouard] Data: {"supplierName":"Lidis","targetDate":"2025-07-25T17:52:12.370Z","tableId":"mrr733dfb8wtt9b"}
+ERROR
+25/07/2025 19:52:12
+SEARCH_BY_SUPPLIER_DATE_ERROR
+[2025-07-25T17:52:12.374Z] [ERROR] [SEARCH_BY_SUPPLIER_DATE_ERROR] [Group:1] [Frouard] Data: {"supplierName":"Lidis","targetDate":"2025-07-25T17:52:12.370Z"} Error: Request failed with status code 404
+WARN
+25/07/2025 19:52:12
+VERIFY_INVOICE_NOT_FOUND
+[2025-07-25T17:52:12.374Z] [WARN] [VERIFY_INVOICE_NOT_FOUND] [Group:1] [Frouard] Data: {"invoiceRef":"25025575","supplierName":"Lidis","amount":22468.48,"searchAttempts":3}

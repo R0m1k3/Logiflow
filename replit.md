@@ -267,6 +267,16 @@ The application uses a sophisticated dual authentication approach:
 - **DIAGNOSTIC COMPLET** - Interface permet test factures réelles avec feedback visuel et détails techniques
 - **ARCHITECTURE ROBUSTE** - Système entièrement opérationnel prêt pour diagnostic problèmes vérification BL/factures
 
+### July 25, 2025 - CORRECTION CRITIQUE NOCODB: Project ID Incorrect Causait Erreurs 404 - Système Réparé
+
+- **PROBLÈME ROOT CAUSE IDENTIFIÉ** - Configuration NocoDB utilisait project_id 'nocodb' qui n'existe pas, causant erreurs 404 systématiques
+- **DIAGNOSTIC API NOCODB EFFECTUÉ** - Tests curl révèlent "Base 'nocodb' not found", structure API confirmée fonctionnelle
+- **PROJECT_ID CORRIGÉ** - Changement de 'nocodb' vers 'pcg4uw79ukvycxc' (projet Magasin) dans nocodb_config table
+- **CONFIGURATION FONCTIONNELLE RESTAURÉE** - URL API: https://nocodb.ffnancy.fr/api/v1/db/data/noco/pcg4uw79ukvycxc/mrr733dfb8wtt9b
+- **VÉRIFICATION FACTURES OPÉRATIONNELLE** - Système peut maintenant rechercher par référence facture RefFacture comme requis
+- **LOGS DIAGNOSTIC AMÉLIORÉS** - Ajout détails HTTP complets pour traçabilité future des erreurs NocoDB
+- **RÉGRESSION CORRIGÉE** - Fonctionnalité "qui marchait avant" maintenant restaurée avec bon project_id
+
 ### July 25, 2025 - RÉSOLUTION FINALE CONFIGURATION NOCODB: Système Entièrement Opérationnel et Testé
 
 - **PROBLÈME ROOT CAUSE RÉSOLU DÉFINITIVEMENT** - Fallbacks inutiles dans getGroups() et getGroup() empêchaient la lecture des vraies configurations NocoDB

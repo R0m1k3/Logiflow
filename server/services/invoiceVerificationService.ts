@@ -174,8 +174,20 @@ class InvoiceVerificationService {
         },
         params: {
           where: whereClause
-        }
+        },
+        timeout: 10000
       });
+
+      nocodbLogger.debug('SEARCH_BY_INVOICE_REF_HTTP_DETAILS', {
+        requestUrl: `${searchUrl}?where=${encodeURIComponent(whereClause)}`,
+        responseStatus: response.status,
+        responseHeaders: response.headers['content-type'],
+        dataStructure: {
+          hasData: !!response.data,
+          hasList: !!response.data?.list,
+          listLength: response.data?.list?.length || 0
+        }
+      }, groupConfig.id, groupConfig.name);
 
       nocodbLogger.debug('SEARCH_BY_INVOICE_REF_RESPONSE', {
         statusCode: response.status,
@@ -221,9 +233,17 @@ class InvoiceVerificationService {
       };
 
     } catch (error) {
+      const axiosError = error as any;
       nocodbLogger.error('SEARCH_BY_INVOICE_REF_ERROR', error as Error, groupConfig.id, groupConfig.name, {
         invoiceRef,
-        supplierName
+        supplierName,
+        errorDetails: {
+          status: axiosError.response?.status,
+          statusText: axiosError.response?.statusText,
+          responseData: axiosError.response?.data,
+          requestUrl: `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`,
+          fullUrl: `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}?where=${encodeURIComponent(`(${groupConfig.invoiceColumnName || 'RefFacture'},eq,${invoiceRef})`)}`
+        }
       });
       
       return {
