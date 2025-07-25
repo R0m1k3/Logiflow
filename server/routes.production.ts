@@ -2407,14 +2407,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
-  });ervice.testConnection(nocodbConfig);
-      res.json(testResult);
-
-    } catch (error) {
-      nocodbLogger.error('TEST_CONNECTION_API_ERROR', error as Error);
-      console.error("Error testing NocoDB connection:", error);
-      res.status(500).json({ message: "Erreur lors du test de connexion" });
-    }
   });
 
   // Récupération des logs NocoDB récents

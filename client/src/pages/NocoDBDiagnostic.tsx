@@ -87,13 +87,23 @@ export default function NocoDBDiagnostic() {
   const testConnectionMutation = useMutation({
     mutationFn: (configId: number) => apiRequest('/api/nocodb/test-connection', 'POST', { configId }),
     onSuccess: (result: any) => {
+      console.log('🔍 Test connection result:', result);
       refetchLogs();
       toast({
         title: result.success ? "Connexion réussie" : "Connexion échouée",
         description: result.success 
           ? "La connexion à NocoDB fonctionne" 
-          : result.error,
+          : result.message || result.error || "Erreur inconnue",
         variant: result.success ? "default" : "destructive"
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Test connection error:', error);
+      refetchLogs();
+      toast({
+        title: "Erreur de test",
+        description: error.message || "Erreur lors du test de connexion",
+        variant: "destructive"
       });
     }
   });
