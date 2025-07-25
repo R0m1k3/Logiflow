@@ -38,7 +38,7 @@ const reconciliationSchema = z.object({
 type ReconciliationForm = z.infer<typeof reconciliationSchema>;
 
 export default function BLReconciliation() {
-  console.log('🔥 BL RECONCILIATION NOUVELLE VERSION CHARGÉE - JAN 25 21:25');
+  console.log('🔥 BL RECONCILIATION FIXED VERSION CHARGÉE - JAN 25 21:40');
   const { user } = useAuthUnified();
   const { selectedStoreId } = useStore();
   const { toast } = useToast();
@@ -77,7 +77,7 @@ export default function BLReconciliation() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deliveryToDelete, setDeliveryToDelete] = useState<any>(null);
-  const [invoiceVerifications, setInvoiceVerifications] = useState<Record<number, { exists: boolean; error?: string; isUsed?: boolean; usedBy?: any }>>({});
+  const [invoiceVerifications, setInvoiceVerifications] = useState<Record<string, { exists: boolean; error?: string; isUsed?: boolean; usedBy?: any }>>({});
   const [isVerifyingInvoices, setIsVerifyingInvoices] = useState(false);
   const [isVerifyingCurrentInvoice, setIsVerifyingCurrentInvoice] = useState(false);
 
@@ -137,7 +137,9 @@ export default function BLReconciliation() {
             
             if (verificationResponse.ok) {
               const verificationResults = await verificationResponse.json();
+              console.log('✅ Verification results:', verificationResults);
               setInvoiceVerifications(verificationResults);
+              console.log('🔄 Invoice verifications state updated with:', Object.keys(verificationResults));
             }
           } catch (error) {
             console.error('Error verifying invoice references:', error);
@@ -858,14 +860,19 @@ export default function BLReconciliation() {
                                 {(() => {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
-                                  console.log(`🔍 Debug verification for delivery ${delivery.id}:`, { 
+                                  
+                                  // Debug forcé pour identifier le problème
+                                  console.log(`🔍 FORCE DEBUG delivery ${delivery.id} (${delivery.invoiceReference}):`, { 
                                     verificationKey, 
-                                    verification, 
+                                    verification,
+                                    verificationExists: !!verification,
+                                    verificationExistsValue: verification?.exists,
                                     allKeys: Object.keys(invoiceVerifications),
-                                    invoiceRef: delivery.invoiceReference
+                                    stateKeys: Object.keys(invoiceVerifications).map(k => `${k}: ${invoiceVerifications[k]?.exists}`)
                                   });
                                   
                                   if (verification) {
+                                    console.log(`✅ RENDERING for delivery ${delivery.id}: exists=${verification.exists}`);
                                     return (
                                       <div className="flex items-center">
                                         {verification.exists ? (
@@ -883,6 +890,8 @@ export default function BLReconciliation() {
                                         )}
                                       </div>
                                     );
+                                  } else {
+                                    console.log(`❌ NO VERIFICATION for delivery ${delivery.id}`);
                                   }
                                   return null;
                                 })()}
