@@ -115,7 +115,7 @@ export default function Layout({ children }: LayoutProps) {
             )}
           </header>
 
-          <div className="flex-1 bg-gray-50">
+          <div className="flex-1 bg-gray-50 overflow-y-auto">
             {children}
           </div>
         </main>

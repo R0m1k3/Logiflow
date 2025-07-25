@@ -9,9 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { safeFormat } from "@/lib/dateUtils";
-import EditOrderModal from "./EditOrderModal";
-import EditDeliveryModal from "./EditDeliveryModal";
-import ValidateDeliveryModal from "./ValidateDeliveryModal";
+import { EditOrderModal } from "./EditOrderModal";
+import { EditDeliveryModal } from "./EditDeliveryModal";
+import { ValidateDeliveryModal } from "./ValidateDeliveryModal";
 import { Package, Truck, Edit, Trash2, Check, X } from "lucide-react";
 
 interface OrderDetailModalProps {
@@ -20,7 +20,7 @@ interface OrderDetailModalProps {
   item: any;
 }
 
-export default function OrderDetailModal({
+export function OrderDetailModal({
   isOpen,
   onClose,
   item,

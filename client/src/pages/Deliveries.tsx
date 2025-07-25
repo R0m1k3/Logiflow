@@ -279,7 +279,7 @@ export default function Deliveries() {
   });
 
   return (
-    <div className="h-full flex flex-col p-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-6 shadow-sm -mx-6 -mt-6 mb-6">
         <div className="flex items-center justify-between">

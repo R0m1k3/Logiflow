@@ -1,7 +1,12 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from './button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './select';
 
 interface PaginationProps {
   currentPage: number;
@@ -9,7 +14,7 @@ interface PaginationProps {
   totalItems: number;
   itemsPerPage: number;
   onPageChange: (page: number) => void;
-  onItemsPerPageChange?: (itemsPerPage: number) => void;
+  onItemsPerPageChange: (itemsPerPage: number) => void;
   className?: string;
 }
 
@@ -20,164 +25,118 @@ export function Pagination({
   itemsPerPage,
   onPageChange,
   onItemsPerPageChange,
-  className = ""
+  className = '',
 }: PaginationProps) {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getVisiblePages = () => {
-    const delta = 2;
-    const range = [];
-    const rangeWithDots = [];
-    let l;
+    const visiblePages: (number | string)[] = [];
+    const maxVisible = 5;
 
-    for (let i = Math.max(2, currentPage - delta);
-         i <= Math.min(totalPages - 1, currentPage + delta);
-         i++) {
-      range.push(i);
-    }
-
-    if (currentPage - delta > 2) {
-      rangeWithDots.push(1, '...');
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        visiblePages.push(i);
+      }
     } else {
-      rangeWithDots.push(1);
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          visiblePages.push(i);
+        }
+        visiblePages.push('...');
+        visiblePages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        visiblePages.push(1);
+        visiblePages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          visiblePages.push(i);
+        }
+      } else {
+        visiblePages.push(1);
+        visiblePages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          visiblePages.push(i);
+        }
+        visiblePages.push('...');
+        visiblePages.push(totalPages);
+      }
     }
 
-    rangeWithDots.push(...range);
-
-    if (currentPage + delta < totalPages - 1) {
-      rangeWithDots.push('...', totalPages);
-    } else {
-      rangeWithDots.push(totalPages);
-    }
-
-    return rangeWithDots;
+    return visiblePages;
   };
 
-  // Toujours afficher la pagination pour permettre le changement du nombre d'éléments par page
-  if (totalPages <= 1 && !onItemsPerPageChange) return null;
+  if (totalItems === 0) {
+    return null;
+  }
 
   return (
-    <div className={`flex items-center justify-between px-2 ${className}`}>
-      <div className="flex items-center space-x-6 lg:space-x-8">
-        {onItemsPerPageChange && (
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Lignes par page</p>
-            <Select
-              value={itemsPerPage.toString()}
-              onValueChange={(value) => onItemsPerPageChange(parseInt(value))}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={itemsPerPage} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 30, 50, 100].map((pageSize) => (
-                  <SelectItem key={pageSize} value={pageSize.toString()}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Page {currentPage} sur {totalPages}
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {totalItems > 0 ? `${startItem}-${endItem} sur ${totalItems}` : '0 élément'}
+    <div className={`flex items-center justify-between ${className}`}>
+      <div className="flex items-center gap-4">
+        <p className="text-sm text-gray-700">
+          Affichage de <span className="font-medium">{startItem}</span> à{' '}
+          <span className="font-medium">{endItem}</span> sur{' '}
+          <span className="font-medium">{totalItems}</span> résultats
+        </p>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-700">Afficher:</span>
+          <Select
+            value={itemsPerPage.toString()}
+            onValueChange={(value) => onItemsPerPageChange(parseInt(value))}
+          >
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
+
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
-          className="hidden h-8 w-8 p-0 lg:flex"
-          onClick={() => onPageChange(1)}
-          disabled={currentPage === 1}
-        >
-          <span className="sr-only">Aller à la première page</span>
-          <ChevronsLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          className="h-8 w-8 p-0"
+          size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <span className="sr-only">Aller à la page précédente</span>
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="w-4 h-4" />
+          Précédent
         </Button>
-        
-        <div className="flex items-center space-x-1">
+
+        <div className="flex items-center gap-1">
           {getVisiblePages().map((page, index) => (
-            <Button
-              key={index}
-              variant={page === currentPage ? "default" : "outline"}
-              className="h-8 w-8 p-0"
-              onClick={() => typeof page === 'number' && onPageChange(page)}
-              disabled={page === '...'}
-            >
-              {page}
-            </Button>
+            <span key={index}>
+              {page === '...' ? (
+                <span className="px-3 py-2 text-gray-500">...</span>
+              ) : (
+                <Button
+                  variant={currentPage === page ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => onPageChange(page as number)}
+                  className="w-10"
+                >
+                  {page}
+                </Button>
+              )}
+            </span>
           ))}
         </div>
 
         <Button
           variant="outline"
-          className="h-8 w-8 p-0"
+          size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          <span className="sr-only">Aller à la page suivante</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          className="hidden h-8 w-8 p-0 lg:flex"
-          onClick={() => onPageChange(totalPages)}
-          disabled={currentPage === totalPages}
-        >
-          <span className="sr-only">Aller à la dernière page</span>
-          <ChevronsRight className="h-4 w-4" />
+          Suivant
+          <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
     </div>
   );
-}
-
-// Hook utilitaire pour gérer la pagination
-export function usePagination(data: any[], initialItemsPerPage: number = 20) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
-
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedData = data.slice(startIndex, endIndex);
-
-  // Reset à la page 1 si les données changent
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [data.length]);
-
-  // Reset à la page 1 si le nombre d'éléments par page change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [itemsPerPage]);
-
-  // S'assurer que la page actuelle est valide
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
-  return {
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
-    totalPages,
-    paginatedData,
-    totalItems: data.length
-  };
 }

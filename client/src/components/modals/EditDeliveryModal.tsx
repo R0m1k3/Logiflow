@@ -20,7 +20,7 @@ interface EditDeliveryModalProps {
   delivery: DeliveryWithRelations | null;
 }
 
-export default function EditDeliveryModal({
+export function EditDeliveryModal({
   isOpen,
   onClose,
   delivery,

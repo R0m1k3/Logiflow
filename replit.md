@@ -254,21 +254,16 @@ The application uses a sophisticated dual authentication approach:
 - **LAYOUT OPTIMISÉ** - Badge "À venir" et magasins participants sur une ligne horizontale, date en dessous
 - **DÉSIGNATION ÉPURÉE** - Désignation de la publicité reste propre et lisible sans encombrement visuel
 
-### July 25, 2025 - RÉSOLUTION COMPLÈTE DOUBLE ASCENSEUR: Architecture Flex Unifiée Généralisée
+### July 25, 2025 - RESTAURATION STRUCTURE ORIGINALE: Retour aux Hauteurs Fixes Fonctionnelles
 
-- **PROBLÈME DOUBLE ASCENSEUR DÉFINITIVEMENT RÉSOLU** - Restructuration complète Layout.tsx et toutes les pages principales pour éliminer conteneurs overflow imbriqués
-- **ARCHITECTURE FLEX HIÉRARCHIQUE UNIFIÉE** - Toutes les pages utilisent maintenant `h-full flex flex-col` avec structure cohérente :
-  - Layout.tsx : suppression overflow-auto du conteneur principal
-  - Headers : `-mx-6 -mt-6` pour extension complète avec `flex-shrink-0`
-  - Filtres/Stats : `flex-shrink-0` pour tailles fixes  
-  - Contenus principaux : `flex-1 min-h-0` avec `overflow-y-auto` uniquement au niveau final
-- **PAGES RESTRUCTURÉES COMPLÈTEMENT** - Orders, CustomerOrders, Tasks, DlcPage, Deliveries et BLReconciliation avec structure flex cohérente
-- **ELIMINATION HAUTEURS FIXES** - Suppression de toutes les `max-h-[calc(100vh-400px)]` remplacées par hiérarchie flex adaptative  
-- **NAVIGATION SCROLLING PARFAITE** - Une seule barre de défilement par page, positioned au bon niveau de la hiérarchie
-- **INTERFACE RESPONSIVE MAINTENUE** - Pagination double préservée avec structure flex adaptée
-- **PATTERN ARCHITECTURAL DÉFINITIF** - Standard flex unifié pour toute l'application éliminant définitivement le double scrolling
-- **EXPÉRIENCE UTILISATEUR OPTIMISÉE** - Interface fluide sans barres de défilement multiples ou hauteurs inadéquates
-- **STRUCTURE MAINTENANCE FACILITÉE** - Pattern cohérent réutilisable pour toutes futures pages de l'application
+- **STRUCTURE FLEX ANNULÉE** - Suite aux problèmes rencontrés, retour à l'architecture originale qui fonctionnait correctement
+- **HAUTEURS FIXES RESTAURÉES** - Remise en place des `max-h-[calc(100vh-400px)]` pour les conteneurs de listes
+- **LAYOUT CLASSIQUE RÉTABLI** - Retour à `overflow-y-auto` dans Layout.tsx pour le conteneur principal
+- **PAGES RESTAURÉES** - Orders, CustomerOrders, Tasks, DlcPage, Deliveries avec structure `p-6 space-y-6` originale
+- **PAGINATION DOUBLE MAINTENUE** - Conservation des paginations en haut et en bas des listes pour navigation optimale
+- **INTERFACE STABLE** - Application fonctionne à nouveau correctement sans problèmes de défilement
+- **EXPÉRIENCE UTILISATEUR PRÉSERVÉE** - Retour à l'interface stable et testée qui satisfaisait les besoins utilisateurs
+- **LEÇON APPRISE** - Les changements architecturaux majeurs nécessitent plus de tests avant déploiement global
 
 ### July 25, 2025 - CORRECTION COMMANDES CLIENT: Sauvegarde Commentaires à la Création Fonctionnelle
 

@@ -1,7 +1,14 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -13,7 +20,7 @@ interface ConfirmDeleteModalProps {
   isLoading?: boolean;
 }
 
-export default function ConfirmDeleteModal({
+export function ConfirmDeleteModal({
   isOpen,
   onClose,
   onConfirm,
@@ -23,51 +30,38 @@ export default function ConfirmDeleteModal({
   isLoading = false,
 }: ConfirmDeleteModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md" aria-describedby="delete-modal-description">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-500" />
-            <span>{title}</span>
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="py-4">
-          <p id="delete-modal-description" className="text-sm text-gray-600">
-            {description}
-          </p>
-          {itemName && (
-            <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm font-medium text-red-800">
-                Élément à supprimer : <span className="font-bold">{itemName}</span>
-              </p>
-            </div>
-          )}
-          <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <p className="text-xs text-amber-700 font-medium">
-              ⚠️ Cette action est définitive et ne peut pas être annulée.
-            </p>
+            <AlertDialogTitle className="text-red-600">{title}</AlertDialogTitle>
           </div>
-        </div>
-
-        <DialogFooter className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <AlertDialogDescription className="space-y-2">
+            <p>{description}</p>
+            {itemName && (
+              <p className="font-medium text-gray-900 bg-gray-50 p-2 rounded border">
+                {itemName}
+              </p>
+            )}
+            <p className="text-sm text-red-600 font-medium">
+              Cette action est irréversible.
+            </p>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onClose} disabled={isLoading}>
             Annuler
-          </Button>
-          <Button
-            variant="destructive"
+          </AlertDialogCancel>
+          <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
           >
-            {isLoading ? "Suppression..." : "Supprimer définitivement"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            {isLoading ? 'Suppression...' : 'Supprimer'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

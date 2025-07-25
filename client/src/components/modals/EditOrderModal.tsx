@@ -20,7 +20,7 @@ interface EditOrderModalProps {
   order: OrderWithRelations | null;
 }
 
-export default function EditOrderModal({
+export function EditOrderModal({
   isOpen,
   onClose,
   order,

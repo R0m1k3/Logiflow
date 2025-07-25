@@ -20,7 +20,7 @@ interface CreateOrderModalProps {
   selectedDate: Date | null;
 }
 
-export default function CreateOrderModal({
+export function CreateOrderModal({
   isOpen,
   onClose,
   selectedDate,

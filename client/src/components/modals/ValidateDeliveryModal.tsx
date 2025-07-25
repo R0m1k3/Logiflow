@@ -25,7 +25,7 @@ interface ValidateDeliveryModalProps {
   onValidated?: () => void; // Callback pour fermer le modal parent
 }
 
-export default function ValidateDeliveryModal({
+export function ValidateDeliveryModal({
   isOpen,
   onClose,
   delivery,
