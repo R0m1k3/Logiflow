@@ -104,6 +104,9 @@ export default function Groups() {
         nocodbTableId: "",
         nocodbTableName: "",
         invoiceColumnName: "Ref Facture",
+        nocodbBlColumnName: "Numéro de BL",
+        nocodbAmountColumnName: "Montant HT",
+        nocodbSupplierColumnName: "Fournisseur",
       });
     },
     onError: (error) => {
@@ -145,6 +148,9 @@ export default function Groups() {
         nocodbTableId: "",
         nocodbTableName: "",
         invoiceColumnName: "Ref Facture",
+        nocodbBlColumnName: "Numéro de BL",
+        nocodbAmountColumnName: "Montant HT",
+        nocodbSupplierColumnName: "Fournisseur",
       });
     },
     onError: (error) => {

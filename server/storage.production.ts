@@ -467,28 +467,78 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getGroups(): Promise<Group[]> {
-    const result = await pool.query('SELECT * FROM groups ORDER BY name');
+    const result = await pool.query(`
+      SELECT *, 
+             nocodb_config_id as "nocodbConfigId", 
+             nocodb_table_id as "nocodbTableId",
+             nocodb_table_name as "nocodbTableName",
+             invoice_column_name as "invoiceColumnName",
+             nocodb_bl_column_name as "nocodbBlColumnName",
+             nocodb_amount_column_name as "nocodbAmountColumnName",
+             nocodb_supplier_column_name as "nocodbSupplierColumnName"
+      FROM groups 
+      ORDER BY name
+    `);
+    
+    console.log('🏪 PRODUCTION getGroups result:', { count: result.rows.length, sample: result.rows[0] });
     return result.rows;
   }
 
   async getGroup(id: number): Promise<Group | undefined> {
-    const result = await pool.query('SELECT * FROM groups WHERE id = $1', [id]);
-    return result.rows[0] || undefined;
+    const result = await pool.query(`
+      SELECT *, 
+             nocodb_config_id as "nocodbConfigId", 
+             nocodb_table_id as "nocodbTableId",
+             nocodb_table_name as "nocodbTableName",
+             invoice_column_name as "invoiceColumnName",
+             nocodb_bl_column_name as "nocodbBlColumnName",
+             nocodb_amount_column_name as "nocodbAmountColumnName",
+             nocodb_supplier_column_name as "nocodbSupplierColumnName"
+      FROM groups 
+      WHERE id = $1
+    `, [id]);
+    
+    const group = result.rows[0];
+    console.log('🏪 PRODUCTION getGroup result:', { id, group });
+    return group || undefined;
   }
 
   async createGroup(group: InsertGroup): Promise<Group> {
-    console.log('🏪 Creating group with data:', { 
-      name: group.name, 
-      color: group.color,
-      fullData: group 
-    });
+    console.log('🏪 PRODUCTION createGroup called with:', group);
     
     try {
       const result = await pool.query(`
-        INSERT INTO groups (name, color) 
-        VALUES ($1, $2) 
-        RETURNING *
-      `, [group.name, group.color]);
+        INSERT INTO groups (
+          name, 
+          color, 
+          nocodb_config_id, 
+          nocodb_table_id, 
+          nocodb_table_name, 
+          invoice_column_name,
+          nocodb_bl_column_name,
+          nocodb_amount_column_name,
+          nocodb_supplier_column_name
+        ) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+        RETURNING *, 
+                 nocodb_config_id as "nocodbConfigId", 
+                 nocodb_table_id as "nocodbTableId",
+                 nocodb_table_name as "nocodbTableName",
+                 invoice_column_name as "invoiceColumnName",
+                 nocodb_bl_column_name as "nocodbBlColumnName",
+                 nocodb_amount_column_name as "nocodbAmountColumnName",
+                 nocodb_supplier_column_name as "nocodbSupplierColumnName"
+      `, [
+        group.name, 
+        group.color, 
+        group.nocodbConfigId || null,
+        group.nocodbTableId || null,
+        group.nocodbTableName || null,
+        group.invoiceColumnName || "Ref Facture",
+        group.nocodbBlColumnName || "Numéro de BL",
+        group.nocodbAmountColumnName || "Montant HT",
+        group.nocodbSupplierColumnName || "Fournisseur"
+      ]);
       
       console.log('✅ Group created successfully:', result.rows[0]);
       return result.rows[0];
@@ -505,12 +555,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGroup(id: number, group: Partial<InsertGroup>): Promise<Group> {
+    console.log('🏪 PRODUCTION updateGroup called with:', { id, group });
+    
     const result = await pool.query(`
-      UPDATE groups SET name = $1, color = $2, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $3
-      RETURNING *
-    `, [group.name, group.color, id]);
-    return result.rows[0];
+      UPDATE groups SET 
+        name = COALESCE($1, name),
+        color = COALESCE($2, color),
+        nocodb_config_id = $3,
+        nocodb_table_id = $4,
+        nocodb_table_name = $5,
+        invoice_column_name = COALESCE($6, invoice_column_name),
+        nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
+        nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
+        nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $10
+      RETURNING *, nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName"
+    `, [
+      group.name, 
+      group.color, 
+      group.nocodbConfigId || null,
+      group.nocodbTableId || null,
+      group.nocodbTableName || null,
+      group.invoiceColumnName,
+      group.nocodbBlColumnName,
+      group.nocodbAmountColumnName,
+      group.nocodbSupplierColumnName,
+      id
+    ]);
+    
+    const updatedGroup = result.rows[0];
+    console.log('🏪 PRODUCTION updateGroup result:', updatedGroup);
+    return updatedGroup;
   }
 
   async deleteGroup(id: number): Promise<void> {
