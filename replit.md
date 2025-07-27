@@ -123,7 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - ERREUR SYNTAXE PRODUCTION RÉSOLUE : Route PUT Deliveries Entièrement Fonctionnelle
+### 2025-07-27 - AFFICHAGE ICÔNES WEBHOOK CONDITIONNEL : Masquage Lors de Coche Verte Finalisé
+✓ LOGIQUE WEBHOOK INTELLIGENTE - Icônes webhook n'apparaissent plus quand facture est vérifiée (coche verte) dans NocoDB
+✓ CONDITION DOUBLE VÉRIFICATION - Affichage seulement si webhookUrl configuré ET pas de verification.exists === true
+✓ INTERFACE UTILISATEUR ÉPURÉE - Réduction visuelle du bruit, webhook affiché uniquement pour factures non trouvées
+✓ LOGIQUE MÉTIER RESPECTÉE - Webhook utilisé pour notifier les factures problématiques, pas celles déjà validées
+✓ MODAL RAPPROCHEMENT CORRIGÉ - Champs vides maintenant correctement sauvegardés comme null au lieu de chaînes vides
+✓ PROBLÈME LIGNE MOREL RÉSOLU - Effacement des montants de facture maintenant fonctionnel en production
+✓ LOGS AMÉLIORATION TRAÇABILITÉ - Payload serveur affiche explicitly les valeurs null pour debugging efficace
+
+### 2025-07-27 - ERREUR SYNTAXE PRODUCTION RÉSOLUE : Route PUT Deliveries Entièrement Fonctionnelle (PRÉCÉDENT)
 ✓ PROBLÈME CRITIQUE IDENTIFIÉ - Erreur syntaxe dans routes.production.ts ligne `if (!resu` tronquée empêchait exécution route PUT /api/deliveries/:id
 ✓ CORRECTION SYNTAXE APPLIQUÉE - `if (!resu` corrigé en `if (!result.success) {` pour validation schema Zod appropriée
 ✓ VALIDATION PRODUCTION RÉPARÉE - Route PUT /api/deliveries/:id maintenant opérationnelle avec gestion d'erreurs numériques complète
