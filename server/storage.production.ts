@@ -1368,7 +1368,7 @@ export class DatabaseStorage implements IStorage {
     const result = await pool.query(`
       SELECT d.*, 
              s.id as supplier_id, s.name as supplier_name, s.contact as supplier_contact, s.phone as supplier_phone,
-             g.id as group_id, g.name as group_name, g.color as group_color,
+             g.id as group_id, g.name as group_name, g.color as group_color, g.webhook_url as group_webhook_url,
              u.id as creator_id, u.username as creator_username, u.email as creator_email, u.name as creator_name,
              o.id as order_id_rel, o.planned_date as order_planned_date, o.status as order_status
       FROM deliveries d
@@ -1415,6 +1415,7 @@ export class DatabaseStorage implements IStorage {
         id: row.group_id,
         name: row.group_name,
         color: row.group_color || '#666666',
+        webhookUrl: row.group_webhook_url || null,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       } : null,
