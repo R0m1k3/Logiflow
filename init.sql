@@ -234,10 +234,10 @@ CREATE INDEX idx_session_expire ON sessions(expire);
 
 -- Insert default data
 
--- Insert default groups (stores)
-INSERT INTO groups (name, color, webhook_url) VALUES 
-('Frouard', '#1976D2', 'https://workflow.ffnancy.fr/webhook-test/acf9cbf7-040a-4cf5-a43d-80210420d30a'),
-('Houdemont', '#455A64', NULL);
+-- Insert default groups (stores) with complete configuration
+INSERT INTO groups (name, color, nocodb_config_id, nocodb_table_id, nocodb_table_name, invoice_column_name, nocodb_bl_column_name, nocodb_amount_column_name, nocodb_supplier_column_name, webhook_url) VALUES 
+('Frouard', '#1976D2', 1, 'mrr733dfb8wtt9b', 'CommandeF', 'RefFacture', 'Numero_BL', 'Montant HT', 'Fournisseurs', 'https://workflow.ffnancy.fr/webhook-test/acf9cbf7-040a-4cf5-a43d-80210420d30a'),
+('Houdemont', '#455A64', NULL, NULL, NULL, 'Ref Facture', 'Numéro de BL', 'Montant HT', 'Fournisseur', '');
 
 -- Insert 4 fixed roles with soft colors
 INSERT INTO roles (id, name, display_name, description, color, is_system, is_active) VALUES
