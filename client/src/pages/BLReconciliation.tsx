@@ -1004,10 +1004,10 @@ export default function BLReconciliation() {
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
-                                        className="inline-flex items-center justify-center w-6 h-6 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-sm transition-colors duration-200 ml-2 border border-blue-200 bg-blue-25"
+                                        className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1"
                                         title="Envoyer facture via webhook"
                                       >
-                                        <Send className="w-3.5 h-3.5" />
+                                        <Send className="w-4 h-4" />
                                       </button>
                                     );
                                   }
