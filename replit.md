@@ -123,7 +123,27 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - SYSTÈME WEBHOOK ICONS COMPLÈTEMENT OPÉRATIONNEL : Affichage Universel Sans Conditions
+### 2025-07-27 - ERREUR SYNTAXE PRODUCTION RÉSOLUE : Route PUT Deliveries Entièrement Fonctionnelle
+✓ PROBLÈME CRITIQUE IDENTIFIÉ - Erreur syntaxe dans routes.production.ts ligne `if (!resu` tronquée empêchait exécution route PUT /api/deliveries/:id
+✓ CORRECTION SYNTAXE APPLIQUÉE - `if (!resu` corrigé en `if (!result.success) {` pour validation schema Zod appropriée
+✓ VALIDATION PRODUCTION RÉPARÉE - Route PUT /api/deliveries/:id maintenant opérationnelle avec gestion d'erreurs numériques complète
+✓ NETTOYAGE DONNÉES PRÉSERVÉ - Logique cleanedData pour conversion chaînes vides maintenue pour robustesse validation
+✓ HARMONIE DÉVELOPPEMENT/PRODUCTION - Les deux environnements utilisent maintenant validation identique avec nettoyage préventif des champs
+✓ APPLICATION PRODUCTION READY - Plus d'erreurs "invalid input syntax for type numeric" lors modification livraisons
+✓ LOGS DIAGNOSTIC MAINTENUS - Console logs pour traçabilité des données originales vs nettoyées préservés
+✓ WEBHOOK SYSTÈME PRÉSERVÉ - Fonctionnalité d'affichage universel des icônes webhook maintenue intacte
+
+### 2025-07-27 - VALIDATION CHAMPS NUMÉRIQUES HARMONISÉE : Erreurs Backend Production/Développement Complètement Résolues (PRÉCÉDENT)
+✓ PROBLÈME ROOT CAUSE RÉSOLU - Erreur "invalid input syntax for type numeric" causée par chaînes vides ("") envoyées au lieu de null pour champs blAmount/invoiceAmount
+✓ DÉVELOPPEMENT ALIGNÉ PRODUCTION - Correction validation côté serveur dans routes.ts alignée avec routes.production.ts existant
+✓ NETTOYAGE DONNÉES PRÉVENTIF - Conversion automatique chaînes vides vers null ou suppression pour blAmount, invoiceAmount, quantity, orderId
+✓ VALIDATION ROBUSTE IMPLÉMENTÉE - Vérification cleanedData === "" || cleanedData === undefined avant parsing Zod schema
+✓ COMMENTAIRES EXPLICITES AJOUTÉS - "🔧 CORRECTION CRITIQUE" avec documentation claire du processus de nettoyage
+✓ HARMONIE CROSS-ENVIRONNEMENT - Même logique de validation appliquée en développement et production pour cohérence totale
+✓ APPLICATION STABLE RESTAURÉE - Plus d'erreurs serveur lors de la soumission de formulaires avec champs numériques optionnels vides
+✓ WEBHOOK ICONS MAINTENUS FONCTIONNELS - Affichage universel des icônes webhook préservé pendant correction validation
+
+### 2025-07-27 - SYSTÈME WEBHOOK ICONS COMPLÈTEMENT OPÉRATIONNEL : Affichage Universel Sans Conditions (PRÉCÉDENT)
 ✓ LOGIQUE WEBHOOK SIMPLIFIÉE - Suppression condition vérification facture (coche verte), icônes visibles sur toutes lignes avec webhook configuré
 ✓ AFFICHAGE UNIVERSEL CONFIRMÉ - Icônes webhook s'affichent maintenant pour tous magasins ayant URL webhook, indépendamment statut vérification NocoDB
 ✓ POSITIONNEMENT OPTIMAL MAINTENU - Icône Send (📤) à droite de la référence facture, après icônes de vérification à gauche

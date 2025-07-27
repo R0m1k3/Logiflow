@@ -669,7 +669,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const data = insertDeliverySchema.partial().parse(req.body);
+      // 🔧 CORRECTION CRITIQUE: Nettoyer les champs numériques vides avant validation
+      const cleanedData = { ...req.body };
+      
+      // Convertir les chaînes vides en null pour les champs numériques
+      if (cleanedData.blAmount === "" || cleanedData.blAmount === undefined) {
+        delete cleanedData.blAmount;
+      }
+      if (cleanedData.invoiceAmount === "" || cleanedData.invoiceAmount === undefined) {
+        delete cleanedData.invoiceAmount;
+      }
+      if (cleanedData.quantity === "" || cleanedData.quantity === undefined) {
+        delete cleanedData.quantity;  
+      }
+      if (cleanedData.orderId === "" || cleanedData.orderId === "none") {
+        cleanedData.orderId = null;
+      }
+
+      const data = insertDeliverySchema.partial().parse(cleanedData);
       const updatedDelivery = await storage.updateDelivery(id, data);
       res.json(updatedDelivery);
     } catch (error) {
