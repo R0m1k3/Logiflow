@@ -379,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.deleteOrder(id);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Production DELETE order - Error:", error);
       console.error("❌ Production DELETE order - Error stack:", error.stack);
       res.status(500).json({ message: "Failed to delete order", error: error.message });
@@ -461,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const delivery = await storage.createDelivery(result.data);
       console.log('✅ PRODUCTION - Delivery created successfully:', { id: delivery.id, status: delivery.status });
       res.status(201).json(delivery);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ PRODUCTION Error creating delivery:", error);
       console.error("❌ PRODUCTION Error details:", {
         message: error.message,
@@ -521,15 +521,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.validateDelivery(id, { blNumber, blAmount });
       console.log('✅ Delivery validated successfully:', { id, blNumber, blAmount });
       res.json({ message: "Livraison validée avec succès" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error validating delivery:", error);
       
-      if (error.message.includes('column') && error.message.includes('does not exist')) {
+      if (error.message && error.message.includes('column') && error.message.includes('does not exist')) {
         console.error('💾 Database schema issue:', error.message);
         return res.status(500).json({ message: "Erreur de structure de base de données. Contactez l'administrateur." });
       }
       
-      if (error.message.includes('constraint') || error.message.includes('check')) {
+      if (error.message && (error.message.includes('constraint') || error.message.includes('check'))) {
         return res.status(400).json({ message: "Données invalides pour la validation" });
       }
       
@@ -576,7 +576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const delivery = await storage.updateDelivery(id, result.data);
       console.log('✅ Delivery updated successfully:', { id, fieldsUpdated: Object.keys(result.data) });
       res.json(delivery);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error updating delivery:", error);
       
       // Gestion d'erreur spécifique pour les erreurs numériques
@@ -595,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       await storage.deleteDelivery(id);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting delivery:", error);
       res.status(500).json({ message: "Failed to delete delivery" });
     }
@@ -655,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const newUser = await storage.createUser(userData);
       res.status(201).json(newUser);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating user:", error);
       
       // Gestion des erreurs spécifiques
@@ -697,7 +697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('✅ Found user to update:', existingUser.username);
       
       // Nettoyer les données - supprimer les champs vides ou undefined
-      const cleanedUserData = {};
+      const cleanedUserData: any = {};
       for (const [key, value] of Object.entries(userData)) {
         if (value !== undefined && value !== null && 
             (typeof value !== 'string' || value.trim() !== '')) {
@@ -727,22 +727,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedUser = await storage.updateUser(id, cleanedUserData);
       console.log('✅ User updated successfully:', { id, updatedFields: Object.keys(cleanedUserData) });
       res.json(updatedUser);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error updating user:", error);
       
       // Gestion des erreurs spécifiques
-      if (error.message.includes('email') && error.message.includes('unique')) {
+      if (error.message && error.message.includes('email') && error.message.includes('unique')) {
         return res.status(400).json({ message: "Cet email est déjà utilisé par un autre utilisateur" });
       }
       
-      if (error.message.includes('username') && error.message.includes('unique')) {
+      if (error.message && error.message.includes('username') && error.message.includes('unique')) {
         return res.status(400).json({ message: "Ce nom d'utilisateur est déjà pris" });
       }
       
-      if (error.message.includes('ne peut pas être vide') || 
+      if (error.message && (error.message.includes('ne peut pas être vide') || 
           error.message.includes('doit être valide') ||
           error.message.includes('Aucun champ') ||
-          error.message.includes('non trouvé')) {
+          error.message.includes('non trouvé'))) {
         return res.status(400).json({ message: error.message });
       }
       
@@ -761,7 +761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = req.params.id;
       await storage.deleteUser(id);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user" });
     }
@@ -868,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the complete publicity with relations
       const completePublicity = await storage.getPublicity(publicity.id);
       res.status(201).json(completePublicity);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating publicity:", error);
       res.status(500).json({ message: "Failed to create publicity", error: error.message });
     }
@@ -1120,11 +1120,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           id: group.id,
           name: group.name,
-          nocodbTableId: group.nocodbTableId,
-          invoiceColumnName: group.invoiceColumnName,
-          nocodbBlColumnName: group.nocodbBlColumnName,
-          nocodbAmountColumnName: group.nocodbAmountColumnName,
-          nocodbSupplierColumnName: group.nocodbSupplierColumnName
+          nocodbTableId: group.nocodbTableId ?? undefined,
+          invoiceColumnName: group.invoiceColumnName ?? undefined,
+          nocodbBlColumnName: group.nocodbBlColumnName ?? undefined,
+          nocodbAmountColumnName: group.nocodbAmountColumnName ?? undefined,
+          nocodbSupplierColumnName: group.nocodbSupplierColumnName ?? undefined
         },
         nocodbConfig
       );
@@ -1224,7 +1224,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ref.invoiceReference,
             ref.supplierName,
             parseFloat(ref.amount || '0'),
-            groupConfig,
+            {
+              ...groupConfig,
+              nocodbConfigId: groupConfig.nocodbConfigId ?? undefined,
+              nocodbTableId: groupConfig.nocodbTableId ?? undefined,
+              nocodbTableName: groupConfig.nocodbTableName ?? undefined,
+              invoiceColumnName: groupConfig.invoiceColumnName ?? undefined,
+              nocodbBlColumnName: groupConfig.nocodbBlColumnName ?? undefined,
+              nocodbAmountColumnName: groupConfig.nocodbAmountColumnName ?? undefined,
+              nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName ?? undefined,
+              nocodbDateColumnName: groupConfig.nocodbDateColumnName ?? undefined,
+              webhookUrl: groupConfig.webhookUrl ?? undefined
+            },
             nocodbConfig,
             ref.deliveryId
           );
