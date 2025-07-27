@@ -988,19 +988,31 @@ export default function BLReconciliation() {
                                   <span className="truncate max-w-28">{delivery.invoiceReference}</span>
                                 </div>
                                 
-                                {/* ICÔNE WEBHOOK À DROITE - SEULEMENT SI PAS DE COCHE VERTE */}
-                                {delivery.group?.webhookUrl && (
-                                  <button
-                                    onClick={() => {
-                                      setSelectedWebhookDelivery(delivery);
-                                      setShowWebhookModal(true);
-                                    }}
-                                    className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1"
-                                    title="Envoyer facture via webhook"
-                                  >
-                                    <Send className="w-4 h-4" />
-                                  </button>
-                                )}
+                                {/* ICÔNE WEBHOOK À DROITE - SEULEMENT POUR FACTURES NON TROUVÉES AVEC WEBHOOK */}
+                                {(() => {
+                                  const verificationKey = delivery.id.toString();
+                                  const verification = invoiceVerifications[verificationKey];
+                                  const hasWebhookUrl = delivery.group?.webhookUrl;
+                                  const hasGreenCheck = verification?.exists === true;
+                                  const isNotFound = verification && !verification.exists && !verification.error;
+                                  
+                                  // Afficher l'icône webhook SEULEMENT si facture non trouvée (X rouge) ET webhook configuré
+                                  if (isNotFound && hasWebhookUrl) {
+                                    return (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedWebhookDelivery(delivery);
+                                          setShowWebhookModal(true);
+                                        }}
+                                        className="inline-flex items-center justify-center w-6 h-6 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-sm transition-colors duration-200 ml-2 border border-blue-200 bg-blue-25"
+                                        title="Envoyer facture via webhook"
+                                      >
+                                        <Send className="w-3.5 h-3.5" />
+                                      </button>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                               </div>
                             ) : (
                               <button
