@@ -934,102 +934,64 @@ export default function BLReconciliation() {
                           <div className="text-gray-900">
                             {delivery.invoiceReference ? (
                               <div className="flex items-center justify-between">
-                                <span className="truncate max-w-28">{delivery.invoiceReference}</span>
-                                {/* NOUVEAU CODE - Affichage icônes alignées à droite */}
-                                {(() => {
-                                  const verificationKey = delivery.id.toString();
-                                  const verification = invoiceVerifications[verificationKey];
-                                  
-                                  if (verification) {
-                                    // Affichage des icônes basé sur la vérification NocoDB
-                                    if (verification.exists === true) {
-                                      return (
-                                        <div className="flex items-center ml-1" title="Facture trouvée dans NocoDB">
-                                          <CheckCircle className="w-4 h-4 text-green-600" />
-                                        </div>
-                                      );
-                                    } else if (verification.error) {
-                                      return (
-                                        <div className="flex items-center space-x-1">
+                                <div className="flex items-center space-x-2">
+                                  {/* ICÔNE VÉRIFICATION FACTURE À GAUCHE */}
+                                  {(() => {
+                                    const verificationKey = delivery.id.toString();
+                                    const verification = invoiceVerifications[verificationKey];
+                                    
+                                    if (verification) {
+                                      // Affichage de l'icône de vérification NocoDB à gauche
+                                      if (verification.exists === true) {
+                                        return (
+                                          <div title="Facture trouvée dans NocoDB">
+                                            <CheckCircle className="w-4 h-4 text-green-600" />
+                                          </div>
+                                        );
+                                      } else if (verification.error) {
+                                        return (
                                           <div title={`Erreur de configuration: ${verification.error}`}>
                                             <AlertTriangle className="w-4 h-4 text-orange-500" />
                                           </div>
-                                          <button
-                                            onClick={() => {
-                                              if (!delivery.group?.webhookUrl) {
-                                                toast({
-                                                  title: "Configuration manquante",
-                                                  description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
-                                                  variant: "destructive",
-                                                });
-                                                return;
-                                              }
-                                              setSelectedWebhookDelivery(delivery);
-                                              setShowWebhookModal(true);
-                                            }}
-                                            className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
-                                            title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
-                                          >
-                                            <Send className="w-4 h-4" />
-                                          </button>
-                                        </div>
-                                      );
-                                    } else {
-                                      return (
-                                        <div className="flex items-center space-x-1">
+                                        );
+                                      } else {
+                                        return (
                                           <div title="Facture non trouvée dans NocoDB">
                                             <X className="w-4 h-4 text-red-600" />
                                           </div>
-                                          <button
-                                            onClick={() => {
-                                              if (!delivery.group?.webhookUrl) {
-                                                toast({
-                                                  title: "Configuration manquante",
-                                                  description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
-                                                  variant: "destructive",
-                                                });
-                                                return;
-                                              }
-                                              setSelectedWebhookDelivery(delivery);
-                                              setShowWebhookModal(true);
-                                            }}
-                                            className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
-                                            title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
-                                          >
-                                            <Send className="w-4 h-4" />
-                                          </button>
+                                        );
+                                      }
+                                    } else if (!delivery.groupId) {
+                                      return (
+                                        <div title="Aucun magasin assigné - impossible de vérifier">
+                                          <AlertTriangle className="w-4 h-4 text-gray-400" />
                                         </div>
                                       );
                                     }
-                                  } else {
-                                    // Pas de vérification encore effectuée - afficher l'icône d'envoi
-                                    return (
-                                      <button
-                                        onClick={() => {
-                                          if (!delivery.group?.webhookUrl) {
-                                            toast({
-                                              title: "Configuration manquante",
-                                              description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
-                                              variant: "destructive",
-                                            });
-                                            return;
-                                          }
-                                          setSelectedWebhookDelivery(delivery);
-                                          setShowWebhookModal(true);
-                                        }}
-                                        className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
-                                        title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
-                                      >
-                                        <Send className="w-4 h-4" />
-                                      </button>
-                                    );
-                                  }
-                                })()}
-                                {!invoiceVerifications[delivery.id.toString()] && !delivery.groupId && (
-                                  <div title="Aucun magasin assigné - impossible de vérifier">
-                                    <AlertTriangle className="w-3 h-3 text-gray-400" />
-                                  </div>
-                                )}
+                                    return null;
+                                  })()}
+                                  <span className="truncate max-w-28">{delivery.invoiceReference}</span>
+                                </div>
+                                
+                                {/* ICÔNE WEBHOOK À DROITE */}
+                                <button
+                                  onClick={() => {
+                                    if (!delivery.group?.webhookUrl) {
+                                      toast({
+                                        title: "Configuration manquante",
+                                        description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
+                                        variant: "destructive",
+                                      });
+                                      return;
+                                    }
+                                    setSelectedWebhookDelivery(delivery);
+                                    setShowWebhookModal(true);
+                                  }}
+                                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1"
+                                  title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
+                                >
+                                  <Send className="w-4 h-4" />
+                                </button>
                               </div>
                             ) : (
                               <button
