@@ -3071,7 +3071,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function for permission checks
+  async function checkPermission(req: any, res: any, permission: string) {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      
+      if (!userId) {
+        res.status(401).json({ message: "User not authenticated" });
+        return { isAdmin: false };
+      }
 
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return { isAdmin: false };
+      }
+
+      // For system_admin permission, check if user is admin
+      if (permission === "system_admin" && user.role !== 'admin') {
+        res.status(403).json({ message: "Insufficient permissions - Admin required" });
+        return { isAdmin: false };
+      }
+
+      return { isAdmin: user.role === 'admin', user };
+    } catch (error) {
+      console.error("❌ Permission check error:", error);
+      res.status(500).json({ message: "Permission check failed" });
+      return { isAdmin: false };
+    }
+  }
 
   // ===== BL RECONCILIATION ROUTES =====
   
