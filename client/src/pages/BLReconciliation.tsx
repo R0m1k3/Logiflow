@@ -829,18 +829,7 @@ export default function BLReconciliation() {
                       Ref. Facture
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                      <div className="flex items-center space-x-2">
-                        <span>Montant Fact.</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowWebhookModal(true)}
-                          className="h-6 w-6 p-0"
-                          title="Envoyer webhook facture/avoir"
-                        >
-                          <Webhook className="h-4 w-4 text-blue-600" />
-                        </Button>
-                      </div>
+                      Montant Fact.
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       Écart
