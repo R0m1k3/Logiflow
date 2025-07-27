@@ -13,7 +13,7 @@ export class SchedulerService {
     // Créer un pool directement
     const pool = new Pool({ 
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false },
+      ssl: false, // Production PostgreSQL server ne supporte pas SSL
       max: 5,
       min: 1,
       idleTimeoutMillis: 30000,

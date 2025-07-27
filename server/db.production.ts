@@ -5,7 +5,7 @@ import * as schema from '../shared/schema';
 // Production database configuration using standard PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false },
+  ssl: false, // Production PostgreSQL server ne supporte pas SSL selon les logs
   max: 5, // Reasonable pool size for Replit
   min: 1, // Minimum connections to keep open
   idleTimeoutMillis: 30000, // 30 second idle timeout
