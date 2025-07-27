@@ -17,12 +17,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle, Webhook, Upload } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const reconciliationSchema = z.object({
   blNumber: z.string().optional(),
@@ -35,7 +36,16 @@ const reconciliationSchema = z.object({
   }),
 });
 
+const webhookSchema = z.object({
+  supplier: z.string().min(1, "Veuillez sélectionner un fournisseur"),
+  type: z.enum(["Facture", "Avoir"], {
+    required_error: "Veuillez sélectionner un type",
+  }),
+  pdfFile: z.any().refine((file) => file && file.length > 0, "Veuillez sélectionner un fichier PDF"),
+});
+
 type ReconciliationForm = z.infer<typeof reconciliationSchema>;
+type WebhookForm = z.infer<typeof webhookSchema>;
 
 export default function BLReconciliation() {
   console.log('🔥 BL RECONCILIATION FIXED VERSION CHARGÉE - JAN 25 21:40');
@@ -80,6 +90,26 @@ export default function BLReconciliation() {
   const [invoiceVerifications, setInvoiceVerifications] = useState<Record<string, { exists: boolean; error?: string; isUsed?: boolean; usedBy?: any }>>({});
   const [isVerifyingInvoices, setIsVerifyingInvoices] = useState(false);
   const [isVerifyingCurrentInvoice, setIsVerifyingCurrentInvoice] = useState(false);
+  
+  // États pour le modal webhook
+  const [showWebhookModal, setShowWebhookModal] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<string>("");
+  
+  // Form pour webhook
+  const webhookForm = useForm<WebhookForm>({
+    resolver: zodResolver(webhookSchema),
+    defaultValues: {
+      supplier: "",
+      type: "Facture",
+      pdfFile: undefined,
+    },
+  });
+
+  // Récupérer les fournisseurs pour le webhook
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['/api/suppliers'],
+    select: (data) => Array.isArray(data) ? data : [],
+  });
 
   // Récupérer les livraisons validées avec BL
   const { data: deliveriesWithBL = [], isLoading } = useQuery({
@@ -499,6 +529,34 @@ export default function BLReconciliation() {
     },
   });
 
+  // Mutation pour envoyer le webhook
+  const sendWebhookMutation = useMutation({
+    mutationFn: async (data: WebhookForm) => {
+      const formData = new FormData();
+      formData.append('supplier', data.supplier);
+      formData.append('type', data.type);
+      formData.append('pdfFile', data.pdfFile[0]);
+      
+      await apiRequest('/api/webhook/send', 'POST', formData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Succès",
+        description: "Webhook envoyé avec succès",
+      });
+      setShowWebhookModal(false);
+      webhookForm.reset();
+    },
+    onError: (error: any) => {
+      console.error('❌ Error sending webhook:', error);
+      toast({
+        title: "Erreur",
+        description: `Impossible d'envoyer le webhook: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteDeliveryMutation = useMutation({
     mutationFn: async (id: number) => {
       console.log('🌐 API Request:', { url: `/api/deliveries/${id}`, method: "DELETE" });
@@ -771,7 +829,18 @@ export default function BLReconciliation() {
                       Ref. Facture
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                      Montant Fact.
+                      <div className="flex items-center space-x-2">
+                        <span>Montant Fact.</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowWebhookModal(true)}
+                          className="h-6 w-6 p-0"
+                          title="Envoyer webhook facture/avoir"
+                        >
+                          <Webhook className="h-4 w-4 text-blue-600" />
+                        </Button>
+                      </div>
                     </th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       Écart
@@ -1206,6 +1275,116 @@ export default function BLReconciliation() {
         itemName={deliveryToDelete ? `${deliveryToDelete.supplier?.name} - BL ${deliveryToDelete.blNumber}` : undefined}
         isLoading={deleteDeliveryMutation.isPending}
       />
+
+      {/* Modal Webhook */}
+      <Dialog open={showWebhookModal} onOpenChange={setShowWebhookModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Webhook className="w-5 h-5 text-blue-600" />
+              <span>Envoyer Webhook Facture/Avoir</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <Form {...webhookForm}>
+            <form 
+              onSubmit={webhookForm.handleSubmit((data) => sendWebhookMutation.mutate(data))}
+              className="space-y-4"
+            >
+              {/* Sélecteur de fournisseur */}
+              <FormField
+                control={webhookForm.control}
+                name="supplier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fournisseur</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un fournisseur" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {suppliers.map((supplier: any) => (
+                          <SelectItem key={supplier.id} value={supplier.name}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Sélecteur de type */}
+              <FormField
+                control={webhookForm.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Facture">Facture</SelectItem>
+                        <SelectItem value="Avoir">Avoir</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Upload de fichier PDF */}
+              <FormField
+                control={webhookForm.control}
+                name="pdfFile"
+                render={({ field: { onChange, value, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>Fichier PDF</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => onChange(e.target.files)}
+                          {...field}
+                          className="cursor-pointer"
+                        />
+                        <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowWebhookModal(false)}
+                  disabled={sendWebhookMutation.isPending}
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={sendWebhookMutation.isPending}
+                >
+                  {sendWebhookMutation.isPending ? "Envoi..." : "Envoyer"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

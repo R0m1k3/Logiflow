@@ -3249,6 +3249,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour envoyer webhook facture/avoir avec upload multer
+  const multer = await import('multer');
+  const upload = multer.default({ 
+    storage: multer.default.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB max
+  });
+
+  app.post('/api/webhook/send', isAuthenticated, upload.single('pdfFile'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUserWithGroups(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Vérifier que l'utilisateur a accès au rapprochement (admin ou directeur)
+      if (!['admin', 'directeur'].includes(user.role)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { supplier, type } = req.body;
+      const pdfFile = req.file;
+
+      if (!supplier || !type || !pdfFile) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Récupérer l'URL webhook du groupe actuel de l'utilisateur
+      const userGroups = user.userGroups;
+      if (!userGroups || userGroups.length === 0) {
+        return res.status(400).json({ message: "No group assigned to user" });
+      }
+
+      const webhookUrl = userGroups[0]?.group?.webhookUrl;
+      if (!webhookUrl) {
+        return res.status(400).json({ message: "No webhook URL configured for this group" });
+      }
+
+      // Préparer les données du webhook
+      const webhookData = {
+        supplier: supplier,
+        type: type,
+        filename: pdfFile.originalname,
+        size: pdfFile.size,
+        timestamp: new Date().toISOString(),
+        user: {
+          id: userId,
+          role: user.role,
+          groupId: userGroups[0]?.group?.id
+        }
+      };
+
+      // Envoyer le webhook (simulation pour l'instant)
+      console.log('🎯 Webhook data to send:', webhookData);
+      console.log('🎯 Webhook URL:', webhookUrl);
+      console.log('🎯 PDF file info:', {
+        name: pdfFile.originalname,
+        size: pdfFile.size,
+        mimetype: pdfFile.mimetype
+      });
+
+      // TODO: Implémenter l'envoi réel du webhook avec fetch/axios
+      // await fetch(webhookUrl, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(webhookData)
+      // });
+
+      res.json({ 
+        success: true, 
+        message: "Webhook sent successfully",
+        data: webhookData 
+      });
+
+    } catch (error) {
+      console.error('❌ Error sending webhook:', error);
+      res.status(500).json({ message: "Failed to send webhook" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

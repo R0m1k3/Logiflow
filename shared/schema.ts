@@ -57,6 +57,8 @@ export const groups = pgTable("groups", {
   nocodbBlColumnName: varchar("nocodb_bl_column_name").default("Numéro de BL"), // Nom de la colonne N° BL dans NocoDB
   nocodbAmountColumnName: varchar("nocodb_amount_column_name").default("Montant HT"), // Nom de la colonne Montant HT dans NocoDB
   nocodbSupplierColumnName: varchar("nocodb_supplier_column_name").default("Fournisseur"), // Nom de la colonne Fournisseur dans NocoDB
+  // Configuration webhook pour factures/avoirs
+  webhookUrl: varchar("webhook_url").default(""), // URL du webhook pour ce groupe
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
