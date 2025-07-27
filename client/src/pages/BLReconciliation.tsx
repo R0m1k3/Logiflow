@@ -1004,16 +1004,18 @@ export default function BLReconciliation() {
                                 )}
                               </div>
                               
-                              {/* ICÔNE WEBHOOK - Affiché SEULEMENT si webhook configuré ET pas de coche verte */}
+                              {/* ICÔNE WEBHOOK - Masqué SEULEMENT si coche verte */}
                               {(() => {
                                 const hasWebhookUrl = !!(delivery.group?.webhookUrl);
                                 const verificationKey = delivery.id.toString();
                                 const verification = invoiceVerifications[verificationKey];
                                 const hasGreenCheck = verification && verification.exists === true;
                                 
-                                // Afficher l'icône webhook SEULEMENT si:
-                                // 1. Le magasin a une URL webhook configurée
-                                // 2. ET il n'y a PAS de coche verte (facture non trouvée)
+                                // Afficher l'icône webhook dans tous les cas SAUF coche verte :
+                                // ✅ Pas de vérification (pas d'icône) → Webhook visible
+                                // ❌ X rouge (facture non trouvée) → Webhook visible  
+                                // ⚠️ Triangle orange (erreur config) → Webhook visible
+                                // ✅ Coche verte (facture trouvée) → Webhook masqué
                                 if (hasWebhookUrl && !hasGreenCheck) {
                                   return (
                                     <button
