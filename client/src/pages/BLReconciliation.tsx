@@ -17,7 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle, Webhook, Upload } from "lucide-react";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle, Send, Upload } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
@@ -951,10 +951,10 @@ export default function BLReconciliation() {
                                               setSelectedWebhookDelivery(delivery);
                                               setShowWebhookModal(true);
                                             }}
-                                            className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                                            title={delivery.group?.webhookUrl ? "Envoyer via webhook" : "Configuration webhook manquante"}
+                                            className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                                            title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
                                           >
-                                            <Webhook className="w-4 h-4" />
+                                            <Send className="w-4 h-4" />
                                           </button>
                                         </div>
                                       );
@@ -977,16 +977,16 @@ export default function BLReconciliation() {
                                               setSelectedWebhookDelivery(delivery);
                                               setShowWebhookModal(true);
                                             }}
-                                            className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                                            title={delivery.group?.webhookUrl ? "Envoyer via webhook" : "Configuration webhook manquante"}
+                                            className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                                            title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
                                           >
-                                            <Webhook className="w-4 h-4" />
+                                            <Send className="w-4 h-4" />
                                           </button>
                                         </div>
                                       );
                                     }
                                   } else {
-                                    // Pas de vérification encore effectuée - afficher l'icône webhook
+                                    // Pas de vérification encore effectuée - afficher l'icône d'envoi
                                     return (
                                       <button
                                         onClick={() => {
@@ -1001,10 +1001,10 @@ export default function BLReconciliation() {
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
-                                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                                        title={delivery.group?.webhookUrl ? "Envoyer via webhook" : "Configuration webhook manquante"}
+                                        className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                                        title={delivery.group?.webhookUrl ? "Envoyer facture" : "Configuration manquante"}
                                       >
-                                        <Webhook className="w-4 h-4" />
+                                        <Send className="w-4 h-4" />
                                       </button>
                                     );
                                   }
@@ -1336,8 +1336,8 @@ export default function BLReconciliation() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
-              <Webhook className="w-5 h-5 text-blue-600" />
-              <span>Envoyer Webhook Facture/Avoir</span>
+              <Send className="w-5 h-5" />
+              <span>Envoyer Facture/Avoir</span>
             </DialogTitle>
           </DialogHeader>
           
