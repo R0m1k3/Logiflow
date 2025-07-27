@@ -1,5 +1,6 @@
 // Service de rapprochement automatique par numéro de BL
-import { storage } from "./storage";
+// Import dynamique du storage selon l'environnement
+let storage: any;
 
 export interface BLReconciliationResult {
   processedDeliveries: number;
@@ -23,6 +24,18 @@ export interface NocoDBInvoiceData {
 // Fonction pour vérifier si une facture est déjà utilisée par une autre livraison
 async function isInvoiceAlreadyUsed(invoiceReference: string, excludeDeliveryId?: number): Promise<boolean> {
   try {
+    // Initialiser le storage si nécessaire
+    if (!storage) {
+      const storageMode = process.env.STORAGE_MODE || (process.env.DATABASE_URL ? 'production' : 'development');
+      if (storageMode === 'production') {
+        const { storage: prodStorage } = await import('./storage.production.js');
+        storage = prodStorage;
+      } else {
+        const { storage: devStorage } = await import('./storage.js');
+        storage = devStorage;
+      }
+    }
+
     const deliveries = await storage.getDeliveries();
     const alreadyUsed = deliveries.some(delivery => 
       delivery.invoiceReference === invoiceReference && 
@@ -51,6 +64,20 @@ export async function performBLReconciliation(): Promise<BLReconciliationResult>
   };
 
   try {
+    // Initialiser le storage selon l'environnement
+    if (!storage) {
+      const storageMode = process.env.STORAGE_MODE || (process.env.DATABASE_URL ? 'production' : 'development');
+      console.log(`🔍 [BL-RECONCILIATION] Initializing storage mode: ${storageMode}`);
+      
+      if (storageMode === 'production') {
+        const { storage: prodStorage } = await import('./storage.production.js');
+        storage = prodStorage;
+      } else {
+        const { storage: devStorage } = await import('./storage.js');
+        storage = devStorage;
+      }
+    }
+
     console.log("🔄 [BL-RECONCILIATION] Début du rapprochement automatique par N° BL");
     
     // 1. Récupérer toutes les livraisons validées sans référence facture
