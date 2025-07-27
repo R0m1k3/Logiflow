@@ -947,80 +947,82 @@ export default function BLReconciliation() {
                         </td>
                         <td className="px-3 py-2 text-sm">
                           <div className="text-gray-900">
-                            {delivery.invoiceReference ? (
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                  {/* ICÔNE VÉRIFICATION FACTURE À GAUCHE */}
-                                  {(() => {
-                                    const verificationKey = delivery.id.toString();
-                                    const verification = invoiceVerifications[verificationKey];
-                                    
-                                    if (verification) {
-                                      // Affichage de l'icône de vérification NocoDB à gauche
-                                      if (verification.exists === true) {
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                {delivery.invoiceReference ? (
+                                  <>
+                                    {/* ICÔNE VÉRIFICATION FACTURE À GAUCHE */}
+                                    {(() => {
+                                      const verificationKey = delivery.id.toString();
+                                      const verification = invoiceVerifications[verificationKey];
+                                      
+                                      if (verification) {
+                                        // Affichage de l'icône de vérification NocoDB à gauche
+                                        if (verification.exists === true) {
+                                          return (
+                                            <div title="Facture trouvée dans NocoDB">
+                                              <CheckCircle className="w-4 h-4 text-green-600" />
+                                            </div>
+                                          );
+                                        } else if (verification.error) {
+                                          return (
+                                            <div title={`Erreur de configuration: ${verification.error}`}>
+                                              <AlertTriangle className="w-4 h-4 text-orange-500" />
+                                            </div>
+                                          );
+                                        } else {
+                                          return (
+                                            <div title="Facture non trouvée dans NocoDB">
+                                              <X className="w-4 h-4 text-red-600" />
+                                            </div>
+                                          );
+                                        }
+                                      } else if (!delivery.groupId) {
                                         return (
-                                          <div title="Facture trouvée dans NocoDB">
-                                            <CheckCircle className="w-4 h-4 text-green-600" />
-                                          </div>
-                                        );
-                                      } else if (verification.error) {
-                                        return (
-                                          <div title={`Erreur de configuration: ${verification.error}`}>
-                                            <AlertTriangle className="w-4 h-4 text-orange-500" />
-                                          </div>
-                                        );
-                                      } else {
-                                        return (
-                                          <div title="Facture non trouvée dans NocoDB">
-                                            <X className="w-4 h-4 text-red-600" />
+                                          <div title="Aucun magasin assigné - impossible de vérifier">
+                                            <AlertTriangle className="w-4 h-4 text-gray-400" />
                                           </div>
                                         );
                                       }
-                                    } else if (!delivery.groupId) {
-                                      return (
-                                        <div title="Aucun magasin assigné - impossible de vérifier">
-                                          <AlertTriangle className="w-4 h-4 text-gray-400" />
-                                        </div>
-                                      );
-                                    }
-                                    return null;
-                                  })()}
-                                  <span className="truncate max-w-28">{delivery.invoiceReference}</span>
-                                </div>
-                                
-                                {/* ICÔNE WEBHOOK - Affiché pour toutes les lignes avec webhook configuré */}
-                                {(() => {
-                                  const hasWebhookUrl = !!(delivery.group?.webhookUrl);
-                                  
-                                  // Afficher l'icône webhook si le magasin a une URL webhook configurée
-                                  if (hasWebhookUrl) {
-                                    return (
-                                      <button
-                                        onClick={() => {
-                                          setSelectedWebhookDelivery(delivery);
-                                          setShowWebhookModal(true);
-                                        }}
-                                        className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1 border border-gray-300 rounded p-0.5"
-                                        title="Envoyer facture via webhook"
-                                      >
-                                        <Send className="w-4 h-4" />
-                                      </button>
-                                    );
-                                  }
-                                  
-                                  return null;
-                                })()}
+                                      return null;
+                                    })()}
+                                    <span className="truncate max-w-28">{delivery.invoiceReference}</span>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => handleEditReconciliation(delivery)}
+                                    disabled={updateReconciliationMutation.isPending}
+                                    className="text-gray-400 hover:text-blue-600 transition-colors duration-200 flex items-center justify-center w-6 h-6 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Ajouter une référence facture"
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </div>
-                            ) : (
-                              <button
-                                onClick={() => handleEditReconciliation(delivery)}
-                                disabled={updateReconciliationMutation.isPending}
-                                className="text-gray-400 hover:text-blue-600 transition-colors duration-200 flex items-center justify-center w-6 h-6 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Ajouter une référence facture"
-                              >
-                                <Edit className="w-3.5 h-3.5" />
-                              </button>
-                            )}
+                              
+                              {/* ICÔNE WEBHOOK - Affiché sur TOUTES les lignes avec webhook configuré */}
+                              {(() => {
+                                const hasWebhookUrl = !!(delivery.group?.webhookUrl);
+                                
+                                // Afficher l'icône webhook si le magasin a une URL webhook configurée
+                                if (hasWebhookUrl) {
+                                  return (
+                                    <button
+                                      onClick={() => {
+                                        setSelectedWebhookDelivery(delivery);
+                                        setShowWebhookModal(true);
+                                      }}
+                                      className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1 border border-gray-300 rounded p-0.5"
+                                      title="Envoyer facture via webhook"
+                                    >
+                                      <Send className="w-4 h-4" />
+                                    </button>
+                                  );
+                                }
+                                
+                                return null;
+                              })()}
+                            </div>
                           </div>
                         </td>
                         <td className="px-3 py-2 text-sm">
