@@ -996,6 +996,20 @@ export default function BLReconciliation() {
                                   const hasGreenCheck = verification?.exists === true;
                                   const isNotFound = verification && !verification.exists && !verification.error;
                                   
+                                  // DEBUG PRODUCTION - Logs détaillés pour identifier le problème
+                                  if (hasWebhookUrl) {
+                                    console.log('🔍 WEBHOOK DEBUG - Delivery:', delivery.id, {
+                                      supplier: delivery.supplier?.name,
+                                      groupName: delivery.group?.name,
+                                      hasWebhookUrl: !!hasWebhookUrl,
+                                      webhookUrl: delivery.group?.webhookUrl,
+                                      verification: verification,
+                                      hasGreenCheck,
+                                      isNotFound,
+                                      shouldShow: !!(isNotFound && hasWebhookUrl)
+                                    });
+                                  }
+                                  
                                   // Afficher l'icône webhook SEULEMENT si facture non trouvée (X rouge) ET webhook configuré
                                   if (isNotFound && hasWebhookUrl) {
                                     return (
