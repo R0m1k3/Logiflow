@@ -929,8 +929,27 @@ export default function BLReconciliation() {
                                       );
                                     } else if (verification.error) {
                                       return (
-                                        <div className="flex items-center ml-1" title={`Erreur de configuration: ${verification.error}`}>
-                                          <AlertTriangle className="w-4 h-4 text-orange-500" />
+                                        <div className="flex items-center ml-1 space-x-1">
+                                          <div title={`Erreur de configuration: ${verification.error}`}>
+                                            <AlertTriangle className="w-4 h-4 text-orange-500" />
+                                          </div>
+                                          <button
+                                            onClick={() => {
+                                              if (!delivery.group?.webhookUrl) {
+                                                toast({
+                                                  title: "Configuration manquante",
+                                                  description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
+                                                  variant: "destructive",
+                                                });
+                                                return;
+                                              }
+                                              setShowWebhookModal(true);
+                                            }}
+                                            className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                                            title={delivery.group?.webhookUrl ? "Envoyer via webhook" : "Configuration webhook manquante"}
+                                          >
+                                            <Webhook className="w-4 h-4" />
+                                          </button>
                                         </div>
                                       );
                                     } else {
@@ -939,15 +958,23 @@ export default function BLReconciliation() {
                                           <div title="Facture non trouvée dans NocoDB">
                                             <X className="w-4 h-4 text-red-600" />
                                           </div>
-                                          {delivery.group?.webhookUrl && (
-                                            <button
-                                              onClick={() => setShowWebhookModal(true)}
-                                              className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                                              title="Envoyer via webhook"
-                                            >
-                                              <Webhook className="w-4 h-4" />
-                                            </button>
-                                          )}
+                                          <button
+                                            onClick={() => {
+                                              if (!delivery.group?.webhookUrl) {
+                                                toast({
+                                                  title: "Configuration manquante",
+                                                  description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
+                                                  variant: "destructive",
+                                                });
+                                                return;
+                                              }
+                                              setShowWebhookModal(true);
+                                            }}
+                                            className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                                            title={delivery.group?.webhookUrl ? "Envoyer via webhook" : "Configuration webhook manquante"}
+                                          >
+                                            <Webhook className="w-4 h-4" />
+                                          </button>
                                         </div>
                                       );
                                     }
