@@ -3424,37 +3424,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return;
         }
         
-        // Webhooks en méthode GET (métadonnées uniquement)
-        console.log('🌐 Sending GET webhook with metadata only (no file transmission)');
+        // Webhooks en méthode POST (avec fichier PDF)
+        console.log('🌐 Sending POST webhook with PDF file transmission');
         
         // Ajouter informations BL et référence facture depuis selectedWebhookDelivery
         const blNumber = req.body.blNumber || 'N/A';
         const invoiceReference = req.body.invoiceReference || 'N/A';
         
-        // Créer URL avec query params pour GET
-        const queryParams = new URLSearchParams({
-          supplier: webhookData.supplier,
-          type: webhookData.type,
+        // Créer FormData pour POST avec fichier
+        const FormDataClass = (await import('form-data')).default;
+        const formData = new FormDataClass();
+        formData.append('supplier', webhookData.supplier);
+        formData.append('type', webhookData.type);
+        formData.append('filename', webhookData.filename);
+        formData.append('size', webhookData.size.toString());
+        formData.append('timestamp', webhookData.timestamp);
+        formData.append('userId', webhookData.user.id);
+        formData.append('userRole', webhookData.user.role);
+        formData.append('groupId', webhookData.user.groupId.toString());
+        formData.append('blNumber', blNumber);
+        formData.append('invoiceReference', invoiceReference);
+        formData.append('pdfFile', req.file.buffer, {
           filename: webhookData.filename,
-          size: webhookData.size.toString(),
-          timestamp: webhookData.timestamp,
-          userId: webhookData.user.id,
-          userRole: webhookData.user.role,
-          groupId: webhookData.user.groupId.toString(),
-          blNumber: blNumber,
-          invoiceReference: invoiceReference,
-          // Note importante : fichier PDF non transmis en GET
-          fileTransmitted: 'false',
-          note: 'File_not_transmitted_via_GET_method'
+          contentType: 'application/pdf'
         });
         
-        const getWebhookUrl = `${webhookUrl}?${queryParams.toString()}`;
-        console.log('🌐 Sending GET webhook to:', getWebhookUrl);
-        console.log('⚠️  Note: PDF file NOT transmitted (GET method limitation)');
+        console.log('🌐 Sending POST webhook to:', webhookUrl);
+        console.log('✅ PDF file INCLUDED in transmission (POST method)');
         
         const fetch = (await import('node-fetch')).default;
-        const webhookResponse = await fetch(getWebhookUrl, {
-          method: 'GET',
+        const webhookResponse = await fetch(webhookUrl, {
+          method: 'POST',
+          body: formData,
+          headers: formData.getHeaders(),
           timeout: 10000
         });
         
@@ -3467,22 +3469,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           res.json({ 
             success: true, 
-            message: "GET webhook sent successfully (metadata only - file not transmitted)",
+            message: "POST webhook sent successfully with PDF file",
             data: webhookData,
             webhookResponse: {
               status: webhookResponse.status,
               statusText: webhookResponse.statusText,
               body: responseText
-            },
-            warning: "PDF file was not transmitted due to GET method limitation"
+            }
           });
         } else {
-          console.log('❌ GET webhook failed with status:', webhookResponse.status);
+          console.log('❌ POST webhook failed with status:', webhookResponse.status);
           const errorText = await webhookResponse.text().catch(() => 'No response body');
           console.log('❌ Error response:', errorText);
           
           res.status(500).json({ 
-            message: `GET webhook send failed: HTTP ${webhookResponse.status}`,
+            message: `POST webhook send failed: HTTP ${webhookResponse.status}`,
             error: webhookResponse.statusText,
             errorBody: errorText
           });
