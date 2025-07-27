@@ -172,30 +172,40 @@ function BLReconciliationCard() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/bl-reconciliation/status'] });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: "Impossible de modifier le service de rapprochement BL",
+        description: error.message || "Impossible de modifier le service de rapprochement BL",
         variant: "destructive",
       });
     },
   });
 
-  // Mutation pour déclencher un rapprochement manuel
+  // Mutation pour déclencher un rapprochement BL manuel
   const manualReconciliationMutation = useMutation({
     mutationFn: () => apiRequest('/api/bl-reconciliation/trigger', 'POST'),
     onSuccess: (data) => {
-      const result = data.result;
+      const result = data.result || {};
       toast({
         title: "Rapprochement terminé",
-        description: `${result.reconciledDeliveries} livraisons rapprochées sur ${result.processedDeliveries} traitées`,
+        description: `${result.reconciledDeliveries || 0} livraisons rapprochées sur ${result.processedDeliveries || 0} traitées`,
       });
+      if (result.errors && result.errors.length > 0) {
+        console.error("Erreurs rapprochement BL:", result.errors);
+        toast({
+          title: "Attention",
+          description: `${result.errors.length} erreurs détectées (voir console)`,
+          variant: "destructive",
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['/api/bl-reconciliation/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/deliveries'] });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Erreur rapprochement BL:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de déclencher le rapprochement manuel",
+        title: "Erreur rapprochement BL",
+        description: error.message || "Impossible d'effectuer le rapprochement manuel",
         variant: "destructive",
       });
     },
