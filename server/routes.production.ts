@@ -3338,6 +3338,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== DATABASE MIGRATION ROUTE =====
+  
+  // Route pour exécuter la migration webhook_url directement depuis l'interface
+  app.post('/api/database/migrate-webhook', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Seuls les administrateurs peuvent exécuter les migrations" });
+      }
+
+      console.log('🔄 MIGRATION WEBHOOK - Début de la migration...');
+      
+      // Vérifier si la colonne webhook_url existe déjà
+      const checkColumnQuery = `
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'groups' AND column_name = 'webhook_url'
+      `;
+      
+      const existingColumn = await pool.query(checkColumnQuery);
+      
+      if (existingColumn.rows.length > 0) {
+        console.log('✅ MIGRATION WEBHOOK - La colonne webhook_url existe déjà');
+        return res.json({ 
+          success: true,
+          message: "La colonne webhook_url existe déjà", 
+          alreadyExists: true 
+        });
+      }
+      
+      console.log('🔧 MIGRATION WEBHOOK - Ajout de la colonne webhook_url...');
+      
+      // Ajouter la colonne webhook_url
+      const addColumnQuery = `
+        ALTER TABLE groups 
+        ADD COLUMN webhook_url VARCHAR(500) NULL
+      `;
+      
+      await pool.query(addColumnQuery);
+      console.log('✅ MIGRATION WEBHOOK - Colonne webhook_url ajoutée avec succès');
+      
+      // Vérifier que la colonne a été ajoutée
+      const verifyColumn = await pool.query(checkColumnQuery);
+      
+      if (verifyColumn.rows.length > 0) {
+        console.log('✅ MIGRATION WEBHOOK - Migration réussie et vérifiée');
+        res.json({ 
+          success: true,
+          message: "Colonne webhook_url ajoutée avec succès", 
+          migrated: true 
+        });
+      } else {
+        console.error('❌ MIGRATION WEBHOOK - Échec de la vérification');
+        res.status(500).json({ 
+          success: false,
+          message: "Échec de la vérification de migration" 
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ MIGRATION WEBHOOK - Erreur:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Erreur lors de la migration", 
+        error: error.message 
+      });
+    }
+  });
+
   const server = createServer(app);
   return server;
 }

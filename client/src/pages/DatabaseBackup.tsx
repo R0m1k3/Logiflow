@@ -278,6 +278,130 @@ function BLReconciliationCard() {
   );
 }
 
+// Composant pour gérer la migration webhook
+function WebhookMigrationCard() {
+  const { toast } = useToast();
+  const [migrationStatus, setMigrationStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
+  const [migrationMessage, setMigrationMessage] = useState<string>('');
+
+  // Mutation pour exécuter la migration webhook
+  const migrationMutation = useMutation({
+    mutationFn: () => apiRequest('/api/database/migrate-webhook', 'POST'),
+    onMutate: () => {
+      setMigrationStatus('running');
+      setMigrationMessage('Migration en cours...');
+    },
+    onSuccess: (data) => {
+      if (data.alreadyExists) {
+        setMigrationStatus('success');
+        setMigrationMessage('La colonne webhook_url existe déjà');
+        toast({
+          title: "Migration non nécessaire",
+          description: "La colonne webhook_url existe déjà dans la base de données",
+        });
+      } else if (data.migrated) {
+        setMigrationStatus('success');
+        setMigrationMessage('Migration réussie - Colonne webhook_url ajoutée');
+        toast({
+          title: "Migration réussie",
+          description: "La colonne webhook_url a été ajoutée avec succès",
+        });
+      } else {
+        setMigrationStatus('success');
+        setMigrationMessage(data.message || 'Migration terminée');
+        toast({
+          title: "Migration terminée",
+          description: data.message,
+        });
+      }
+    },
+    onError: (error: any) => {
+      setMigrationStatus('error');
+      setMigrationMessage(`Erreur: ${error.message || 'Migration échouée'}`);
+      toast({
+        title: "Erreur de migration",
+        description: error.message || "Impossible d'exécuter la migration",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getStatusIcon = () => {
+    switch (migrationStatus) {
+      case 'running':
+        return <RefreshCw className="h-4 w-4 animate-spin" />;
+      case 'success':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'error':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Database className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Database className="h-5 w-5" />
+          Migration Base de Données - Webhook
+        </CardTitle>
+        <CardDescription>
+          Ajouter la colonne webhook_url à la table groups pour la sauvegarde des URLs webhook
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {getStatusIcon()}
+            <span className={`text-sm ${
+              migrationStatus === 'success' ? 'text-green-600' :
+              migrationStatus === 'error' ? 'text-red-600' :
+              migrationStatus === 'running' ? 'text-blue-600' :
+              'text-gray-600'
+            }`}>
+              {migrationMessage || 'Prêt à exécuter la migration'}
+            </span>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => migrationMutation.mutate()}
+            disabled={migrationMutation.isPending || migrationStatus === 'success'}
+            variant={migrationStatus === 'success' ? 'outline' : 'default'}
+          >
+            {migrationMutation.isPending ? (
+              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+            ) : migrationStatus === 'success' ? (
+              <CheckCircle className="h-4 w-4 mr-2" />
+            ) : (
+              <Database className="h-4 w-4 mr-2" />
+            )}
+            {migrationStatus === 'success' ? 'Migration terminée' : 'Exécuter la migration'}
+          </Button>
+        </div>
+        
+        {migrationStatus !== 'idle' && (
+          <div className={`p-3 rounded-lg text-sm ${
+            migrationStatus === 'success' ? 'bg-green-50 border border-green-200' :
+            migrationStatus === 'error' ? 'bg-red-50 border border-red-200' :
+            'bg-blue-50 border border-blue-200'
+          }`}>
+            <div className="flex items-center gap-2">
+              {getStatusIcon()}
+              <span className="font-medium">
+                {migrationStatus === 'success' ? 'Succès' :
+                 migrationStatus === 'error' ? 'Erreur' :
+                 'En cours'}
+              </span>
+            </div>
+            <p className="mt-1 text-xs opacity-75">{migrationMessage}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DatabaseBackup() {
   const [description, setDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -624,6 +748,7 @@ export default function DatabaseBackup() {
       {/* Services automatiques */}
       <SchedulerCard />
       <BLReconciliationCard />
+      <WebhookMigrationCard />
 
       {/* Liste des sauvegardes */}
       <Card>
