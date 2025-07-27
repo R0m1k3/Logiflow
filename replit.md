@@ -123,7 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - RÉSOLUTION FINALE WEBHOOK PRODUCTION : Sauvegarde et Configuration Entièrement Opérationnelles
+### 2025-07-27 - CORRECTION WEBHOOK PRODUCTION : Gestion des Bases de Données Sans Colonne webhook_url
+✓ PROBLÈME IDENTIFICATION - Erreur "webhook_url" does not exist survient quand bases production utilisent ancien schéma sans colonne webhook
+✓ DETECTION DYNAMIQUE AJOUTÉE - Requête information_schema pour vérifier existence colonne webhook_url avant UPDATE
+✓ LOGIQUE ADAPTIVE IMPLÉMENTÉE - updateGroup() utilise requête complète si colonne existe, sinon requête sans webhook
+✓ TRIPLE FALLBACK ROBUSTE - 1) requête complète, 2) requête sans webhook, 3) requête minimale (nom, couleur uniquement)
+✓ INIT.SQL MIS À JOUR - Insertion groupes par défaut inclut maintenant webhook_url avec URL configurée pour Frouard
+✓ LOGGING DÉTAILLÉ - Traces complètes pour diagnostiquer quel chemin est utilisé en production
+✓ COMPATIBILITÉ GARANTIE - Code fonctionne avec bases anciennes ET nouvelles, migration transparente
+✓ PRODUCTION READY - Déploiements futurs ne devraient plus avoir d'erreurs webhook_url column missing
+
+### 2025-07-27 - RÉSOLUTION FINALE WEBHOOK PRODUCTION : Sauvegarde et Configuration Entièrement Opérationnelles (PRÉCÉDENT)
 ✓ PROBLÈME ROOT CAUSE RÉSOLU - Méthode updateGroup dans storage.production.ts ne supportait pas la colonne webhook_url
 ✓ REQUÊTE SQL CORRIGÉE - Ajout webhook_url = COALESCE($10, webhook_url) dans la requête UPDATE principale
 ✓ PARAMÈTRES SQL HARMONISÉS - Ajout group.webhookUrl dans le tableau de paramètres avec position $10

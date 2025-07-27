@@ -234,10 +234,10 @@ CREATE INDEX idx_session_expire ON sessions(expire);
 
 -- Insert default data
 
--- Insert default groups (stores)
-INSERT INTO groups (name, color) VALUES 
-('Frouard', '#1976D2'),
-('Houdemont', '#455A64');
+-- Insert default groups (stores) with webhook URLs
+INSERT INTO groups (name, color, webhook_url) VALUES 
+('Frouard', '#1976D2', 'https://workflow.ffnancy.fr/webhook-test/acf9cbf7-040a-4cf5-a43d-80210420d30a'),
+('Houdemont', '#455A64', '');
 
 -- Insert 4 fixed roles with soft colors
 INSERT INTO roles (id, name, display_name, description, color, is_system, is_active) VALUES

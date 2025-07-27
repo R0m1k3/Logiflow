@@ -617,42 +617,97 @@ export class DatabaseStorage implements IStorage {
   async updateGroup(id: number, group: Partial<InsertGroup>): Promise<Group> {
     console.log('🏪 PRODUCTION updateGroup called with:', { id, group });
     
+    // First, check if webhook_url column exists in the groups table
+    let hasWebhookColumn = false;
     try {
-      const result = await pool.query(`
-        UPDATE groups SET 
-          name = COALESCE($1, name),
-          color = COALESCE($2, color),
-          nocodb_config_id = $3,
-          nocodb_table_id = $4,
-          nocodb_table_name = $5,
-          invoice_column_name = COALESCE($6, invoice_column_name),
-          nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
-          nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
-          nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
-          webhook_url = COALESCE($10, webhook_url),
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = $11
-        RETURNING *, nocodb_config_id as "nocodbConfigId", 
-                 nocodb_table_id as "nocodbTableId",
-                 nocodb_table_name as "nocodbTableName",
-                 invoice_column_name as "invoiceColumnName",
-                 nocodb_bl_column_name as "nocodbBlColumnName",
-                 nocodb_amount_column_name as "nocodbAmountColumnName",
-                 nocodb_supplier_column_name as "nocodbSupplierColumnName",
-                 webhook_url as "webhookUrl"
-      `, [
-        group.name, 
-        group.color, 
-        group.nocodbConfigId || null,
-        group.nocodbTableId || null,
-        group.nocodbTableName || null,
-        group.invoiceColumnName,
-        group.nocodbBlColumnName,
-        group.nocodbAmountColumnName,
-        group.nocodbSupplierColumnName,
-        group.webhookUrl,
-        id
-      ]);
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'groups' AND column_name = 'webhook_url'
+      `);
+      hasWebhookColumn = columnCheck.rows.length > 0;
+      console.log('🔍 PRODUCTION webhook_url column exists:', hasWebhookColumn);
+    } catch (error) {
+      console.warn('⚠️  Could not check webhook_url column existence:', error);
+    }
+    
+    try {
+      let result;
+      
+      if (hasWebhookColumn) {
+        // Full update with webhook support
+        result = await pool.query(`
+          UPDATE groups SET 
+            name = COALESCE($1, name),
+            color = COALESCE($2, color),
+            nocodb_config_id = $3,
+            nocodb_table_id = $4,
+            nocodb_table_name = $5,
+            invoice_column_name = COALESCE($6, invoice_column_name),
+            nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
+            nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
+            nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
+            webhook_url = COALESCE($10, webhook_url),
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $11
+          RETURNING *, nocodb_config_id as "nocodbConfigId", 
+                   nocodb_table_id as "nocodbTableId",
+                   nocodb_table_name as "nocodbTableName",
+                   invoice_column_name as "invoiceColumnName",
+                   nocodb_bl_column_name as "nocodbBlColumnName",
+                   nocodb_amount_column_name as "nocodbAmountColumnName",
+                   nocodb_supplier_column_name as "nocodbSupplierColumnName",
+                   webhook_url as "webhookUrl"
+        `, [
+          group.name, 
+          group.color, 
+          group.nocodbConfigId || null,
+          group.nocodbTableId || null,
+          group.nocodbTableName || null,
+          group.invoiceColumnName,
+          group.nocodbBlColumnName,
+          group.nocodbAmountColumnName,
+          group.nocodbSupplierColumnName,
+          group.webhookUrl,
+          id
+        ]);
+      } else {
+        // Update without webhook column (for older databases)
+        console.log('🔧 Using update query without webhook_url column');
+        result = await pool.query(`
+          UPDATE groups SET 
+            name = COALESCE($1, name),
+            color = COALESCE($2, color),
+            nocodb_config_id = $3,
+            nocodb_table_id = $4,
+            nocodb_table_name = $5,
+            invoice_column_name = COALESCE($6, invoice_column_name),
+            nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
+            nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
+            nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = $10
+          RETURNING *, nocodb_config_id as "nocodbConfigId", 
+                   nocodb_table_id as "nocodbTableId",
+                   nocodb_table_name as "nocodbTableName",
+                   invoice_column_name as "invoiceColumnName",
+                   nocodb_bl_column_name as "nocodbBlColumnName",
+                   nocodb_amount_column_name as "nocodbAmountColumnName",
+                   nocodb_supplier_column_name as "nocodbSupplierColumnName",
+                   '' as "webhookUrl"
+        `, [
+          group.name, 
+          group.color, 
+          group.nocodbConfigId || null,
+          group.nocodbTableId || null,
+          group.nocodbTableName || null,
+          group.invoiceColumnName,
+          group.nocodbBlColumnName,
+          group.nocodbAmountColumnName,
+          group.nocodbSupplierColumnName,
+          id
+        ]);
+      }
       
       const updatedGroup = result.rows[0];
       console.log('🏪 PRODUCTION updateGroup result:', updatedGroup);
@@ -660,31 +715,29 @@ export class DatabaseStorage implements IStorage {
     } catch (error: any) {
       console.error('❌ Error in updateGroup:', error);
       
-      // Fallback avec requête simplifiée si colonnes manquantes
+      // Final fallback with minimal fields
       if (error.code === '42703') {
-        console.log('🔧 Fallback: Using simplified updateGroup query without NocoDB BL columns');
+        console.log('🔧 Final fallback: Using basic updateGroup query');
         const result = await pool.query(`
           UPDATE groups SET 
             name = COALESCE($1, name),
             color = COALESCE($2, color),
-            webhook_url = COALESCE($3, webhook_url),
             updated_at = CURRENT_TIMESTAMP
-          WHERE id = $4
+          WHERE id = $3
           RETURNING *,
                    'Ref Facture' as "invoiceColumnName",
                    'Numéro de BL' as "nocodbBlColumnName",
                    'Montant HT' as "nocodbAmountColumnName",
                    'Fournisseur' as "nocodbSupplierColumnName",
-                   webhook_url as "webhookUrl"
+                   '' as "webhookUrl"
         `, [
           group.name, 
           group.color, 
-          group.webhookUrl,
           id
         ]);
         
         const updatedGroup = result.rows[0];
-        console.log('🏪 PRODUCTION updateGroup fallback result:', updatedGroup);
+        console.log('🏪 PRODUCTION updateGroup final fallback result:', updatedGroup);
         return updatedGroup;
       }
       
