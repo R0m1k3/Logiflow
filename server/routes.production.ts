@@ -1126,7 +1126,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           nocodbAmountColumnName: group.nocodbAmountColumnName ?? undefined,
           nocodbSupplierColumnName: group.nocodbSupplierColumnName ?? undefined
         },
-        nocodbConfig
+        {
+          ...nocodbConfig,
+          isActive: nocodbConfig?.isActive ?? true
+        }
       );
 
       res.json(verificationResult);
@@ -1233,10 +1236,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               nocodbBlColumnName: groupConfig.nocodbBlColumnName ?? undefined,
               nocodbAmountColumnName: groupConfig.nocodbAmountColumnName ?? undefined,
               nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName ?? undefined,
-              nocodbDateColumnName: groupConfig.nocodbDateColumnName ?? undefined,
+
               webhookUrl: groupConfig.webhookUrl ?? undefined
             },
-            nocodbConfig,
+            {
+              ...nocodbConfig,
+              isActive: nocodbConfig?.isActive ?? true
+            },
             ref.deliveryId
           );
           
@@ -1679,7 +1685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('❌ Task permissions debug error:', error);
-      res.status(500).json({ message: "Debug failed", error: error.message });
+      res.status(500).json({ message: "Debug failed", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -1755,7 +1761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('❌ Error applying SQL fixes:', error);
-      res.status(500).json({ message: "Erreur lors de l'application des corrections", error: error.message });
+      res.status(500).json({ message: "Erreur lors de l'application des corrections", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -1954,7 +1960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error updating user roles:", error);
       
       // Gestion d'erreur spécifique avec message plus informatif
-      if (error.message && error.message.includes('does not exist')) {
+      if (error instanceof Error && error.message.includes('does not exist')) {
         return res.status(404).json({ message: error.message });
       }
       
@@ -1980,7 +1986,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error updating user roles:", error);
       
       // Gestion d'erreur spécifique avec message plus informatif
-      if (error.message.includes('does not exist')) {
+      if (error instanceof Error && error.message.includes('does not exist')) {
         return res.status(404).json({ message: error.message });
       }
       
