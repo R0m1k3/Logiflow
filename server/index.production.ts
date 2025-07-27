@@ -3,6 +3,7 @@ import { setupSecurityHeaders, setupRateLimiting, setupInputSanitization } from 
 import { setupCompression } from "./cache";
 import { monitor, setupMonitoringEndpoints } from "./monitoring";
 import { initDatabase } from "./initDatabase.production";
+import { runAutoMigrations } from "./auto-migration";
 import path from "path";
 import fs from "fs";
 
@@ -114,6 +115,14 @@ app.use((req, res, next) => {
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
     process.exit(1);
+  }
+
+  // Exécuter les migrations automatiques après l'initialisation
+  try {
+    await runAutoMigrations();
+  } catch (error) {
+    console.error('⚠️  Migration automatique échouée (continuant quand même):', error);
+    // Ne pas faire planter l'application pour des migrations
   }
 
   const { registerRoutes } = await import('./routes.production');
