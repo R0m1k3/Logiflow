@@ -992,6 +992,15 @@ export default function BLReconciliation() {
                                 {(() => {
                                   const hasWebhookUrl = !!(delivery.group?.webhookUrl);
                                   
+                                  // Debug pour voir pourquoi l'icône ne s'affiche pas
+                                  console.log(`🔍 WEBHOOK DEBUG - Livraison ${delivery.id}:`, {
+                                    groupId: delivery.groupId,
+                                    groupName: delivery.group?.name,
+                                    webhookUrl: delivery.group?.webhookUrl,
+                                    hasWebhookUrl: hasWebhookUrl,
+                                    invoiceRef: delivery.invoiceReference
+                                  });
+                                  
                                   // Afficher l'icône webhook si le magasin a une URL webhook configurée
                                   if (hasWebhookUrl) {
                                     return (
