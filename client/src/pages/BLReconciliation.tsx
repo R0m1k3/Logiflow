@@ -988,39 +988,24 @@ export default function BLReconciliation() {
                                   <span className="truncate max-w-28">{delivery.invoiceReference}</span>
                                 </div>
                                 
-                                {/* ICÔNE WEBHOOK - SOLUTION UNIVERSELLE PRODUCTION/DÉVELOPPEMENT */}
+                                {/* ICÔNE WEBHOOK - Affiché seulement pour factures non trouvées avec webhook configuré */}
                                 {(() => {
-                                  // 🚀 SOLUTION FINALE - Logique universelle et robuste
                                   const hasWebhookUrl = !!(delivery.group?.webhookUrl);
                                   const verification = invoiceVerifications[delivery.id.toString()];
                                   const hasRedX = verification && verification.exists === false;
-                                  const hasGreenCheck = verification && verification.exists === true;
                                   
-                                  // LOG DE DEBUG FINAL - Visible dans tous les environnements
-                                  console.log(`🎯 FINAL WEBHOOK DEBUG - Delivery ${delivery.id} (${delivery.supplier?.name}):`, {
-                                    hasWebhookUrl,
-                                    webhookUrl: delivery.group?.webhookUrl,
-                                    verification,
-                                    hasRedX,
-                                    hasGreenCheck,
-                                    SHOULD_SHOW_WEBHOOK: hasWebhookUrl && hasRedX
-                                  });
-                                  
-                                  // ✅ CONDITION FINALE : Webhook configuré ET facture non trouvée (X rouge)
+                                  // Afficher l'icône webhook seulement si : webhook configuré ET facture non trouvée (X rouge)
                                   if (hasWebhookUrl && hasRedX) {
-                                    console.log(`🚀 CREATING WEBHOOK BUTTON for delivery ${delivery.id}`);
                                     return (
                                       <button
                                         onClick={() => {
-                                          console.log(`🔥 WEBHOOK CLICKED: delivery ${delivery.id}`);
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
                                         className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1 border border-gray-300 rounded p-0.5"
                                         title="Envoyer facture via webhook"
-                                        style={{ backgroundColor: '#ffeb3b', border: '2px solid #f44336', padding: '4px' }}
                                       >
-                                        <Send className="w-4 h-4" style={{ color: '#1976d2' }} />
+                                        <Send className="w-4 h-4" />
                                       </button>
                                     );
                                   }
