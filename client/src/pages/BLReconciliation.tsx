@@ -946,8 +946,19 @@ export default function BLReconciliation() {
                                       );
                                     } else {
                                       return (
-                                        <div className="flex items-center ml-1" title="Facture non trouvée dans NocoDB">
-                                          <X className="w-4 h-4 text-red-600" />
+                                        <div className="flex items-center ml-1 space-x-1">
+                                          <div title="Facture non trouvée dans NocoDB">
+                                            <X className="w-4 h-4 text-red-600" />
+                                          </div>
+                                          {delivery.group?.webhookUrl && (
+                                            <button
+                                              onClick={() => setShowWebhookModal(true)}
+                                              className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                                              title="Envoyer via webhook"
+                                            >
+                                              <Webhook className="w-4 h-4" />
+                                            </button>
+                                          )}
                                         </div>
                                       );
                                     }

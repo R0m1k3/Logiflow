@@ -52,6 +52,7 @@ export default function Groups() {
     nocodbBlColumnName: "Numéro de BL",
     nocodbAmountColumnName: "Montant HT", 
     nocodbSupplierColumnName: "Fournisseur",
+    webhookUrl: "",
   });
 
   const groupsQueryResult = useQuery<Group[]>({
@@ -133,6 +134,7 @@ export default function Groups() {
         nocodbBlColumnName: "Numéro de BL",
         nocodbAmountColumnName: "Montant HT",
         nocodbSupplierColumnName: "Fournisseur",
+        webhookUrl: "",
       });
     },
     onError: (error) => {
@@ -177,6 +179,7 @@ export default function Groups() {
         nocodbBlColumnName: "Numéro de BL",
         nocodbAmountColumnName: "Montant HT",
         nocodbSupplierColumnName: "Fournisseur",
+        webhookUrl: "",
       });
     },
     onError: (error) => {
@@ -284,6 +287,7 @@ export default function Groups() {
       nocodbBlColumnName: "Numéro de BL",
       nocodbAmountColumnName: "Montant HT",
       nocodbSupplierColumnName: "Fournisseur",
+      webhookUrl: "",
     });
     setShowCreateModal(true);
   };
@@ -300,6 +304,7 @@ export default function Groups() {
       nocodbBlColumnName: group.nocodbBlColumnName || "Numéro de BL",
       nocodbAmountColumnName: group.nocodbAmountColumnName || "Montant HT",
       nocodbSupplierColumnName: group.nocodbSupplierColumnName || "Fournisseur",
+      webhookUrl: group.webhookUrl || "",
     });
     setShowEditModal(true);
   };
@@ -515,6 +520,10 @@ export default function Groups() {
           nocodbTableId: "",
           nocodbTableName: "",
           invoiceColumnName: "Ref Facture",
+          nocodbBlColumnName: "Numéro de BL",
+          nocodbAmountColumnName: "Montant HT",
+          nocodbSupplierColumnName: "Fournisseur",
+          webhookUrl: "",
         });
       }}>
         <DialogContent className="sm:max-w-md" aria-describedby="group-modal-description">
@@ -670,6 +679,27 @@ export default function Groups() {
               )}
             </div>
 
+            {/* Section Configuration Webhook */}
+            <div className="border-t pt-4 space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-4 h-4 bg-green-500 rounded"></div>
+                <h3 className="font-medium text-gray-900">Configuration Webhook (Optionnel)</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                URL du webhook pour envoyer les factures et avoirs non trouvés dans NocoDB.
+              </p>
+
+              <div>
+                <Label htmlFor="webhookUrl">URL du webhook</Label>
+                <Input
+                  id="webhookUrl"
+                  value={formData.webhookUrl}
+                  onChange={(e) => handleChange('webhookUrl', e.target.value)}
+                  placeholder="https://webhook.site/votre-webhook-url"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center space-x-3 pt-4">
               <Button 
                 type="button" 
@@ -688,6 +718,7 @@ export default function Groups() {
                     nocodbBlColumnName: "Numéro de BL",
                     nocodbAmountColumnName: "Montant HT",
                     nocodbSupplierColumnName: "Fournisseur",
+                    webhookUrl: "",
                   });
                 }}
               >
