@@ -123,16 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - SYSTÈME WEBHOOK FINALISÉ : Interface Utilisateur Optimisée et Modal Simplifié COMPLÉTÉ
-✓ ALIGNEMENT ICÔNES WEBHOOK CORRIGÉ - Icônes webhook maintenant alignées à droite des champs références factures avec justify-between pour un affichage cohérent
-✓ ERREUR OUVERTURE MODAL RÉSOLUE - Ajout de setSelectedWebhookDelivery(delivery) avant ouverture du modal pour éliminer les erreurs d'état
-✓ SÉLECTEUR FOURNISSEUR SUPPRIMÉ DU MODAL - Interface webhook simplifiée sans sélecteur car nom fournisseur déjà visible sur la ligne
-✓ SCHÉMA WEBHOOK OPTIMISÉ - Schema Zod modifié pour ne plus exiger la sélection manuelle du fournisseur
-✓ INFORMATIONS CONTEXTUELLES AJOUTÉES - Encadré informatif dans modal webhook affichant automatiquement fournisseur et référence facture de la livraison
-✓ MUTATION WEBHOOK AUTOMATISÉE - sendWebhookMutation utilise maintenant automatiquement selectedWebhookDelivery.supplier.name au lieu de saisie manuelle
-✓ GESTION D'ÉTAT AMÉLIORÉE - Nettoyage automatique de selectedWebhookDelivery à la fermeture du modal pour prévenir les conflits d'état
-✓ ICÔNES WEBHOOK UNIVERSELLES - Affichage sur TOUTES les lignes nécessitant vérification : factures non trouvées (X rouge), erreurs configuration (triangle orange), et factures non encore vérifiées
-✓ EXPÉRIENCE UTILISATEUR OPTIMISÉE - Workflow webhook simplifié : clic icône → modal avec infos pré-remplies → sélection type + fichier PDF → envoi
+### 2025-07-27 - SYSTÈME WEBHOOK POST FINALISÉ : Transmission Fichiers PDF et Production Ready COMPLÉTÉ
+✓ MÉTHODE POST RÉTABLIE - Webhook revenu à la méthode POST pour permettre transmission complète des fichiers PDF
+✓ MÉTADONNÉES COMPLÈTES TRANSMISES - Fournisseur, type, taille fichier, timestamp, utilisateur, numéro BL, référence facture inclus dans FormData
+✓ FICHIER PDF INCLUS - Transmission complète du fichier PDF via FormData avec contentType application/pdf approprié
+✓ ROUTES PRODUCTION AJOUTÉES - Route /api/webhook/send implémentée dans routes.production.ts avec même fonctionnalité
+✓ INIT.SQL MIS À JOUR - Colonne webhook_url ajoutée à la table groups avec URL par défaut pour Frouard
+✓ CONFIGURATION PRODUCTION READY - INSERT groups modifié pour inclure URL webhook test par défaut
+✓ LOGS DÉTAILLÉS - Diagnostic complet côté serveur pour traçabilité des envois webhook
+✓ GESTION ERREURS ROBUSTE - Messages d'erreur explicites et logging détaillé pour debugging
+✓ PERMISSIONS SÉCURISÉES - Accès webhook restreint aux admins et directeurs uniquement
+✓ COMPATIBILITÉ DÉVELOPPEMENT/PRODUCTION - Même fonctionnalité disponible dans les deux environnements
 
 ### 2025-07-27 - RÉSOLUTION FINALE BL RECONCILIATION : Service Adaptatif et Gestion Erreurs PostgreSQL COMPLÉTÉE (PRÉCÉDENT)
 ✓ PROBLÈME ROOT CAUSE RÉSOLU - blReconciliationService.ts utilisait mauvais import storage (./storage vs environnement)

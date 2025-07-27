@@ -3199,6 +3199,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route webhook pour envoi de factures (Production)
+  const multer = (await import('multer')).default;
+  const upload = multer({ storage: multer.memoryStorage() });
+
+  app.post("/api/webhook/send", upload.single('pdfFile'), async (req, res) => {
+    try {
+      console.log('🌐 Webhook send request received (Production)');
+      console.log('🔍 Request body keys:', Object.keys(req.body));
+      console.log('🔍 File info:', req.file ? { 
+        originalname: req.file.originalname, 
+        size: req.file.size,
+        mimetype: req.file.mimetype 
+      } : 'No file');
+
+      const { isAdmin, isDirecteur } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin && !isDirecteur) {
+        return res.status(403).json({ message: "Access denied. Admin or Directeur role required." });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Aucun fichier PDF fourni" });
+      }
+
+      const { supplier, type, blNumber, invoiceReference } = req.body;
+      if (!supplier || !type) {
+        return res.status(400).json({ 
+          message: "Fournisseur et type requis",
+          received: { supplier, type, blNumber, invoiceReference }
+        });
+      }
+
+      // Récupérer l'utilisateur actuel
+      const userResult = await storage.getUser(req.user.id);
+      const user = userResult;
+      
+      // Récupérer les groupes de l'utilisateur
+      let userGroups = [];
+      if (user.role === 'admin') {
+        const groupsResult = await storage.getGroups();
+        userGroups = groupsResult;
+      } else {
+        userGroups = user.groups || [];
+      }
+
+      // Trouver le groupe avec une URL webhook configurée
+      const group = userGroups.find(g => g.webhookUrl);
+      if (!group || !group.webhookUrl) {
+        return res.status(400).json({ 
+          message: "Aucune URL webhook configurée pour vos magasins",
+          availableGroups: userGroups.map(g => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl }))
+        });
+      }
+
+      const webhookUrl = group.webhookUrl;
+      console.log('🌐 Using webhook URL:', webhookUrl);
+
+      // Préparer les données webhook
+      const webhookData = {
+        supplier: supplier,
+        type: type,
+        filename: req.file.originalname,
+        size: req.file.size,
+        timestamp: new Date().toISOString(),
+        user: {
+          id: user.id,
+          role: user.role,
+          groupId: group.id
+        }
+      };
+
+      console.log('📋 Webhook data prepared:', webhookData);
+
+      // Webhooks en méthode POST (avec fichier PDF)
+      console.log('🌐 Sending POST webhook with PDF file transmission (Production)');
+      
+      // Créer FormData pour POST avec fichier
+      const FormDataClass = (await import('form-data')).default;
+      const formData = new FormDataClass();
+      formData.append('supplier', webhookData.supplier);
+      formData.append('type', webhookData.type);
+      formData.append('filename', webhookData.filename);
+      formData.append('size', webhookData.size.toString());
+      formData.append('timestamp', webhookData.timestamp);
+      formData.append('userId', webhookData.user.id);
+      formData.append('userRole', webhookData.user.role);
+      formData.append('groupId', webhookData.user.groupId.toString());
+      formData.append('blNumber', blNumber || 'N/A');
+      formData.append('invoiceReference', invoiceReference || 'N/A');
+      formData.append('pdfFile', req.file.buffer, {
+        filename: webhookData.filename,
+        contentType: 'application/pdf'
+      });
+      
+      console.log('🌐 Sending POST webhook to:', webhookUrl);
+      console.log('✅ PDF file INCLUDED in transmission (POST method)');
+      
+      const fetch = (await import('node-fetch')).default;
+      const webhookResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        body: formData,
+        headers: formData.getHeaders(),
+        timeout: 10000
+      });
+      
+      console.log('📡 Webhook response status:', webhookResponse.status);
+      console.log('📡 Webhook response ok:', webhookResponse.ok);
+      
+      if (webhookResponse.ok) {
+        const responseText = await webhookResponse.text();
+        console.log('📡 Webhook response:', responseText);
+        
+        res.json({ 
+          success: true, 
+          message: "POST webhook sent successfully with PDF file (Production)",
+          data: webhookData,
+          webhookResponse: {
+            status: webhookResponse.status,
+            statusText: webhookResponse.statusText,
+            body: responseText
+          }
+        });
+      } else {
+        console.log('❌ POST webhook failed with status:', webhookResponse.status);
+        const errorText = await webhookResponse.text().catch(() => 'No response body');
+        console.log('❌ Error response:', errorText);
+        
+        res.status(500).json({ 
+          message: `POST webhook send failed: HTTP ${webhookResponse.status}`,
+          error: webhookResponse.statusText,
+          errorBody: errorText
+        });
+      }
+
+    } catch (error) {
+      console.error('❌ Error sending webhook (Production):', error);
+      res.status(500).json({ message: "Failed to send webhook" });
+    }
+  });
+
   const server = createServer(app);
   return server;
 }
