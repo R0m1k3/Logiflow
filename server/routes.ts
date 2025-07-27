@@ -3280,6 +3280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pdfFile = req.file;
 
       console.log('🔧 Extracted data:', { supplier, type, pdfFile: pdfFile ? 'FILE PRESENT' : 'NO FILE' });
+      console.log('🔧 User data:', { id: user.id, role: user.role, userGroups: user.userGroups });
 
       if (!supplier || !type || !pdfFile) {
         console.log('🔧 Missing fields - supplier:', !!supplier, 'type:', !!type, 'pdfFile:', !!pdfFile);
@@ -3288,16 +3289,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Récupérer l'URL webhook du groupe actuel de l'utilisateur
       const userGroups = user.userGroups;
-      if (!userGroups || userGroups.length === 0) {
+      
+      // Pour les admins, on peut utiliser tous les groupes disponibles
+      if ((!userGroups || userGroups.length === 0) && user.role !== 'admin') {
+        console.log('🔧 No groups found for non-admin user');
         return res.status(400).json({ message: "No group assigned to user" });
       }
+      
+      let webhookUrl;
+      if (user.role === 'admin' && (!userGroups || userGroups.length === 0)) {
+        // Pour admin sans groupes assignés, récupérer le groupe du magasin sélectionné
+        const allGroups = await storage.getGroups();
+        console.log('🔧 Admin user - fetching all groups:', allGroups.length);
+        const targetGroup = allGroups.find(g => g.id === 1); // Default to group 1 (Frouard)
+        webhookUrl = targetGroup?.webhookUrl;
+        console.log('🔧 Admin fallback webhook URL:', webhookUrl);
+      } else {
+        webhookUrl = userGroups[0]?.group?.webhookUrl;
+        console.log('🔧 User group webhook URL:', webhookUrl);
+      }
 
-      const webhookUrl = userGroups[0]?.group?.webhookUrl;
       if (!webhookUrl) {
         return res.status(400).json({ message: "No webhook URL configured for this group" });
       }
 
       // Préparer les données du webhook
+      const groupId = user.role === 'admin' && (!userGroups || userGroups.length === 0) 
+        ? 1 // Default group for admin
+        : userGroups[0]?.group?.id;
+        
       const webhookData = {
         supplier: supplier,
         type: type,
@@ -3307,7 +3327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: {
           id: userId,
           role: user.role,
-          groupId: userGroups[0]?.group?.id
+          groupId: groupId
         }
       };
 
