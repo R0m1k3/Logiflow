@@ -1,0 +1,205 @@
+    
+    created_at: 2025-07-22T11:09:08.977Z,
+
+    updated_at: 2025-07-25T23:13:36.829Z,
+
+    nocodb_bl_column_name: 'Numero_BL',
+
+    nocodb_amount_column_name: 'Montant HT',
+
+    nocodb_supplier_column_name: 'Fournisseurs',
+
+    webhook_url: null,
+
+    nocodbConfigId: 1,
+
+    nocodbTableId: 'my7zunxprumahmm',
+
+    nocodbTableName: 'CommandeH',
+
+    invoiceColumnName: 'RefFacture',
+
+    nocodbBlColumnName: 'Numero_BL',
+
+    nocodbAmountColumnName: 'Montant HT',
+
+    nocodbSupplierColumnName: 'Fournisseurs',
+
+    webhookUrl: null
+
+  }
+
+}
+
+🔍 [VERIFY-INVOICES] Group config retrieved: {
+
+  id: 2,
+
+  name: 'Houdemont',
+
+  nocodbConfigId: 1,
+
+  nocodbTableId: 'my7zunxprumahmm',
+
+  invoiceColumnName: 'RefFacture',
+
+  nocodbSupplierColumnName: 'Fournisseurs'
+
+}
+
+📊 [DEBUG] getNocodbConfig called with id: 1
+
+📊 [DEBUG] Raw database result for getNocodbConfig(1): {
+
+  id: 1,
+
+  name: 'Nocodb',
+
+  base_url: 'https://nocodb.ffnancy.fr',
+
+  project_id: 'pcg4uw79ukvycxc',
+
+  api_token: 'z4BAwLo6dgoN_E7PKJSHN7PA7kdBePtKOYcsDlwQ',
+
+  description: '',
+
+  is_active: true,
+
+  created_by: 'admin_local',
+
+  created_at: 2025-07-22T11:12:54.971Z,
+
+  updated_at: 2025-07-25T23:07:17.197Z
+
+}
+
+📊 [DEBUG] Transformed NocoDB config for id 1: {
+
+  id: 1,
+
+  name: 'Nocodb',
+
+  baseUrl: 'https://nocodb.ffnancy.fr',
+
+  projectId: 'pcg4uw79ukvycxc',
+
+  apiToken: 'z4BAwLo6dgoN_E7PKJSHN7PA7kdBePtKOYcsDlwQ',
+
+  description: '',
+
+  isActive: true,
+
+  createdBy: 'admin_local',
+
+  createdAt: 2025-07-22T11:12:54.971Z,
+
+  updatedAt: 2025-07-25T23:07:17.197Z
+
+}
+
+🔍 [VERIFY-INVOICES] NocoDB config retrieved: {
+
+  id: 1,
+
+  name: 'Nocodb',
+
+  baseUrl: 'https://nocodb.ffnancy.fr',
+
+  projectId: 'pcg4uw79ukvycxc',
+
+  isActive: true
+
+}
+
+🚨 [CRITICAL-DEBUG] ULTRA-DETAILED NocodbConfig Analysis: {
+
+  configId: 1,
+
+  configExists: true,
+
+  rawConfig: {
+
+    id: 1,
+
+    name: 'Nocodb',
+
+    baseUrl: 'https://nocodb.ffnancy.fr',
+
+    projectId: 'pcg4uw79ukvycxc',
+
+    apiToken: 'z4BAwLo6dgoN_E7PKJSHN7PA7kdBePtKOYcsDlwQ',
+
+    description: '',
+
+    isActive: true,
+
+    createdBy: 'admin_local',
+
+    createdAt: 2025-07-22T11:12:54.971Z,
+
+    updatedAt: 2025-07-25T23:07:17.197Z
+
+  },
+
+  projectIdValue: 'pcg4uw79ukvycxc',
+
+  projectIdType: 'string',
+
+  projectIdLength: 15,
+
+  expectedProjectId: 'pcg4uw79ukvycxc',
+
+  isProjectIdCorrect: true,
+
+  willConstructUrl: 'https://nocodb.ffnancy.fr/api/v1/db/data/noco/pcg4uw79ukvycxc/my7zunxprumahmm'
+
+}
+
+🚀 [VERIFY-INVOICES] Starting verification with service for delivery 39
+
+🚀 [VERIFY-INVOICES] Parameters: {
+
+  invoiceRef: '223604',
+
+  supplierName: 'BI2L',
+
+  amount: 0,
+
+  groupId: 2,
+
+  nocodbUrl: 'https://nocodb.ffnancy.fr/api/v1/db/data/noco/pcg4uw79ukvycxc/my7zunxprumahmm'
+
+}
+
+🔍 [VERIFY-INVOICES] Service result for delivery 39: {
+
+  found: false,
+
+  matchType: 'NONE',
+
+  hasInvoice: false,
+
+  verificationDetails: {
+
+    invoiceRef: '223604',
+
+    supplierName: 'BI2L',
+
+    amount: 0,
+
+    error: 'Aucune facture correspondante trouvée'
+
+  }
+
+}
+
+🔍 [VERIFY-INVOICES] Delivery 39: ❌ NOT FOUND
+
+9:05:05 PM [express] POST /api/verify-invoices 200 in 287ms
+
+9:05:12 PM [express] HEAD /api/health 200 in 1ms
+
+
+      
+      
+    
