@@ -123,7 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - SYSTÈME WEBHOOK DÉFINITIVEMENT FINALISÉ : Configuration Complète Production et Développement
+### 2025-07-27 - RÉSOLUTION FINALE WEBHOOK PRODUCTION : Sauvegarde et Configuration Entièrement Opérationnelles
+✓ PROBLÈME ROOT CAUSE RÉSOLU - Méthode updateGroup dans storage.production.ts ne supportait pas la colonne webhook_url
+✓ REQUÊTE SQL CORRIGÉE - Ajout webhook_url = COALESCE($10, webhook_url) dans la requête UPDATE principale
+✓ PARAMÈTRES SQL HARMONISÉS - Ajout group.webhookUrl dans le tableau de paramètres avec position $10
+✓ RETURNING CLAUSE ÉTENDUE - Ajout webhook_url as "webhookUrl" pour retour complet des données
+✓ FALLBACK SQL CORRIGÉ - Méthode fallback inclut aussi la colonne webhook_url pour compatibilité
+✓ INIT.SQL CONFIGURATION COMPLÈTE - Groupe Frouard créé avec configuration NocoDB et URL webhook complètes
+✓ INTERFACE PRODUCTION READY - Page modification groupes peut maintenant sauvegarder l'URL webhook
+✓ DÉVELOPPEMENT SYNCHRONISÉ - Comportement identique entre environnements développement et production
+
+### 2025-07-27 - SYSTÈME WEBHOOK DÉFINITIVEMENT FINALISÉ : Configuration Complète Production et Développement (PRÉCÉDENT)
 ✓ MÉTHODE POST RÉTABLIE - Webhook revenu à la méthode POST pour permettre transmission complète des fichiers PDF
 ✓ MÉTADONNÉES COMPLÈTES TRANSMISES - Fournisseur, type, taille fichier, timestamp, utilisateur, numéro BL, référence facture inclus dans FormData
 ✓ FICHIER PDF INCLUS - Transmission complète du fichier PDF via FormData avec contentType application/pdf approprié

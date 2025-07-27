@@ -629,15 +629,17 @@ export class DatabaseStorage implements IStorage {
           nocodb_bl_column_name = COALESCE($7, nocodb_bl_column_name),
           nocodb_amount_column_name = COALESCE($8, nocodb_amount_column_name),
           nocodb_supplier_column_name = COALESCE($9, nocodb_supplier_column_name),
+          webhook_url = COALESCE($10, webhook_url),
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = $10
+        WHERE id = $11
         RETURNING *, nocodb_config_id as "nocodbConfigId", 
                  nocodb_table_id as "nocodbTableId",
                  nocodb_table_name as "nocodbTableName",
                  invoice_column_name as "invoiceColumnName",
                  nocodb_bl_column_name as "nocodbBlColumnName",
                  nocodb_amount_column_name as "nocodbAmountColumnName",
-                 nocodb_supplier_column_name as "nocodbSupplierColumnName"
+                 nocodb_supplier_column_name as "nocodbSupplierColumnName",
+                 webhook_url as "webhookUrl"
       `, [
         group.name, 
         group.color, 
@@ -648,6 +650,7 @@ export class DatabaseStorage implements IStorage {
         group.nocodbBlColumnName,
         group.nocodbAmountColumnName,
         group.nocodbSupplierColumnName,
+        group.webhookUrl,
         id
       ]);
       
@@ -664,16 +667,19 @@ export class DatabaseStorage implements IStorage {
           UPDATE groups SET 
             name = COALESCE($1, name),
             color = COALESCE($2, color),
+            webhook_url = COALESCE($3, webhook_url),
             updated_at = CURRENT_TIMESTAMP
-          WHERE id = $3
+          WHERE id = $4
           RETURNING *,
                    'Ref Facture' as "invoiceColumnName",
                    'Numéro de BL' as "nocodbBlColumnName",
                    'Montant HT' as "nocodbAmountColumnName",
-                   'Fournisseur' as "nocodbSupplierColumnName"
+                   'Fournisseur' as "nocodbSupplierColumnName",
+                   webhook_url as "webhookUrl"
         `, [
           group.name, 
           group.color, 
+          group.webhookUrl,
           id
         ]);
         
