@@ -1,8 +1,8 @@
 // Script simple pour exécuter la migration webhook_url en production
 // Usage: node run_migration.js
 
-const { Pool } = require('pg');
-const fs = require('fs');
+import { Pool } from 'pg';
+import fs from 'fs';
 
 // Configuration base de données (adaptez selon votre environnement)
 const pool = new Pool({
@@ -72,16 +72,12 @@ async function runMigration() {
 }
 
 // Exécuter la migration si ce script est appelé directement
-if (require.main === module) {
-  runMigration()
-    .then(() => {
-      console.log('✨ Migration webhook_url complétée');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('💥 Échec de la migration:', error);
-      process.exit(1);
-    });
-}
-
-module.exports = { runMigration };
+runMigration()
+  .then(() => {
+    console.log('✨ Migration webhook_url complétée');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('💥 Échec de la migration:', error);
+    process.exit(1);
+  });

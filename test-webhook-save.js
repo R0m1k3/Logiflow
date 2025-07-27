@@ -1,7 +1,7 @@
 // Script de test pour vérifier la sauvegarde webhook
 // Usage: node test-webhook-save.js
 
-const { Pool } = require('pg');
+import { Pool } from 'pg';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -67,16 +67,12 @@ async function testWebhookSave() {
   }
 }
 
-if (require.main === module) {
-  testWebhookSave()
-    .then(() => {
-      console.log('🎯 Test terminé');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('💥 Échec du test:', error);
-      process.exit(1);
-    });
-}
-
-module.exports = { testWebhookSave };
+testWebhookSave()
+  .then(() => {
+    console.log('🎯 Test terminé');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('💥 Échec du test:', error);
+    process.exit(1);
+  });
