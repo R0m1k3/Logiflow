@@ -167,7 +167,10 @@ export interface IStorage {
   // Permission management operations
   getPermissions(): Promise<Permission[]>;
   getPermission(id: number): Promise<Permission | undefined>;
+  getPermissionsByCategory(category: string): Promise<Permission[]>;
   createPermission(permission: InsertPermission): Promise<Permission>;
+  updatePermission(id: number, permission: Partial<InsertPermission>): Promise<Permission>;
+  deletePermission(id: number): Promise<void>;
   updatePermission(id: number, permission: Partial<InsertPermission>): Promise<Permission>;
   deletePermission(id: number): Promise<void>;
   getPermissionsByCategory(category: string): Promise<Permission[]>;
@@ -602,7 +605,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async assignUserToGroup(userGroup: InsertUserGroup): Promise<UserGroup> {
-    const [newUserGroup] = await db.insert(userGroups).values(userGroup).returning();
+    const [newUserGroup] = await db.insert(userGroups).values([userGroup]).returning();
     return newUserGroup;
   }
 
@@ -1553,6 +1556,11 @@ export class DatabaseStorage implements IStorage {
     await db.delete(permissions).where(eq(permissions.id, id));
   }
 
+  async getPermission(id: number): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
+    return permission;
+  }
+
   async getPermissionsByCategory(category: string): Promise<Permission[]> {
     return await db
       .select()
@@ -1807,13 +1815,13 @@ export class DatabaseStorage implements IStorage {
   async getTasksByDateRange(startDate: string, endDate: string, groupIds?: number[]): Promise<any[]> {
     const whereCondition = groupIds 
       ? and(
-          gte(tasks.dueDate, startDate),
-          lte(tasks.dueDate, endDate),
+          sql`${tasks.dueDate} >= ${startDate}`,
+          sql`${tasks.dueDate} <= ${endDate}`,
           inArray(tasks.groupId, groupIds)
         )
       : and(
-          gte(tasks.dueDate, startDate),
-          lte(tasks.dueDate, endDate)
+          sql`${tasks.dueDate} >= ${startDate}`,
+          sql`${tasks.dueDate} <= ${endDate}`
         );
 
     return await db.query.tasks.findMany({

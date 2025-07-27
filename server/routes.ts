@@ -127,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(userGroups);
       }
     } catch (error) {
-      console.error("Error fetching groups:", error);
+      console.error("Error fetching groups:", error instanceof Error ? error.message : 'Unknown error');
       res.status(500).json({ message: "Failed to fetch groups" });
     }
   });
@@ -188,18 +188,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(group);
     } catch (error) {
       console.error('❌ Failed to create group:', {
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
         body: req.body,
         userId: req.user?.id || req.user?.claims?.sub || 'unknown'
       });
       
       // Erreur de validation Zod
-      if (error.name === 'ZodError') {
-        console.error('❌ Validation error details:', error.errors);
+      if (error instanceof Error && error.name === 'ZodError') {
+        console.error('❌ Validation error details:', (error as any).errors);
         return res.status(400).json({ 
           message: "Validation failed", 
-          errors: error.errors 
+          errors: (error as any).errors 
         });
       }
       
@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const group = await storage.updateGroup(id, data);
       res.json(group);
     } catch (error) {
-      console.error("Error updating group:", error);
+      console.error("Error updating group:", error instanceof Error ? error.message : 'Unknown error');
       res.status(500).json({ message: "Failed to update group" });
     }
   });
@@ -235,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteGroup(id);
       res.json({ message: "Group deleted successfully" });
     } catch (error) {
-      console.error("Error deleting group:", error);
+      console.error("Error deleting group:", error instanceof Error ? error.message : 'Unknown error');
       res.status(500).json({ message: "Failed to delete group" });
     }
   });
@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const suppliers = await storage.getSuppliers(dlcOnly);
       res.json(suppliers);
     } catch (error) {
-      console.error("Error fetching suppliers:", error);
+      console.error("Error fetching suppliers:", error instanceof Error ? error.message : 'Unknown error');
       res.status(500).json({ message: "Failed to fetch suppliers" });
     }
   });
