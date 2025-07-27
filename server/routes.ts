@@ -3189,9 +3189,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { isAdmin } = await checkPermission(req, res, "system_admin");
       if (!isAdmin) return;
 
-      const { SchedulerService } = await import('./schedulerService.production.js');
-      const scheduler = SchedulerService.getInstance();
-      const result = await scheduler.triggerManualBLReconciliation();
+      // Test direct du service de rapprochement avec gestion d'erreur détaillée
+      console.log("🔧 [BL-RECONCILIATION] Test manuel du rapprochement BL...");
+      
+      const { performBLReconciliation } = await import('./blReconciliationService.ts');
+      const result = await performBLReconciliation();
+      
+      console.log(`✅ [BL-RECONCILIATION] Test manuel terminé: ${result.reconciledDeliveries}/${result.processedDeliveries} livraisons rapprochées`);
       
       res.json({ 
         message: "Rapprochement BL manuel exécuté avec succès",
@@ -3199,9 +3203,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("❌ Error triggering manual BL reconciliation:", error);
+      console.error("❌ Stack trace:", error.stack);
       res.status(500).json({ 
         message: "Erreur lors du rapprochement BL manuel",
-        error: error.message 
+        error: error.message,
+        stack: error.stack
       });
     }
   });
