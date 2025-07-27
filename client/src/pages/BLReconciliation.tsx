@@ -1008,18 +1008,31 @@ export default function BLReconciliation() {
                                   
                                   // Afficher l'icône webhook seulement si : webhook configuré ET facture non trouvée (X rouge)
                                   if (hasWebhookUrl && hasRedX) {
+                                    console.log(`🚀 RENDERING WEBHOOK BUTTON for delivery ${delivery.id}`);
                                     return (
                                       <button
                                         onClick={() => {
+                                          console.log(`🔥 WEBHOOK BUTTON CLICKED for delivery ${delivery.id}`);
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
                                         className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1 border border-gray-300 rounded p-0.5"
                                         title="Envoyer facture via webhook"
+                                        style={{ 
+                                          backgroundColor: '#ffeb3b', 
+                                          border: '2px solid #f44336', 
+                                          padding: '4px',
+                                          display: 'inline-block',
+                                          visibility: 'visible'
+                                        }}
                                       >
-                                        <Send className="w-4 h-4" />
+                                        <Send className="w-4 h-4" style={{ color: '#1976d2' }} />
                                       </button>
                                     );
+                                  } else {
+                                    if (delivery.id === 122) {
+                                      console.log(`❌ WEBHOOK BUTTON NOT SHOWN for delivery ${delivery.id} - hasWebhookUrl: ${hasWebhookUrl}, hasRedX: ${hasRedX}`);
+                                    }
                                   }
                                   
                                   return null;
