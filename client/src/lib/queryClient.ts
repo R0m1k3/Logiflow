@@ -23,13 +23,18 @@ export async function apiRequest(
 ): Promise<any> {
   console.log("🌐 API Request:", { url, method, body });
   
+  // Détection si le body est un FormData
+  const isFormData = body instanceof FormData;
+  
   const res = await fetch(url, {
     method,
     headers: {
-      ...(body ? { "Content-Type": "application/json" } : {}),
+      // Ne pas ajouter Content-Type pour FormData (le navigateur le fait automatiquement)
+      ...(body && !isFormData ? { "Content-Type": "application/json" } : {}),
       ...headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    // Ne pas JSON.stringify pour FormData
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
     credentials: "include",
   });
 

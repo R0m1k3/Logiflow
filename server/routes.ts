@@ -3258,6 +3258,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/webhook/send', isAuthenticated, upload.single('pdfFile'), async (req: any, res) => {
     try {
+      // Debug logs pour voir ce qui arrive
+      console.log('🔧 Webhook request received');
+      console.log('🔧 req.body:', req.body);
+      console.log('🔧 req.file:', req.file);
+      console.log('🔧 req.headers content-type:', req.headers['content-type']);
+      
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUserWithGroups(userId);
       
@@ -3273,7 +3279,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { supplier, type } = req.body;
       const pdfFile = req.file;
 
+      console.log('🔧 Extracted data:', { supplier, type, pdfFile: pdfFile ? 'FILE PRESENT' : 'NO FILE' });
+
       if (!supplier || !type || !pdfFile) {
+        console.log('🔧 Missing fields - supplier:', !!supplier, 'type:', !!type, 'pdfFile:', !!pdfFile);
         return res.status(400).json({ message: "Missing required fields" });
       }
 
