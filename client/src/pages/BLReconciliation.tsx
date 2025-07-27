@@ -1012,18 +1012,29 @@ export default function BLReconciliation() {
                                   
                                   // Afficher l'icône webhook SEULEMENT si facture non trouvée (X rouge) ET webhook configuré
                                   if (isNotFound && hasWebhookUrl) {
+                                    console.log('✅ WEBHOOK BUTTON CREATED for delivery:', delivery.id, 'with webhook:', delivery.group?.webhookUrl);
                                     return (
                                       <button
                                         onClick={() => {
+                                          console.log('🔥 WEBHOOK BUTTON CLICKED for delivery:', delivery.id);
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
                                         className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1 border border-gray-300 rounded p-0.5"
                                         title="Envoyer facture via webhook"
+                                        style={{ backgroundColor: 'yellow', border: '2px solid red' }} // DEBUG TEMPORAIRE
                                       >
                                         <Send className="w-4 h-4" />
                                       </button>
                                     );
+                                  } else {
+                                    if (hasWebhookUrl) {
+                                      console.log('❌ WEBHOOK BUTTON NOT CREATED - Missing condition for delivery:', delivery.id, {
+                                        isNotFound,
+                                        hasWebhookUrl,
+                                        reason: !isNotFound ? 'Invoice was found (has green check)' : 'Unknown reason'
+                                      });
+                                    }
                                   }
                                   return null;
                                 })()}
