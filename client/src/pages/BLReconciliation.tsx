@@ -314,10 +314,10 @@ export default function BLReconciliation() {
   const form = useForm<ReconciliationForm>({
     resolver: zodResolver(reconciliationSchema),
     defaultValues: {
-      blNumber: "",
-      blAmount: "",
-      invoiceReference: "",
-      invoiceAmount: "",
+      blNumber: undefined,
+      blAmount: undefined,
+      invoiceReference: undefined,
+      invoiceAmount: undefined,
     },
   });
 
@@ -650,11 +650,12 @@ export default function BLReconciliation() {
 
   const handleEditReconciliation = (delivery: any) => {
     setSelectedDelivery(delivery);
+    // 🔧 CORRECTION CRITIQUE - Utiliser undefined au lieu de chaînes vides pour éviter la remise automatique des valeurs
     form.reset({
-      blNumber: delivery.blNumber || "",
-      blAmount: delivery.blAmount || "",
-      invoiceReference: delivery.invoiceReference || "",
-      invoiceAmount: delivery.invoiceAmount || "",
+      blNumber: delivery.blNumber || undefined,
+      blAmount: delivery.blAmount || undefined,
+      invoiceReference: delivery.invoiceReference || undefined,
+      invoiceAmount: delivery.invoiceAmount || undefined,
     });
     setShowReconciliationModal(true);
   };
