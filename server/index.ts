@@ -5,34 +5,25 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
+// Force development mode
+console.log('🔧 FORCING DEVELOPMENT MODE');
+process.env.NODE_ENV = 'development';
+process.env.STORAGE_MODE = 'development';
+
 // Enhanced environment detection
 const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
 const isReplit = process.cwd().includes('/home/runner/workspace');
-const isProduction = process.env.NODE_ENV === 'production' || isDocker;
+const isProduction = false; // Force development
 
 console.log('🔍 Environment Analysis:', {
   cwd: process.cwd(),
   isDocker,
   isReplit,
-  isProduction,
+  isProduction: false,
   nodeEnv: process.env.NODE_ENV,
-  dockerEnv: process.env.DOCKER_ENV
+  dockerEnv: process.env.DOCKER_ENV,
+  storageMode: process.env.STORAGE_MODE
 });
-
-if (isDocker) {
-  console.log('🐳 Detected Docker production environment - switching to production mode');
-  process.env.NODE_ENV = 'production';
-  process.env.STORAGE_MODE = 'production';
-} else if (isReplit) {
-  console.log('🔧 Detected Replit development environment');
-  process.env.NODE_ENV = 'development';
-  process.env.STORAGE_MODE = 'production'; // Keep production storage but dev Vite
-} else if (isProduction) {
-  console.log('🏭 Production mode detected');
-  process.env.STORAGE_MODE = 'production';
-} else {
-  console.log('🔧 Development mode');
-}
 
 console.log('🔍 DIAGNOSTIC - Final STORAGE_MODE:', process.env.STORAGE_MODE);
 console.log('🔍 DIAGNOSTIC - Using storage:', process.env.STORAGE_MODE === 'production' ? 'PRODUCTION' : 'DEVELOPMENT');
@@ -144,25 +135,9 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     // Continue startup even if role initialization fails
   }
 
-  // Initialize production database and permissions when using production storage
+  // Skip production database initialization in development mode
   if (process.env.STORAGE_MODE === 'production') {
-    try {
-      await initDatabase();
-      // CRITICAL FIX: Auto-fix employee permissions on every startup
-      const { ensureEmployeePermissions, ensureCorrectNocodbConfig } = await import('./initDatabase.production');
-      await ensureEmployeePermissions();
-      
-      // CRITICAL FIX: Ensure correct NocoDB project_id on every startup
-      await ensureCorrectNocodbConfig();
-      
-      // Initialize all automatic services (backup and BL reconciliation)
-      const { SchedulerService } = await import('./schedulerService.production.js');
-      const scheduler = SchedulerService.getInstance();
-      scheduler.startAllServices();
-    } catch (error) {
-      console.error("Failed to initialize production database:", error);
-      // Continue startup even if production initialization fails
-    }
+    console.log('🔧 Skipping production database initialization (running in development mode)');
   }
 
   // Health check endpoint for Docker
@@ -175,26 +150,11 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     });
   });
 
-  // Setup routes - use appropriate routes based on storage mode
-  let server;
-  if (process.env.STORAGE_MODE === 'production') {
-    console.log('🔄 Loading production routes... (STORAGE_MODE=production)');
-    try {
-      const { registerRoutes: registerProductionRoutes } = await import("./routes.production");
-      console.log('✅ Successfully loaded routes.production.ts');
-      server = await registerProductionRoutes(app);
-    } catch (error) {
-      console.error('❌ Failed to load production routes, falling back to development routes:', error instanceof Error ? error.message : 'Unknown error');
-      const { registerRoutes } = await import("./routes");
-      console.log('🔄 Fallback: loaded routes.ts (development)');
-      server = await registerRoutes(app);
-    }
-  } else {
-    console.log('🔄 Loading development routes... (STORAGE_MODE=development)');
-    const { registerRoutes } = await import("./routes");
-    console.log('✅ Successfully loaded routes.ts');
-    server = await registerRoutes(app);
-  }
+  // Setup routes - always use development routes in development mode
+  console.log('🔄 Loading development routes... (STORAGE_MODE=development)');
+  const { registerRoutes } = await import("./routes");
+  console.log('✅ Successfully loaded routes.ts');
+  const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

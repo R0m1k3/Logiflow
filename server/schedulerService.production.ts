@@ -1,6 +1,6 @@
 import * as cron from 'node-cron';
 import { BackupService } from './backupService.production.js';
-import { Pool } from '@neondatabase/serverless';
+import { Pool } from 'pg';
 import { performBLReconciliation } from './blReconciliationService.js';
 
 export class SchedulerService {
@@ -10,9 +10,19 @@ export class SchedulerService {
   private blReconciliationTask: cron.ScheduledTask | null = null;
 
   private constructor() {
-    // Initialiser le pool pour le BackupService
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.backupService = new BackupService(pool);
+    // Utiliser le pool existant de db.production.ts
+    try {
+      const { pool } = require('./db.production.ts');
+      this.backupService = new BackupService(pool);
+    } catch (error) {
+      console.error('Failed to initialize BackupService:', error);
+      // Créer un pool de secours si nécessaire
+      const fallbackPool = new Pool({ 
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
+      });
+      this.backupService = new BackupService(fallbackPool);
+    }
   }
 
   public static getInstance(): SchedulerService {

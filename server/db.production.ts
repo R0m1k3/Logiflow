@@ -5,15 +5,15 @@ import * as schema from '../shared/schema';
 // Production database configuration using standard PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false, // Disable SSL completely for production environment
-  max: 3, // Further reduced pool size for stability
+  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false },
+  max: 5, // Reasonable pool size for Replit
   min: 1, // Minimum connections to keep open
-  idleTimeoutMillis: 20000, // Reduced idle timeout to 20 seconds
-  connectionTimeoutMillis: 15000, // Reduced connection timeout
-  maxUses: 500, // Reduced connection reuse to prevent stale connections
+  idleTimeoutMillis: 30000, // 30 second idle timeout
+  connectionTimeoutMillis: 20000, // 20 second connection timeout
+  maxUses: 1000, // Higher reuse for better performance
   allowExitOnIdle: false, // Keep pool alive in Replit
-  statement_timeout: 10000, // 10 second query timeout
-  query_timeout: 10000, // 10 second overall query timeout
+  statement_timeout: 30000, // 30 second query timeout
+  query_timeout: 30000, // 30 second overall query timeout
   application_name: 'LogiFlow_Production'
 });
 
