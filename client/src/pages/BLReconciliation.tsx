@@ -532,8 +532,15 @@ export default function BLReconciliation() {
   // Mutation pour envoyer le webhook
   const sendWebhookMutation = useMutation({
     mutationFn: async (data: WebhookForm) => {
+      console.log('🚀 Webhook mutation data received:', data);
+      console.log('🚀 Selected delivery:', selectedWebhookDelivery);
+      
       if (!selectedWebhookDelivery?.supplier?.name) {
         throw new Error("Aucun fournisseur sélectionné");
+      }
+      
+      if (!data.pdfFile || data.pdfFile.length === 0) {
+        throw new Error("Aucun fichier PDF sélectionné");
       }
       
       const formData = new FormData();
@@ -541,6 +548,12 @@ export default function BLReconciliation() {
       formData.append('type', data.type);
       formData.append('pdfFile', data.pdfFile[0]);
       
+      console.log('🚀 FormData contents:');
+      for (let pair of formData.entries()) {
+        console.log('🚀', pair[0], pair[1]);
+      }
+      
+      console.log('🌐 API Request:', { url: '/api/webhook/send', method: 'POST', formData: 'FormData object' });
       await apiRequest('/api/webhook/send', 'POST', formData);
     },
     onSuccess: () => {
