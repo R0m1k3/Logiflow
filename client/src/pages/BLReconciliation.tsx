@@ -370,14 +370,18 @@ export default function BLReconciliation() {
   }, [form.watch("invoiceReference"), selectedDelivery]);
 
   const updateReconciliationMutation = useMutation({
-    mutationFn: async (data: { id: number; blNumber: string; blAmount: string; invoiceReference: string; invoiceAmount: string }) => {
+    mutationFn: async (data: { id: number; blNumber: string | null; blAmount: string | null; invoiceReference: string | null; invoiceAmount: string | null }) => {
       console.log('🔄 Updating reconciliation data:', data);
-      const response = await apiRequest(`/api/deliveries/${data.id}`, "PUT", {
+      
+      const payload = {
         blNumber: data.blNumber,
         blAmount: data.blAmount,
         invoiceReference: data.invoiceReference,
         invoiceAmount: data.invoiceAmount,
-      });
+      };
+      
+      console.log('📤 Payload sent to server (null values will clear fields):', payload);
+      const response = await apiRequest(`/api/deliveries/${data.id}`, "PUT", payload);
       console.log('✅ Reconciliation update response:', response);
       return response;
     },
@@ -659,10 +663,10 @@ export default function BLReconciliation() {
     if (selectedDelivery) {
       updateReconciliationMutation.mutate({
         id: selectedDelivery.id,
-        blNumber: data.blNumber || "",
-        blAmount: data.blAmount || "",
-        invoiceReference: data.invoiceReference || "",
-        invoiceAmount: data.invoiceAmount || "",
+        blNumber: data.blNumber?.trim() || null,
+        blAmount: data.blAmount?.trim() || null,
+        invoiceReference: data.invoiceReference?.trim() || null,
+        invoiceAmount: data.invoiceAmount?.trim() || null,
       });
     }
   };
