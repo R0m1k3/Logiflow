@@ -5,15 +5,21 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// Force development mode
-console.log('🔧 FORCING DEVELOPMENT MODE');
-process.env.NODE_ENV = 'development';
-process.env.STORAGE_MODE = 'development';
+// Auto-detect environment for production deployment
+if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app') {
+  console.log('🚀 PRODUCTION MODE DETECTED');
+  process.env.NODE_ENV = 'production';
+  process.env.STORAGE_MODE = 'production';
+} else {
+  console.log('🔧 DEVELOPMENT MODE');
+  process.env.NODE_ENV = 'development';
+  process.env.STORAGE_MODE = 'development';
+}
 
 // Enhanced environment detection
 const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
 const isReplit = process.cwd().includes('/home/runner/workspace');
-const isProduction = false; // Force development
+const isProduction = process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app';
 
 console.log('🔍 Environment Analysis:', {
   cwd: process.cwd(),

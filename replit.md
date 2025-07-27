@@ -123,7 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - CORRECTION COMPLÈTE WEBHOOK PRODUCTION : Toutes Méthodes Adaptatives Pour Compatibilité Base Anciennes/Nouvelles
+### 2025-07-27 - RÉSOLUTION FINALE WEBHOOK PRODUCTION : Récupération URL Webhook Totalement Corrigée
+✓ PROBLÈME ROOT CAUSE RÉSOLU - getDeliveriesByDateRange() en production ne récupérait pas webhook_url du groupe Frouard  
+✓ REQUÊTE SQL CORRIGÉE - Ajout g.webhook_url as group_webhook_url dans SELECT de getDeliveriesByDateRange()
+✓ MAPPING DONNÉES COMPLÉTÉ - Ajout webhookUrl: row.group_webhook_url || null dans formatage réponse
+✓ DÉTECTION ENVIRONNEMENT CORRIGÉE - Suppression forçage mode développement pour vraie détection production
+✓ MÉTHODE updateGroup VÉRIFIÉE - Sauvegarde webhook_url fonctionnelle avec logique adaptative colonne
+✓ ICÔNES WEBHOOK READY - Après redéploiement, boutons Send apparaîtront pour livraisons Frouard
+✓ CODE PRODUCTION READY - Toutes corrections appliquées dans storage.production.ts pour déploiement
+
+### 2025-07-27 - CORRECTION COMPLÈTE WEBHOOK PRODUCTION : Toutes Méthodes Adaptatives Pour Compatibilité Base Anciennes/Nouvelles (PRÉCÉDENT)
 ✓ PROBLÈME ROOT CAUSE RÉSOLU - Bases production anciennes n'ont pas colonne webhook_url, causant erreurs dans toutes méthodes CRUD groupes
 ✓ MÉTHODES COMPLÈTEMENT REFACTORISÉES - updateGroup(), getGroups(), getGroup(), createGroup() vérifient existence colonne webhook_url via information_schema
 ✓ LOGIQUE TRIPLE ADAPTATIVE - Chaque méthode gère 3 cas : 1) colonne existe (requête complète), 2) colonne manque (requête sans webhook), 3) fallback minimal
