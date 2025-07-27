@@ -989,45 +989,18 @@ export default function BLReconciliation() {
                                 </div>
                                 
                                 {/* ICÔNE WEBHOOK À DROITE - SEULEMENT SI PAS DE COCHE VERTE */}
-                                {(() => {
-                                  const verificationKey = delivery.id.toString();
-                                  const verification = invoiceVerifications[verificationKey];
-                                  const hasWebhookUrl = delivery.group?.webhookUrl;
-                                  const hasGreenCheck = verification?.exists === true;
-                                  
-                                  // DEBUG PRODUCTION : Log pour comprendre pourquoi webhook n'apparaît pas
-                                  const shouldShowWebhook = !hasGreenCheck && !!hasWebhookUrl;
-                                  console.log('🔍 WEBHOOK DEBUG - Delivery:', delivery.id, {
-                                    supplier: delivery.supplier?.name,
-                                    groupName: delivery.group?.name,
-                                    hasWebhookUrl: !!hasWebhookUrl,
-                                    webhookUrl: delivery.group?.webhookUrl,
-                                    hasGreenCheck,
-                                    verification: verification,
-                                    shouldShowWebhook
-                                  });
-                                  
-                                  // Afficher l'icône webhook seulement si pas de coche verte ET webhook configuré
-                                  if (shouldShowWebhook) {
-                                    console.log('🚀 AFFICHAGE ICÔNE WEBHOOK - Delivery:', delivery.id, 'BOUTON CRÉÉ');
-                                    return (
-                                      <button
-                                        onClick={() => {
-                                          console.log('🚀 CLIC WEBHOOK BUTTON - Delivery:', delivery.id);
-                                          setSelectedWebhookDelivery(delivery);
-                                          setShowWebhookModal(true);
-                                        }}
-                                        className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors duration-200 ml-2 border border-blue-200"
-                                        title="Envoyer facture via webhook"
-                                      >
-                                        <Send className="w-4 h-4" />
-                                        <span className="ml-1 text-xs">Send</span>
-                                      </button>
-                                    );
-                                  }
-                                  console.log('❌ PAS D\'ICÔNE WEBHOOK - Delivery:', delivery.id, { shouldShowWebhook, hasGreenCheck, hasWebhookUrl: !!hasWebhookUrl });
-                                  return null;
-                                })()}
+                                {delivery.group?.webhookUrl && (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedWebhookDelivery(delivery);
+                                      setShowWebhookModal(true);
+                                    }}
+                                    className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1"
+                                    title="Envoyer facture via webhook"
+                                  >
+                                    <Send className="w-4 h-4" />
+                                  </button>
+                                )}
                               </div>
                             ) : (
                               <button
