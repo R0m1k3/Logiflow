@@ -995,6 +995,17 @@ export default function BLReconciliation() {
                                   const hasWebhookUrl = delivery.group?.webhookUrl;
                                   const hasGreenCheck = verification?.exists === true;
                                   
+                                  // DEBUG PRODUCTION : Log pour comprendre pourquoi webhook n'apparaît pas
+                                  console.log('🔍 WEBHOOK DEBUG - Delivery:', delivery.id, {
+                                    supplier: delivery.supplier?.name,
+                                    groupName: delivery.group?.name,
+                                    hasWebhookUrl,
+                                    webhookUrl: delivery.group?.webhookUrl,
+                                    hasGreenCheck,
+                                    verification: verification,
+                                    shouldShowWebhook: !hasGreenCheck && hasWebhookUrl
+                                  });
+                                  
                                   // Afficher l'icône webhook seulement si pas de coche verte ET webhook configuré
                                   if (!hasGreenCheck && hasWebhookUrl) {
                                     return (
