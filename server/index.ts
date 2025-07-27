@@ -5,12 +5,9 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// FORCE PRODUCTION MODE FOR TESTING WEBHOOK ICONS
-const FORCE_PRODUCTION_MODE = true; // Temporaire pour test webhook production
-
 // Auto-detect environment for production deployment
-if (FORCE_PRODUCTION_MODE || process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app') {
-  console.log('🚀 PRODUCTION MODE DETECTED (forced for webhook test)');
+if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app') {
+  console.log('🚀 PRODUCTION MODE DETECTED');
   process.env.NODE_ENV = 'production';
   process.env.STORAGE_MODE = 'production';
 } else {

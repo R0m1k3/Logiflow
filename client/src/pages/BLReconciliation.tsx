@@ -988,31 +988,15 @@ export default function BLReconciliation() {
                                   <span className="truncate max-w-28">{delivery.invoiceReference}</span>
                                 </div>
                                 
-                                {/* ICÔNE WEBHOOK - Affiché seulement pour factures non trouvées avec webhook configuré */}
+                                {/* ICÔNE WEBHOOK - Affiché pour toutes les lignes avec webhook configuré */}
                                 {(() => {
                                   const hasWebhookUrl = !!(delivery.group?.webhookUrl);
-                                  const verification = invoiceVerifications[delivery.id.toString()];
-                                  const hasRedX = verification && verification.exists === false;
                                   
-                                  // Debug temporaire pour vérifier la logique
-                                  if (delivery.id === 122) {
-                                    console.log(`🔍 DEBUG LIVRAISON 122:`, {
-                                      hasWebhookUrl,
-                                      webhookUrl: delivery.group?.webhookUrl,
-                                      verification,
-                                      hasRedX,
-                                      shouldShow: hasWebhookUrl && hasRedX,
-                                      invoiceRef: delivery.invoiceReference
-                                    });
-                                  }
-                                  
-                                  // Afficher l'icône webhook seulement si : webhook configuré ET facture non trouvée (X rouge)
-                                  if (hasWebhookUrl && hasRedX) {
-                                    console.log(`🚀 RENDERING WEBHOOK BUTTON for delivery ${delivery.id}`);
+                                  // Afficher l'icône webhook si le magasin a une URL webhook configurée
+                                  if (hasWebhookUrl) {
                                     return (
                                       <button
                                         onClick={() => {
-                                          console.log(`🔥 WEBHOOK BUTTON CLICKED for delivery ${delivery.id}`);
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
@@ -1022,10 +1006,6 @@ export default function BLReconciliation() {
                                         <Send className="w-4 h-4" />
                                       </button>
                                     );
-                                  } else {
-                                    if (delivery.id === 122) {
-                                      console.log(`❌ WEBHOOK BUTTON NOT SHOWN for delivery ${delivery.id} - hasWebhookUrl: ${hasWebhookUrl}, hasRedX: ${hasRedX}`);
-                                    }
                                   }
                                   
                                   return null;
