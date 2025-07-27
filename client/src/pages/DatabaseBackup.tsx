@@ -47,7 +47,7 @@ function SchedulerCard() {
   // Mutation pour démarrer/arrêter le scheduler
   const toggleSchedulerMutation = useMutation({
     mutationFn: (action: 'start' | 'stop') => 
-      apiRequest(`/api/scheduler/${action}`, { method: 'POST' }),
+      apiRequest(`/api/scheduler/${action}`, 'POST'),
     onSuccess: (data, action) => {
       toast({
         title: "Succès",
@@ -68,7 +68,7 @@ function SchedulerCard() {
 
   // Mutation pour déclencher une sauvegarde immédiate
   const manualBackupMutation = useMutation({
-    mutationFn: () => apiRequest('/api/scheduler/backup-now', { method: 'POST' }),
+    mutationFn: () => apiRequest('/api/scheduler/backup-now', 'POST'),
     onSuccess: (data) => {
       toast({
         title: "Sauvegarde créée",
@@ -162,7 +162,7 @@ function BLReconciliationCard() {
   // Mutation pour démarrer/arrêter le service
   const toggleBLServiceMutation = useMutation({
     mutationFn: (action: 'start' | 'stop') => 
-      apiRequest(`/api/bl-reconciliation/${action}`, { method: 'POST' }),
+      apiRequest(`/api/bl-reconciliation/${action}`, 'POST'),
     onSuccess: (data, action) => {
       toast({
         title: "Succès",
@@ -183,7 +183,7 @@ function BLReconciliationCard() {
 
   // Mutation pour déclencher un rapprochement manuel
   const manualReconciliationMutation = useMutation({
-    mutationFn: () => apiRequest('/api/bl-reconciliation/trigger', { method: 'POST' }),
+    mutationFn: () => apiRequest('/api/bl-reconciliation/trigger', 'POST'),
     onSuccess: (data) => {
       const result = data.result;
       toast({
