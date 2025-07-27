@@ -123,12 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - ICÔNES WEBHOOK UNIVERSELLES : Affichage pour Toutes Factures Non Vérifiées COMPLÉTÉ
-✓ ICÔNES WEBHOOK UNIVERSELLES - L'icône webhook s'affiche maintenant pour TOUTES les factures avec référence, pas seulement celles vérifiées comme "non trouvées"
-✓ LOGIQUE D'AFFICHAGE AMÉLIORÉE - Icône webhook visible pour les factures non encore vérifiées ET pour celles marquées comme non trouvées dans NocoDB
-✓ ACCÈS WEBHOOK COMPLET - Les utilisateurs peuvent maintenant utiliser le webhook sur toutes les lignes de factures nécessitant une vérification manuelle
-✓ INTERFACE COHÉRENTE - Icône webhook positionnée de manière uniforme à côté des statuts de vérification (CheckCircle vert, X rouge, ou seule si pas encore vérifiée)
-✓ CONFIGURATION WEBHOOK OPÉRATIONNELLE - Champ URL webhook dans les groupes/magasins entièrement fonctionnel et intégré au processus de rapprochement
+### 2025-07-27 - SYSTÈME WEBHOOK FINALISÉ : Interface Utilisateur Optimisée et Modal Simplifié COMPLÉTÉ
+✓ ALIGNEMENT ICÔNES WEBHOOK CORRIGÉ - Icônes webhook maintenant alignées à droite des champs références factures avec justify-between pour un affichage cohérent
+✓ ERREUR OUVERTURE MODAL RÉSOLUE - Ajout de setSelectedWebhookDelivery(delivery) avant ouverture du modal pour éliminer les erreurs d'état
+✓ SÉLECTEUR FOURNISSEUR SUPPRIMÉ DU MODAL - Interface webhook simplifiée sans sélecteur car nom fournisseur déjà visible sur la ligne
+✓ SCHÉMA WEBHOOK OPTIMISÉ - Schema Zod modifié pour ne plus exiger la sélection manuelle du fournisseur
+✓ INFORMATIONS CONTEXTUELLES AJOUTÉES - Encadré informatif dans modal webhook affichant automatiquement fournisseur et référence facture de la livraison
+✓ MUTATION WEBHOOK AUTOMATISÉE - sendWebhookMutation utilise maintenant automatiquement selectedWebhookDelivery.supplier.name au lieu de saisie manuelle
+✓ GESTION D'ÉTAT AMÉLIORÉE - Nettoyage automatique de selectedWebhookDelivery à la fermeture du modal pour prévenir les conflits d'état
+✓ ICÔNES WEBHOOK UNIVERSELLES - Affichage sur TOUTES les lignes nécessitant vérification : factures non trouvées (X rouge), erreurs configuration (triangle orange), et factures non encore vérifiées
+✓ EXPÉRIENCE UTILISATEUR OPTIMISÉE - Workflow webhook simplifié : clic icône → modal avec infos pré-remplies → sélection type + fichier PDF → envoi
 
 ### 2025-07-27 - RÉSOLUTION FINALE BL RECONCILIATION : Service Adaptatif et Gestion Erreurs PostgreSQL COMPLÉTÉE (PRÉCÉDENT)
 ✓ PROBLÈME ROOT CAUSE RÉSOLU - blReconciliationService.ts utilisait mauvais import storage (./storage vs environnement)

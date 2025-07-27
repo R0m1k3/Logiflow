@@ -37,7 +37,6 @@ const reconciliationSchema = z.object({
 });
 
 const webhookSchema = z.object({
-  supplier: z.string().min(1, "Veuillez sélectionner un fournisseur"),
   type: z.enum(["Facture", "Avoir"], {
     required_error: "Veuillez sélectionner un type",
   }),
@@ -93,6 +92,7 @@ export default function BLReconciliation() {
   
   // États pour le modal webhook
   const [showWebhookModal, setShowWebhookModal] = useState(false);
+  const [selectedWebhookDelivery, setSelectedWebhookDelivery] = useState<any>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   
   // Form pour webhook
@@ -532,8 +532,12 @@ export default function BLReconciliation() {
   // Mutation pour envoyer le webhook
   const sendWebhookMutation = useMutation({
     mutationFn: async (data: WebhookForm) => {
+      if (!selectedWebhookDelivery?.supplier?.name) {
+        throw new Error("Aucun fournisseur sélectionné");
+      }
+      
       const formData = new FormData();
-      formData.append('supplier', data.supplier);
+      formData.append('supplier', selectedWebhookDelivery.supplier.name);
       formData.append('type', data.type);
       formData.append('pdfFile', data.pdfFile[0]);
       
@@ -545,6 +549,7 @@ export default function BLReconciliation() {
         description: "Webhook envoyé avec succès",
       });
       setShowWebhookModal(false);
+      setSelectedWebhookDelivery(null);
       webhookForm.reset();
     },
     onError: (error: any) => {
@@ -912,9 +917,9 @@ export default function BLReconciliation() {
                         <td className="px-3 py-2 text-sm">
                           <div className="text-gray-900">
                             {delivery.invoiceReference ? (
-                              <div className="flex items-center space-x-1">
+                              <div className="flex items-center justify-between">
                                 <span className="truncate max-w-28">{delivery.invoiceReference}</span>
-                                {/* NOUVEAU CODE - Affichage coche basé sur existence dans NocoDB */}
+                                {/* NOUVEAU CODE - Affichage icônes alignées à droite */}
                                 {(() => {
                                   const verificationKey = delivery.id.toString();
                                   const verification = invoiceVerifications[verificationKey];
@@ -929,7 +934,7 @@ export default function BLReconciliation() {
                                       );
                                     } else if (verification.error) {
                                       return (
-                                        <div className="flex items-center ml-1 space-x-1">
+                                        <div className="flex items-center space-x-1">
                                           <div title={`Erreur de configuration: ${verification.error}`}>
                                             <AlertTriangle className="w-4 h-4 text-orange-500" />
                                           </div>
@@ -943,6 +948,7 @@ export default function BLReconciliation() {
                                                 });
                                                 return;
                                               }
+                                              setSelectedWebhookDelivery(delivery);
                                               setShowWebhookModal(true);
                                             }}
                                             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
@@ -954,7 +960,7 @@ export default function BLReconciliation() {
                                       );
                                     } else {
                                       return (
-                                        <div className="flex items-center ml-1 space-x-1">
+                                        <div className="flex items-center space-x-1">
                                           <div title="Facture non trouvée dans NocoDB">
                                             <X className="w-4 h-4 text-red-600" />
                                           </div>
@@ -968,6 +974,7 @@ export default function BLReconciliation() {
                                                 });
                                                 return;
                                               }
+                                              setSelectedWebhookDelivery(delivery);
                                               setShowWebhookModal(true);
                                             }}
                                             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
@@ -979,16 +986,27 @@ export default function BLReconciliation() {
                                       );
                                     }
                                   } else {
-                                    // Pas de vérification encore effectuée - afficher l'icône webhook si disponible
-                                    return delivery.group?.webhookUrl ? (
+                                    // Pas de vérification encore effectuée - afficher l'icône webhook
+                                    return (
                                       <button
-                                        onClick={() => setShowWebhookModal(true)}
-                                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200 ml-1"
-                                        title="Envoyer via webhook"
+                                        onClick={() => {
+                                          if (!delivery.group?.webhookUrl) {
+                                            toast({
+                                              title: "Configuration manquante",
+                                              description: "Aucune URL webhook configurée pour ce magasin. Configurez-la dans Gestion > Magasins.",
+                                              variant: "destructive",
+                                            });
+                                            return;
+                                          }
+                                          setSelectedWebhookDelivery(delivery);
+                                          setShowWebhookModal(true);
+                                        }}
+                                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                                        title={delivery.group?.webhookUrl ? "Envoyer via webhook" : "Configuration webhook manquante"}
                                       >
                                         <Webhook className="w-4 h-4" />
                                       </button>
-                                    ) : null;
+                                    );
                                   }
                                 })()}
                                 {!invoiceVerifications[delivery.id.toString()] && !delivery.groupId && (
@@ -1328,31 +1346,17 @@ export default function BLReconciliation() {
               onSubmit={webhookForm.handleSubmit((data) => sendWebhookMutation.mutate(data))}
               className="space-y-4"
             >
-              {/* Sélecteur de fournisseur */}
-              <FormField
-                control={webhookForm.control}
-                name="supplier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fournisseur</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un fournisseur" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {suppliers.map((supplier: any) => (
-                          <SelectItem key={supplier.id} value={supplier.name}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Informations de la livraison */}
+              {selectedWebhookDelivery && (
+                <div className="bg-gray-50 rounded-lg p-3 space-y-1">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Fournisseur:</span> {selectedWebhookDelivery.supplier?.name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Référence facture:</span> {selectedWebhookDelivery.invoiceReference}
+                  </p>
+                </div>
+              )}
 
               {/* Sélecteur de type */}
               <FormField
