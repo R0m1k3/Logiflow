@@ -99,7 +99,6 @@ export default function BLReconciliation() {
   const webhookForm = useForm<WebhookForm>({
     resolver: zodResolver(webhookSchema),
     defaultValues: {
-      supplier: "",
       type: "Facture",
       pdfFile: undefined,
     },
@@ -118,7 +117,7 @@ export default function BLReconciliation() {
       const params = new URLSearchParams({
         // Remove withBL filter - show all delivered deliveries regardless of BL status
       });
-      if (selectedStoreId && user?.role === 'admin') {
+      if (selectedStoreId && (user as any)?.role === 'admin') {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -296,6 +295,22 @@ export default function BLReconciliation() {
     }
   }, [deliveriesWithBL]);
 
+  // Re-vérifier les factures lors du changement de magasin pour maintenir les icônes webhook
+  useEffect(() => {
+    console.log('🔄 Store changed, clearing invoice verifications for fresh webhook icons');
+    setInvoiceVerifications({}); // Clear old verifications
+    
+    // Re-verify after short delay to ensure deliveries are loaded
+    const timer = setTimeout(() => {
+      if (deliveriesWithBL && deliveriesWithBL.length > 0) {
+        console.log('🔄 Re-verifying invoices after store change');
+        verifyAllInvoices();
+      }
+    }, 200);
+    
+    return () => clearTimeout(timer);
+  }, [selectedStoreId]);
+
   const form = useForm<ReconciliationForm>({
     resolver: zodResolver(reconciliationSchema),
     defaultValues: {
@@ -424,7 +439,7 @@ export default function BLReconciliation() {
             }
 
             // Combiner les résultats
-            const result = verificationResults[variables.id] || {};
+            const result = verificationResults[variables.id.toString()] || {};
             const finalResult = {
               ...result,
               isUsed: usageResult?.isUsed || false,
@@ -433,7 +448,7 @@ export default function BLReconciliation() {
 
             setInvoiceVerifications(prev => ({ 
               ...prev, 
-              [variables.id]: finalResult
+              [variables.id.toString()]: finalResult
             }));
             
             // Notification du résultat
@@ -644,10 +659,10 @@ export default function BLReconciliation() {
     if (selectedDelivery) {
       updateReconciliationMutation.mutate({
         id: selectedDelivery.id,
-        blNumber: data.blNumber,
-        blAmount: data.blAmount,
-        invoiceReference: data.invoiceReference,
-        invoiceAmount: data.invoiceAmount,
+        blNumber: data.blNumber || "",
+        blAmount: data.blAmount || "",
+        invoiceReference: data.invoiceReference || "",
+        invoiceAmount: data.invoiceAmount || "",
       });
     }
   };
@@ -763,9 +778,9 @@ export default function BLReconciliation() {
               <PopoverContent className="w-auto p-0" align="start">
                 <DayPicker
                   mode="single"
-                  selected={selectedDate}
+                  selected={selectedDate || undefined}
                   onSelect={(date) => {
-                    setSelectedDate(date);
+                    setSelectedDate(date || null);
                     setIsDatePickerOpen(false);
                   }}
                   locale={fr}
@@ -1071,7 +1086,7 @@ export default function BLReconciliation() {
                               )}
                             </>
                           )}
-                          {user?.role === 'admin' && (
+                          {(user as any)?.role === 'admin' && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -1195,11 +1210,17 @@ export default function BLReconciliation() {
                             {!isVerifyingCurrentInvoice && field.value && field.value.trim() && selectedDelivery && invoiceVerifications[selectedDelivery.id.toString()] && (
                               <div className="flex items-center space-x-1">
                                 {invoiceVerifications[selectedDelivery.id.toString()].isUsed ? (
-                                  <AlertTriangle className="w-4 h-4 text-red-600" title={`Facture déjà utilisée par BL ${invoiceVerifications[selectedDelivery.id.toString()].usedBy?.blNumber}`} />
+                                  <div title={`Facture déjà utilisée par BL ${invoiceVerifications[selectedDelivery.id.toString()].usedBy?.blNumber}`}>
+                                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                                  </div>
                                 ) : invoiceVerifications[selectedDelivery.id.toString()].exists ? (
-                                  <CheckCircle className="w-4 h-4 text-green-500" title="Facture trouvée dans NocoDB" />
+                                  <div title="Facture trouvée dans NocoDB">
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                  </div>
                                 ) : (
-                                  <X className="w-4 h-4 text-red-500" title="Facture non trouvée dans NocoDB" />
+                                  <div title="Facture non trouvée dans NocoDB">
+                                    <X className="w-4 h-4 text-red-500" />
+                                  </div>
                                 )}
                               </div>
                             )}
