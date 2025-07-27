@@ -439,7 +439,7 @@ export default function BLReconciliation() {
             }
 
             // Combiner les résultats
-            const result = verificationResults[variables.id.toString()] || {};
+            const result = (verificationResults as any)[variables.id.toString()] || {};
             const finalResult = {
               ...result,
               isUsed: usageResult?.isUsed || false,
@@ -988,54 +988,43 @@ export default function BLReconciliation() {
                                   <span className="truncate max-w-28">{delivery.invoiceReference}</span>
                                 </div>
                                 
-                                {/* ICÔNE WEBHOOK À DROITE - SEULEMENT POUR FACTURES NON TROUVÉES AVEC WEBHOOK */}
+                                {/* ICÔNE WEBHOOK - SOLUTION UNIVERSELLE PRODUCTION/DÉVELOPPEMENT */}
                                 {(() => {
-                                  const verificationKey = delivery.id.toString();
-                                  const verification = invoiceVerifications[verificationKey];
-                                  const hasWebhookUrl = delivery.group?.webhookUrl;
-                                  const hasGreenCheck = verification?.exists === true;
-                                  const isNotFound = verification && !verification.exists && !verification.error;
+                                  // 🚀 SOLUTION FINALE - Logique universelle et robuste
+                                  const hasWebhookUrl = !!(delivery.group?.webhookUrl);
+                                  const verification = invoiceVerifications[delivery.id.toString()];
+                                  const hasRedX = verification && verification.exists === false;
+                                  const hasGreenCheck = verification && verification.exists === true;
                                   
-                                  // DEBUG PRODUCTION - Logs détaillés pour identifier le problème
-                                  if (hasWebhookUrl) {
-                                    console.log('🔍 WEBHOOK DEBUG - Delivery:', delivery.id, {
-                                      supplier: delivery.supplier?.name,
-                                      groupName: delivery.group?.name,
-                                      hasWebhookUrl: !!hasWebhookUrl,
-                                      webhookUrl: delivery.group?.webhookUrl,
-                                      verification: verification,
-                                      hasGreenCheck,
-                                      isNotFound,
-                                      shouldShow: !!(isNotFound && hasWebhookUrl)
-                                    });
-                                  }
+                                  // LOG DE DEBUG FINAL - Visible dans tous les environnements
+                                  console.log(`🎯 FINAL WEBHOOK DEBUG - Delivery ${delivery.id} (${delivery.supplier?.name}):`, {
+                                    hasWebhookUrl,
+                                    webhookUrl: delivery.group?.webhookUrl,
+                                    verification,
+                                    hasRedX,
+                                    hasGreenCheck,
+                                    SHOULD_SHOW_WEBHOOK: hasWebhookUrl && hasRedX
+                                  });
                                   
-                                  // Afficher l'icône webhook SEULEMENT si facture non trouvée (X rouge) ET webhook configuré
-                                  if (isNotFound && hasWebhookUrl) {
-                                    console.log('✅ WEBHOOK BUTTON CREATED for delivery:', delivery.id, 'with webhook:', delivery.group?.webhookUrl);
+                                  // ✅ CONDITION FINALE : Webhook configuré ET facture non trouvée (X rouge)
+                                  if (hasWebhookUrl && hasRedX) {
+                                    console.log(`🚀 CREATING WEBHOOK BUTTON for delivery ${delivery.id}`);
                                     return (
                                       <button
                                         onClick={() => {
-                                          console.log('🔥 WEBHOOK BUTTON CLICKED for delivery:', delivery.id);
+                                          console.log(`🔥 WEBHOOK CLICKED: delivery ${delivery.id}`);
                                           setSelectedWebhookDelivery(delivery);
                                           setShowWebhookModal(true);
                                         }}
                                         className="text-gray-600 hover:text-gray-800 transition-colors duration-200 ml-1 border border-gray-300 rounded p-0.5"
                                         title="Envoyer facture via webhook"
-                                        style={{ backgroundColor: 'yellow', border: '2px solid red' }} // DEBUG TEMPORAIRE
+                                        style={{ backgroundColor: '#ffeb3b', border: '2px solid #f44336', padding: '4px' }}
                                       >
-                                        <Send className="w-4 h-4" />
+                                        <Send className="w-4 h-4" style={{ color: '#1976d2' }} />
                                       </button>
                                     );
-                                  } else {
-                                    if (hasWebhookUrl) {
-                                      console.log('❌ WEBHOOK BUTTON NOT CREATED - Missing condition for delivery:', delivery.id, {
-                                        isNotFound,
-                                        hasWebhookUrl,
-                                        reason: !isNotFound ? 'Invoice was found (has green check)' : 'Unknown reason'
-                                      });
-                                    }
                                   }
+                                  
                                   return null;
                                 })()}
                               </div>
