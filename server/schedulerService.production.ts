@@ -10,19 +10,16 @@ export class SchedulerService {
   private blReconciliationTask: cron.ScheduledTask | null = null;
 
   private constructor() {
-    // Utiliser le pool existant de db.production.ts
-    try {
-      const { pool } = require('./db.production.ts');
-      this.backupService = new BackupService(pool);
-    } catch (error) {
-      console.error('Failed to initialize BackupService:', error);
-      // Créer un pool de secours si nécessaire
-      const fallbackPool = new Pool({ 
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
-      });
-      this.backupService = new BackupService(fallbackPool);
-    }
+    // Créer un pool directement
+    const pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false },
+      max: 5,
+      min: 1,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 20000
+    });
+    this.backupService = new BackupService(pool);
   }
 
   public static getInstance(): SchedulerService {

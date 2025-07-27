@@ -3047,6 +3047,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== SCHEDULER ROUTES =====
+  
+  // Status du service de sauvegarde automatique
+  app.get("/api/scheduler/status", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      const status = scheduler.getDailyBackupStatus();
+      
+      res.json(status);
+    } catch (error) {
+      console.error("❌ Error getting scheduler status:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de la récupération du statut du scheduler",
+        error: error.message 
+      });
+    }
+  });
+
+  // Démarrer la sauvegarde automatique
+  app.post("/api/scheduler/start", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      scheduler.startDailyBackup();
+      
+      res.json({ 
+        message: "Sauvegarde automatique activée avec succès",
+        status: scheduler.getDailyBackupStatus()
+      });
+    } catch (error) {
+      console.error("❌ Error starting scheduler:", error);
+      res.status(500).json({ 
+        message: "Erreur lors du démarrage du scheduler",
+        error: error.message 
+      });
+    }
+  });
+
+  // Arrêter la sauvegarde automatique
+  app.post("/api/scheduler/stop", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      scheduler.stopDailyBackup();
+      
+      res.json({ 
+        message: "Sauvegarde automatique désactivée avec succès",
+        status: scheduler.getDailyBackupStatus()
+      });
+    } catch (error) {
+      console.error("❌ Error stopping scheduler:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de l'arrêt du scheduler",
+        error: error.message 
+      });
+    }
+  });
+
   // ===== BL RECONCILIATION ROUTES =====
   
   // Status du service de rapprochement BL
@@ -3133,6 +3201,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Error triggering manual BL reconciliation:", error);
       res.status(500).json({ 
         message: "Erreur lors du rapprochement BL manuel",
+        error: error.message 
+      });
+    }
+  });
+
+  // Déclencher une sauvegarde manuelle immédiate
+  app.post("/api/scheduler/backup-now", async (req, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      if (!isAdmin) return;
+
+      const { SchedulerService } = await import('./schedulerService.production.js');
+      const scheduler = SchedulerService.getInstance();
+      const backupId = await scheduler.triggerManualBackup();
+      
+      res.json({ 
+        message: "Sauvegarde manuelle créée avec succès",
+        backupId: backupId
+      });
+    } catch (error) {
+      console.error("❌ Error creating manual backup:", error);
+      res.status(500).json({ 
+        message: "Erreur lors de la création de la sauvegarde manuelle",
         error: error.message 
       });
     }
