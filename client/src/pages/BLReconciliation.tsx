@@ -994,6 +994,18 @@ export default function BLReconciliation() {
                                   const verification = invoiceVerifications[delivery.id.toString()];
                                   const hasRedX = verification && verification.exists === false;
                                   
+                                  // Debug temporaire pour vérifier la logique
+                                  if (delivery.id === 122) {
+                                    console.log(`🔍 DEBUG LIVRAISON 122:`, {
+                                      hasWebhookUrl,
+                                      webhookUrl: delivery.group?.webhookUrl,
+                                      verification,
+                                      hasRedX,
+                                      shouldShow: hasWebhookUrl && hasRedX,
+                                      invoiceRef: delivery.invoiceReference
+                                    });
+                                  }
+                                  
                                   // Afficher l'icône webhook seulement si : webhook configuré ET facture non trouvée (X rouge)
                                   if (hasWebhookUrl && hasRedX) {
                                     return (
