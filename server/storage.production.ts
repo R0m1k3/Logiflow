@@ -504,18 +504,50 @@ export class DatabaseStorage implements IStorage {
   async getGroups(): Promise<Group[]> {
     console.log('🏪 PRODUCTION getGroups called');
     
-    const result = await pool.query(`
-      SELECT *, 
-             nocodb_config_id as "nocodbConfigId", 
-             nocodb_table_id as "nocodbTableId",
-             nocodb_table_name as "nocodbTableName",
-             invoice_column_name as "invoiceColumnName",
-             nocodb_bl_column_name as "nocodbBlColumnName",
-             nocodb_amount_column_name as "nocodbAmountColumnName",
-             nocodb_supplier_column_name as "nocodbSupplierColumnName"
-      FROM groups 
-      ORDER BY name
-    `);
+    // Check if webhook_url column exists
+    let hasWebhookColumn = false;
+    try {
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'groups' AND column_name = 'webhook_url'
+      `);
+      hasWebhookColumn = columnCheck.rows.length > 0;
+      console.log('🔍 PRODUCTION getGroups - webhook_url column exists:', hasWebhookColumn);
+    } catch (error) {
+      console.warn('⚠️  Could not check webhook_url column existence in getGroups:', error);
+    }
+    
+    let result;
+    if (hasWebhookColumn) {
+      result = await pool.query(`
+        SELECT *, 
+               nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName",
+               webhook_url as "webhookUrl"
+        FROM groups 
+        ORDER BY name
+      `);
+    } else {
+      result = await pool.query(`
+        SELECT *, 
+               nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName",
+               '' as "webhookUrl"
+        FROM groups 
+        ORDER BY name
+      `);
+    }
     
     console.log('🏪 PRODUCTION getGroups result:', { count: result.rows.length, sample: result.rows[0] });
     return result.rows;
@@ -524,18 +556,50 @@ export class DatabaseStorage implements IStorage {
   async getGroup(id: number): Promise<Group | undefined> {
     console.log('🏪 PRODUCTION getGroup called with id:', id);
     
-    const result = await pool.query(`
-      SELECT *, 
-             nocodb_config_id as "nocodbConfigId", 
-             nocodb_table_id as "nocodbTableId",
-             nocodb_table_name as "nocodbTableName",
-             invoice_column_name as "invoiceColumnName",
-             nocodb_bl_column_name as "nocodbBlColumnName",
-             nocodb_amount_column_name as "nocodbAmountColumnName",
-             nocodb_supplier_column_name as "nocodbSupplierColumnName"
-      FROM groups 
-      WHERE id = $1
-    `, [id]);
+    // Check if webhook_url column exists
+    let hasWebhookColumn = false;
+    try {
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'groups' AND column_name = 'webhook_url'
+      `);
+      hasWebhookColumn = columnCheck.rows.length > 0;
+      console.log('🔍 PRODUCTION getGroup - webhook_url column exists:', hasWebhookColumn);
+    } catch (error) {
+      console.warn('⚠️  Could not check webhook_url column existence in getGroup:', error);
+    }
+    
+    let result;
+    if (hasWebhookColumn) {
+      result = await pool.query(`
+        SELECT *, 
+               nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName",
+               webhook_url as "webhookUrl"
+        FROM groups 
+        WHERE id = $1
+      `, [id]);
+    } else {
+      result = await pool.query(`
+        SELECT *, 
+               nocodb_config_id as "nocodbConfigId", 
+               nocodb_table_id as "nocodbTableId",
+               nocodb_table_name as "nocodbTableName",
+               invoice_column_name as "invoiceColumnName",
+               nocodb_bl_column_name as "nocodbBlColumnName",
+               nocodb_amount_column_name as "nocodbAmountColumnName",
+               nocodb_supplier_column_name as "nocodbSupplierColumnName",
+               '' as "webhookUrl"
+        FROM groups 
+        WHERE id = $1
+      `, [id]);
+    }
     
     const group = result.rows[0];
     console.log('🏪 PRODUCTION getGroup result:', { id, group });
@@ -545,48 +609,105 @@ export class DatabaseStorage implements IStorage {
   async createGroup(group: InsertGroup): Promise<Group> {
     console.log('🏪 PRODUCTION createGroup called with:', group);
     
+    // Check if webhook_url column exists
+    let hasWebhookColumn = false;
     try {
-      const result = await pool.query(`
-        INSERT INTO groups (
-          name, 
-          color, 
-          nocodb_config_id, 
-          nocodb_table_id, 
-          nocodb_table_name, 
-          invoice_column_name,
-          nocodb_bl_column_name,
-          nocodb_amount_column_name,
-          nocodb_supplier_column_name
-        ) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-        RETURNING *, 
-                 nocodb_config_id as "nocodbConfigId", 
-                 nocodb_table_id as "nocodbTableId",
-                 nocodb_table_name as "nocodbTableName",
-                 invoice_column_name as "invoiceColumnName",
-                 nocodb_bl_column_name as "nocodbBlColumnName",
-                 nocodb_amount_column_name as "nocodbAmountColumnName",
-                 nocodb_supplier_column_name as "nocodbSupplierColumnName"
-      `, [
-        group.name, 
-        group.color, 
-        group.nocodbConfigId || null,
-        group.nocodbTableId || null,
-        group.nocodbTableName || null,
-        group.invoiceColumnName || "Ref Facture",
-        group.nocodbBlColumnName || "Numéro de BL",
-        group.nocodbAmountColumnName || "Montant HT",
-        group.nocodbSupplierColumnName || "Fournisseur"
-      ]);
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'groups' AND column_name = 'webhook_url'
+      `);
+      hasWebhookColumn = columnCheck.rows.length > 0;
+      console.log('🔍 PRODUCTION createGroup - webhook_url column exists:', hasWebhookColumn);
+    } catch (error) {
+      console.warn('⚠️  Could not check webhook_url column existence in createGroup:', error);
+    }
+    
+    try {
+      let result;
+      
+      if (hasWebhookColumn) {
+        // Full insert with webhook support
+        result = await pool.query(`
+          INSERT INTO groups (
+            name, 
+            color, 
+            nocodb_config_id, 
+            nocodb_table_id, 
+            nocodb_table_name, 
+            invoice_column_name,
+            nocodb_bl_column_name,
+            nocodb_amount_column_name,
+            nocodb_supplier_column_name,
+            webhook_url
+          ) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+          RETURNING *, 
+                   nocodb_config_id as "nocodbConfigId", 
+                   nocodb_table_id as "nocodbTableId",
+                   nocodb_table_name as "nocodbTableName",
+                   invoice_column_name as "invoiceColumnName",
+                   nocodb_bl_column_name as "nocodbBlColumnName",
+                   nocodb_amount_column_name as "nocodbAmountColumnName",
+                   nocodb_supplier_column_name as "nocodbSupplierColumnName",
+                   webhook_url as "webhookUrl"
+        `, [
+          group.name, 
+          group.color, 
+          group.nocodbConfigId || null,
+          group.nocodbTableId || null,
+          group.nocodbTableName || null,
+          group.invoiceColumnName || "Ref Facture",
+          group.nocodbBlColumnName || "Numéro de BL",
+          group.nocodbAmountColumnName || "Montant HT",
+          group.nocodbSupplierColumnName || "Fournisseur",
+          group.webhookUrl || ""
+        ]);
+      } else {
+        // Insert without webhook column (for older databases)
+        result = await pool.query(`
+          INSERT INTO groups (
+            name, 
+            color, 
+            nocodb_config_id, 
+            nocodb_table_id, 
+            nocodb_table_name, 
+            invoice_column_name,
+            nocodb_bl_column_name,
+            nocodb_amount_column_name,
+            nocodb_supplier_column_name
+          ) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+          RETURNING *, 
+                   nocodb_config_id as "nocodbConfigId", 
+                   nocodb_table_id as "nocodbTableId",
+                   nocodb_table_name as "nocodbTableName",
+                   invoice_column_name as "invoiceColumnName",
+                   nocodb_bl_column_name as "nocodbBlColumnName",
+                   nocodb_amount_column_name as "nocodbAmountColumnName",
+                   nocodb_supplier_column_name as "nocodbSupplierColumnName",
+                   '' as "webhookUrl"
+        `, [
+          group.name, 
+          group.color, 
+          group.nocodbConfigId || null,
+          group.nocodbTableId || null,
+          group.nocodbTableName || null,
+          group.invoiceColumnName || "Ref Facture",
+          group.nocodbBlColumnName || "Numéro de BL",
+          group.nocodbAmountColumnName || "Montant HT",
+          group.nocodbSupplierColumnName || "Fournisseur"
+        ]);
+      }
       
       console.log('✅ Group created successfully:', result.rows[0]);
       return result.rows[0];
     } catch (error: any) {
       console.error('❌ Failed to create group:', error);
       
-      // Fallback avec requête simplifiée si colonnes manquantes
+      // Final fallback with minimal fields
       if (error.code === '42703') {
-        console.log('🔧 Fallback: Using simplified createGroup query without NocoDB BL columns');
+        console.log('🔧 Final fallback: Using basic createGroup query');
         const result = await pool.query(`
           INSERT INTO groups (name, color) 
           VALUES ($1, $2) 
@@ -594,13 +715,14 @@ export class DatabaseStorage implements IStorage {
                    'Ref Facture' as "invoiceColumnName",
                    'Numéro de BL' as "nocodbBlColumnName",
                    'Montant HT' as "nocodbAmountColumnName",
-                   'Fournisseur' as "nocodbSupplierColumnName"
+                   'Fournisseur' as "nocodbSupplierColumnName",
+                   '' as "webhookUrl"
         `, [
           group.name, 
           group.color
         ]);
         
-        console.log('✅ Group created with fallback:', result.rows[0]);
+        console.log('✅ Group created with final fallback:', result.rows[0]);
         return result.rows[0];
       }
       
