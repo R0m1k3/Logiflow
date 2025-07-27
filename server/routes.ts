@@ -3249,6 +3249,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route de test pour capturer les webhooks locaux
+  app.all('/webhook-test/:id', (req, res) => {
+    console.log('🧪 [WEBHOOK TEST] Request received:');
+    console.log('🧪 Method:', req.method);
+    console.log('🧪 URL:', req.url);
+    console.log('🧪 Headers:', req.headers);
+    console.log('🧪 Query params:', req.query);
+    console.log('🧪 Body:', req.body);
+    
+    if (req.method === 'GET') {
+      res.json({ 
+        success: true, 
+        message: 'GET webhook test endpoint received', 
+        data: { method: 'GET', query: req.query, headers: req.headers }
+      });
+    } else {
+      res.json({ 
+        success: true, 
+        message: 'POST webhook test endpoint received', 
+        data: { method: 'POST', body: req.body, headers: req.headers }
+      });
+    }
+  });
+
   // Route pour envoyer webhook facture/avoir avec upload multer
   const multer = await import('multer');
   const upload = multer.default({ 
@@ -3356,31 +3380,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log('🚀 Sending webhook to:', webhookUrl);
         
-        // Test en local avec URL de test  
-        const isTestUrl = webhookUrl.includes('webhook-test');
-        if (isTestUrl) {
-          console.log('🧪 Test webhook detected - simulating success');
-          // Simulation réussie pour les tests
-          const mockResponse = {
-            status: 200,
-            ok: true,
-            statusText: 'OK',
-            text: async () => 'Test webhook received successfully'
-          };
+        // Test local : envoyer vers notre endpoint de test
+        const isLocalTest = webhookUrl.includes('localhost') || webhookUrl.includes('127.0.0.1');
+        if (isLocalTest) {
+          console.log('🧪 Local test webhook detected - sending to local endpoint');
+          const localUrl = webhookUrl.replace('https://workflow.ffnancy.fr', 'http://localhost:3000');
           
-          console.log('📡 Mock webhook response status:', mockResponse.status);
-          console.log('📡 Mock webhook response:', await mockResponse.text());
+          // Essayer GET avec query params
+          const queryParams = new URLSearchParams({
+            supplier: webhookData.supplier,
+            type: webhookData.type,
+            filename: webhookData.filename,
+            size: webhookData.size.toString(),
+            timestamp: webhookData.timestamp,
+            userId: webhookData.user.id,
+            userRole: webhookData.user.role,
+            groupId: webhookData.user.groupId.toString()
+          });
+          
+          const testGetUrl = `${localUrl}?${queryParams.toString()}`;
+          console.log('🧪 Testing GET webhook:', testGetUrl);
+          
+          const fetch = (await import('node-fetch')).default;
+          const webhookResponse = await fetch(testGetUrl, {
+            method: 'GET',
+            timeout: 5000
+          });
+          
+          console.log('📡 Local test response status:', webhookResponse.status);
+          const responseText = await webhookResponse.text();
+          console.log('📡 Local test response:', responseText);
           
           res.json({ 
             success: true, 
-            message: "Test webhook sent successfully (simulated)",
+            message: "Local test webhook sent successfully",
             data: webhookData,
             webhookResponse: {
-              status: mockResponse.status,
-              statusText: mockResponse.statusText,
-              note: "Test webhook - data was properly formatted and would be sent to real endpoint"
+              status: webhookResponse.status,
+              statusText: webhookResponse.statusText,
+              body: responseText
             }
           });
+          return;
+        }
+        
+        // Test externe avec méthode GET
+        const isExternalTest = webhookUrl.includes('webhook-test');
+        if (isExternalTest) {
+          console.log('🌐 External test webhook detected - trying GET method');
+          
+          // Créer URL avec query params pour GET
+          const queryParams = new URLSearchParams({
+            supplier: webhookData.supplier,
+            type: webhookData.type,
+            filename: webhookData.filename,
+            size: webhookData.size.toString(),
+            timestamp: webhookData.timestamp,
+            userId: webhookData.user.id,
+            userRole: webhookData.user.role,
+            groupId: webhookData.user.groupId.toString()
+          });
+          
+          const getWebhookUrl = `${webhookUrl}?${queryParams.toString()}`;
+          console.log('🌐 Sending GET webhook to:', getWebhookUrl);
+          
+          const fetch = (await import('node-fetch')).default;
+          const webhookResponse = await fetch(getWebhookUrl, {
+            method: 'GET',
+            timeout: 10000
+          });
+          
+          console.log('📡 External webhook response status:', webhookResponse.status);
+          console.log('📡 External webhook response ok:', webhookResponse.ok);
+          
+          if (webhookResponse.ok) {
+            const responseText = await webhookResponse.text();
+            console.log('📡 External webhook response:', responseText);
+            
+            res.json({ 
+              success: true, 
+              message: "GET webhook sent successfully",
+              data: webhookData,
+              webhookResponse: {
+                status: webhookResponse.status,
+                statusText: webhookResponse.statusText,
+                body: responseText
+              }
+            });
+          } else {
+            console.log('❌ GET webhook failed with status:', webhookResponse.status);
+            res.status(500).json({ 
+              message: "GET webhook send failed",
+              error: `HTTP ${webhookResponse.status}: ${webhookResponse.statusText}`
+            });
+          }
           return;
         }
         
