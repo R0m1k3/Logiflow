@@ -3424,68 +3424,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return;
         }
         
-        // Test externe avec méthode GET
-        const isExternalTest = webhookUrl.includes('webhook-test');
-        if (isExternalTest) {
-          console.log('🌐 External test webhook detected - trying GET method');
-          
-          // Créer URL avec query params pour GET
-          const queryParams = new URLSearchParams({
-            supplier: webhookData.supplier,
-            type: webhookData.type,
-            filename: webhookData.filename,
-            size: webhookData.size.toString(),
-            timestamp: webhookData.timestamp,
-            userId: webhookData.user.id,
-            userRole: webhookData.user.role,
-            groupId: webhookData.user.groupId.toString()
-          });
-          
-          const getWebhookUrl = `${webhookUrl}?${queryParams.toString()}`;
-          console.log('🌐 Sending GET webhook to:', getWebhookUrl);
-          
-          const fetch = (await import('node-fetch')).default;
-          const webhookResponse = await fetch(getWebhookUrl, {
-            method: 'GET',
-            timeout: 10000
-          });
-          
-          console.log('📡 External webhook response status:', webhookResponse.status);
-          console.log('📡 External webhook response ok:', webhookResponse.ok);
-          
-          if (webhookResponse.ok) {
-            const responseText = await webhookResponse.text();
-            console.log('📡 External webhook response:', responseText);
-            
-            res.json({ 
-              success: true, 
-              message: "GET webhook sent successfully",
-              data: webhookData,
-              webhookResponse: {
-                status: webhookResponse.status,
-                statusText: webhookResponse.statusText,
-                body: responseText
-              }
-            });
-          } else {
-            console.log('❌ GET webhook failed with status:', webhookResponse.status);
-            res.status(500).json({ 
-              message: "GET webhook send failed",
-              error: `HTTP ${webhookResponse.status}: ${webhookResponse.statusText}`
-            });
-          }
-          return;
-        }
+        // Webhooks en méthode GET (métadonnées uniquement)
+        console.log('🌐 Sending GET webhook with metadata only (no file transmission)');
         
-        // Envoyer le webhook réel avec fetch
-        const fetch = (await import('node-fetch')).default;
-        const webhookResponse = await fetch(webhookUrl, {
-          method: 'POST',
-          body: webhookFormData,
-          headers: webhookFormData.getHeaders(),
-          timeout: 10000 // 10 secondes timeout
+        // Ajouter informations BL et référence facture depuis selectedWebhookDelivery
+        const blNumber = req.body.blNumber || 'N/A';
+        const invoiceReference = req.body.invoiceReference || 'N/A';
+        
+        // Créer URL avec query params pour GET
+        const queryParams = new URLSearchParams({
+          supplier: webhookData.supplier,
+          type: webhookData.type,
+          filename: webhookData.filename,
+          size: webhookData.size.toString(),
+          timestamp: webhookData.timestamp,
+          userId: webhookData.user.id,
+          userRole: webhookData.user.role,
+          groupId: webhookData.user.groupId.toString(),
+          blNumber: blNumber,
+          invoiceReference: invoiceReference,
+          // Note importante : fichier PDF non transmis en GET
+          fileTransmitted: 'false',
+          note: 'File_not_transmitted_via_GET_method'
         });
-
+        
+        const getWebhookUrl = `${webhookUrl}?${queryParams.toString()}`;
+        console.log('🌐 Sending GET webhook to:', getWebhookUrl);
+        console.log('⚠️  Note: PDF file NOT transmitted (GET method limitation)');
+        
+        const fetch = (await import('node-fetch')).default;
+        const webhookResponse = await fetch(getWebhookUrl, {
+          method: 'GET',
+          timeout: 10000
+        });
+        
         console.log('📡 Webhook response status:', webhookResponse.status);
         console.log('📡 Webhook response ok:', webhookResponse.ok);
         
@@ -3495,20 +3467,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           res.json({ 
             success: true, 
-            message: "Webhook sent successfully",
+            message: "GET webhook sent successfully (metadata only - file not transmitted)",
             data: webhookData,
             webhookResponse: {
               status: webhookResponse.status,
-              statusText: webhookResponse.statusText
-            }
+              statusText: webhookResponse.statusText,
+              body: responseText
+            },
+            warning: "PDF file was not transmitted due to GET method limitation"
           });
         } else {
-          console.log('❌ Webhook failed with status:', webhookResponse.status);
+          console.log('❌ GET webhook failed with status:', webhookResponse.status);
+          const errorText = await webhookResponse.text().catch(() => 'No response body');
+          console.log('❌ Error response:', errorText);
+          
           res.status(500).json({ 
-            message: "Webhook send failed",
-            error: `HTTP ${webhookResponse.status}: ${webhookResponse.statusText}`
+            message: `GET webhook send failed: HTTP ${webhookResponse.status}`,
+            error: webhookResponse.statusText,
+            errorBody: errorText
           });
         }
+        return;
         
       } catch (webhookError) {
         console.error('❌ Error sending webhook:', webhookError);

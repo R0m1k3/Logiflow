@@ -547,6 +547,9 @@ export default function BLReconciliation() {
       formData.append('supplier', selectedWebhookDelivery.supplier.name);
       formData.append('type', data.type);
       formData.append('pdfFile', data.pdfFile[0]);
+      // Ajouter informations BL et référence facture pour webhook GET
+      formData.append('blNumber', selectedWebhookDelivery.blNumber || 'N/A');
+      formData.append('invoiceReference', selectedWebhookDelivery.invoiceReference || 'N/A');
       
       console.log('🚀 FormData contents:');
       for (let pair of formData.entries()) {
