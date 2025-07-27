@@ -9,12 +9,12 @@ console.log('🔍 DIAGNOSTIC - NODE_ENV:', process.env.NODE_ENV);
 console.log('🔍 DIAGNOSTIC - STORAGE_MODE:', process.env.STORAGE_MODE);
 console.log('🔍 DIAGNOSTIC - DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT_SET');
 
-// FORCER MODE PRODUCTION - Détecter automatiquement via DATABASE_URL
+// Use development mode in routes.ts - this file is for development
 const hasProductionDB = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgresql');
-const isProduction = true; // FORCER PRODUCTION POUR ADMIN SIDEBAR
+const isProduction = false; // Force development mode for routes.ts
 const storage = isProduction ? prodStorage : devStorage;
 console.log('🔍 DIAGNOSTIC - Using storage:', isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
-console.log('🔍 DIAGNOSTIC - Production detected by:', hasProductionDB ? 'DATABASE_URL' : 'ENV_VAR');
+console.log('🔍 DIAGNOSTIC - Database URL exists:', hasProductionDB ? 'YES' : 'NO');
 
 
 // Alias pour compatibilité
@@ -63,52 +63,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/permissions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
-      // 🔧 PRODUCTION FIX - Forcer utilisation production pour résoudre problème sidebar admin
-      const forceProduction = true; // Toujours utiliser le mode production
-      console.log(`🔍 PRODUCTION FORCÉ - Fetching permissions for user:`, userId);
+      console.log(`🔍 DEV - Fetching permissions for user:`, userId);
       
-      // TOUJOURS utiliser le mode production maintenant
+      // Development mode - use development storage with simplified permissions
       try {
-        // MODE PRODUCTION - Utiliser les requêtes SQL directes comme dans routes.production.ts
-        const { Pool } = require("@neondatabase/serverless");
-        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-        
-        // Récupérer l'utilisateur avec l'ID de base de données
-        const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
-        if (userResult.rows.length === 0) {
-          console.log('❌ PRODUCTION - User not found:', userId);
+        const user = await storage.getUser(userId);
+        if (!user) {
+          console.log('❌ DEV - User not found:', userId);
           return res.status(404).json({ message: 'User not found' });
         }
         
-        const user = userResult.rows[0];
-        console.log('👤 PRODUCTION - User found:', user.username, 'role:', user.role);
+        console.log('👤 DEV - User found:', user.username, 'role:', user.role);
         
-        // Pour l'admin, retourner toutes les permissions
+        // For development, return a basic set of permissions
+        // In development mode, we'll give admins all permissions and others basic permissions
         if (user.role === 'admin' || user.username === 'admin') {
-          const allPermissionsResult = await pool.query(`
-            SELECT id, name, display_name as "displayName", description, category, action, resource, is_system as "isSystem", created_at as "createdAt"
-            FROM permissions 
-            ORDER BY category, name
-          `);
-          console.log('🔧 PRODUCTION - Admin user, returning all permissions:', allPermissionsResult.rows.length);
-          return res.json(allPermissionsResult.rows);
+          // Return all available permissions for admin
+          const allPermissions = [
+            { id: 1, name: 'read_orders', displayName: 'Lire les commandes', description: 'Voir les commandes', category: 'orders', action: 'read', resource: 'order', isSystem: false },
+            { id: 2, name: 'create_orders', displayName: 'Créer les commandes', description: 'Créer de nouvelles commandes', category: 'orders', action: 'create', resource: 'order', isSystem: false },
+            { id: 3, name: 'update_orders', displayName: 'Modifier les commandes', description: 'Modifier les commandes existantes', category: 'orders', action: 'update', resource: 'order', isSystem: false },
+            { id: 4, name: 'delete_orders', displayName: 'Supprimer les commandes', description: 'Supprimer les commandes', category: 'orders', action: 'delete', resource: 'order', isSystem: false },
+            { id: 5, name: 'admin_panel', displayName: 'Panneau Admin', description: 'Accès au panneau d\'administration', category: 'admin', action: 'access', resource: 'admin_panel', isSystem: true }
+          ];
+          console.log('🔧 DEV - Admin user, returning all permissions:', allPermissions.length);
+          return res.json(allPermissions);
         }
         
-        // Pour les autres rôles, récupérer leurs permissions spécifiques via les rôles
-        const userPermissionsResult = await pool.query(`
-          SELECT DISTINCT p.id, p.name, p.display_name as "displayName", p.description, p.category, p.action, p.resource, p.is_system as "isSystem", p.created_at as "createdAt"
-          FROM permissions p
-          INNER JOIN role_permissions rp ON p.id = rp.permission_id
-          INNER JOIN user_roles ur ON rp.role_id = ur.role_id
-          WHERE ur.user_id = $1::text
-          ORDER BY p.category, p.name
-        `, [userId]);
+        // For other users, return basic permissions
+        const basicPermissions = [
+          { id: 1, name: 'read_orders', displayName: 'Lire les commandes', description: 'Voir les commandes', category: 'orders', action: 'read', resource: 'order', isSystem: false }
+        ];
         
-        console.log('📝 PRODUCTION - User permissions found:', userPermissionsResult.rows.length);
-        return res.json(userPermissionsResult.rows);
-      } catch (productionError) {
-        console.error('❌ PRODUCTION Error in user permissions SQL:', productionError);
-        throw productionError;
+        console.log('📝 DEV - User permissions found:', basicPermissions.length);
+        return res.json(basicPermissions);
+      } catch (devError) {
+        console.error('❌ DEV Error in user permissions:', devError);
+        throw devError;
       }
     } catch (error) {
       console.error(`${isProduction ? 'PRODUCTION' : 'DEV'} Error fetching user permissions:`, error);
