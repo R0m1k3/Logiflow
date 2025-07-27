@@ -962,8 +962,18 @@ export default function BLReconciliation() {
                                         </div>
                                       );
                                     }
+                                  } else {
+                                    // Pas de vérification encore effectuée - afficher l'icône webhook si disponible
+                                    return delivery.group?.webhookUrl ? (
+                                      <button
+                                        onClick={() => setShowWebhookModal(true)}
+                                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200 ml-1"
+                                        title="Envoyer via webhook"
+                                      >
+                                        <Webhook className="w-4 h-4" />
+                                      </button>
+                                    ) : null;
                                   }
-                                  return null;
                                 })()}
                                 {!invoiceVerifications[delivery.id.toString()] && !delivery.groupId && (
                                   <div title="Aucun magasin assigné - impossible de vérifier">

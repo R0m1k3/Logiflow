@@ -123,7 +123,14 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-27 - RÉSOLUTION FINALE BL RECONCILIATION : Service Adaptatif et Gestion Erreurs PostgreSQL COMPLÉTÉE
+### 2025-07-27 - ICÔNES WEBHOOK UNIVERSELLES : Affichage pour Toutes Factures Non Vérifiées COMPLÉTÉ
+✓ ICÔNES WEBHOOK UNIVERSELLES - L'icône webhook s'affiche maintenant pour TOUTES les factures avec référence, pas seulement celles vérifiées comme "non trouvées"
+✓ LOGIQUE D'AFFICHAGE AMÉLIORÉE - Icône webhook visible pour les factures non encore vérifiées ET pour celles marquées comme non trouvées dans NocoDB
+✓ ACCÈS WEBHOOK COMPLET - Les utilisateurs peuvent maintenant utiliser le webhook sur toutes les lignes de factures nécessitant une vérification manuelle
+✓ INTERFACE COHÉRENTE - Icône webhook positionnée de manière uniforme à côté des statuts de vérification (CheckCircle vert, X rouge, ou seule si pas encore vérifiée)
+✓ CONFIGURATION WEBHOOK OPÉRATIONNELLE - Champ URL webhook dans les groupes/magasins entièrement fonctionnel et intégré au processus de rapprochement
+
+### 2025-07-27 - RÉSOLUTION FINALE BL RECONCILIATION : Service Adaptatif et Gestion Erreurs PostgreSQL COMPLÉTÉE (PRÉCÉDENT)
 ✓ PROBLÈME ROOT CAUSE RÉSOLU - blReconciliationService.ts utilisait mauvais import storage (./storage vs environnement)
 ✓ STORAGE ADAPTATIF IMPLÉMENTÉ - Détection automatique environnement (production/développement) avec imports dynamiques
 ✓ SYSTÈME RAPPROCHEMENT FONCTIONNEL - 16 livraisons traitées avec succès, logique multi-étapes opérationnelle
