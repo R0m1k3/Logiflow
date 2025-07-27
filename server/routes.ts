@@ -3331,7 +3331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      // Envoyer le webhook (simulation pour l'instant)
+      // Envoyer le webhook réel
       console.log('🎯 Webhook data to send:', webhookData);
       console.log('🎯 Webhook URL:', webhookUrl);
       console.log('🎯 PDF file info:', {
@@ -3340,18 +3340,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mimetype: pdfFile.mimetype
       });
 
-      // TODO: Implémenter l'envoi réel du webhook avec fetch/axios
-      // await fetch(webhookUrl, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(webhookData)
-      // });
+      try {
+        // Créer FormData pour envoyer le fichier
+        const FormData = (await import('form-data')).default;
+        const webhookFormData = new FormData();
+        
+        // Ajouter les données JSON
+        webhookFormData.append('data', JSON.stringify(webhookData));
+        
+        // Ajouter le fichier PDF
+        webhookFormData.append('file', pdfFile.buffer, {
+          filename: pdfFile.originalname,
+          contentType: pdfFile.mimetype
+        });
 
-      res.json({ 
-        success: true, 
-        message: "Webhook sent successfully",
-        data: webhookData 
-      });
+        console.log('🚀 Sending webhook to:', webhookUrl);
+        
+        // Envoyer le webhook avec fetch
+        const fetch = (await import('node-fetch')).default;
+        const webhookResponse = await fetch(webhookUrl, {
+          method: 'POST',
+          body: webhookFormData,
+          headers: webhookFormData.getHeaders(),
+          timeout: 10000 // 10 secondes timeout
+        });
+
+        console.log('📡 Webhook response status:', webhookResponse.status);
+        console.log('📡 Webhook response ok:', webhookResponse.ok);
+        
+        if (webhookResponse.ok) {
+          const responseText = await webhookResponse.text();
+          console.log('📡 Webhook response:', responseText);
+          
+          res.json({ 
+            success: true, 
+            message: "Webhook sent successfully",
+            data: webhookData,
+            webhookResponse: {
+              status: webhookResponse.status,
+              statusText: webhookResponse.statusText
+            }
+          });
+        } else {
+          console.log('❌ Webhook failed with status:', webhookResponse.status);
+          res.status(500).json({ 
+            message: "Webhook send failed",
+            error: `HTTP ${webhookResponse.status}: ${webhookResponse.statusText}`
+          });
+        }
+        
+      } catch (webhookError) {
+        console.error('❌ Error sending webhook:', webhookError);
+        res.status(500).json({ 
+          message: "Failed to send webhook",
+          error: webhookError.message 
+        });
+      }
 
     } catch (error) {
       console.error('❌ Error sending webhook:', error);
