@@ -2101,7 +2101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("❌ ERREUR CRITIQUE dans assignation groupe:", error);
-      console.error("❌ Stack trace:", error.stack);
+      console.error("❌ Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
       
       res.status(500).json({ 
         message: "Impossible d'assigner l'utilisateur au groupe",
@@ -2587,7 +2587,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         projectId: nocodbConfig.projectId 
       });
 
-      const testResult = await invoiceVerificationService.testConnection(nocodbConfig);
+      const testResult = await invoiceVerificationService.testConnection({
+        ...nocodbConfig,
+        isActive: nocodbConfig.isActive ?? true
+      });
       
       console.log('📋 Test result:', testResult);
       
@@ -2795,6 +2798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const validatedData = insertDlcProductFrontendSchema.parse({
+        name: req.body.productName || req.body.name,
         ...req.body,
         createdBy: userId,
       });
@@ -3257,7 +3261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("❌ Error triggering manual BL reconciliation:", error);
-      console.error("❌ Stack trace:", error.stack);
+      console.error("❌ Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ 
         message: "Erreur lors du rapprochement BL manuel",
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -3281,7 +3285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } : 'No file');
 
       const { isAdmin } = await checkPermission(req, res, "system_admin");
-      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      const user = await storage.getUser((req.user as any)?.claims?.sub || (req.user as any)?.id);
       const isDirecteur = user?.role === 'directeur';
       if (!isAdmin && !isDirecteur) {
         return res.status(403).json({ message: "Access denied. Admin or Directeur role required." });
@@ -3300,7 +3304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Récupérer l'utilisateur actuel avec ses groupes
-      const currentUser = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      const currentUser = await storage.getUser((req.user as any)?.claims?.sub || (req.user as any)?.id);
       
       // Récupérer les groupes de l'utilisateur
       let userGroups = [];
@@ -3308,15 +3312,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const groupsResult = await storage.getGroups();
         userGroups = groupsResult;
       } else {
-        userGroups = currentUser?.groups || [];
+        userGroups = (currentUser as any)?.groups || [];
       }
 
       // Trouver le groupe avec une URL webhook configurée
-      const group = userGroups.find(g => g.webhookUrl);
+      const group = userGroups.find((g: any) => g.webhookUrl);
       if (!group || !group.webhookUrl) {
         return res.status(400).json({ 
           message: "Aucune URL webhook configurée pour vos magasins",
-          availableGroups: userGroups.map(g => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl }))
+          availableGroups: userGroups.map((g: any) => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl }))
         });
       }
 
@@ -3331,8 +3335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         size: req.file.size,
         timestamp: new Date().toISOString(),
         user: {
-          id: user.id,
-          role: user.role,
+          id: user?.id,
+          role: user?.role,
           groupId: group.id
         }
       };
@@ -3368,7 +3372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         method: 'POST',
         body: formData,
         headers: formData.getHeaders(),
-        timeout: 10000
+        signal: AbortSignal.timeout(10000)
       });
       
       console.log('📡 Webhook response status:', webhookResponse.status);
