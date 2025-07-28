@@ -2105,8 +2105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(500).json({ 
         message: "Impossible d'assigner l'utilisateur au groupe",
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
       });
     }
   });
@@ -2142,7 +2142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const initializeBackupService = async () => {
     try {
       const { BackupService } = await import('./backupService.production.js');
-      backupService = new BackupService(pool);
+      backupService = new BackupService(pool as any);
       
       // Initialiser la table des sauvegardes au démarrage
       await backupService.initBackupTable();
@@ -3102,7 +3102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedTask);
     } catch (error) {
       console.error("❌ Error completing task:", error);
-      res.status(500).json({ message: "Failed to complete task", error: error.message });
+      res.status(500).json({ message: "Failed to complete task", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -3260,8 +3260,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Stack trace:", error.stack);
       res.status(500).json({ 
         message: "Erreur lors du rapprochement BL manuel",
-        error: error.message,
-        stack: error.stack
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       });
     }
   });
@@ -3280,7 +3280,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mimetype: req.file.mimetype 
       } : 'No file');
 
-      const { isAdmin, isDirecteur } = await checkPermission(req, res, "system_admin");
+      const { isAdmin } = await checkPermission(req, res, "system_admin");
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      const isDirecteur = user?.role === 'directeur';
       if (!isAdmin && !isDirecteur) {
         return res.status(403).json({ message: "Access denied. Admin or Directeur role required." });
       }
@@ -3297,17 +3299,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Récupérer l'utilisateur actuel
-      const userResult = await storage.getUser(req.user.id);
-      const user = userResult;
+      // Récupérer l'utilisateur actuel avec ses groupes
+      const currentUser = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
       
       // Récupérer les groupes de l'utilisateur
       let userGroups = [];
-      if (user.role === 'admin') {
+      if (currentUser?.role === 'admin') {
         const groupsResult = await storage.getGroups();
         userGroups = groupsResult;
       } else {
-        userGroups = user.groups || [];
+        userGroups = currentUser?.groups || [];
       }
 
       // Trouver le groupe avec une URL webhook configurée
@@ -3469,7 +3470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false,
         message: "Erreur lors de la migration", 
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
