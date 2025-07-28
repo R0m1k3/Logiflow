@@ -633,11 +633,43 @@ export default function BLReconciliation() {
     },
     onError: (error: any) => {
       console.error('❌ Error sending webhook:', error);
+      
+      // 🔧 AMÉLIORATION DIAGNOSTIC N8N: Afficher les conseils détaillés
+      let displayMessage = `Impossible d'envoyer le webhook: ${error.message}`;
+      let troubleshootingTip = '';
+      
+      // Vérifier si l'erreur contient des informations de diagnostic détaillées
+      if (error.troubleshooting) {
+        troubleshootingTip = error.troubleshooting;
+      }
+      
+      // Détecter les erreurs spécifiques N8N
+      if (error.message && error.message.includes('No item to return was found')) {
+        displayMessage = 'Erreur de configuration N8N: Le workflow webhook ne traite pas correctement les données';
+        troubleshootingTip = 'Le webhook reçoit les données mais le workflow N8N n\'est pas configuré pour les traiter. Vérifiez que le workflow contient les nœuds appropriés pour traiter les données FormData (fichier PDF + métadonnées JSON).';
+      } else if (error.message && error.message.includes('500')) {
+        troubleshootingTip = troubleshootingTip || 'Le webhook N8N fonctionne mais rencontre une erreur interne. Vérifiez les logs N8N pour plus de détails.';
+      }
+      
+      console.log('🔍 FRONTEND DIAGNOSTIC N8N:', { displayMessage, troubleshootingTip, technicalDetails: error.technicalDetails });
+      
+      // Afficher l'erreur principale
       toast({
-        title: "Erreur",
-        description: `Impossible d'envoyer le webhook: ${error.message}`,
+        title: "Erreur Webhook",
+        description: displayMessage,
         variant: "destructive",
       });
+      
+      // Afficher les conseils de dépannage si disponibles
+      if (troubleshootingTip) {
+        setTimeout(() => {
+          toast({
+            title: "💡 Conseil de Dépannage",
+            description: troubleshootingTip,
+            variant: "default",
+          });
+        }, 1000);
+      }
     },
   });
 

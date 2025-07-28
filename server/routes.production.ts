@@ -3499,10 +3499,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const errorText = await webhookResponse.text().catch(() => 'No response body');
         console.log('❌ Error response:', errorText);
         
+        // 🔧 AMÉLIORATION DIAGNOSTIC N8N: Analyser l'erreur spécifique
+        let userFriendlyMessage = `Impossible d'envoyer le webhook: ${webhookResponse.status}: ${webhookResponse.statusText}`;
+        let troubleshootingTip = '';
+        
+        // Détecter l'erreur spécifique "No item to return was found"
+        if (errorText && errorText.includes('No item to return was found')) {
+          userFriendlyMessage = 'Erreur de configuration N8N: Le workflow webhook ne traite pas correctement les données';
+          troubleshootingTip = 'SOLUTION: Vérifiez la configuration N8N du workflow. Le webhook reçoit les données mais le workflow n\'est pas configuré pour les traiter. Assurez-vous que le workflow N8N contient les nœuds appropriés pour traiter les données FormData (fichier PDF + métadonnées JSON).';
+        } else if (errorText && errorText.includes('500')) {
+          userFriendlyMessage = 'Erreur interne du serveur N8N';
+          troubleshootingTip = 'Le webhook N8N fonctionne mais rencontre une erreur interne. Vérifiez les logs N8N pour plus de détails.';
+        }
+        
+        console.log('🔍 DIAGNOSTIC N8N:', { userFriendlyMessage, troubleshootingTip });
+        
         res.status(500).json({ 
-          message: `POST webhook send failed: HTTP ${webhookResponse.status}`,
+          message: userFriendlyMessage,
           error: webhookResponse.statusText,
-          errorBody: errorText
+          errorBody: errorText,
+          troubleshooting: troubleshootingTip,
+          technicalDetails: {
+            status: webhookResponse.status,
+            url: group?.webhookUrl,
+            timestamp: new Date().toISOString()
+          }
         });
       }
 
