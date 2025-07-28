@@ -1001,8 +1001,70 @@ export default function BLReconciliation() {
                                           );
                                         } else {
                                           return (
-                                            <div title="Facture non trouvée dans NocoDB">
-                                              <X className="w-4 h-4 text-red-600" />
+                                            <div className="flex items-center space-x-1">
+                                              <div title="Facture non trouvée dans NocoDB">
+                                                <X className="w-4 h-4 text-red-600" />
+                                              </div>
+                                              {(user as any)?.role === 'admin' && (
+                                                <button
+                                                  onClick={async () => {
+                                                    try {
+                                                      const response = await fetch(`/api/verify-invoices/cache/${delivery.invoiceReference}`, {
+                                                        method: 'DELETE',
+                                                        credentials: 'include'
+                                                      });
+                                                      
+                                                      if (response.ok) {
+                                                        toast({
+                                                          title: "Cache vidé",
+                                                          description: `Cache vidé pour ${delivery.invoiceReference}. Nouvelle vérification en cours...`,
+                                                          duration: 3000,
+                                                        });
+                                                        
+                                                        // Forcer une nouvelle vérification
+                                                        const verifyResponse = await fetch('/api/verify-invoices', {
+                                                          method: 'POST',
+                                                          headers: { 'Content-Type': 'application/json' },
+                                                          credentials: 'include',
+                                                          body: JSON.stringify({ 
+                                                            invoiceReferences: [{
+                                                              groupId: delivery.groupId,
+                                                              invoiceReference: delivery.invoiceReference,
+                                                              deliveryId: delivery.id,
+                                                              supplierName: delivery.supplier?.name
+                                                            }]
+                                                          }),
+                                                        });
+                                                        
+                                                        if (verifyResponse.ok) {
+                                                          const newResults = await verifyResponse.json();
+                                                          setInvoiceVerifications(prev => ({
+                                                            ...prev,
+                                                            ...newResults
+                                                          }));
+                                                          
+                                                          toast({
+                                                            title: "Vérification mise à jour",
+                                                            description: "Nouvelle vérification terminée",
+                                                            duration: 3000,
+                                                          });
+                                                        }
+                                                      }
+                                                    } catch (error) {
+                                                      console.error('Error clearing cache:', error);
+                                                      toast({
+                                                        title: "Erreur",
+                                                        description: "Impossible de vider le cache",
+                                                        variant: "destructive",
+                                                      });
+                                                    }
+                                                  }}
+                                                  className="text-gray-400 hover:text-blue-600 transition-colors duration-200"
+                                                  title="Vider le cache et re-vérifier cette facture"
+                                                >
+                                                  <RefreshCw className="w-3 h-3" />
+                                                </button>
+                                              )}
                                             </div>
                                           );
                                         }

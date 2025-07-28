@@ -1145,6 +1145,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== PRODUCTION: SIMPLIFIED VERIFICATION SYSTEM =====
   // ✅ Complex cache routes removed - using simple /api/verify-invoices only
 
+  // Route pour vider le cache d'une facture spécifique
+  app.delete('/api/verify-invoices/cache/:invoiceRef', isAuthenticated, async (req: any, res) => {
+    const { invoiceRef } = req.params;
+    
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
+      
+      // Vider toutes les entrées de cache pour cette facture
+      const result = await storage.pool.query(`
+        DELETE FROM invoice_verification_cache 
+        WHERE invoice_reference = $1
+      `, [invoiceRef]);
+      
+      console.log(`🗑️ [CACHE CLEAR] Cache vidé pour facture: ${invoiceRef}`);
+      res.json({ 
+        success: true, 
+        message: `Cache vidé pour la facture ${invoiceRef}`,
+        deletedRows: result.rowCount 
+      });
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      res.status(500).json({ error: 'Erreur lors du nettoyage du cache' });
+    }
+  });
+
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
     try {
       const { invoiceReferences } = req.body;

@@ -1272,6 +1272,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour vider le cache d'une facture spécifique
+  app.delete('/api/verify-invoices/cache/:invoiceRef', isAuthenticated, async (req: any, res) => {
+    const { invoiceRef } = req.params;
+    
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Accès refusé' });
+      }
+      
+      // Vider toutes les entrées de cache pour cette facture
+      await storage.query(`
+        DELETE FROM invoice_verification_cache 
+        WHERE invoice_reference = $1
+      `, [invoiceRef]);
+      
+      console.log(`🗑️ [CACHE CLEAR] Cache vidé pour facture: ${invoiceRef}`);
+      res.json({ 
+        success: true, 
+        message: `Cache vidé pour la facture ${invoiceRef}` 
+      });
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      res.status(500).json({ error: 'Erreur lors du nettoyage du cache' });
+    }
+  });
+
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
     try {
       const { invoiceReferences } = req.body;
