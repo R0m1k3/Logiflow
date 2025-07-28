@@ -185,7 +185,7 @@ export default function BLReconciliation() {
                 toast({
                   title: "Vérification automatique terminée",
                   description: `💾 ${cacheHits} factures depuis le cache, ⚡ ${newVerifications} nouvelles vérifications`,
-                  duration: 3000,
+                  duration: 5000,
                 });
               }
               
