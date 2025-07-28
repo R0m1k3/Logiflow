@@ -3387,16 +3387,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Récupérer l'utilisateur actuel avec ses groupes
-      const currentUser = await storage.getUser((req.user as any)?.claims?.sub || (req.user as any)?.id);
+      // 🔧 CORRECTION CRITIQUE PRODUCTION : Utiliser getUserWithGroups comme en développement
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id;
+      const currentUserWithGroups = await storage.getUserWithGroups(userId);
       
-      // Récupérer les groupes de l'utilisateur
+      // Récupérer les groupes de l'utilisateur (même logique qu'en développement)
       let userGroups = [];
-      if (currentUser?.role === 'admin') {
+      if (currentUserWithGroups?.role === 'admin') {
+        // Pour admin, récupérer tous les groupes disponibles
         const groupsResult = await storage.getGroups();
         userGroups = groupsResult;
       } else {
-        userGroups = (currentUser as any)?.groups || [];
+        // Pour autres rôles, utiliser les groupes assignés à l'utilisateur
+        userGroups = currentUserWithGroups?.userGroups?.map((ug: any) => ug.group).filter((g: any) => g) || [];
       }
 
       console.log('🔍 PRODUCTION WEBHOOK DEBUG - Available groups:', userGroups.map((g: any) => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl })));
@@ -3434,8 +3437,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         size: req.file.size,
         timestamp: new Date().toISOString(),
         user: {
-          id: user?.id,
-          role: user?.role,
+          id: currentUserWithGroups?.id,
+          role: currentUserWithGroups?.role,
           groupId: group.id
         }
       };
