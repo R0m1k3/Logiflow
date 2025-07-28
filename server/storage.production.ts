@@ -32,7 +32,9 @@ import type {
   DlcProductFrontend,
   InsertDlcProductFrontend,
   Task,
-  InsertTask
+  InsertTask,
+  InvoiceVerification,
+  InsertInvoiceVerification
 } from "../shared/schema";
 
 // Production storage implementation using raw PostgreSQL queries
@@ -3711,6 +3713,162 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting user effective permissions:", error);
       return [];
+    }
+  }
+
+  // ===== MÉTHODES INVOICE VERIFICATION POUR CACHE =====
+  
+  async getInvoiceVerification(deliveryId: number): Promise<InvoiceVerification | undefined> {
+    try {
+      const result = await pool.query(`
+        SELECT id, delivery_id, group_id, invoice_reference, supplier_name, 
+               exists, match_type, is_valid, verified_at, last_checked_at
+        FROM invoice_verifications 
+        WHERE delivery_id = $1
+      `, [deliveryId]);
+
+      if (result.rows.length === 0) return undefined;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        deliveryId: row.delivery_id,
+        groupId: row.group_id,
+        invoiceReference: row.invoice_reference,
+        supplierName: row.supplier_name,
+        exists: row.exists,
+        matchType: row.match_type,
+        isValid: row.is_valid,
+        verifiedAt: row.verified_at,
+        lastCheckedAt: row.last_checked_at
+      };
+    } catch (error) {
+      console.error("Error getting invoice verification:", error);
+      return undefined;
+    }
+  }
+
+  async getInvoiceVerificationByReference(invoiceReference: string, groupId: number): Promise<InvoiceVerification | undefined> {
+    try {
+      const result = await pool.query(`
+        SELECT id, delivery_id, group_id, invoice_reference, supplier_name, 
+               exists, match_type, is_valid, verified_at, last_checked_at
+        FROM invoice_verifications 
+        WHERE invoice_reference = $1 AND group_id = $2 AND is_valid = true
+        ORDER BY last_checked_at DESC
+        LIMIT 1
+      `, [invoiceReference, groupId]);
+
+      if (result.rows.length === 0) return undefined;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        deliveryId: row.delivery_id,
+        groupId: row.group_id,
+        invoiceReference: row.invoice_reference,
+        supplierName: row.supplier_name,
+        exists: row.exists,
+        matchType: row.match_type,
+        isValid: row.is_valid,
+        verifiedAt: row.verified_at,
+        lastCheckedAt: row.last_checked_at
+      };
+    } catch (error) {
+      console.error("Error getting invoice verification by reference:", error);
+      return undefined;
+    }
+  }
+
+  async createInvoiceVerification(verification: InsertInvoiceVerification): Promise<InvoiceVerification> {
+    try {
+      const result = await pool.query(`
+        INSERT INTO invoice_verifications (
+          delivery_id, group_id, invoice_reference, supplier_name, 
+          exists, match_type, is_valid, verified_at, last_checked_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING id, delivery_id, group_id, invoice_reference, supplier_name, 
+                  exists, match_type, is_valid, verified_at, last_checked_at
+      `, [
+        verification.deliveryId,
+        verification.groupId,
+        verification.invoiceReference,
+        verification.supplierName,
+        verification.exists,
+        verification.matchType || 'NONE',
+        verification.isValid !== false
+      ]);
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        deliveryId: row.delivery_id,
+        groupId: row.group_id,
+        invoiceReference: row.invoice_reference,
+        supplierName: row.supplier_name,
+        exists: row.exists,
+        matchType: row.match_type,
+        isValid: row.is_valid,
+        verifiedAt: row.verified_at,
+        lastCheckedAt: row.last_checked_at
+      };
+    } catch (error) {
+      console.error("Error creating invoice verification:", error);
+      throw error;
+    }
+  }
+
+  async updateInvoiceVerification(deliveryId: number, verification: Partial<InsertInvoiceVerification>): Promise<InvoiceVerification> {
+    try {
+      const updateFields = [];
+      const values = [];
+      let paramCount = 1;
+
+      if (verification.exists !== undefined) {
+        updateFields.push(`exists = $${paramCount++}`);
+        values.push(verification.exists);
+      }
+      if (verification.matchType !== undefined) {
+        updateFields.push(`match_type = $${paramCount++}`);
+        values.push(verification.matchType);
+      }
+      if (verification.isValid !== undefined) {
+        updateFields.push(`is_valid = $${paramCount++}`);
+        values.push(verification.isValid);
+      }
+
+      updateFields.push(`last_checked_at = CURRENT_TIMESTAMP`);
+      values.push(deliveryId);
+
+      const result = await pool.query(`
+        UPDATE invoice_verifications 
+        SET ${updateFields.join(', ')}
+        WHERE delivery_id = $${paramCount}
+        RETURNING id, delivery_id, group_id, invoice_reference, supplier_name, 
+                  exists, match_type, is_valid, verified_at, last_checked_at
+      `, values);
+
+      if (result.rows.length === 0) {
+        throw new Error(`Invoice verification not found for delivery ${deliveryId}`);
+      }
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        deliveryId: row.delivery_id,
+        groupId: row.group_id,
+        invoiceReference: row.invoice_reference,
+        supplierName: row.supplier_name,
+        exists: row.exists,
+        matchType: row.match_type,
+        isValid: row.is_valid,
+        verifiedAt: row.verified_at,
+        lastCheckedAt: row.last_checked_at
+      };
+    } catch (error) {
+      console.error("Error updating invoice verification:", error);
+      throw error;
     }
   }
 }
