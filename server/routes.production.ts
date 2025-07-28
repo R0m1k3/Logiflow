@@ -1185,10 +1185,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Seuls les administrateurs peuvent dévalider les livraisons' });
       }
       
-      // Dévalider le rapprochement : remettre en mode éditable sans vider les données
+      // Dévalider le rapprochement : vider les données BL/facture mais garder la livraison livrée
       const result = await storage.pool.query(`
         UPDATE deliveries 
-        SET reconciled = false, updated_at = NOW()
+        SET bl_number = NULL, bl_amount = NULL, invoice_reference = NULL, 
+            invoice_amount = NULL, reconciled = false, updated_at = NOW()
         WHERE id = $1
         RETURNING *
       `, [deliveryId]);

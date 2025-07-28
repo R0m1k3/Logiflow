@@ -123,18 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - SYSTÈME DÉVALIDATION RAPPROCHEMENT DÉFINITIVEMENT OPTIMISÉ : Garde Toutes Données, Rend Juste Modifiable
+### 2025-07-28 - SYSTÈME DÉVALIDATION RAPPROCHEMENT FINALISÉ : Supprime Données et Restaure Droits Édition
 
-✓ LOGIQUE DÉVALIDATION PARFAITE - Dévalidation met seulement reconciled=false sans vider aucun champ (blNumber, blAmount, invoiceReference, invoiceAmount conservés)
-✓ DONNÉES CONSERVÉES INTÉGRALEMENT - Tous champs BL/facture restent visibles dans formulaire pour permettre modifications directes
-✓ MODE ÉDITABLE RESTAURÉ - Suppression côté "grisé", champs redeviennent modifiables immédiatement après dévalidation
-✓ WORKFLOW UTILISATEUR OPTIMAL - Dévalidation → Champs pré-remplis avec données existantes → Modification → Re-validation possible immédiatement
-✓ ROUTES HARMONISÉES - Développement ET production utilisent même logique minimale (UPDATE reconciled=false uniquement)
-✓ MESSAGES UTILISATEUR CLAIRS - Toast "données conservées dans champs pour corrections" et tooltip "rendre modifiable, garde données"
-✓ AUCUNE PERTE DONNÉES - Utilisateur peut corriger erreurs sans ressaisir toutes informations depuis zéro
-✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider rapprochements pour corrections
-✓ INTERFACE FLUIDE VALIDÉE - Dévalidation rend champs éditables sans vider, permettant workflow correction naturel
-✓ SYSTÈME PRODUCTION READY - Fonctionnalité parfaitement calibrée selon besoins utilisateur réels
+✓ LOGIQUE DÉVALIDATION STANDARD - Dévalidation vide les champs BL/facture (blNumber, blAmount, invoiceReference, invoiceAmount) et met reconciled=false
+✓ INTERFACE UTILISATEUR COHÉRENTE - Après dévalidation, suppression du côté "grisé" et réapparition des boutons Modifier/Valider
+✓ WORKFLOW CORRECTION OPÉRATIONNEL - Dévalidation → Données supprimées → Boutons édition restaurés → Nouvelle saisie possible
+✓ ROUTES DÉVELOPPEMENT/PRODUCTION HARMONISÉES - Même logique de suppression des données rapprochement dans les deux environnements
+✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider des rapprochements existants avec bouton RotateCcw orange
+✓ MESSAGES UTILISATEUR CLAIRS - Toast "données supprimées, boutons disponibles" et tooltip "supprime données et rend modifiable"
+✓ FONCTIONNALITÉ CORRECTION ACTIVE - Admin peut dévalider pour corriger erreurs, utilisateur ressaisit données correctes
+✓ AFFICHAGE CONDITIONNEL CORRECT - Boutons Modifier/Valider masqués quand reconciled=true, visibles quand reconciled=false
+✓ SYSTÈME PRODUCTION READY - Dévalidation opérationnelle avec comportement standard de suppression et restauration droits
 
 ### 2025-07-28 - OPTIMISATION CACHE DÉFINITIVEMENT FINALISÉE : Système Intelligent Sans Doublons Opérationnel (PRÉCÉDENT)
 
