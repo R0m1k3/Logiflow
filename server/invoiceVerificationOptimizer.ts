@@ -54,9 +54,17 @@ export class InvoiceVerificationOptimizer {
     
     try {
       const verificationService = await this.getVerificationService();
-      const verificationResult = await verificationService.searchByInvoiceReference(
-        groupId,
-        invoiceReference
+      // Get group configuration for the verification service
+      const groupConfig = await storage.getGroup(groupId);
+      if (!groupConfig) {
+        throw new Error(`Group ${groupId} not found`);
+      }
+
+      const verificationResult = await verificationService.verifyInvoice(
+        invoiceReference,
+        supplierName || '',
+        null, // amount not available
+        groupConfig
       );
 
       // Step 3: Save/update cache with new result
