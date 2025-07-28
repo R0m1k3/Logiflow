@@ -152,57 +152,10 @@ export default function BLReconciliation() {
       
       // Livraisons pour rapprochement : livrées + dévalidées avec données BL
       
-      // ✅ SYSTÈME CACHE INTELLIGENT : Backend décide cache vs NocoDB
-      if (filtered.length > 0) {
-        const deliveriesWithInvoices = filtered.filter((delivery: any) => {
-          return delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
-        });
-        
-        console.log(`💾 BL Cache Check - ${deliveriesWithInvoices.length} factures à vérifier (cache + nouvelles)`);
-        
-        if (Array.isArray(deliveriesWithInvoices) && deliveriesWithInvoices.length > 0) {
-          const invoiceReferencesToVerify = deliveriesWithInvoices.map((delivery: any) => ({
-            groupId: delivery.groupId,
-            invoiceReference: delivery.invoiceReference,
-            deliveryId: delivery.id,
-            supplierName: delivery.supplier?.name,
-          }));
-          
-          try {
-            const verificationResponse = await fetch('/api/verify-invoices', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ invoiceReferences: invoiceReferencesToVerify }),
-            });
-            
-            if (verificationResponse.ok) {
-              const verificationResults = await verificationResponse.json();
-              
-              // Compter combien sont en cache vs nouvelles vérifications
-              const cacheHits = Object.values(verificationResults).filter((result: any) => result.cached).length;
-              const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
-              
-              console.log(`✅ Optimisation Cache: ${cacheHits} cache hits, ${newVerifications} nouvelles vérifications`);
-              
-              // Afficher un message informatif sur l'optimisation
-              if (deliveriesWithInvoices.length > 0) {
-                toast({
-                  title: "Vérification automatique terminée",
-                  description: `💾 ${cacheHits} factures depuis le cache, ⚡ ${newVerifications} nouvelles vérifications`,
-                  duration: 5000,
-                });
-              }
-              
-              setInvoiceVerifications(verificationResults);
-            } else {
-              console.error('❌ Verification failed:', verificationResponse.status);
-            }
-          } catch (error) {
-            console.error('❌ Error verifying invoices:', error);
-          }
-        }
-      }
+      // ✅ OPTIMISATION ANTI-SPAM : Plus de vérification automatique lors du chargement
+      // La vérification se fait maintenant uniquement :
+      // 1. Manuellement via le bouton "Actualiser vérifications"  
+      // 2. Automatiquement après enregistrement des données dans le modal
       
       // CORRECTION PRODUCTION: Trier spécifiquement par date de livraison validée
       const sorted = filtered.sort((a: any, b: any) => {
@@ -326,11 +279,8 @@ export default function BLReconciliation() {
     }
   };
 
-  // ❌ SUPPRIMÉ - Duplication avec fetchDeliveries() qui appelle déjà la vérification
-  // La vérification se fait déjà automatiquement dans fetchDeliveries()
-
-  // ✅ OPTIMISÉ - Pas besoin de re-vérifier manuellement lors du changement de magasin
-  // Le nouveau chargement des livraisons via fetchDeliveries() fait déjà la vérification automatiquement
+  // ✅ OPTIMISÉ - Vider les vérifications lors du changement de magasin
+  // Plus de vérification automatique - seulement vider les anciennes données
   useEffect(() => {
     console.log('🔄 Store changed, clearing invoice verifications for fresh webhook icons');
     setInvoiceVerifications({}); // Clear old verifications only
@@ -346,53 +296,8 @@ export default function BLReconciliation() {
     },
   });
 
-  // Fonction pour vérifier une facture en temps réel
-  const verifyInvoiceRealtime = async (invoiceRef: string) => {
-    if (!invoiceRef || !invoiceRef.trim() || !selectedDelivery) return;
-    
-    setIsVerifyingCurrentInvoice(true);
-    try {
-      console.log('🔍 Real-time verification for:', invoiceRef);
-      const verificationResponse = await fetch('/api/verify-invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          invoiceReferences: [{
-            groupId: selectedDelivery.groupId,
-            invoiceReference: invoiceRef.trim(),
-            deliveryId: selectedDelivery.id,
-            supplierName: selectedDelivery.supplier?.name,
-          }]
-        }),
-      });
-      
-      if (verificationResponse.ok) {
-        const verificationResults = await verificationResponse.json();
-        console.log('✅ Real-time verification result:', verificationResults);
-        setInvoiceVerifications(prev => ({ ...prev, ...verificationResults }));
-      }
-    } catch (error) {
-      console.error('Error in real-time verification:', error);
-    } finally {
-      setIsVerifyingCurrentInvoice(false);
-    }
-  };
-
-  // Debounce pour la vérification en temps réel
-  useEffect(() => {
-    const invoiceRef = form.watch("invoiceReference");
-    if (!invoiceRef || !invoiceRef.trim()) {
-      setIsVerifyingCurrentInvoice(false);
-      return;
-    }
-    
-    const timeoutId = setTimeout(() => {
-      verifyInvoiceRealtime(invoiceRef);
-    }, 1000); // Attendre 1 seconde après la dernière saisie
-    
-    return () => clearTimeout(timeoutId);
-  }, [form.watch("invoiceReference"), selectedDelivery]);
+  // ✅ SUPPRIMÉ - Vérification en temps réel qui spammait visuellement
+  // La vérification se fait maintenant uniquement à l'enregistrement des données
 
   const updateReconciliationMutation = useMutation({
     mutationFn: async (data: { id: number; blNumber: string | null; blAmount: string | null; invoiceReference: string | null; invoiceAmount: string | null }) => {
