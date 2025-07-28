@@ -573,7 +573,7 @@ export default function BLReconciliation() {
     },
   });
 
-  // Mutation pour dévalider une livraison (Admin uniquement)
+  // Mutation pour dévalider un rapprochement (Admin uniquement)
   const devalidateDeliveryMutation = useMutation({
     mutationFn: async (deliveryId: number) => {
       const response = await apiRequest(`/api/deliveries/${deliveryId}/devalidate`, "POST", {});
@@ -581,9 +581,9 @@ export default function BLReconciliation() {
     },
     onSuccess: () => {
       toast({
-        title: "Livraison dévalidée",
-        description: "La livraison a été dévalidée avec succès",
-        duration: 3000,
+        title: "Rapprochement dévalidé",
+        description: "Les données de rapprochement ont été supprimées. Vous pouvez les modifier et les sauvegarder à nouveau.",
+        duration: 4000,
       });
       // Recharger les données
       queryClient.invalidateQueries({ 
@@ -1227,7 +1227,7 @@ export default function BLReconciliation() {
                                   onClick={() => devalidateDeliveryMutation.mutate(delivery.id)}
                                   disabled={devalidateDeliveryMutation.isPending}
                                   className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 px-2 py-1 text-xs"
-                                  title="Dévalider cette livraison (Admin uniquement)"
+                                  title="Dévalider le rapprochement (vide les données BL/facture)"
                                 >
                                   <RotateCcw className="w-3 h-3" />
                                 </Button>

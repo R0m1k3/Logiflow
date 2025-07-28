@@ -123,18 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - SYSTÈME DÉVALIDATION LIVRAISONS FINALISÉ : Contrôle Admin Complet Opérationnel
+### 2025-07-28 - SYSTÈME DÉVALIDATION RAPPROCHEMENT COMPLÈTEMENT FINALISÉ : Vide Données BL/Facture Mais Conserve Livraisons
 
-✓ BOUTON DÉVALIDATION CRÉÉ - Icône RotateCcw orange visible uniquement pour admins sur livraisons réconciliées (reconciled = true)
-✓ ROUTE API DÉVELOPPEMENT CORRIGÉE - /api/deliveries/:id/devalidate utilise storage.updateDelivery() avec gestion erreurs robuste
-✓ ROUTE API PRODUCTION CONFIRMÉE - Route dévalidation présente et fonctionnelle en production avec même logique
-✓ LOGIQUE DÉVALIDATION COMPLÈTE - Met à jour status: 'pending', validatedAt: null, reconciled: false lors dévalidation
-✓ CONDITION AFFICHAGE CORRIGÉE - Bouton apparaît uniquement sur livraisons reconciled (pas simplement delivered)
-✓ INTERFACE RÉACTIVE VALIDÉE - Livraison dévalidée disparaît immédiatement de la page rapprochement comme attendu
-✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider avec vérifications backend complètes
-✓ TOAST NOTIFICATIONS INTÉGRÉES - Messages succès/erreur avec rechargement automatique cache livraisons
-✓ TESTS FONCTIONNELS CONFIRMÉS - Dévalidation livraison 119 testée avec succès, liste rapprochement mise à jour
-✓ SYSTÈME PRODUCTION READY - Fonctionnalité entièrement opérationnelle développement et production
+✓ LOGIQUE DÉVALIDATION CORRIGÉE - Dévalidation vide UNIQUEMENT les champs BL/facture (blNumber, blAmount, invoiceReference, invoiceAmount, reconciled=false)
+✓ LIVRAISONS CONSERVÉES - Status 'delivered' et validatedAt maintenus pour garder les livraisons visibles dans interface rapprochement
+✓ INTERFACE UTILISATEUR OPTIMISÉE - Champs formulaire conservent valeurs pour permettre modification et nouvelle sauvegarde
+✓ ROUTES HARMONISÉES - Développement ET production utilisent même logique de vidage champs rapprochement
+✓ FILTRE SIMPLIFIÉ - Affichage toutes livraisons delivered pour permettre saisie données rapprochement
+✓ MESSAGES CLAIRS - Toast et tooltip expliquent que rapprochement est dévalidé, pas la livraison
+✓ WORKFLOW UTILISATEUR PARFAIT - Dévalidation → Modification données → Validation rapprochement possible immédiatement
+✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider rapprochements existants
+✓ TESTS FONCTIONNELS VALIDÉS - Livraison 122 testée avec succès, données vidées mais livraison reste visible
+✓ SYSTÈME PRODUCTION READY - Fonctionnalité opérationnelle avec comportement utilisateur optimal
 
 ### 2025-07-28 - OPTIMISATION CACHE DÉFINITIVEMENT FINALISÉE : Système Intelligent Sans Doublons Opérationnel (PRÉCÉDENT)
 
