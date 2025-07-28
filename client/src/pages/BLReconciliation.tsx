@@ -618,7 +618,7 @@ export default function BLReconciliation() {
     onSuccess: () => {
       toast({
         title: "Succès",
-        description: "Webhook envoyé avec succès",
+        description: "Facture envoyé avec succès",
       });
       setShowWebhookModal(false);
       setSelectedWebhookDelivery(null);
@@ -1467,6 +1467,16 @@ export default function BLReconciliation() {
       {/* Modal Webhook */}
       <Dialog open={showWebhookModal} onOpenChange={setShowWebhookModal}>
         <DialogContent className="sm:max-w-md">
+          {/* Overlay de chargement */}
+          {sendWebhookMutation.isPending && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 rounded-lg">
+              <div className="bg-white rounded-lg p-6 flex flex-col items-center space-y-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="text-gray-700 font-medium">Envoi de la Facture en cours</p>
+              </div>
+            </div>
+          )}
+          
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Send className="w-5 h-5" />
