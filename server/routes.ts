@@ -3495,10 +3495,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      const { supplier, type } = req.body;
+      const { supplier, type, selectedGroupId, blNumber, invoiceReference } = req.body;
       const pdfFile = req.file;
 
-      console.log('🔧 Extracted data:', { supplier, type, pdfFile: pdfFile ? 'FILE PRESENT' : 'NO FILE' });
+      console.log('🔧 DEV WEBHOOK DEBUG - Extracted data:', { supplier, type, selectedGroupId, blNumber, invoiceReference, pdfFile: pdfFile ? 'FILE PRESENT' : 'NO FILE' });
       console.log('🔧 User data:', { id: user.id, role: user.role, userGroups: user.userGroups });
 
       if (!supplier || !type || !pdfFile) {
@@ -3516,15 +3516,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       let webhookUrl;
+      let selectedGroup;
+      
       if (user.role === 'admin' && (!userGroups || userGroups.length === 0)) {
-        // Pour admin sans groupes assignés, récupérer le groupe du magasin sélectionné
+        // Pour admin sans groupes assignés, récupérer tous les groupes disponibles
         const allGroups = await storage.getGroups();
-        console.log('🔧 Admin user - fetching all groups:', allGroups.length);
-        const targetGroup = allGroups.find(g => g.id === 1); // Default to group 1 (Frouard)
-        webhookUrl = targetGroup?.webhookUrl;
-        console.log('🔧 Admin fallback webhook URL:', webhookUrl);
+        console.log('🔧 DEV WEBHOOK DEBUG - Available groups for admin:', allGroups.map(g => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl })));
+        
+        // 🔧 CORRECTION CRITIQUE : Utiliser le groupe sélectionné au lieu du groupe par défaut 1
+        if (selectedGroupId) {
+          selectedGroup = allGroups.find(g => g.id.toString() === selectedGroupId.toString() && g.webhookUrl);
+          console.log('🔧 DEV WEBHOOK DEBUG - Selected group found:', selectedGroup ? { id: selectedGroup.id, name: selectedGroup.name } : 'NOT FOUND');
+        } else {
+          selectedGroup = allGroups.find(g => g.id === 1); // Fallback to Frouard
+          console.log('🔧 DEV WEBHOOK DEBUG - Fallback to Frouard (ID 1):', selectedGroup ? { id: selectedGroup.id, name: selectedGroup.name } : 'NOT FOUND');
+        }
+        
+        webhookUrl = selectedGroup?.webhookUrl;
+        console.log('🔧 Admin webhook URL:', webhookUrl);
       } else {
-        webhookUrl = userGroups[0]?.group?.webhookUrl;
+        console.log('🔧 DEV WEBHOOK DEBUG - User groups:', userGroups.map(g => ({ groupId: g.group?.id, name: g.group?.name, hasWebhook: !!g.group?.webhookUrl })));
+        
+        // 🔧 CORRECTION CRITIQUE : Utiliser le groupe sélectionné au lieu du premier disponible
+        if (selectedGroupId) {
+          const userGroupWithSelected = userGroups.find(ug => ug.group?.id.toString() === selectedGroupId.toString() && ug.group?.webhookUrl);
+          selectedGroup = userGroupWithSelected?.group;
+          console.log('🔧 DEV WEBHOOK DEBUG - Selected user group found:', selectedGroup ? { id: selectedGroup.id, name: selectedGroup.name } : 'NOT FOUND');
+        } else {
+          selectedGroup = userGroups[0]?.group;
+          console.log('🔧 DEV WEBHOOK DEBUG - Fallback to first user group:', selectedGroup ? { id: selectedGroup.id, name: selectedGroup.name } : 'NOT FOUND');
+        }
+        
+        webhookUrl = selectedGroup?.webhookUrl;
         console.log('🔧 User group webhook URL:', webhookUrl);
       }
 
@@ -3533,9 +3556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Préparer les données du webhook
-      const groupId = user.role === 'admin' && (!userGroups || userGroups.length === 0) 
-        ? 1 // Default group for admin
-        : userGroups[0]?.group?.id;
+      const groupId = selectedGroup?.id || (user.role === 'admin' ? 1 : userGroups[0]?.group?.id);
         
       const webhookData = {
         supplier: supplier,

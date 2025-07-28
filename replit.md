@@ -123,7 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - WEBHOOK MODAL UX DÉFINITIVEMENT FINALISÉ : Messages Production et État Chargement Optimaux
+### 2025-07-28 - BUG CRITIQUE WEBHOOK MULTI-TENANT RÉSOLU : Routage par Groupe Sélectionné Définitivement Corrigé
+
+✓ PROBLÈME ROOT CAUSE IDENTIFIÉ - Système webhook utilisait premier groupe avec webhook disponible au lieu du groupe actuellement sélectionné par utilisateur
+✓ FRONTEND CORRIGÉ - BLReconciliation.tsx envoie maintenant selectedStoreId dans requête webhook via selectedGroupId pour ciblage précis
+✓ LOGIQUE SERVEUR PRODUCTION HARMONISÉE - routes.production.ts utilise selectedGroupId pour trouver groupe spécifique avec webhook au lieu de premier disponible
+✓ LOGIQUE SERVEUR DÉVELOPPEMENT SYNCHRONISÉE - routes.ts applique même correction pour cohérence totale entre environnements
+✓ LOGS DIAGNOSTIC AJOUTÉS - Traçabilité complète sélection groupe avec debug détaillé disponableGroups et selectedGroup
+✓ FALLBACK INTELLIGENT MAINTENU - Si pas selectedGroupId fourni, système utilise encore premier groupe avec webhook (compatibilité)
+✓ OVERLAY POSITIONNEMENT DÉFINITIF - Position fixed avec z-[9999] pour compatibilité cross-browser parfaite en production
+✓ MULTI-TENANT WEBHOOK FONCTIONNEL - Utilisateur sélectionne groupe Houdemont, webhook utilise URL Houdemont (plus confusion Frouard/Houdemont)
+
+### 2025-07-28 - WEBHOOK MODAL UX DÉFINITIVEMENT FINALISÉ : Messages Production et État Chargement Optimaux (PRÉCÉDENT)
 
 ✓ MESSAGE SUCCÈS PRODUCTION CORRIGÉ - "Webhook envoyé avec succès" changé vers "Facture envoyé avec succès" pour clarté utilisateur final
 ✓ OVERLAY CHARGEMENT IMPLÉMENTÉ - Fenêtre grisée avec overlay "Envoi de la Facture en cours" pendant traitement webhook

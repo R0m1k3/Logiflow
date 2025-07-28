@@ -590,9 +590,14 @@ export default function BLReconciliation() {
     mutationFn: async (data: WebhookForm) => {
       console.log('🚀 Webhook mutation data received:', data);
       console.log('🚀 Selected delivery:', selectedWebhookDelivery);
+      console.log('🚀 Selected store ID:', selectedStoreId);
       
       if (!selectedWebhookDelivery?.supplier?.name) {
         throw new Error("Aucun fournisseur sélectionné");
+      }
+      
+      if (!selectedStoreId) {
+        throw new Error("Aucun magasin sélectionné");
       }
       
       if (!data.pdfFile || data.pdfFile.length === 0) {
@@ -603,6 +608,8 @@ export default function BLReconciliation() {
       formData.append('supplier', selectedWebhookDelivery.supplier.name);
       formData.append('type', data.type);
       formData.append('pdfFile', data.pdfFile[0]);
+      // 🔧 CORRECTION CRITIQUE: Ajouter l'ID du groupe sélectionné
+      formData.append('selectedGroupId', selectedStoreId.toString());
       // Ajouter informations BL et référence facture pour webhook GET
       formData.append('blNumber', selectedWebhookDelivery.blNumber || 'N/A');
       formData.append('invoiceReference', selectedWebhookDelivery.invoiceReference || 'N/A');

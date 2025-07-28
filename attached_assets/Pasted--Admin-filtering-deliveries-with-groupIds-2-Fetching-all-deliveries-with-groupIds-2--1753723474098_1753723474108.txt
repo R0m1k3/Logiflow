@@ -1,0 +1,166 @@
+🚚 Admin filtering deliveries with groupIds: [ 2 ]
+
+🚚 Fetching all deliveries with groupIds: [ 2 ]
+
+🚚 Deliveries returned: 14 items
+
+5:23:12 PM [express] GET /api/deliveries 200 in 18ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/verify-invoices',
+
+  method: 'POST',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: 'admin_local',
+
+  username: 'admin',
+
+  sessionId: '48mIxQTE0WdnQfBP2MjT9gTfJSKLT9uK',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔍 [VERIFY-INVOICES-CACHE] Processing 5 invoices with cache optimization
+
+💾 [CACHE HIT] Delivery 15: Using cached result for invoice 22529139 (EXISTS)
+
+💾 [CACHE HIT] Delivery 42: Using cached result for invoice F5162713 (NOT FOUND)
+
+💾 [CACHE HIT] Delivery 26: Using cached result for invoice F5161652 (NOT FOUND)
+
+💾 [CACHE HIT] Delivery 16: Using cached result for invoice 223590 (NOT FOUND)
+
+💾 [CACHE HIT] Delivery 39: Using cached result for invoice 223604 (NOT FOUND)
+
+✅ [VERIFY-INVOICES-CACHE] Complete: 5 cache hits, 0 NocoDB calls, 5 total results
+
+5:23:12 PM [express] POST /api/verify-invoices 200 in 12ms
+
+5:23:14 PM [express] HEAD /api/health 200 in 1ms
+
+🌐 Webhook send request received (Production)
+
+🔍 Request body keys: [ 'supplier', 'type', 'blNumber', 'invoiceReference' ]
+
+🔍 File info: {
+
+  originalname: 'F5162713.pdf',
+
+  size: 643802,
+
+  mimetype: 'application/pdf'
+
+}
+
+🏪 PRODUCTION getGroups called
+
+🔍 PRODUCTION getGroups - webhook_url column exists: true
+
+🏪 PRODUCTION getGroups result: {
+
+  count: 2,
+
+  sample: {
+
+    id: 1,
+
+    name: 'Frouard',
+
+    color: '#00796B',
+
+    nocodb_config_id: 1,
+
+    nocodb_table_id: 'mrr733dfb8wtt9b',
+
+    nocodb_table_name: 'CommandeF',
+
+    invoice_column_name: 'RefFacture',
+
+    created_at: 2025-07-22T11:08:59.497Z,
+
+    updated_at: 2025-07-28T17:07:17.893Z,
+
+    nocodb_bl_column_name: 'Numero_BL',
+
+    nocodb_amount_column_name: 'Montant HT',
+
+    nocodb_supplier_column_name: 'Fournisseurs',
+
+    webhook_url: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a',
+
+    nocodbConfigId: 1,
+
+    nocodbTableId: 'mrr733dfb8wtt9b',
+
+    nocodbTableName: 'CommandeF',
+
+    invoiceColumnName: 'RefFacture',
+
+    nocodbBlColumnName: 'Numero_BL',
+
+    nocodbAmountColumnName: 'Montant HT',
+
+    nocodbSupplierColumnName: 'Fournisseurs',
+
+    webhookUrl: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a'
+
+  }
+
+}
+
+🌐 Using webhook URL: https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a
+
+📋 Webhook data prepared: {
+
+  supplier: 'JJA Five',
+
+  type: 'Facture',
+
+  filename: 'F5162713.pdf',
+
+  size: 643802,
+
+  timestamp: '2025-07-28T17:23:18.626Z',
+
+  user: { id: 'admin_local', role: 'admin', groupId: 1 }
+
+}
+
+🌐 Sending POST webhook with PDF file transmission (Production)
+
+🌐 Sending POST webhook to: https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a
+
+✅ PDF file INCLUDED in transmission (POST method)
+
+📡 Webhook response status: 500
+
+📡 Webhook response ok: false
+
+❌ POST webhook failed with status: 500
+
+❌ Error response: {"code":0,"message":"No item to return was found"}
+
+5:23:19 PM [express] POST /api/webhook/send 500 in 447ms
+
+5:23:44 PM [express] HEAD /api/health 200 in 0ms
+
+5:24:14 PM [express] HEAD /api/health 200 in 0ms
+
+5:24:21 PM [express] GET /api/user 304 in 35ms
+
+
+      
+      
+    

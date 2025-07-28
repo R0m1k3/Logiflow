@@ -3377,11 +3377,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Aucun fichier PDF fourni" });
       }
 
-      const { supplier, type, blNumber, invoiceReference } = req.body;
+      const { supplier, type, blNumber, invoiceReference, selectedGroupId } = req.body;
+      console.log('🔍 PRODUCTION WEBHOOK DEBUG - Request body:', { supplier, type, blNumber, invoiceReference, selectedGroupId });
+      
       if (!supplier || !type) {
         return res.status(400).json({ 
           message: "Fournisseur et type requis",
-          received: { supplier, type, blNumber, invoiceReference }
+          received: { supplier, type, blNumber, invoiceReference, selectedGroupId }
         });
       }
 
@@ -3397,11 +3399,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userGroups = (currentUser as any)?.groups || [];
       }
 
-      // Trouver le groupe avec une URL webhook configurée
-      const group = userGroups.find((g: any) => g.webhookUrl);
+      console.log('🔍 PRODUCTION WEBHOOK DEBUG - Available groups:', userGroups.map((g: any) => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl })));
+
+      // 🔧 CORRECTION CRITIQUE : Utiliser le groupe sélectionné au lieu du premier avec webhook
+      let group;
+      if (selectedGroupId) {
+        // Trouver le groupe spécifiquement sélectionné
+        group = userGroups.find((g: any) => g.id.toString() === selectedGroupId.toString() && g.webhookUrl);
+        console.log('🔍 PRODUCTION WEBHOOK DEBUG - Selected group found:', group ? { id: group.id, name: group.name, hasWebhook: !!group.webhookUrl } : 'NOT FOUND');
+      } else {
+        // Fallback : prendre le premier groupe avec webhook (comportement ancien)
+        group = userGroups.find((g: any) => g.webhookUrl);
+        console.log('🔍 PRODUCTION WEBHOOK DEBUG - Fallback to first group with webhook:', group ? { id: group.id, name: group.name } : 'NOT FOUND');
+      }
+      
       if (!group || !group.webhookUrl) {
         return res.status(400).json({ 
-          message: "Aucune URL webhook configurée pour vos magasins",
+          message: selectedGroupId ? 
+            `Aucune URL webhook configurée pour le magasin sélectionné (ID: ${selectedGroupId})` : 
+            "Aucune URL webhook configurée pour vos magasins",
+          selectedGroupId,
           availableGroups: userGroups.map((g: any) => ({ id: g.id, name: g.name, hasWebhook: !!g.webhookUrl }))
         });
       }
