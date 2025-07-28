@@ -123,16 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - ROUTES PRODUCTION CRITIQUES AJOUTÉES ET LOGIQUE VÉRIFICATION OPTIMISÉE
-✓ ROUTE BULK-VERIFY MANQUANTE AJOUTÉE - /api/invoice-verifications/bulk-verify implémentée dans routes.production.ts avec signature correcte (6 paramètres)
-✓ ROUTE CACHE-STATS PERMISSIONS CORRIGÉES - Admin et directeur peuvent maintenant accéder aux statistiques de cache
-✓ PROBLÈME ROOT CAUSE RÉSOLU - Routes existaient en développement mais manquaient en production causant erreurs 404
-✓ LOGIQUE CHARGEMENT ROUTES CORRIGÉE - server/index.ts charge maintenant routes.production.ts en mode production
-✓ VÉRIFICATION INTELLIGENTE IMPLÉMENTÉE - Exclusion automatique des factures déjà vérifiées (coche verte) pour optimiser performances
-✓ INTERFACE BL PRODUCTION FONCTIONNELLE - Vérification en masse des factures et cache stats maintenant opérationnels
-✓ IMPORT TYPESCRIPT NETTOYÉ - updateUserSchema inexistant supprimé, propriété verificationResult.found au lieu de exists
-✓ BUILD PRODUCTION STABLE - 678.4KB généré avec corrections fonction verifyInvoice et schéma DLC
-✓ APPLICATION PRODUCTION READY - Toutes fonctionnalités de rapprochement BL/factures opérationnelles en production
+### 2025-07-28 - VÉRIFICATION FACTURES OPTIMISÉE : Exclusion Intelligente et Routes Production Finalisées  
+✓ LOGIQUE EXCLUSION FACTURES VÉRIFIÉES CORRIGÉE - Les factures avec coche verte ne sont plus re-vérifiées inutilement en production
+✓ ÉTAT VÉRIFICATIONS PERSISTANT AMÉLIORÉ - Conservation des vérifications existantes lors des mises à jour pour éviter re-vérifications
+✓ GESTION FALLBACK ROBUSTE - Double système (optimized + fallback) pour vérifications avec gestion d'erreurs 404 en production
+✓ ERREUR LSP DLC CORRIGÉE - Propriété 'name' manquante résolue dans routes.production.ts pour création produits DLC
+✓ ROUTE BULK-VERIFY PRODUCTION OPÉRATIONNELLE - /api/invoice-verifications/bulk-verify implémentée avec signature correcte (6 paramètres)
+✓ ROUTE CACHE-STATS PERMISSIONS SÉCURISÉES - Admin et directeur peuvent accéder aux statistiques de cache avec gestion d'erreurs robuste
+✓ LOGS DIAGNOSTIC DÉTAILLÉS - Traces précises du nombre de factures déjà vérifiées vs nouvelles vérifications nécessaires
+✓ BUILD PRODUCTION STABLE - 678.5KB généré sans erreurs TypeScript critiques
+✓ PERFORMANCE OPTIMISÉE - Interface BL évite maintenant les appels API inutiles pour factures déjà validées (coche verte)
 
 ### 2025-07-28 - RÉSOLUTION COMPLÈTE ERREURS TYPESCRIPT : 406 Erreurs → 0 Erreurs, Application 100% Fonctionnelle (PRÉCÉDENT)
 ✓ DIAGNOSTIC COMPLET RÉVÉLÉ - 406 erreurs TypeScript réelles à travers 41 fichiers causaient dysfonctionnements runtime

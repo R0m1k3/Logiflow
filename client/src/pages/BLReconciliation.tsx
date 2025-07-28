@@ -166,10 +166,10 @@ export default function BLReconciliation() {
             // Exclure les livraisons sans facture ou groupId
             if (!delivery.invoiceReference || !delivery.groupId) return false;
             
-            // ✅ CORRECTION: Exclure les factures déjà vérifiées avec coche verte
+            // ✅ CORRECTION INTELLIGENTE: Exclure les factures déjà vérifiées avec coche verte
             const existingVerification = invoiceVerifications[delivery.id];
             if (existingVerification && existingVerification.exists === true) {
-              console.log(`⏭️ Skipping already verified delivery ${delivery.id} (${delivery.invoiceReference})`);
+              console.log(`⏭️ Skipping already verified delivery ${delivery.id} (${delivery.invoiceReference}) - has green checkmark`);
               return false;
             }
             
@@ -182,7 +182,7 @@ export default function BLReconciliation() {
             supplierName: delivery.supplier?.name,
           }));
         
-        console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries need verification (${filtered.length} total filtered)`);
+        console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries need verification (${filtered.length} total filtered, ${filtered.length - deliveriesToVerify.length} already verified with green checkmarks)`);
         
         if (Array.isArray(deliveriesToVerify) && deliveriesToVerify.length > 0) {
           try {
@@ -190,21 +190,20 @@ export default function BLReconciliation() {
             const verificationResults = await verifyBulkWithCache.mutateAsync(deliveriesToVerify);
             console.log('🚀 Optimized verification results:', verificationResults);
             
-            // Transform results to match existing state structure
-            const transformedResults: Record<string, { exists: boolean; error?: string; cacheHit?: boolean }> = {};
+            // ✅ CORRECTION: Conserver les vérifications existantes et ajouter les nouvelles
+            const updatedVerifications = { ...invoiceVerifications };
             verificationResults.forEach(result => {
-              transformedResults[result.deliveryId] = {
+              updatedVerifications[result.deliveryId] = {
                 exists: result.exists,
                 cacheHit: result.cacheHit
               };
             });
             
-            setInvoiceVerifications(transformedResults);
-            console.log('🔄 Cached invoice verifications state updated with:', Object.keys(transformedResults));
+            setInvoiceVerifications(updatedVerifications);
+            console.log('🔄 Cached invoice verifications state updated - total entries:', Object.keys(updatedVerifications).length);
           } catch (error) {
-            console.error('Error in optimized invoice verification:', error);
-            // Fallback to traditional verification if optimization fails
-            console.log('🔄 Falling back to traditional verification...');
+            console.error('❌ Error in optimized invoice verification:', error);
+            console.log('🔄 Falling back to traditional verification due to 404 or other error...');
             
             const fallbackReferences = deliveriesToVerify.map(d => ({
               groupId: d.groupId,
@@ -213,19 +212,28 @@ export default function BLReconciliation() {
               supplierName: d.supplierName,
             }));
             
-            const verificationResponse = await fetch('/api/verify-invoices', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ invoiceReferences: fallbackReferences }),
-            });
-            
-            if (verificationResponse.ok) {
-              const fallbackResults = await verificationResponse.json();
-              console.log('✅ Fallback verification results:', fallbackResults);
-              setInvoiceVerifications(fallbackResults);
+            try {
+              const verificationResponse = await fetch('/api/verify-invoices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ invoiceReferences: fallbackReferences }),
+              });
+              
+              if (verificationResponse.ok) {
+                const fallbackResults = await verificationResponse.json();
+                console.log('✅ Fallback verification results:', fallbackResults);
+                
+                // Conserver les vérifications existantes avec fallback
+                const updatedFallbackVerifications = { ...invoiceVerifications, ...fallbackResults };
+                setInvoiceVerifications(updatedFallbackVerifications);
+              }
+            } catch (fallbackError) {
+              console.error('❌ Both optimized and fallback verification failed:', fallbackError);
             }
           }
+        } else {
+          console.log('✅ All deliveries already verified - no API calls needed');
         }
       }
       

@@ -2914,17 +2914,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Ensure required fields including 'name'
       const dlcData = {
-        name: req.body.productName || req.body.name || 'Produit DLC',
         ...req.body,
+        name: req.body.name || req.body.productName || 'Produit DLC',
         createdBy: userId,
       };
       
-      // Ensure name is explicitly set
-      if (!dlcData.name) {
-        dlcData.name = dlcData.productName || 'Produit DLC';
-      }
-      
+      console.log('🔧 DLC Data prepared:', dlcData);
       const validatedData = insertDlcProductFrontendSchema.parse(dlcData);
 
       const dlcProduct = await storage.createDlcProduct(validatedData);
