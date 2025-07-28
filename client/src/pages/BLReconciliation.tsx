@@ -147,25 +147,16 @@ export default function BLReconciliation() {
       // Ne filtrer que les livraisons livrées (status === 'delivered')
       // Toutes les livraisons livrées doivent apparaître, même sans BL encore saisi
       
-      // ✅ SYSTÈME OPTIMISÉ : VÉRIFIE SEULEMENT LES FACTURES NON ENCORE VALIDÉES
+      // ✅ SYSTÈME CACHE INTELLIGENT : Backend décide cache vs NocoDB
       if (filtered.length > 0) {
-        const deliveriesToVerify = filtered.filter((delivery: any) => {
-          const hasInvoiceRef = delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
-          const alreadyVerified = invoiceVerifications[delivery.id]?.exists === true;
-          
-          console.log(`🔍 Initial check - Delivery ${delivery.id}:`, {
-            hasInvoiceRef,
-            alreadyVerified,
-            shouldVerify: hasInvoiceRef && !alreadyVerified
-          });
-          
-          return hasInvoiceRef && !alreadyVerified;
+        const deliveriesWithInvoices = filtered.filter((delivery: any) => {
+          return delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
         });
         
-        console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries to verify (${filtered.length} total filtered)`);
+        console.log(`🔍 BL Verification - ${deliveriesWithInvoices.length} deliveries with invoices (${filtered.length} total filtered)`);
         
-        if (Array.isArray(deliveriesToVerify) && deliveriesToVerify.length > 0) {
-          const invoiceReferencesToVerify = deliveriesToVerify.map((delivery: any) => ({
+        if (Array.isArray(deliveriesWithInvoices) && deliveriesWithInvoices.length > 0) {
+          const invoiceReferencesToVerify = deliveriesWithInvoices.map((delivery: any) => ({
             groupId: delivery.groupId,
             invoiceReference: delivery.invoiceReference,
             deliveryId: delivery.id,
@@ -173,6 +164,7 @@ export default function BLReconciliation() {
           }));
           
           try {
+            console.log('🔍 Sending all invoices to backend - cache decisions handled server-side');
             const verificationResponse = await fetch('/api/verify-invoices', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -182,16 +174,14 @@ export default function BLReconciliation() {
             
             if (verificationResponse.ok) {
               const verificationResults = await verificationResponse.json();
-              console.log('✅ Verification results:', verificationResults);
-              setInvoiceVerifications(prev => ({ ...prev, ...verificationResults }));
+              console.log('✅ Verification results (cache + new):', verificationResults);
+              setInvoiceVerifications(verificationResults);
             } else {
               console.error('❌ Verification failed:', verificationResponse.status);
             }
           } catch (error) {
             console.error('❌ Error verifying invoices:', error);
           }
-        } else {
-          console.log('💾 All invoices already verified - no API calls needed');
         }
       }
       
@@ -260,19 +250,7 @@ export default function BLReconciliation() {
     if (!deliveriesWithBL || deliveriesWithBL.length === 0) return;
     
     const invoiceReferencesToVerify = deliveriesWithBL
-      .filter((delivery: any) => {
-        // Seulement vérifier les factures qui n'ont pas encore été vérifiées avec succès
-        const hasInvoiceRef = delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
-        const alreadyVerified = invoiceVerifications[delivery.id]?.exists === true;
-        
-        console.log(`🔍 Delivery ${delivery.id} filter check:`, {
-          hasInvoiceRef,
-          alreadyVerified,
-          shouldVerify: hasInvoiceRef && !alreadyVerified
-        });
-        
-        return hasInvoiceRef && !alreadyVerified;
-      })
+      .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId)
       .map((delivery: any) => ({
         groupId: delivery.groupId,
         invoiceReference: delivery.invoiceReference,
