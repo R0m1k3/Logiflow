@@ -1272,14 +1272,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Route pour vider le cache d'une facture spécifique
+  // Route pour vider le cache d'une facture spécifique (URL standard)
   app.delete('/api/verify-invoices/cache/:invoiceRef', isAuthenticated, async (req: any, res) => {
     const { invoiceRef } = req.params;
     
     try {
       const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ error: 'Accès refusé' });
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ error: 'Accès refusé - Admin/Directeur requis' });
       }
       
       // Vider toutes les entrées de cache pour cette facture
@@ -1290,6 +1290,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         message: `Cache vidé pour la facture ${invoiceRef}` 
       });
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      res.status(500).json({ error: 'Erreur lors du nettoyage du cache' });
+    }
+  });
+
+  // Route pour vider le cache d'une facture spécifique (URL utilisée par le frontend)
+  app.post('/api/invoice-verifications/clear-cache/:invoiceRef', isAuthenticated, async (req: any, res) => {
+    const { invoiceRef } = req.params;
+    
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ error: 'Accès refusé - Admin/Directeur requis' });
+      }
+      
+      // Vider le cache pour cette facture
+      let deletedCount = 0;
+      try {
+        if (typeof storage.clearInvoiceVerificationCache === 'function') {
+          deletedCount = await storage.clearInvoiceVerificationCache(invoiceRef);
+        } else {
+          // Fallback vers la méthode existante
+          await storage.deleteInvoiceVerificationByReference(invoiceRef);
+          deletedCount = 1;
+        }
+        
+        console.log(`🗑️ [CACHE CLEAR] Cache vidé pour facture: ${invoiceRef} (${deletedCount} entrées supprimées)`);
+        res.json({ 
+          success: true, 
+          message: `Cache vidé pour la facture ${invoiceRef}`,
+          deletedRows: deletedCount 
+        });
+      } catch (dbError) {
+        // Fallback si aucune méthode n'existe
+        console.log(`⚠️ [CACHE CLEAR] Méthode de cache non disponible pour facture: ${invoiceRef}`);
+        res.json({ 
+          success: true, 
+          message: `Cache vide (méthode non disponible) pour la facture ${invoiceRef}`,
+          deletedRows: 0 
+        });
+      }
     } catch (error) {
       console.error('Error clearing cache:', error);
       res.status(500).json({ error: 'Erreur lors du nettoyage du cache' });

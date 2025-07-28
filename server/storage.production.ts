@@ -3718,6 +3718,20 @@ export class DatabaseStorage implements IStorage {
 
   // ===== MÉTHODES INVOICE VERIFICATION POUR CACHE =====
   
+  async clearInvoiceVerificationCache(invoiceReference: string): Promise<number> {
+    try {
+      const result = await pool.query(`
+        DELETE FROM invoice_verification_cache 
+        WHERE invoice_reference = $1
+      `, [invoiceReference]);
+      
+      return result.rowCount || 0;
+    } catch (error) {
+      console.error('Error clearing invoice verification cache:', error);
+      return 0;
+    }
+  }
+  
   async getInvoiceVerification(deliveryId: number): Promise<InvoiceVerification | undefined> {
     try {
       const result = await pool.query(`

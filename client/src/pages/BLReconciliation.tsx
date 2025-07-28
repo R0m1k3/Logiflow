@@ -398,6 +398,37 @@ export default function BLReconciliation() {
     mutationFn: async (data: { id: number; blNumber: string | null; blAmount: string | null; invoiceReference: string | null; invoiceAmount: string | null }) => {
       console.log('🔄 Updating reconciliation data:', data);
       
+      // 🔧 CACHE INVALIDATION - Récupérer l'ancienne référence de facture pour vider son cache si elle change
+      const originalDelivery = selectedDelivery;
+      const oldInvoiceReference = originalDelivery?.invoiceReference;
+      const newInvoiceReference = data.invoiceReference?.trim() || null;
+      
+      console.log('🔍 [CACHE CHECK] Old invoice ref:', oldInvoiceReference, '→ New invoice ref:', newInvoiceReference);
+      
+      // Si la référence de facture a changé (et qu'il y en avait une avant), vider le cache de l'ancienne
+      if (oldInvoiceReference && oldInvoiceReference !== newInvoiceReference) {
+        console.log('🗑️ [CACHE CLEAR] Invoice reference changed, clearing cache for old reference:', oldInvoiceReference);
+        try {
+          await apiRequest(`/api/invoice-verifications/clear-cache/${encodeURIComponent(oldInvoiceReference)}`, 'POST');
+          console.log('✅ [CACHE CLEAR] Successfully cleared cache for:', oldInvoiceReference);
+          
+          // Supprimer la vérification du cache côté client aussi
+          setInvoiceVerifications(prev => {
+            const updated = { ...prev };
+            delete updated[data.id];
+            return updated;
+          });
+          
+          toast({
+            title: "Cache invalidé",
+            description: `Cache vidé pour l'ancienne facture ${oldInvoiceReference}`,
+            duration: 3000,
+          });
+        } catch (error) {
+          console.error('❌ [CACHE CLEAR] Failed to clear cache:', error);
+        }
+      }
+      
       const payload = {
         blNumber: data.blNumber,
         blAmount: data.blAmount,
@@ -422,7 +453,7 @@ export default function BLReconciliation() {
           query.queryKey[0] === '/api/deliveries'
       });
       
-      // Vérifier immédiatement la facture si une référence a été ajoutée ou modifiée
+      // Vérifier immédiatement la nouvelle facture si une référence a été ajoutée ou modifiée
       if (variables.invoiceReference && variables.invoiceReference.trim() !== '') {
         const verifyInvoice = async () => {
           try {

@@ -1946,6 +1946,13 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(invoiceVerifications.lastCheckedAt));
   }
 
+  async clearInvoiceVerificationCache(invoiceReference: string): Promise<number> {
+    const result = await db
+      .delete(invoiceVerifications)
+      .where(eq(invoiceVerifications.invoiceReference, invoiceReference));
+    return result.rowCount || 0;
+  }
+
   async deleteInvoiceVerificationByReference(invoiceRef: string): Promise<void> {
     await db
       .delete(invoiceVerifications)
