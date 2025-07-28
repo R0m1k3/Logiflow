@@ -1306,24 +1306,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Seuls les administrateurs peuvent dévalider les livraisons' });
       }
       
-      // Mettre à jour la livraison pour la dévalider
-      const updatedDelivery = await storage.db.update(deliveries)
-        .set({ 
-          status: 'pending',
-          validatedAt: null 
-        })
-        .where(eq(deliveries.id, deliveryId))
-        .returning();
-      
-      if (updatedDelivery.length === 0) {
+      // Vérifier que la livraison existe
+      const delivery = await storage.getDelivery(deliveryId);
+      if (!delivery) {
         return res.status(404).json({ error: 'Livraison non trouvée' });
       }
+      
+      // Mettre à jour la livraison pour la dévalider
+      const updatedDelivery = await storage.updateDelivery(deliveryId, { 
+        status: 'pending',
+        validatedAt: null,
+        reconciled: false
+      });
       
       console.log(`🔄 [DEVALIDATE] Livraison ${deliveryId} dévalidée par admin ${user.username}`);
       res.json({ 
         success: true, 
         message: `Livraison ${deliveryId} dévalidée avec succès`,
-        delivery: updatedDelivery[0]
+        delivery: updatedDelivery
       });
     } catch (error) {
       console.error('Error devalidating delivery:', error);
