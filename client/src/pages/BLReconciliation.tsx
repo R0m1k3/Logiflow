@@ -147,10 +147,19 @@ export default function BLReconciliation() {
       // Ne filtrer que les livraisons livrées (status === 'delivered')
       // Toutes les livraisons livrées doivent apparaître, même sans BL encore saisi
       
-      // ✅ SYSTÈME SIMPLE DE VÉRIFICATION SANS CACHE
+      // ✅ SYSTÈME OPTIMISÉ : VÉRIFIE SEULEMENT LES FACTURES NON ENCORE VALIDÉES
       if (filtered.length > 0) {
         const deliveriesToVerify = filtered.filter((delivery: any) => {
-          return delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
+          const hasInvoiceRef = delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
+          const alreadyVerified = invoiceVerifications[delivery.id]?.exists === true;
+          
+          console.log(`🔍 Initial check - Delivery ${delivery.id}:`, {
+            hasInvoiceRef,
+            alreadyVerified,
+            shouldVerify: hasInvoiceRef && !alreadyVerified
+          });
+          
+          return hasInvoiceRef && !alreadyVerified;
         });
         
         console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries to verify (${filtered.length} total filtered)`);
@@ -174,13 +183,15 @@ export default function BLReconciliation() {
             if (verificationResponse.ok) {
               const verificationResults = await verificationResponse.json();
               console.log('✅ Verification results:', verificationResults);
-              setInvoiceVerifications(verificationResults);
+              setInvoiceVerifications(prev => ({ ...prev, ...verificationResults }));
             } else {
               console.error('❌ Verification failed:', verificationResponse.status);
             }
           } catch (error) {
             console.error('❌ Error verifying invoices:', error);
           }
+        } else {
+          console.log('💾 All invoices already verified - no API calls needed');
         }
       }
       
@@ -249,7 +260,19 @@ export default function BLReconciliation() {
     if (!deliveriesWithBL || deliveriesWithBL.length === 0) return;
     
     const invoiceReferencesToVerify = deliveriesWithBL
-      .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId)
+      .filter((delivery: any) => {
+        // Seulement vérifier les factures qui n'ont pas encore été vérifiées avec succès
+        const hasInvoiceRef = delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
+        const alreadyVerified = invoiceVerifications[delivery.id]?.exists === true;
+        
+        console.log(`🔍 Delivery ${delivery.id} filter check:`, {
+          hasInvoiceRef,
+          alreadyVerified,
+          shouldVerify: hasInvoiceRef && !alreadyVerified
+        });
+        
+        return hasInvoiceRef && !alreadyVerified;
+      })
       .map((delivery: any) => ({
         groupId: delivery.groupId,
         invoiceReference: delivery.invoiceReference,
