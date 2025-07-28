@@ -17,8 +17,8 @@ export class InvoiceVerificationOptimizer {
 
   private async getVerificationService(): Promise<InvoiceVerificationService> {
     if (!this.verificationService) {
-      const { InvoiceVerificationService } = await import('./services/invoiceVerificationService');
-      this.verificationService = new InvoiceVerificationService();
+      const { invoiceVerificationService } = await import('./services/invoiceVerificationService');
+      this.verificationService = invoiceVerificationService;
     }
     return this.verificationService;
   }

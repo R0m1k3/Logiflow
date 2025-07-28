@@ -316,6 +316,32 @@ export const invoiceVerifications = pgTable("invoice_verifications", {
   invoiceRefIdx: index("invoice_verifications_invoice_ref_idx").on(table.invoiceReference, table.groupId),
 }));
 
+// 🚀 INVOICE VERIFICATION CACHE: Performance optimization table for high-volume databases
+export const invoiceVerificationCache = pgTable("invoice_verification_cache", {
+  id: serial("id").primaryKey(),
+  cacheKey: varchar("cache_key").notNull().unique(), // Format: "groupId:invoiceRef:supplierName"
+  groupId: integer("group_id").notNull(),
+  invoiceReference: varchar("invoice_reference").notNull(),
+  supplierName: varchar("supplier_name"),
+  // Cached verification result
+  exists: boolean("exists").notNull(),
+  matchType: varchar("match_type").notNull(), // "EXACT", "APPROXIMATE", "NONE", "ERROR"
+  errorMessage: text("error_message"),
+  // Cache metadata
+  cacheHit: boolean("cache_hit").default(false),
+  apiCallTime: integer("api_call_time"), // Time taken for original API call in ms
+  expiresAt: timestamp("expires_at").notNull(), // Cache expiration time
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  // Index pour recherche rapide par clé de cache
+  cacheKeyIdx: index("invoice_verification_cache_key_idx").on(table.cacheKey),
+  // Index pour recherche par groupe et référence facture
+  groupInvoiceIdx: index("invoice_verification_cache_group_invoice_idx").on(table.groupId, table.invoiceReference),
+  // Index pour nettoyage des entrées expirées
+  expiresAtIdx: index("invoice_verification_cache_expires_at_idx").on(table.expiresAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userGroups: many(userGroups),
@@ -627,6 +653,13 @@ export const insertInvoiceVerificationSchema = createInsertSchema(invoiceVerific
   lastCheckedAt: true,
 });
 
+// 🚀 Invoice verification cache schema
+export const insertInvoiceVerificationCacheSchema = createInsertSchema(invoiceVerificationCache).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -654,6 +687,10 @@ export type DatabaseBackupInsert = z.infer<typeof insertDatabaseBackupSchema>;
 
 export type InvoiceVerification = typeof invoiceVerifications.$inferSelect;
 export type InsertInvoiceVerification = z.infer<typeof insertInvoiceVerificationSchema>;
+
+// 🚀 Invoice verification cache types
+export type InvoiceVerificationCache = typeof invoiceVerificationCache.$inferSelect;
+export type InsertInvoiceVerificationCache = z.infer<typeof insertInvoiceVerificationCacheSchema>;
 
 // Extended types with relations
 export type OrderWithRelations = Order & {

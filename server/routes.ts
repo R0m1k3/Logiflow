@@ -20,23 +20,21 @@ console.log('🔍 DIAGNOSTIC - Database URL exists:', hasProductionDB ? 'YES' : 
 // Alias pour compatibilité
 const isAuthenticated = requireAuth;
 const setupAuth = setupLocalAuth;
-import { 
-  insertGroupSchema, 
-  insertSupplierSchema, 
-  insertOrderSchema, 
-  insertDeliverySchema,
-  insertUserGroupSchema,
-  insertPublicitySchema,
-  insertCustomerOrderSchema,
-  insertDlcProductSchema,
-  insertDlcProductFrontendSchema,
-  insertRoleSchema,
-  insertPermissionSchema,
-  insertUserRoleSchema,
-  insertTaskSchema
-} from "@shared/schema";
 import { z } from "zod";
 import { requirePermission } from "./permissions";
+import { and, eq, desc, gte, asc, inArray, sql, or, isNull, not } from "drizzle-orm";
+import { 
+  users, groups, suppliers, orders, deliveries, userGroups, publicities, 
+  publicityParticipations, customerOrders, dlcProducts, tasks, roles, permissions,
+  rolePermissions, userRoles, insertCustomerOrderSchema, 
+  insertDlcProductSchema, insertDlcProductFrontendSchema, insertSupplierSchema, 
+  insertOrderSchema, insertDeliverySchema, insertUserSchema, insertRoleSchema, 
+  insertPermissionSchema, insertPublicitySchema, insertGroupSchema, updateUserSchema,
+  insertPublicityParticipationSchema, databaseBackups, insertDatabaseBackupSchema,
+  invoiceVerifications, insertInvoiceVerificationSchema, invoiceVerificationCache,
+  insertInvoiceVerificationCacheSchema, insertUserGroupSchema, insertTaskSchema
+} from "@shared/schema";
+import { db } from './db';
 
 // Simple permission check for development mode
 async function checkPermission(req: any, res: any, permission: string) {
@@ -1826,6 +1824,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in bulk verification:", error);
       res.status(500).json({ message: "Failed to perform bulk verification" });
+    }
+  });
+
+  // 🚀 DEV: Cache stats endpoint for performance monitoring
+  app.get('/api/invoice-verifications/cache-stats', isAuthenticated, requirePermission('admin'), async (req: any, res) => {
+    try {
+      console.log('📊 [CACHE STATS DEV] Fetching cache statistics');
+      
+      // Development implementation using Drizzle ORM
+      const [totalEntries] = await db.select({ count: sql<number>`count(*)` }).from(invoiceVerificationCache);
+      const [activeEntries] = await db.select({ count: sql<number>`count(*)` }).from(invoiceVerificationCache).where(sql`${invoiceVerificationCache.expiresAt} > NOW()`);
+      const [expiredEntries] = await db.select({ count: sql<number>`count(*)` }).from(invoiceVerificationCache).where(sql`${invoiceVerificationCache.expiresAt} <= NOW()`);
+      const [cacheHits] = await db.select({ count: sql<number>`count(*)` }).from(invoiceVerificationCache).where(eq(invoiceVerificationCache.cacheHit, true));
+      const [avgResponse] = await db.select({ avg: sql<number>`avg(${invoiceVerificationCache.apiCallTime})` }).from(invoiceVerificationCache);
+      const [lastUpdated] = await db.select({ max: sql<Date>`max(${invoiceVerificationCache.createdAt})` }).from(invoiceVerificationCache);
+      
+      const response = {
+        totalEntries: totalEntries?.count || 0,
+        activeEntries: activeEntries?.count || 0,
+        expiredEntries: expiredEntries?.count || 0,
+        cacheHits: cacheHits?.count || 0,
+        averageResponseTime: avgResponse?.avg || 0,
+        lastUpdated: lastUpdated?.max || null
+      };
+      
+      console.log('📊 [CACHE STATS DEV] Stats retrieved:', response);
+      res.json(response);
+    } catch (error) {
+      console.error('❌ [CACHE STATS DEV] Error:', error);
+      
+      // Fallback response if table doesn't exist yet in development
+      const fallbackStats = {
+        totalEntries: 0,
+        activeEntries: 0,
+        expiredEntries: 0,
+        cacheHits: 0,
+        averageResponseTime: 0,
+        lastUpdated: null,
+        status: 'table_not_exists'
+      };
+      
+      console.log('📊 [CACHE STATS DEV] Returning fallback stats:', fallbackStats);
+      res.json(fallbackStats);
     }
   });
 

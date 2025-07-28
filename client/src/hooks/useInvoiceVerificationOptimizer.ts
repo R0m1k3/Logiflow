@@ -67,10 +67,7 @@ export function useInvoiceVerificationOptimizer() {
   // Bulk optimized verification with cache
   const verifyBulkWithCache = useMutation({
     mutationFn: async (deliveries: BulkVerificationRequest[]): Promise<BulkVerificationResult[]> => {
-      return await apiRequest('/api/invoice-verifications/bulk-verify', {
-        method: 'POST',
-        body: JSON.stringify({ deliveries })
-      });
+      return await apiRequest('/api/invoice-verifications/bulk-verify', 'POST', { deliveries });
     },
     onSuccess: () => {
       // Invalidate related queries

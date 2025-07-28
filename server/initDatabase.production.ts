@@ -322,6 +322,31 @@ async function createTablesIfNotExist() {
     CREATE INDEX IF NOT EXISTS invoice_verifications_invoice_ref_idx ON invoice_verifications(invoice_reference, group_id);
   `;
 
+  // 🚀 Invoice verification cache table for performance optimization
+  const createInvoiceVerificationCacheTable = `
+    CREATE TABLE IF NOT EXISTS invoice_verification_cache (
+      id SERIAL PRIMARY KEY,
+      cache_key VARCHAR(255) UNIQUE NOT NULL, -- Format: "groupId:invoiceRef:supplierName"
+      group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      invoice_reference VARCHAR(255) NOT NULL,
+      supplier_name VARCHAR(255),
+      -- Cached verification result
+      exists BOOLEAN NOT NULL,
+      match_type VARCHAR(50) NOT NULL, -- "EXACT", "APPROXIMATE", "NONE", "ERROR"
+      error_message TEXT,
+      -- Cache metadata
+      cache_hit BOOLEAN DEFAULT FALSE,
+      api_call_time INTEGER, -- Time taken for original API call in ms
+      expires_at TIMESTAMP NOT NULL, -- Cache expiration time
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX IF NOT EXISTS invoice_verification_cache_key_idx ON invoice_verification_cache(cache_key);
+    CREATE INDEX IF NOT EXISTS invoice_verification_cache_group_invoice_idx ON invoice_verification_cache(group_id, invoice_reference);
+    CREATE INDEX IF NOT EXISTS invoice_verification_cache_expires_at_idx ON invoice_verification_cache(expires_at);
+  `;
+
   const createCalendarEventsTable = `
     CREATE TABLE IF NOT EXISTS calendar_events (
       id SERIAL PRIMARY KEY,
@@ -500,6 +525,8 @@ async function createTablesIfNotExist() {
     createTasksTable,
     createUserRolesTable,
     createDatabaseBackupsTable,
+    createInvoiceVerificationsTable, // 🚀 Invoice verifications table
+    createInvoiceVerificationCacheTable, // 🚀 NEW: Cache table for performance optimization
     createCalendarEventsTable,
     createClientOrdersTable,
     createCommandsTable,

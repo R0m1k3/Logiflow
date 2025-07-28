@@ -1142,7 +1142,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Route supprimée - utiliser /api/verify-invoices à la place
+  // Route supprimée - utiliser /api/verify-invoices
+
+  // 🚀 PRODUCTION: Cache stats endpoint for performance monitoring
+  app.get('/api/invoice-verifications/cache-stats', isAuthenticated, requirePermission('admin'), async (req: any, res) => {
+    try {
+      console.log('📊 [CACHE STATS PRODUCTION] Fetching cache statistics');
+      
+      // Production implementation using raw SQL
+      const cacheStatsQuery = `
+        SELECT 
+          COUNT(*) as total_entries,
+          COUNT(*) FILTER (WHERE expires_at > NOW()) as active_entries,
+          COUNT(*) FILTER (WHERE expires_at <= NOW()) as expired_entries,
+          COUNT(*) FILTER (WHERE cache_hit = true) as cache_hits,
+          AVG(api_call_time) as avg_response_time,
+          MAX(created_at) as last_updated
+        FROM invoice_verification_cache
+      `;
+      
+      const result = await pool.query(cacheStatsQuery);
+      const stats = result.rows[0] || {};
+      
+      const response = {
+        totalEntries: parseInt(stats.total_entries) || 0,
+        activeEntries: parseInt(stats.active_entries) || 0,
+        expiredEntries: parseInt(stats.expired_entries) || 0,
+        cacheHits: parseInt(stats.cache_hits) || 0,
+        averageResponseTime: parseFloat(stats.avg_response_time) || 0,
+        lastUpdated: stats.last_updated || null
+      };
+      
+      console.log('📊 [CACHE STATS PRODUCTION] Stats retrieved:', response);
+      res.json(response);
+    } catch (error) {
+      console.error('❌ [CACHE STATS PRODUCTION] Error:', error);
+      
+      // Robust fallback response for production deployment
+      const fallbackStats = {
+        totalEntries: 0,
+        activeEntries: 0,
+        expiredEntries: 0,
+        cacheHits: 0,
+        averageResponseTime: 0,
+        lastUpdated: null,
+        status: 'table_not_exists'
+      };
+      
+      console.log('📊 [CACHE STATS PRODUCTION] Returning fallback stats (table not exists):', fallbackStats);
+      res.json(fallbackStats);
+    }
+  });
 
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
     try {
