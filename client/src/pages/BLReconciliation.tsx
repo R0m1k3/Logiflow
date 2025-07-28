@@ -571,9 +571,7 @@ export default function BLReconciliation() {
   // Mutation pour dévalider une livraison (Admin uniquement)
   const devalidateDeliveryMutation = useMutation({
     mutationFn: async (deliveryId: number) => {
-      const response = await apiRequest(`/api/deliveries/${deliveryId}/devalidate`, {
-        method: "POST",
-      });
+      const response = await apiRequest(`/api/deliveries/${deliveryId}/devalidate`, "POST", {});
       return response;
     },
     onSuccess: () => {
@@ -1217,7 +1215,7 @@ export default function BLReconciliation() {
                           )}
                           {(user as any)?.role === 'admin' && (
                             <>
-                              {delivery.status === 'delivered' && (
+                              {delivery.reconciled && (
                                 <Button
                                   size="sm"
                                   variant="outline"
