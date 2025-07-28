@@ -1287,7 +1287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               nocodbAmountColumnName: groupConfig.nocodbAmountColumnName ?? undefined,
               nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName ?? undefined,
 
-              webhookUrl: groupConfig.webhookUrl ?? undefined
+
             },
             {
               ...nocodbConfig,
@@ -2524,14 +2524,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: group.id,
           name: group.name,
           nocodbConfigId: group.nocodbConfigId,
-          nocodbTableId: group.nocodbTableId,
-          nocodbTableName: group.nocodbTableName,
-          invoiceColumnName: group.invoiceColumnName,
-          nocodbBlColumnName: group.nocodbBlColumnName,
-          nocodbAmountColumnName: group.nocodbAmountColumnName,
-          nocodbSupplierColumnName: group.nocodbSupplierColumnName
+          nocodbTableId: group.nocodbTableId ?? undefined,
+          nocodbTableName: group.nocodbTableName ?? undefined,
+          invoiceColumnName: group.invoiceColumnName ?? undefined,
+          nocodbBlColumnName: group.nocodbBlColumnName ?? undefined,
+          nocodbAmountColumnName: group.nocodbAmountColumnName ?? undefined,
+          nocodbSupplierColumnName: group.nocodbSupplierColumnName ?? undefined
         },
-        nocodbConfig,
+        {
+          ...nocodbConfig,
+          isActive: nocodbConfig.isActive ?? true
+        },
         excludeDeliveryId
       );
 
@@ -2798,7 +2801,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const validatedData = insertDlcProductFrontendSchema.parse({
-        name: req.body.productName || req.body.name,
+        name: req.body.productName || req.body.name || 'Produit DLC',
+        productName: req.body.productName || req.body.name || 'Produit DLC',
         ...req.body,
         createdBy: userId,
       });
@@ -3190,7 +3194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Error getting BL reconciliation status:", error);
       res.status(500).json({ 
         message: "Erreur lors de la récupération du statut du rapprochement BL",
-        error: error.message 
+        error: (error as Error).message 
       });
     }
   });
@@ -3213,7 +3217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Error starting BL reconciliation:", error);
       res.status(500).json({ 
         message: "Erreur lors du démarrage du rapprochement BL",
-        error: error.message 
+        error: (error as Error).message 
       });
     }
   });
@@ -3236,7 +3240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Error stopping BL reconciliation:", error);
       res.status(500).json({ 
         message: "Erreur lors de l'arrêt du rapprochement BL",
-        error: error.message 
+        error: (error as Error).message 
       });
     }
   });

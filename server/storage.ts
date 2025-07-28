@@ -615,7 +615,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async assignUserToGroup(userGroup: InsertUserGroup): Promise<UserGroup> {
-    const [newUserGroup] = await db.insert(userGroups).values([userGroup]).returning();
+    const [newUserGroup] = await db.insert(userGroups).values(userGroup).returning();
     return newUserGroup;
   }
 
@@ -627,6 +627,8 @@ export class DatabaseStorage implements IStorage {
       )
     );
   }
+
+
 
   // Statistics
   async getMonthlyStats(year: number, month: number, groupIds?: number[]): Promise<{
