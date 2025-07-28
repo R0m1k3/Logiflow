@@ -1566,11 +1566,6 @@ export class DatabaseStorage implements IStorage {
     await db.delete(permissions).where(eq(permissions.id, id));
   }
 
-  async getPermission(id: number): Promise<Permission | undefined> {
-    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
-    return permission;
-  }
-
   async getPermissionsByCategory(category: string): Promise<Permission[]> {
     return await db
       .select()

@@ -491,24 +491,7 @@ async function createTablesIfNotExist() {
     );
   `;
 
-  const createInvoiceVerificationCacheTable = `
-    CREATE TABLE IF NOT EXISTS invoice_verification_cache (
-      id SERIAL PRIMARY KEY,
-      cache_key VARCHAR(255) UNIQUE NOT NULL,
-      delivery_id INTEGER NOT NULL,
-      group_id INTEGER NOT NULL,
-      invoice_reference VARCHAR(255) NOT NULL,
-      supplier_name VARCHAR(255),
-      exists BOOLEAN NOT NULL,
-      match_type VARCHAR(50) DEFAULT 'UNKNOWN',
-      is_valid BOOLEAN DEFAULT TRUE,
-      cache_hit BOOLEAN DEFAULT FALSE,
-      api_call_time INTEGER DEFAULT 0,
-      expires_at TIMESTAMP NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
+
 
   const createStoresTable = `
     CREATE TABLE IF NOT EXISTS stores (
