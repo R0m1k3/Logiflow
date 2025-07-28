@@ -18,7 +18,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload, Trash2, RotateCcw } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
@@ -563,6 +563,37 @@ export default function BLReconciliation() {
       toast({
         title: "Erreur",
         description: `Impossible de valider le rapprochement: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation pour dévalider une livraison (Admin uniquement)
+  const devalidateDeliveryMutation = useMutation({
+    mutationFn: async (deliveryId: number) => {
+      const response = await apiRequest(`/api/deliveries/${deliveryId}/devalidate`, {
+        method: "POST",
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Livraison dévalidée",
+        description: "La livraison a été dévalidée avec succès",
+        duration: 3000,
+      });
+      // Recharger les données
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey[0] === '/api/deliveries/bl' || 
+          query.queryKey[0] === '/api/deliveries'
+      });
+    },
+    onError: (error: any) => {
+      console.error("Error devalidating delivery:", error);
+      toast({
+        title: "Erreur",
+        description: error?.message || "Impossible de dévalider la livraison",
         variant: "destructive",
       });
     },
@@ -1185,15 +1216,29 @@ export default function BLReconciliation() {
                             </>
                           )}
                           {(user as any)?.role === 'admin' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteDelivery(delivery)}
-                              disabled={deleteDeliveryMutation.isPending}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 text-xs"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
+                            <>
+                              {delivery.status === 'delivered' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => devalidateDeliveryMutation.mutate(delivery.id)}
+                                  disabled={devalidateDeliveryMutation.isPending}
+                                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 px-2 py-1 text-xs"
+                                  title="Dévalider cette livraison (Admin uniquement)"
+                                >
+                                  <RotateCcw className="w-3 h-3" />
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteDelivery(delivery)}
+                                disabled={deleteDeliveryMutation.isPending}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 text-xs"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </td>

@@ -1931,6 +1931,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(invoiceVerifications.groupId, groupId))
       .orderBy(desc(invoiceVerifications.lastCheckedAt));
   }
+
+  async deleteInvoiceVerificationByReference(invoiceRef: string): Promise<void> {
+    await db
+      .delete(invoiceVerifications)
+      .where(eq(invoiceVerifications.invoiceReference, invoiceRef));
+  }
 }
 
 export const storage = new DatabaseStorage();

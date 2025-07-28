@@ -1174,6 +1174,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour dévalider une livraison (admins uniquement)
+  app.post('/api/deliveries/:id/devalidate', isAuthenticated, async (req: any, res) => {
+    const deliveryId = parseInt(req.params.id);
+    
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Seuls les administrateurs peuvent dévalider les livraisons' });
+      }
+      
+      // Mettre à jour la livraison pour la dévalider
+      const result = await storage.pool.query(`
+        UPDATE deliveries 
+        SET status = 'pending', validated_at = NULL, updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `, [deliveryId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Livraison non trouvée' });
+      }
+      
+      console.log(`🔄 [DEVALIDATE] Livraison ${deliveryId} dévalidée par admin ${user.username}`);
+      res.json({ 
+        success: true, 
+        message: `Livraison ${deliveryId} dévalidée avec succès`,
+        delivery: result.rows[0]
+      });
+    } catch (error) {
+      console.error('Error devalidating delivery:', error);
+      res.status(500).json({ error: 'Erreur lors de la dévalidation' });
+    }
+  });
+
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
     try {
       const { invoiceReferences } = req.body;

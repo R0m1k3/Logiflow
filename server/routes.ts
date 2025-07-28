@@ -31,8 +31,8 @@ import {
   insertOrderSchema, insertDeliverySchema, insertUserSchema, insertRoleSchema, 
   insertPermissionSchema, insertPublicitySchema, insertGroupSchema,
   insertPublicityParticipationSchema, databaseBackups, insertDatabaseBackupSchema,
-  invoiceVerifications, insertInvoiceVerificationSchema, invoiceVerificationCache,
-  insertInvoiceVerificationCacheSchema, insertUserGroupSchema, insertTaskSchema
+  invoiceVerifications, insertInvoiceVerificationSchema,
+  insertUserGroupSchema, insertTaskSchema
 } from "@shared/schema";
 import { db } from './db';
 
@@ -1283,10 +1283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Vider toutes les entrées de cache pour cette facture
-      await storage.query(`
-        DELETE FROM invoice_verification_cache 
-        WHERE invoice_reference = $1
-      `, [invoiceRef]);
+      await storage.deleteInvoiceVerificationByReference(invoiceRef);
       
       console.log(`🗑️ [CACHE CLEAR] Cache vidé pour facture: ${invoiceRef}`);
       res.json({ 
@@ -1296,6 +1293,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error clearing cache:', error);
       res.status(500).json({ error: 'Erreur lors du nettoyage du cache' });
+    }
+  });
+
+  // Route pour dévalider une livraison (admins uniquement)
+  app.post('/api/deliveries/:id/devalidate', isAuthenticated, async (req: any, res) => {
+    const deliveryId = parseInt(req.params.id);
+    
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Seuls les administrateurs peuvent dévalider les livraisons' });
+      }
+      
+      // Mettre à jour la livraison pour la dévalider
+      const updatedDelivery = await storage.db.update(deliveries)
+        .set({ 
+          status: 'pending',
+          validatedAt: null 
+        })
+        .where(eq(deliveries.id, deliveryId))
+        .returning();
+      
+      if (updatedDelivery.length === 0) {
+        return res.status(404).json({ error: 'Livraison non trouvée' });
+      }
+      
+      console.log(`🔄 [DEVALIDATE] Livraison ${deliveryId} dévalidée par admin ${user.username}`);
+      res.json({ 
+        success: true, 
+        message: `Livraison ${deliveryId} dévalidée avec succès`,
+        delivery: updatedDelivery[0]
+      });
+    } catch (error) {
+      console.error('Error devalidating delivery:', error);
+      res.status(500).json({ error: 'Erreur lors de la dévalidation' });
     }
   });
 
