@@ -18,7 +18,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload } from "lucide-react";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
