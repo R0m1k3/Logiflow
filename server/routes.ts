@@ -1770,6 +1770,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== INVOICE VERIFICATION OPTIMIZATION ROUTES =====
+  // 🚀 PERFORMANCE OPTIMIZATION: Cache verification results to avoid repeated NocoDB API calls
+
+  // Get cache statistics (must be before :deliveryId route)
+  app.get('/api/invoice-verifications/cache-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const groupId = req.query.groupId ? parseInt(req.query.groupId as string) : undefined;
+      
+      try {
+        const { invoiceVerificationOptimizer } = await import('./invoiceVerificationOptimizer');
+        const stats = await invoiceVerificationOptimizer.getCacheStats(groupId);
+        res.json(stats);
+      } catch (optimizerError) {
+        console.warn('Cache optimizer not available, returning basic stats:', optimizerError);
+        // Return basic structure for development
+        const basicStats = {
+          totalEntries: 0,
+          validEntries: 0,
+          expiredEntries: 0,
+          cacheHitRate: 0,
+          message: 'Cache system initializing...',
+          status: 'development'
+        };
+        res.json(basicStats);
+      }
+    } catch (error) {
+      console.error("Error fetching cache stats:", error);
+      res.status(500).json({ 
+        error: 'Failed to fetch cache statistics',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Optimized bulk verification with caching
+  app.post('/api/invoice-verifications/bulk-verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const { deliveries } = req.body;
+      
+      if (!Array.isArray(deliveries)) {
+        return res.status(400).json({ message: "deliveries must be an array" });
+      }
+
+      const { invoiceVerificationOptimizer } = await import('./invoiceVerificationOptimizer');
+      const results = await invoiceVerificationOptimizer.bulkVerifyWithCache(deliveries);
+      
+      res.json(results);
+    } catch (error) {
+      console.error("Error in bulk verification:", error);
+      res.status(500).json({ message: "Failed to perform bulk verification" });
+    }
+  });
+
+  // Optimized single verification with caching
+  app.post('/api/invoice-verifications/verify-with-cache', isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const { deliveryId, groupId, invoiceReference, supplierName } = req.body;
+      
+      if (!deliveryId || !groupId || !invoiceReference) {
+        return res.status(400).json({ message: "deliveryId, groupId, and invoiceReference are required" });
+      }
+
+      const { invoiceVerificationOptimizer } = await import('./invoiceVerificationOptimizer');
+      const result = await invoiceVerificationOptimizer.getVerificationWithCache(
+        deliveryId,
+        groupId,
+        invoiceReference,
+        supplierName
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error in cached verification:", error);
+      res.status(500).json({ message: "Failed to perform cached verification" });
+    }
+  });
+
+
+
+  // Clean up expired cache entries
+  app.delete('/api/invoice-verifications/cleanup/:groupId?', isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const groupId = req.params.groupId ? parseInt(req.params.groupId) : undefined;
+      
+      const { invoiceVerificationOptimizer } = await import('./invoiceVerificationOptimizer');
+      const cleanedCount = await invoiceVerificationOptimizer.cleanupExpiredCache(groupId);
+      
+      res.json({ cleanedCount });
+    } catch (error) {
+      console.error("Error cleaning up cache:", error);
+      res.status(500).json({ message: "Failed to clean up cache" });
+    }
+  });
+
+  // Invalidate cache for specific delivery
+  app.delete('/api/invoice-verifications/:deliveryId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const deliveryId = parseInt(req.params.deliveryId);
+      if (isNaN(deliveryId)) {
+        return res.status(400).json({ message: "Invalid delivery ID" });
+      }
+      
+      const { invoiceVerificationOptimizer } = await import('./invoiceVerificationOptimizer');
+      await invoiceVerificationOptimizer.invalidateCache(deliveryId);
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error invalidating cache:", error);
+      res.status(500).json({ message: "Failed to invalidate cache" });
+    }
+  });
+
+  // Get cached verification for delivery (must be last among :deliveryId routes)
+  app.get('/api/invoice-verifications/:deliveryId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { isAdmin } = await checkPermission(req, res, "reconciliation_view");
+      if (!isAdmin) return;
+
+      const deliveryId = parseInt(req.params.deliveryId);
+      if (isNaN(deliveryId)) {
+        return res.status(400).json({ message: "Invalid delivery ID" });
+      }
+      
+      const verification = await storage.getInvoiceVerification(deliveryId);
+      
+      res.json(verification || null);
+    } catch (error) {
+      console.error("Error fetching invoice verification:", error);
+      res.status(500).json({ message: "Failed to fetch invoice verification" });
+    }
+  });
+
   // ===== ROLE MANAGEMENT ROUTES =====
 
   // Roles routes

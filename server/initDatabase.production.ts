@@ -304,6 +304,24 @@ async function createTablesIfNotExist() {
     );
   `;
 
+  const createInvoiceVerificationsTable = `
+    CREATE TABLE IF NOT EXISTS invoice_verifications (
+      id SERIAL PRIMARY KEY,
+      delivery_id INTEGER NOT NULL REFERENCES deliveries(id) ON DELETE CASCADE,
+      group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      invoice_reference VARCHAR(255) NOT NULL,
+      supplier_name VARCHAR(255),
+      exists BOOLEAN NOT NULL,
+      match_type VARCHAR(50),
+      verified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      is_valid BOOLEAN DEFAULT TRUE,
+      last_checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE INDEX IF NOT EXISTS invoice_verifications_delivery_idx ON invoice_verifications(delivery_id);
+    CREATE INDEX IF NOT EXISTS invoice_verifications_invoice_ref_idx ON invoice_verifications(invoice_reference, group_id);
+  `;
+
   const createCalendarEventsTable = `
     CREATE TABLE IF NOT EXISTS calendar_events (
       id SERIAL PRIMARY KEY,

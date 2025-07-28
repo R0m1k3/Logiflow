@@ -14,6 +14,7 @@ import {
   customerOrders,
   dlcProducts,
   tasks,
+  invoiceVerifications,
   type User,
   type UpsertUser,
   type Group,
@@ -57,6 +58,8 @@ import {
   type DlcProductWithRelations,
   type Task,
   type InsertTask,
+  type InvoiceVerification,
+  type InsertInvoiceVerification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, inArray, desc, sql, gte, lte } from "drizzle-orm";
@@ -202,6 +205,13 @@ export interface IStorage {
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task>;
   deleteTask(id: number): Promise<void>;
   completeTask(id: number, completedBy?: string): Promise<void>;
+
+  // Invoice Verification operations - Performance optimization cache
+  getInvoiceVerification(deliveryId: number): Promise<InvoiceVerification | undefined>;
+  createInvoiceVerification(verification: InsertInvoiceVerification): Promise<InvoiceVerification>;
+  updateInvoiceVerification(deliveryId: number, verification: Partial<InsertInvoiceVerification>): Promise<InvoiceVerification>;
+  deleteInvoiceVerification(deliveryId: number): Promise<void>;
+  getInvoiceVerificationsByGroup(groupId: number): Promise<InvoiceVerification[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1874,6 +1884,55 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date() 
       })
       .where(eq(tasks.id, id));
+  }
+
+  // ===== INVOICE VERIFICATION OPERATIONS =====
+  // 🚀 PERFORMANCE OPTIMIZATION: Cache verification results to avoid re-checking invoices
+
+  async getInvoiceVerification(deliveryId: number): Promise<InvoiceVerification | undefined> {
+    const [verification] = await db
+      .select()
+      .from(invoiceVerifications)
+      .where(eq(invoiceVerifications.deliveryId, deliveryId));
+    return verification;
+  }
+
+  async createInvoiceVerification(verification: InsertInvoiceVerification): Promise<InvoiceVerification> {
+    const [newVerification] = await db
+      .insert(invoiceVerifications)
+      .values({
+        ...verification,
+        verifiedAt: new Date(),
+        lastCheckedAt: new Date(),
+      })
+      .returning();
+    return newVerification;
+  }
+
+  async updateInvoiceVerification(deliveryId: number, verification: Partial<InsertInvoiceVerification>): Promise<InvoiceVerification> {
+    const [updatedVerification] = await db
+      .update(invoiceVerifications)
+      .set({
+        ...verification,
+        lastCheckedAt: new Date(),
+      })
+      .where(eq(invoiceVerifications.deliveryId, deliveryId))
+      .returning();
+    return updatedVerification;
+  }
+
+  async deleteInvoiceVerification(deliveryId: number): Promise<void> {
+    await db
+      .delete(invoiceVerifications)
+      .where(eq(invoiceVerifications.deliveryId, deliveryId));
+  }
+
+  async getInvoiceVerificationsByGroup(groupId: number): Promise<InvoiceVerification[]> {
+    return await db
+      .select()
+      .from(invoiceVerifications)
+      .where(eq(invoiceVerifications.groupId, groupId))
+      .orderBy(desc(invoiceVerifications.lastCheckedAt));
   }
 }
 

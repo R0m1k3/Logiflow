@@ -17,7 +17,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle, Send, Upload } from "lucide-react";
+import { useInvoiceVerificationOptimizer } from "@/hooks/useInvoiceVerificationOptimizer";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle, Send, Upload, Zap } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
@@ -95,6 +96,20 @@ export default function BLReconciliation() {
   const [selectedWebhookDelivery, setSelectedWebhookDelivery] = useState<any>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   
+  // 🚀 PERFORMANCE OPTIMIZATION: Use invoice verification optimizer
+  const {
+    verifyBulkWithCache,
+    getCacheStats,
+    cleanupExpiredCache,
+    invalidateDeliveryCache
+  } = useInvoiceVerificationOptimizer();
+  
+  // Cache statistics for the selected store
+  const { data: cacheStats } = getCacheStats(selectedStoreId || undefined);
+  
+  // État pour afficher les stats de cache
+  const [showCacheStats, setShowCacheStats] = useState(false);
+  
   // Form pour webhook
   const webhookForm = useForm<WebhookForm>({
     resolver: zodResolver(webhookSchema),
@@ -144,34 +159,58 @@ export default function BLReconciliation() {
       // Ne filtrer que les livraisons livrées (status === 'delivered')
       // Toutes les livraisons livrées doivent apparaître, même sans BL encore saisi
       
-      // Verify invoice references for deliveries with invoice data
+      // 🚀 PERFORMANCE OPTIMIZATION: Use cached verification system
       if (filtered.length > 0) {
-        const invoiceReferencesToVerify = filtered
+        const deliveriesToVerify = filtered
           .filter((delivery: any) => delivery.invoiceReference && delivery.groupId)
           .map((delivery: any) => ({
+            id: delivery.id,
             groupId: delivery.groupId,
             invoiceReference: delivery.invoiceReference,
-            deliveryId: delivery.id,
-            supplierName: delivery.supplier?.name, // Include supplier name for verification
+            supplierName: delivery.supplier?.name,
           }));
         
-        if (Array.isArray(invoiceReferencesToVerify) && invoiceReferencesToVerify.length > 0) {
+        if (Array.isArray(deliveriesToVerify) && deliveriesToVerify.length > 0) {
           try {
+            // Use optimized bulk verification with cache
+            const verificationResults = await verifyBulkWithCache.mutateAsync(deliveriesToVerify);
+            console.log('🚀 Optimized verification results:', verificationResults);
+            
+            // Transform results to match existing state structure
+            const transformedResults: Record<string, { exists: boolean; error?: string; cacheHit?: boolean }> = {};
+            verificationResults.forEach(result => {
+              transformedResults[result.deliveryId] = {
+                exists: result.exists,
+                cacheHit: result.cacheHit
+              };
+            });
+            
+            setInvoiceVerifications(transformedResults);
+            console.log('🔄 Cached invoice verifications state updated with:', Object.keys(transformedResults));
+          } catch (error) {
+            console.error('Error in optimized invoice verification:', error);
+            // Fallback to traditional verification if optimization fails
+            console.log('🔄 Falling back to traditional verification...');
+            
+            const fallbackReferences = deliveriesToVerify.map(d => ({
+              groupId: d.groupId,
+              invoiceReference: d.invoiceReference,
+              deliveryId: d.id,
+              supplierName: d.supplierName,
+            }));
+            
             const verificationResponse = await fetch('/api/verify-invoices', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ invoiceReferences: invoiceReferencesToVerify }),
+              body: JSON.stringify({ invoiceReferences: fallbackReferences }),
             });
             
             if (verificationResponse.ok) {
-              const verificationResults = await verificationResponse.json();
-              console.log('✅ Verification results:', verificationResults);
-              setInvoiceVerifications(verificationResults);
-              console.log('🔄 Invoice verifications state updated with:', Object.keys(verificationResults));
+              const fallbackResults = await verificationResponse.json();
+              console.log('✅ Fallback verification results:', fallbackResults);
+              setInvoiceVerifications(fallbackResults);
             }
-          } catch (error) {
-            console.error('Error verifying invoice references:', error);
           }
         }
       }
@@ -816,9 +855,94 @@ export default function BLReconciliation() {
               <RefreshCw className={`h-4 w-4 mr-2 ${isVerifyingInvoices ? 'animate-spin' : ''}`} />
               Vérifier factures
             </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCacheStats(!showCacheStats)}
+              className="h-9 px-3"
+              title="Afficher les statistiques de cache"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Cache
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* 🚀 PERFORMANCE OPTIMIZATION: Cache Statistics Panel */}
+      {showCacheStats && (
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <Zap className="h-5 w-5 text-blue-600 mr-2" />
+              <h3 className="text-lg font-semibold text-blue-900">Optimisation des Vérifications</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowCacheStats(false)}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="text-sm text-gray-600">Entrées en cache</div>
+              <div className="text-xl font-bold text-blue-800">
+                {cacheStats?.totalEntries || 0}
+              </div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="text-sm text-gray-600">Entrées valides</div>
+              <div className="text-xl font-bold text-green-600">
+                {cacheStats?.validEntries || 0}
+              </div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="text-sm text-gray-600">Entrées expirées</div>
+              <div className="text-xl font-bold text-orange-600">
+                {cacheStats?.expiredEntries || 0}
+              </div>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <div className="text-sm text-gray-600">Taux de réussite</div>
+              <div className="text-xl font-bold text-blue-600">
+                {cacheStats?.cacheHitRate ? `${Math.round(cacheStats.cacheHitRate * 100)}%` : '-'}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => cleanupExpiredCache.mutate(selectedStoreId || undefined)}
+              disabled={cleanupExpiredCache.isPending}
+              className="h-8"
+            >
+              {cleanupExpiredCache.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Nettoyer cache expiré
+            </Button>
+            
+            <div className="text-sm text-gray-600">
+              Les résultats de vérification sont mis en cache pour améliorer les performances et réduire les appels à l'API NocoDB.
+            </div>
+          </div>
+          
+          {cleanupExpiredCache.isSuccess && (
+            <div className="mt-2 text-sm text-green-600">
+              ✅ {cleanupExpiredCache.data?.cleanedCount || 0} entrées expirées supprimées
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Deliveries List */}
       {filteredDeliveries.length === 0 ? (

@@ -291,6 +291,31 @@ export const databaseBackups = pgTable("database_backups", {
   status: varchar("status").default("creating"), // 'creating', 'completed', 'failed'
 });
 
+// Invoice Verifications - Cache des vérifications NocoDB pour optimisation
+export const invoiceVerifications = pgTable("invoice_verifications", {
+  id: serial("id").primaryKey(),
+  deliveryId: integer("delivery_id").notNull(), // ID de la livraison
+  groupId: integer("group_id").notNull(), // ID du magasin
+  invoiceReference: varchar("invoice_reference").notNull(), // Référence facture vérifiée
+  supplierName: varchar("supplier_name"), // Nom du fournisseur
+  
+  // Résultats de vérification NocoDB
+  exists: boolean("exists").notNull(), // true si facture trouvée
+  matchType: varchar("match_type"), // BL_NUMBER, SUPPLIER_AMOUNT, SUPPLIER_DATE, NONE
+  
+  // Métadonnées de vérification
+  verifiedAt: timestamp("verified_at").defaultNow(), // Quand la vérification a été faite
+  isValid: boolean("is_valid").default(true), // false si vérification expirée/invalide
+  
+  // Pour éviter re-vérifications inutiles
+  lastCheckedAt: timestamp("last_checked_at").defaultNow(),
+}, (table) => ({
+  // Index pour recherche rapide par livraison
+  deliveryIdx: index("invoice_verifications_delivery_idx").on(table.deliveryId),
+  // Index pour recherche par référence facture (éviter doublons)
+  invoiceRefIdx: index("invoice_verifications_invoice_ref_idx").on(table.invoiceReference, table.groupId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   userGroups: many(userGroups),
@@ -352,7 +377,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   deliveries: many(deliveries),
 }));
 
-export const deliveriesRelations = relations(deliveries, ({ one }) => ({
+export const deliveriesRelations = relations(deliveries, ({ one, many }) => ({
   order: one(orders, {
     fields: [deliveries.orderId],
     references: [orders.id],
@@ -369,6 +394,7 @@ export const deliveriesRelations = relations(deliveries, ({ one }) => ({
     fields: [deliveries.createdBy],
     references: [users.id],
   }),
+  verifications: many(invoiceVerifications),
 }));
 
 export const publicitiesRelations = relations(publicities, ({ one, many }) => ({
@@ -466,6 +492,17 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   }),
   group: one(groups, {
     fields: [tasks.groupId],
+    references: [groups.id],
+  }),
+}));
+
+export const invoiceVerificationsRelations = relations(invoiceVerifications, ({ one }) => ({
+  delivery: one(deliveries, {
+    fields: [invoiceVerifications.deliveryId],
+    references: [deliveries.id],
+  }),
+  group: one(groups, {
+    fields: [invoiceVerifications.groupId],
     references: [groups.id],
   }),
 }));
@@ -584,6 +621,12 @@ export const insertDatabaseBackupSchema = createInsertSchema(databaseBackups).om
   tablesCount: true,
 });
 
+export const insertInvoiceVerificationSchema = createInsertSchema(invoiceVerifications).omit({
+  id: true,
+  verifiedAt: true,
+  lastCheckedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -608,6 +651,9 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 export type DatabaseBackup = typeof databaseBackups.$inferSelect;
 export type DatabaseBackupInsert = z.infer<typeof insertDatabaseBackupSchema>;
+
+export type InvoiceVerification = typeof invoiceVerifications.$inferSelect;
+export type InsertInvoiceVerification = z.infer<typeof insertInvoiceVerificationSchema>;
 
 // Extended types with relations
 export type OrderWithRelations = Order & {
