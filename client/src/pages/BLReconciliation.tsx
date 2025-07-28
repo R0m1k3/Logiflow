@@ -143,12 +143,9 @@ export default function BLReconciliation() {
       console.log('🚚 BL Reconciliation - All deliveries received:', Array.isArray(deliveries) ? deliveries.length : 'NOT_ARRAY', deliveries);
       
       // Filtrer les livraisons pour rapprochement :
-      // 1. Livraisons livrées (status === 'delivered')
-      // 2. Livraisons dévalidées qui ont des données BL (blNumber ou invoiceReference)
+      // Toutes les livraisons qui ont été validées (livrées) pour permettre la saisie de données BL/facture
       const filtered = Array.isArray(deliveries) ? deliveries.filter((d: any) => {
-        const isDelivered = d.status === 'delivered';
-        const isDevalidatedWithBLData = d.status === 'pending' && d.validatedAt && (d.blNumber || d.invoiceReference);
-        return isDelivered || isDevalidatedWithBLData;
+        return d.status === 'delivered';
       }) : [];
       
       console.log('🚚 BL Reconciliation - Filtered deliveries:', filtered.length, filtered);

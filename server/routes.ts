@@ -1312,10 +1312,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Livraison non trouvée' });
       }
       
-      // Mettre à jour la livraison pour la dévalider
+      // Dévalider le rapprochement : vider les données BL/facture mais garder la livraison livrée
       const updatedDelivery = await storage.updateDelivery(deliveryId, { 
-        status: 'pending',
-        validatedAt: null,
+        blNumber: null,
+        blAmount: null,
+        invoiceReference: null,
+        invoiceAmount: null,
         reconciled: false
       });
       
