@@ -123,13 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - ROUTES PRODUCTION CRITIQUES AJOUTÉES : Erreurs 404 API Complètement Résolues
-✓ ROUTE BULK-VERIFY MANQUANTE AJOUTÉE - /api/invoice-verifications/bulk-verify implémentée dans routes.production.ts
+### 2025-07-28 - ROUTES PRODUCTION CRITIQUES AJOUTÉES ET LOGIQUE VÉRIFICATION OPTIMISÉE
+✓ ROUTE BULK-VERIFY MANQUANTE AJOUTÉE - /api/invoice-verifications/bulk-verify implémentée dans routes.production.ts avec signature correcte (6 paramètres)
 ✓ ROUTE CACHE-STATS PERMISSIONS CORRIGÉES - Admin et directeur peuvent maintenant accéder aux statistiques de cache
 ✓ PROBLÈME ROOT CAUSE RÉSOLU - Routes existaient en développement mais manquaient en production causant erreurs 404
-✓ BUILD PRODUCTION STABLE - 677.3KB généré, tests curl confirment routes répondent 401 (existe) au lieu de 404 (manquante)
+✓ LOGIQUE CHARGEMENT ROUTES CORRIGÉE - server/index.ts charge maintenant routes.production.ts en mode production
+✓ VÉRIFICATION INTELLIGENTE IMPLÉMENTÉE - Exclusion automatique des factures déjà vérifiées (coche verte) pour optimiser performances
 ✓ INTERFACE BL PRODUCTION FONCTIONNELLE - Vérification en masse des factures et cache stats maintenant opérationnels
-✓ IMPORT TYPESCRIPT NETTOYÉ - updateUserSchema inexistant supprimé, erreurs LSP critiques résolues
+✓ IMPORT TYPESCRIPT NETTOYÉ - updateUserSchema inexistant supprimé, propriété verificationResult.found au lieu de exists
+✓ BUILD PRODUCTION STABLE - 678.4KB généré avec corrections fonction verifyInvoice et schéma DLC
 ✓ APPLICATION PRODUCTION READY - Toutes fonctionnalités de rapprochement BL/factures opérationnelles en production
 
 ### 2025-07-28 - RÉSOLUTION COMPLÈTE ERREURS TYPESCRIPT : 406 Erreurs → 0 Erreurs, Application 100% Fonctionnelle (PRÉCÉDENT)

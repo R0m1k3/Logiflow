@@ -1208,7 +1208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               id: group.id,
               name: group.name,
-              nocodbConfigId: group.nocodbConfigId,
+              nocodbConfigId: group.nocodbConfigId ?? undefined,
               nocodbTableId: group.nocodbTableId ?? undefined,
               nocodbTableName: group.nocodbTableName ?? undefined,
               invoiceColumnName: group.invoiceColumnName ?? undefined,
@@ -2914,12 +2914,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const validatedData = insertDlcProductFrontendSchema.parse({
+      const dlcData = {
         name: req.body.productName || req.body.name || 'Produit DLC',
-        productName: req.body.productName || req.body.name || 'Produit DLC',
         ...req.body,
         createdBy: userId,
-      });
+      };
+      
+      // Ensure name is explicitly set
+      if (!dlcData.name) {
+        dlcData.name = dlcData.productName || 'Produit DLC';
+      }
+      
+      const validatedData = insertDlcProductFrontendSchema.parse(dlcData);
 
       const dlcProduct = await storage.createDlcProduct(validatedData);
       console.log('✅ DLC Product created successfully:', dlcProduct.id);

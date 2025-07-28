@@ -162,13 +162,27 @@ export default function BLReconciliation() {
       // 🚀 PERFORMANCE OPTIMIZATION: Use cached verification system
       if (filtered.length > 0) {
         const deliveriesToVerify = filtered
-          .filter((delivery: any) => delivery.invoiceReference && delivery.groupId)
+          .filter((delivery: any) => {
+            // Exclure les livraisons sans facture ou groupId
+            if (!delivery.invoiceReference || !delivery.groupId) return false;
+            
+            // ✅ CORRECTION: Exclure les factures déjà vérifiées avec coche verte
+            const existingVerification = invoiceVerifications[delivery.id];
+            if (existingVerification && existingVerification.exists === true) {
+              console.log(`⏭️ Skipping already verified delivery ${delivery.id} (${delivery.invoiceReference})`);
+              return false;
+            }
+            
+            return true;
+          })
           .map((delivery: any) => ({
             id: delivery.id,
             groupId: delivery.groupId,
             invoiceReference: delivery.invoiceReference,
             supplierName: delivery.supplier?.name,
           }));
+        
+        console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries need verification (${filtered.length} total filtered)`);
         
         if (Array.isArray(deliveriesToVerify) && deliveriesToVerify.length > 0) {
           try {
