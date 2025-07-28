@@ -152,10 +152,57 @@ export default function BLReconciliation() {
       
       // Livraisons pour rapprochement : livrées + dévalidées avec données BL
       
-      // ✅ OPTIMISATION ANTI-SPAM : Plus de vérification automatique lors du chargement
-      // La vérification se fait maintenant uniquement :
-      // 1. Manuellement via le bouton "Actualiser vérifications"  
-      // 2. Automatiquement après enregistrement des données dans le modal
+      // ✅ OPTIMISATION ANTI-SPAM : Vérifier seulement les factures avec données existantes depuis le cache
+      // Pas de nouveaux appels NocoDB - seulement afficher les résultats déjà en cache
+      if (filtered.length > 0) {
+        const deliveriesWithInvoices = filtered.filter((delivery: any) => {
+          return delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
+        });
+        
+        if (Array.isArray(deliveriesWithInvoices) && deliveriesWithInvoices.length > 0) {
+          console.log(`💾 BL Cache Check - ${deliveriesWithInvoices.length} factures à vérifier (depuis cache uniquement)`);
+          console.log('🔍 DEBUG - Deliveries with invoices:', deliveriesWithInvoices.map(d => ({ id: d.id, invoiceRef: d.invoiceReference, groupId: d.groupId })));
+          
+          const invoiceReferencesToVerify = deliveriesWithInvoices.map((delivery: any) => ({
+            groupId: delivery.groupId,
+            invoiceReference: delivery.invoiceReference,
+            deliveryId: delivery.id,
+            supplierName: delivery.supplier?.name,
+          }));
+          
+          console.log('🔍 DEBUG - Invoice references to verify:', invoiceReferencesToVerify);
+          
+          try {
+            const verificationResponse = await fetch('/api/verify-invoices', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ invoiceReferences: invoiceReferencesToVerify }),
+            });
+            
+            console.log('🔍 DEBUG - Verification response status:', verificationResponse.status);
+            
+            if (verificationResponse.ok) {
+              const verificationResults = await verificationResponse.json();
+              console.log('🔍 DEBUG - Verification results:', verificationResults);
+              
+              // Compter les résultats depuis le cache
+              const cacheHits = Object.values(verificationResults).filter((result: any) => result.cached).length;
+              const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
+              
+              console.log(`✅ Optimisation Cache: ${cacheHits} cache hits, ${newVerifications} nouvelles vérifications`);
+              
+              setInvoiceVerifications(verificationResults);
+            } else {
+              console.error('❌ Verification failed:', verificationResponse.status);
+            }
+          } catch (error) {
+            console.error('❌ Error verifying invoices:', error);
+          }
+        } else {
+          console.log('🔍 DEBUG - No deliveries with invoices found or invalid array');
+        }
+      }
       
       // CORRECTION PRODUCTION: Trier spécifiquement par date de livraison validée
       const sorted = filtered.sort((a: any, b: any) => {
