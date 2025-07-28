@@ -2759,7 +2759,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log('🔧 DLC Data prepared:', dlcData);
-      const validatedData = insertDlcProductFrontendSchema.parse(dlcData);
+      
+      // Validate data with proper handling of name field
+      const validatedData = insertDlcProductFrontendSchema.parse({
+        ...dlcData,
+        // Ensure name is always present for validation
+        name: dlcData.name || dlcData.productName || 'Produit DLC'
+      });
 
       const dlcProduct = await storage.createDlcProduct(validatedData);
       console.log('✅ DLC Product created successfully:', dlcProduct.id);
