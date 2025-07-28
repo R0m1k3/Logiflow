@@ -123,6 +123,14 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
+### 2025-07-28 - CORRECTION CRITIQUE PRODUCTION : Route PUT Deliveries Syntaxe Complètement Réparée
+✓ ERREUR SYNTAXE CRITIQUE IDENTIFIÉE - Ligne `if (!resu` tronquée dans routes.production.ts empêchait complètement le fonctionnement de la route PUT /api/deliveries/:id
+✓ SYNTAXE COMPLÈTEMENT CORRIGÉE - `if (!result.success) {` avec gestion d'erreurs Zod appropriée restaurée
+✓ VALIDATION PRODUCTION OPÉRATIONNELLE - Route PUT /api/deliveries/:id maintenant fonctionnelle pour modifications des données de rapprochement
+✓ PROBLÈME CHAMP MONTANT FACTURE RÉSOLU - Les champs invoiceAmount peuvent maintenant être effacés et sauvegardés comme null en production
+✓ FORMULAIRE FRONTEND OPTIMISÉ - Valeurs par défaut du formulaire changées de chaînes vides vers undefined pour éviter remise automatique des valeurs
+✓ GESTION DONNÉES NETTOYÉES - Logique cleanedData préservée pour conversion robuste des chaînes vides vers null
+
 ### 2025-07-27 - AFFICHAGE ICÔNES WEBHOOK CONDITIONNEL : Masquage Lors de Coche Verte Finalisé
 ✓ LOGIQUE WEBHOOK INTELLIGENTE - Icônes webhook n'apparaissent plus quand facture est vérifiée (coche verte) dans NocoDB
 ✓ CONDITION DOUBLE VÉRIFICATION - Affichage seulement si webhookUrl configuré ET pas de verification.exists === true
