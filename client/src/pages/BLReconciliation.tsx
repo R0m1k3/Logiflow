@@ -141,11 +141,19 @@ export default function BLReconciliation() {
       
       const deliveries = await response.json();
       console.log('🚚 BL Reconciliation - All deliveries received:', Array.isArray(deliveries) ? deliveries.length : 'NOT_ARRAY', deliveries);
-      const filtered = Array.isArray(deliveries) ? deliveries.filter((d: any) => d.status === 'delivered') : [];
+      
+      // Filtrer les livraisons pour rapprochement :
+      // 1. Livraisons livrées (status === 'delivered')
+      // 2. Livraisons dévalidées qui ont des données BL (blNumber ou invoiceReference)
+      const filtered = Array.isArray(deliveries) ? deliveries.filter((d: any) => {
+        const isDelivered = d.status === 'delivered';
+        const isDevalidatedWithBLData = d.status === 'pending' && d.validatedAt && (d.blNumber || d.invoiceReference);
+        return isDelivered || isDevalidatedWithBLData;
+      }) : [];
+      
       console.log('🚚 BL Reconciliation - Filtered deliveries:', filtered.length, filtered);
       
-      // Ne filtrer que les livraisons livrées (status === 'delivered')
-      // Toutes les livraisons livrées doivent apparaître, même sans BL encore saisi
+      // Livraisons pour rapprochement : livrées + dévalidées avec données BL
       
       // ✅ SYSTÈME CACHE INTELLIGENT : Backend décide cache vs NocoDB
       if (filtered.length > 0) {

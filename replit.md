@@ -123,7 +123,20 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - OPTIMISATION CACHE DÉFINITIVEMENT FINALISÉE : Système Intelligent Sans Doublons Opérationnel
+### 2025-07-28 - SYSTÈME DÉVALIDATION LIVRAISONS FINALISÉ : Contrôle Admin Complet Opérationnel
+
+✓ BOUTON DÉVALIDATION CRÉÉ - Icône RotateCcw orange visible uniquement pour admins sur livraisons réconciliées (reconciled = true)
+✓ ROUTE API DÉVELOPPEMENT CORRIGÉE - /api/deliveries/:id/devalidate utilise storage.updateDelivery() avec gestion erreurs robuste
+✓ ROUTE API PRODUCTION CONFIRMÉE - Route dévalidation présente et fonctionnelle en production avec même logique
+✓ LOGIQUE DÉVALIDATION COMPLÈTE - Met à jour status: 'pending', validatedAt: null, reconciled: false lors dévalidation
+✓ CONDITION AFFICHAGE CORRIGÉE - Bouton apparaît uniquement sur livraisons reconciled (pas simplement delivered)
+✓ INTERFACE RÉACTIVE VALIDÉE - Livraison dévalidée disparaît immédiatement de la page rapprochement comme attendu
+✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider avec vérifications backend complètes
+✓ TOAST NOTIFICATIONS INTÉGRÉES - Messages succès/erreur avec rechargement automatique cache livraisons
+✓ TESTS FONCTIONNELS CONFIRMÉS - Dévalidation livraison 119 testée avec succès, liste rapprochement mise à jour
+✓ SYSTÈME PRODUCTION READY - Fonctionnalité entièrement opérationnelle développement et production
+
+### 2025-07-28 - OPTIMISATION CACHE DÉFINITIVEMENT FINALISÉE : Système Intelligent Sans Doublons Opérationnel (PRÉCÉDENT)
 
 ✓ DOUBLONS VÉRIFICATION ÉLIMINÉS - Suppression appels multiples verifyAllInvoices() du useEffect changement magasin
 ✓ APPEL UNIQUE INTELLIGENT - Seul fetchDeliveries() fait la vérification automatique avec cache optimization
