@@ -1153,120 +1153,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "invoiceReferences must be an array" });
       }
 
-      console.log('🔍 [VERIFY-INVOICES] Processing', invoiceReferences.length, 'invoices for verification');
+      console.log('🔍 [VERIFY-INVOICES-CACHE] Processing', invoiceReferences.length, 'invoices with cache optimization');
+      
+      const results: Record<number, any> = {};
+      const referencesToVerify: any[] = [];
 
-      // Use the singleton instance of the verification service
-      const { invoiceVerificationService } = await import('./services/invoiceVerificationService.js');
-      
-      const results: any = {};
-      
+      // 1️⃣ FIRST: Check cache for existing verifications
       for (const ref of invoiceReferences) {
         try {
-          console.log(`🔍 [VERIFY-INVOICES] Processing delivery ${ref.deliveryId} - Invoice: ${ref.invoiceReference}, Supplier: ${ref.supplierName}, Group: ${ref.groupId}`);
+          const cachedVerification = await storage.getInvoiceVerification(ref.deliveryId);
           
-          // Get group and nocodb configurations
-          const groupConfig = await storage.getGroup(ref.groupId);
-          console.log(`🔍 [VERIFY-INVOICES] Group config retrieved:`, groupConfig ? {
-            id: groupConfig.id,
-            name: groupConfig.name,
-            nocodbConfigId: groupConfig.nocodbConfigId,
-            nocodbTableId: groupConfig.nocodbTableId,
-            invoiceColumnName: groupConfig.invoiceColumnName,
-            nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName
-          } : 'NULL');
-          
-          if (!groupConfig || !groupConfig.nocodbConfigId) {
-            console.log(`❌ [VERIFY-INVOICES] Missing NocoDB config for group ${ref.groupId}`);
-            results[ref.deliveryId] = { 
-              exists: false, 
-              error: 'Configuration NocoDB manquante pour ce groupe' 
+          if (cachedVerification && cachedVerification.isValid) {
+            console.log(`💾 [CACHE HIT] Delivery ${ref.deliveryId}: Using cached result (${cachedVerification.exists ? 'EXISTS' : 'NOT FOUND'})`);
+            results[ref.deliveryId] = {
+              exists: cachedVerification.exists,
+              matchType: cachedVerification.matchType,
+              cached: true
             };
-            continue;
+          } else {
+            console.log(`🔍 [CACHE MISS] Delivery ${ref.deliveryId}: Need to verify with NocoDB`);
+            referencesToVerify.push(ref);
           }
-
-          const nocodbConfig = await storage.getNocodbConfig(groupConfig.nocodbConfigId);
-          console.log(`🔍 [VERIFY-INVOICES] NocoDB config retrieved:`, nocodbConfig ? {
-            id: nocodbConfig.id,
-            name: nocodbConfig.name,
-            baseUrl: nocodbConfig.baseUrl,
-            projectId: nocodbConfig.projectId,
-            isActive: nocodbConfig.isActive
-          } : 'NULL');
-          
-          // 🚨 ULTRA-DETAILED DEBUG FOR PRODUCTION PROJECT_ID ISSUE
-          console.log(`🚨 [CRITICAL-DEBUG] ULTRA-DETAILED NocodbConfig Analysis:`, {
-            configId: groupConfig.nocodbConfigId,
-            configExists: !!nocodbConfig,
-            rawConfig: nocodbConfig,
-            projectIdValue: nocodbConfig?.projectId,
-            projectIdType: typeof nocodbConfig?.projectId,
-            projectIdLength: nocodbConfig?.projectId?.length,
-            expectedProjectId: 'pcg4uw79ukvycxc',
-            isProjectIdCorrect: nocodbConfig?.projectId === 'pcg4uw79ukvycxc',
-            willConstructUrl: nocodbConfig ? `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}` : 'NO_CONFIG'
-          });
-          
-          if (!nocodbConfig) {
-            console.log(`❌ [VERIFY-INVOICES] NocoDB config not found for ID ${groupConfig.nocodbConfigId}`);
-            results[ref.deliveryId] = { 
-              exists: false, 
-              error: 'Configuration NocoDB introuvable' 
-            };
-            continue;
-          }
-
-          console.log(`🚀 [VERIFY-INVOICES] Starting verification with service for delivery ${ref.deliveryId}`);
-          console.log(`🚀 [VERIFY-INVOICES] Parameters:`, {
-            invoiceRef: ref.invoiceReference,
-            supplierName: ref.supplierName,
-            amount: parseFloat(ref.amount || '0'),
-            groupId: groupConfig.id,
-            nocodbUrl: `${nocodbConfig.baseUrl}/api/v1/db/data/noco/${nocodbConfig.projectId}/${groupConfig.nocodbTableId}`
-          });
-
-          const result = await invoiceVerificationService.verifyInvoice(
-            ref.invoiceReference,
-            ref.supplierName,
-            parseFloat(ref.amount || '0'),
-            {
-              ...groupConfig,
-              nocodbConfigId: groupConfig.nocodbConfigId ?? undefined,
-              nocodbTableId: groupConfig.nocodbTableId ?? undefined,
-              nocodbTableName: groupConfig.nocodbTableName ?? undefined,
-              invoiceColumnName: groupConfig.invoiceColumnName ?? undefined,
-              nocodbBlColumnName: groupConfig.nocodbBlColumnName ?? undefined,
-              nocodbAmountColumnName: groupConfig.nocodbAmountColumnName ?? undefined,
-              nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName ?? undefined,
-
-
-            },
-            {
-              ...nocodbConfig,
-              isActive: nocodbConfig?.isActive ?? true
-            },
-            ref.deliveryId
-          );
-          
-          console.log(`🔍 [VERIFY-INVOICES] Service result for delivery ${ref.deliveryId}:`, {
-            found: result.found,
-            matchType: result.matchType,
-            hasInvoice: !!result.invoice,
-            verificationDetails: result.verificationDetails
-          });
-          
-          results[ref.deliveryId] = { 
-            exists: result.found,
-            matchType: result.matchType,
-            invoice: result.invoice 
-          };
-          
-          console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${result.found ? '✅ FOUND' : '❌ NOT FOUND'}`);
-        } catch (error: any) {
-          console.error(`❌ [VERIFY-INVOICES] Error verifying delivery ${ref.deliveryId}:`, error);
-          console.error(`❌ [VERIFY-INVOICES] Error stack:`, error?.stack);
-          results[ref.deliveryId] = { exists: false, error: error?.message || 'Erreur inconnue' };
+        } catch (error) {
+          console.error(`❌ [CACHE ERROR] Delivery ${ref.deliveryId}:`, error);
+          referencesToVerify.push(ref); // Fallback to NocoDB verification
         }
       }
+
+      // 2️⃣ SECOND: Verify remaining invoices via NocoDB
+      if (referencesToVerify.length > 0) {
+        console.log(`🌐 [NOCODB] Verifying ${referencesToVerify.length} invoices via NocoDB API`);
+        
+        // Use the singleton instance of the verification service
+        const { invoiceVerificationService } = await import('./services/invoiceVerificationService.js');
+        
+        for (const ref of referencesToVerify) {
+          try {
+            console.log(`🔍 [VERIFY-INVOICES] Processing delivery ${ref.deliveryId} - Invoice: ${ref.invoiceReference}, Supplier: ${ref.supplierName}, Group: ${ref.groupId}`);
+            
+            // Get group and nocodb configurations
+            const groupConfig = await storage.getGroup(ref.groupId);
+            
+            if (!groupConfig || !groupConfig.nocodbConfigId) {
+              console.log(`❌ [VERIFY-INVOICES] Missing NocoDB config for group ${ref.groupId}`);
+              results[ref.deliveryId] = { 
+                exists: false, 
+                error: 'No NocoDB configuration for this group',
+                cached: false
+              };
+              continue;
+            }
+
+            const nocodbConfig = await storage.getNocodbConfig(groupConfig.nocodbConfigId);
+            
+            if (!nocodbConfig) {
+              console.log(`❌ [VERIFY-INVOICES] NocoDB config not found for ID ${groupConfig.nocodbConfigId}`);
+              results[ref.deliveryId] = { 
+                exists: false, 
+                error: 'No NocoDB configuration for this group',
+                cached: false
+              };
+              continue;
+            }
+
+            const result = await invoiceVerificationService.verifyInvoice(
+              ref.invoiceReference,
+              ref.supplierName,
+              parseFloat(ref.amount || '0'),
+              {
+                ...groupConfig,
+                nocodbConfigId: groupConfig.nocodbConfigId ?? undefined,
+                nocodbTableId: groupConfig.nocodbTableId ?? undefined,
+                nocodbTableName: groupConfig.nocodbTableName ?? undefined,
+                invoiceColumnName: groupConfig.invoiceColumnName ?? undefined,
+                nocodbBlColumnName: groupConfig.nocodbBlColumnName ?? undefined,
+                nocodbAmountColumnName: groupConfig.nocodbAmountColumnName ?? undefined,
+                nocodbSupplierColumnName: groupConfig.nocodbSupplierColumnName ?? undefined,
+              },
+              {
+                ...nocodbConfig,
+                isActive: nocodbConfig?.isActive ?? true
+              },
+              ref.deliveryId
+            );
+            
+            results[ref.deliveryId] = { 
+              exists: result.found,
+              matchType: result.matchType,
+              invoice: result.invoice,
+              cached: false
+            };
+
+            // 3️⃣ THIRD: Save to cache for future use
+            try {
+              const existingCache = await storage.getInvoiceVerification(ref.deliveryId);
+              
+              if (existingCache) {
+                await storage.updateInvoiceVerification(ref.deliveryId, {
+                  exists: result.found,
+                  matchType: result.matchType || 'NONE',
+                  isValid: true
+                });
+                console.log(`💾 [CACHE UPDATED] Delivery ${ref.deliveryId}: Result cached`);
+              } else {
+                await storage.createInvoiceVerification({
+                  deliveryId: ref.deliveryId,
+                  groupId: ref.groupId,
+                  invoiceReference: ref.invoiceReference,
+                  supplierName: ref.supplierName,
+                  exists: result.found,
+                  matchType: result.matchType || 'NONE',
+                  isValid: true
+                });
+                console.log(`💾 [CACHE CREATED] Delivery ${ref.deliveryId}: New cache entry`);
+              }
+            } catch (cacheError) {
+              console.error(`❌ [CACHE SAVE ERROR] Delivery ${ref.deliveryId}:`, cacheError);
+              // Continue without caching - not critical
+            }
+            
+            console.log(`🔍 [VERIFY-INVOICES] Delivery ${ref.deliveryId}: ${result.found ? '✅ FOUND' : '❌ NOT FOUND'}`);
+          } catch (error: any) {
+            console.error(`❌ [VERIFY-INVOICES] Error verifying delivery ${ref.deliveryId}:`, error);
+            results[ref.deliveryId] = { exists: false, error: error?.message || 'Erreur inconnue', cached: false };
+          }
+        }
+      }
+
+      const cacheHits = Object.values(results).filter((r: any) => r.cached).length;
+      const nocodbCalls = referencesToVerify.length;
+      
+      console.log(`✅ [VERIFY-INVOICES-CACHE] Complete: ${cacheHits} cache hits, ${nocodbCalls} NocoDB calls, ${Object.keys(results).length} total results`);
       
       res.json(results);
     } catch (error: any) {

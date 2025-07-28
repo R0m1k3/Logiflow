@@ -1280,18 +1280,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "invoiceReferences must be an array" });
       }
 
-      // Add supplier name to invoice references for verification
-      const enrichedReferences = invoiceReferences.map((ref: any) => ({
-        ...ref,
-        supplierName: ref.supplierName // Include supplier name for matching
-      }));
+      console.log('🔍 [VERIFY-INVOICES-CACHE] Processing', invoiceReferences.length, 'invoices with cache optimization');
+      
+      const results: Record<number, any> = {};
+      const referencesToVerify: any[] = [];
 
-      const { verifyMultipleInvoiceReferences } = await import('./nocodbService.js');
-      const results = await verifyMultipleInvoiceReferences(enrichedReferences);
+      // 1️⃣ FIRST: Check cache for existing verifications
+      for (const ref of invoiceReferences) {
+        try {
+          const cachedVerification = await storage.getInvoiceVerification(ref.deliveryId);
+          
+          if (cachedVerification && cachedVerification.isValid) {
+            console.log(`💾 [CACHE HIT] Delivery ${ref.deliveryId}: Using cached result (${cachedVerification.exists ? 'EXISTS' : 'NOT FOUND'})`);
+            results[ref.deliveryId] = {
+              exists: cachedVerification.exists,
+              matchType: cachedVerification.matchType,
+              cached: true
+            };
+          } else {
+            console.log(`🔍 [CACHE MISS] Delivery ${ref.deliveryId}: Need to verify with NocoDB`);
+            referencesToVerify.push(ref);
+          }
+        } catch (error) {
+          console.error(`❌ [CACHE ERROR] Delivery ${ref.deliveryId}:`, error);
+          referencesToVerify.push(ref); // Fallback to NocoDB verification
+        }
+      }
+
+      // 2️⃣ SECOND: Verify remaining invoices via NocoDB
+      if (referencesToVerify.length > 0) {
+        console.log(`🌐 [NOCODB] Verifying ${referencesToVerify.length} invoices via NocoDB API`);
+        
+        const enrichedReferences = referencesToVerify.map((ref: any) => ({
+          ...ref,
+          supplierName: ref.supplierName
+        }));
+
+        const { verifyMultipleInvoiceReferences } = await import('./nocodbService.js');
+        const nocodbResults = await verifyMultipleInvoiceReferences(enrichedReferences);
+        
+        // 3️⃣ THIRD: Save results to cache and add to final results
+        for (const ref of referencesToVerify) {
+          const nocodbResult = nocodbResults[ref.deliveryId];
+          
+          if (nocodbResult) {
+            results[ref.deliveryId] = {
+              ...nocodbResult,
+              cached: false
+            };
+
+            // Save to cache for future use
+            try {
+              const existingCache = await storage.getInvoiceVerification(ref.deliveryId);
+              
+              if (existingCache) {
+                await storage.updateInvoiceVerification(ref.deliveryId, {
+                  exists: nocodbResult.exists,
+                  matchType: nocodbResult.matchType || 'NONE',
+                  isValid: true
+                });
+                console.log(`💾 [CACHE UPDATED] Delivery ${ref.deliveryId}: Result cached`);
+              } else {
+                await storage.createInvoiceVerification({
+                  deliveryId: ref.deliveryId,
+                  groupId: ref.groupId,
+                  invoiceReference: ref.invoiceReference,
+                  supplierName: ref.supplierName,
+                  exists: nocodbResult.exists,
+                  matchType: nocodbResult.matchType || 'NONE',
+                  isValid: true
+                });
+                console.log(`💾 [CACHE CREATED] Delivery ${ref.deliveryId}: New cache entry`);
+              }
+            } catch (cacheError) {
+              console.error(`❌ [CACHE SAVE ERROR] Delivery ${ref.deliveryId}:`, cacheError);
+              // Continue without caching - not critical
+            }
+          }
+        }
+      }
+
+      const cacheHits = Object.values(results).filter((r: any) => r.cached).length;
+      const nocodbCalls = referencesToVerify.length;
+      
+      console.log(`✅ [VERIFY-INVOICES-CACHE] Complete: ${cacheHits} cache hits, ${nocodbCalls} NocoDB calls, ${Object.keys(results).length} total results`);
       
       res.json(results);
     } catch (error) {
-      console.error("Error verifying invoices:", error);
+      console.error("❌ [VERIFY-INVOICES-CACHE] Error:", error);
       res.status(500).json({ message: "Failed to verify invoices" });
     }
   });
