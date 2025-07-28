@@ -123,18 +123,21 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - CACHE SYSTEM PRODUCTION PARITY ACHIEVED: Méthode getInvoiceVerificationByReference Ajoutée
+### 2025-07-28 - BUG PRODUCTION DÉVALIDATION RÉSOLU: Route Corrigée et Système Cache Parfaitement Fonctionnel
 
-✓ IMPORTS TYPES AJOUTÉS - InvoiceVerification et InsertInvoiceVerification importés dans storage.production.ts
-✓ MÉTHODE CLEF AJOUTÉE - getInvoiceVerificationByReference implémentée pour partage cache entre livraisons avec même facture  
-✓ MÉTHODES CRUD COMPLÈTES - getInvoiceVerification, createInvoiceVerification, updateInvoiceVerification ajoutées en production
-✓ ROUTES PRODUCTION SIMPLIFIÉES - Suppression fallback try/catch dans routes.production.ts, utilisation directe nouvelle méthode
-✓ LOGIQUE CACHE UNIFIÉE - Production et développement utilisent maintenant identique optimisation basée références factures
-✓ PARTAGE CACHE OPÉRATIONNEL - Facture "25025575" utilisée par plusieurs livraisons ne sera vérifiée qu'une fois en production
-✓ PERFORMANCE PRODUCTION OPTIMISÉE - Système évite appels redondants NocoDB pour mêmes factures entre différentes livraisons
-✓ ARCHITECTURE HARMONISÉE - Code développement et production parfaitement synchronisés pour logique vérification intelligente
+✓ BUG CRITIQUE IDENTIFIÉ - Route dévalidation en production utilisait storage.pool.query qui n'existe pas, causant crash application
+✓ ROUTE DÉVALIDATION CORRIGÉE - Remplacé storage.pool.query par storage.getDelivery + storage.updateDelivery comme en développement  
+✓ MÉTHODE HARMONISÉE - Production utilise maintenant même logique que développement pour dévalidation rapprochements
+✓ ERREUR RÉFÉRENCE CORRIGÉE - Variable result.rows[0] remplacée par updatedDelivery dans réponse JSON
+✓ CACHE SYSTEM PRODUCTION PARITY ACHIEVED - Toutes méthodes invoice verification ajoutées et fonctionnelles
+✓ IMPORTS TYPES COMPLETS - InvoiceVerification et InsertInvoiceVerification correctement importés storage.production.ts
+✓ MÉTHODES CRUD COMPLÈTES - getInvoiceVerification, createInvoiceVerification, updateInvoiceVerification opérationnelles
+✓ ROUTES PRODUCTION SIMPLIFIÉES - Suppression fallback try/catch, utilisation directe nouvelle méthode getInvoiceVerificationByReference
+✓ LOGIQUE CACHE UNIFIÉE - Production et développement utilisent identique optimisation basée références factures
+✓ PARTAGE CACHE OPÉRATIONNEL - Facture "25025575" utilisée par plusieurs livraisons ne sera vérifiée qu'une fois
+✓ ARCHITECTURE HARMONISÉE - Code développement et production parfaitement synchronisés pour logique vérification ET dévalidation
 ✓ TYPESCRIPT CORRIGÉ - Types appropriés et imports corrects pour compilation sans erreurs production
-✓ DÉPLOIEMENT PRODUCTION READY - Système cache complet prêt pour déploiement avec même efficacité qu'en développement
+✓ DÉPLOIEMENT PRODUCTION READY - Système cache complet ET dévalidation prêts pour déploiement avec même efficacité qu'en développement
 
 ### 2025-07-28 - SYSTÈME DÉVALIDATION RAPPROCHEMENT FINALISÉ : Supprime Données et Restaure Droits Édition (PRÉCÉDENT)
 

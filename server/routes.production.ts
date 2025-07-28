@@ -1185,23 +1185,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Seuls les administrateurs peuvent dévalider les livraisons' });
       }
       
-      // Dévalider le rapprochement : remettre en mode éditable sans vider les données
-      const result = await storage.pool.query(`
-        UPDATE deliveries 
-        SET reconciled = false, updated_at = NOW()
-        WHERE id = $1
-        RETURNING *
-      `, [deliveryId]);
-      
-      if (result.rows.length === 0) {
+      // Vérifier que la livraison existe
+      const delivery = await storage.getDelivery(deliveryId);
+      if (!delivery) {
         return res.status(404).json({ error: 'Livraison non trouvée' });
       }
+      
+      // Dévalider le rapprochement : remettre en mode éditable sans vider les données
+      const updatedDelivery = await storage.updateDelivery(deliveryId, { 
+        reconciled: false
+      });
       
       console.log(`🔄 [DEVALIDATE] Livraison ${deliveryId} dévalidée par admin ${user.username}`);
       res.json({ 
         success: true, 
         message: `Livraison ${deliveryId} dévalidée avec succès`,
-        delivery: result.rows[0]
+        delivery: updatedDelivery
       });
     } catch (error) {
       console.error('Error devalidating delivery:', error);
