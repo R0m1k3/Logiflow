@@ -582,7 +582,7 @@ export default function BLReconciliation() {
     onSuccess: () => {
       toast({
         title: "Rapprochement dévalidé",
-        description: "Les données de rapprochement ont été supprimées. Vous pouvez les modifier et les sauvegarder à nouveau.",
+        description: "Le rapprochement est maintenant modifiable. Les données sont conservées dans les champs pour permettre les corrections.",
         duration: 4000,
       });
       // Recharger les données
@@ -1227,7 +1227,7 @@ export default function BLReconciliation() {
                                   onClick={() => devalidateDeliveryMutation.mutate(delivery.id)}
                                   disabled={devalidateDeliveryMutation.isPending}
                                   className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 px-2 py-1 text-xs"
-                                  title="Dévalider le rapprochement (vide les données BL/facture)"
+                                  title="Dévalider le rapprochement (rendre modifiable, garde les données)"
                                 >
                                   <RotateCcw className="w-3 h-3" />
                                 </Button>

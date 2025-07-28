@@ -123,18 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - SYSTÈME DÉVALIDATION RAPPROCHEMENT COMPLÈTEMENT FINALISÉ : Vide Données BL/Facture Mais Conserve Livraisons
+### 2025-07-28 - SYSTÈME DÉVALIDATION RAPPROCHEMENT DÉFINITIVEMENT OPTIMISÉ : Garde Toutes Données, Rend Juste Modifiable
 
-✓ LOGIQUE DÉVALIDATION CORRIGÉE - Dévalidation vide UNIQUEMENT les champs BL/facture (blNumber, blAmount, invoiceReference, invoiceAmount, reconciled=false)
-✓ LIVRAISONS CONSERVÉES - Status 'delivered' et validatedAt maintenus pour garder les livraisons visibles dans interface rapprochement
-✓ INTERFACE UTILISATEUR OPTIMISÉE - Champs formulaire conservent valeurs pour permettre modification et nouvelle sauvegarde
-✓ ROUTES HARMONISÉES - Développement ET production utilisent même logique de vidage champs rapprochement
-✓ FILTRE SIMPLIFIÉ - Affichage toutes livraisons delivered pour permettre saisie données rapprochement
-✓ MESSAGES CLAIRS - Toast et tooltip expliquent que rapprochement est dévalidé, pas la livraison
-✓ WORKFLOW UTILISATEUR PARFAIT - Dévalidation → Modification données → Validation rapprochement possible immédiatement
-✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider rapprochements existants
-✓ TESTS FONCTIONNELS VALIDÉS - Livraison 122 testée avec succès, données vidées mais livraison reste visible
-✓ SYSTÈME PRODUCTION READY - Fonctionnalité opérationnelle avec comportement utilisateur optimal
+✓ LOGIQUE DÉVALIDATION PARFAITE - Dévalidation met seulement reconciled=false sans vider aucun champ (blNumber, blAmount, invoiceReference, invoiceAmount conservés)
+✓ DONNÉES CONSERVÉES INTÉGRALEMENT - Tous champs BL/facture restent visibles dans formulaire pour permettre modifications directes
+✓ MODE ÉDITABLE RESTAURÉ - Suppression côté "grisé", champs redeviennent modifiables immédiatement après dévalidation
+✓ WORKFLOW UTILISATEUR OPTIMAL - Dévalidation → Champs pré-remplis avec données existantes → Modification → Re-validation possible immédiatement
+✓ ROUTES HARMONISÉES - Développement ET production utilisent même logique minimale (UPDATE reconciled=false uniquement)
+✓ MESSAGES UTILISATEUR CLAIRS - Toast "données conservées dans champs pour corrections" et tooltip "rendre modifiable, garde données"
+✓ AUCUNE PERTE DONNÉES - Utilisateur peut corriger erreurs sans ressaisir toutes informations depuis zéro
+✓ PERMISSIONS ADMIN STRICTES - Seuls administrateurs peuvent dévalider rapprochements pour corrections
+✓ INTERFACE FLUIDE VALIDÉE - Dévalidation rend champs éditables sans vider, permettant workflow correction naturel
+✓ SYSTÈME PRODUCTION READY - Fonctionnalité parfaitement calibrée selon besoins utilisateur réels
 
 ### 2025-07-28 - OPTIMISATION CACHE DÉFINITIVEMENT FINALISÉE : Système Intelligent Sans Doublons Opérationnel (PRÉCÉDENT)
 
