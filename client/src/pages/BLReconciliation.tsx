@@ -153,7 +153,7 @@ export default function BLReconciliation() {
           return delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
         });
         
-        console.log(`🔍 BL Verification - ${deliveriesWithInvoices.length} deliveries with invoices (${filtered.length} total filtered)`);
+        console.log(`💾 BL Cache Check - ${deliveriesWithInvoices.length} factures à vérifier (cache + nouvelles)`);
         
         if (Array.isArray(deliveriesWithInvoices) && deliveriesWithInvoices.length > 0) {
           const invoiceReferencesToVerify = deliveriesWithInvoices.map((delivery: any) => ({
@@ -164,7 +164,6 @@ export default function BLReconciliation() {
           }));
           
           try {
-            console.log('🔍 Sending all invoices to backend - cache decisions handled server-side');
             const verificationResponse = await fetch('/api/verify-invoices', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -174,7 +173,12 @@ export default function BLReconciliation() {
             
             if (verificationResponse.ok) {
               const verificationResults = await verificationResponse.json();
-              console.log('✅ Verification results (cache + new):', verificationResults);
+              
+              // Compter combien sont en cache vs nouvelles vérifications
+              const cacheHits = Object.values(verificationResults).filter((result: any) => result.cached).length;
+              const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
+              
+              console.log(`✅ Optimisation Cache: ${cacheHits} cache hits, ${newVerifications} nouvelles vérifications`);
               setInvoiceVerifications(verificationResults);
             } else {
               console.error('❌ Verification failed:', verificationResponse.status);
@@ -297,27 +301,14 @@ export default function BLReconciliation() {
     }
   };
 
-  // Vérifier les factures NocoDB après chaque mise à jour des livraisons
-  useEffect(() => {
-    if (deliveriesWithBL && deliveriesWithBL.length > 0) {
-      verifyAllInvoices();
-    }
-  }, [deliveriesWithBL]);
+  // ❌ SUPPRIMÉ - Duplication avec fetchDeliveries() qui appelle déjà la vérification
+  // La vérification se fait déjà automatiquement dans fetchDeliveries()
 
-  // Re-vérifier les factures lors du changement de magasin pour maintenir les icônes webhook
+  // ✅ OPTIMISÉ - Pas besoin de re-vérifier manuellement lors du changement de magasin
+  // Le nouveau chargement des livraisons via fetchDeliveries() fait déjà la vérification automatiquement
   useEffect(() => {
     console.log('🔄 Store changed, clearing invoice verifications for fresh webhook icons');
-    setInvoiceVerifications({}); // Clear old verifications
-    
-    // Re-verify after short delay to ensure deliveries are loaded
-    const timer = setTimeout(() => {
-      if (deliveriesWithBL && deliveriesWithBL.length > 0) {
-        console.log('🔄 Re-verifying invoices after store change');
-        verifyAllInvoices();
-      }
-    }, 200);
-    
-    return () => clearTimeout(timer);
+    setInvoiceVerifications({}); // Clear old verifications only
   }, [selectedStoreId]);
 
   const form = useForm<ReconciliationForm>({
