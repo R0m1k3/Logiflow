@@ -29,7 +29,7 @@ import {
   rolePermissions, userRoles, insertCustomerOrderSchema, 
   insertDlcProductSchema, insertDlcProductFrontendSchema, insertSupplierSchema, 
   insertOrderSchema, insertDeliverySchema, insertUserSchema, insertRoleSchema, 
-  insertPermissionSchema, insertPublicitySchema, insertGroupSchema, updateUserSchema,
+  insertPermissionSchema, insertPublicitySchema, insertGroupSchema,
   insertPublicityParticipationSchema, databaseBackups, insertDatabaseBackupSchema,
   invoiceVerifications, insertInvoiceVerificationSchema, invoiceVerificationCache,
   insertInvoiceVerificationCacheSchema, insertUserGroupSchema, insertTaskSchema

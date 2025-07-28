@@ -1144,9 +1144,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Route supprimée - utiliser /api/verify-invoices
 
-  // 🚀 PRODUCTION: Cache stats endpoint for performance monitoring
-  app.get('/api/invoice-verifications/cache-stats', isAuthenticated, requirePermission('admin'), async (req: any, res) => {
+  // ✅ PRODUCTION: Bulk verification endpoint (missing in production)
+  app.post('/api/invoice-verifications/bulk-verify', isAuthenticated, async (req: any, res) => {
     try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent effectuer des vérifications en masse" });
+      }
+
+      const { deliveries } = req.body;
+      
+      if (!Array.isArray(deliveries)) {
+        return res.status(400).json({ message: "deliveries must be an array" });
+      }
+
+      console.log(`🚀 [BULK VERIFY PRODUCTION] Processing ${deliveries.length} deliveries`);
+
+      // Production implementation using direct service calls
+      const results = [];
+      for (const delivery of deliveries) {
+        try {
+          if (!delivery.invoiceReference || !delivery.groupId) {
+            results.push({
+              deliveryId: delivery.id,
+              exists: false,
+              matchType: 'MISSING_DATA',
+              cacheHit: false
+            });
+            continue;
+          }
+
+          // Get group configuration
+          const group = await storage.getGroup(delivery.groupId);
+          if (!group) {
+            results.push({
+              deliveryId: delivery.id,
+              exists: false,
+              matchType: 'NO_CONFIG',
+              cacheHit: false
+            });
+            continue;
+          }
+
+          // Verify invoice using production service
+          const verificationResult = await invoiceVerificationService.verifyInvoice(
+            {
+              id: group.id,
+              name: group.name,
+              nocodbConfigId: group.nocodbConfigId,
+              nocodbTableId: group.nocodbTableId ?? undefined,
+              nocodbTableName: group.nocodbTableName ?? undefined,
+              invoiceColumnName: group.invoiceColumnName ?? undefined,
+              nocodbBlColumnName: group.nocodbBlColumnName ?? undefined,
+              nocodbAmountColumnName: group.nocodbAmountColumnName ?? undefined,
+              nocodbSupplierColumnName: group.nocodbSupplierColumnName ?? undefined
+            },
+            {
+              // Get nocodb config
+              ...(await storage.getNocodbConfigs()).find(config => config.id === group.nocodbConfigId) || {},
+              isActive: true
+            },
+            delivery.id
+          );
+
+          results.push({
+            deliveryId: delivery.id,
+            exists: verificationResult.exists || false,
+            matchType: verificationResult.matchType || 'NO_MATCH',
+            cacheHit: false // Production doesn't use cache optimizer
+          });
+
+        } catch (deliveryError) {
+          console.error(`❌ Production bulk verification failed for delivery ${delivery.id}:`, deliveryError);
+          results.push({
+            deliveryId: delivery.id,
+            exists: false,
+            matchType: 'ERROR',
+            cacheHit: false
+          });
+        }
+      }
+
+      console.log(`✅ [BULK VERIFY PRODUCTION] Completed - ${results.length} deliveries processed`);
+      res.json(results);
+
+    } catch (error) {
+      console.error("❌ Production bulk verification error:", error);
+      res.status(500).json({ 
+        error: 'Failed to perform bulk verification',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // 🚀 PRODUCTION: Cache stats endpoint for performance monitoring
+  app.get('/api/invoice-verifications/cache-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent consulter les statistiques de cache" });
+      }
+
       console.log('📊 [CACHE STATS PRODUCTION] Fetching cache statistics');
       
       // Production implementation using raw SQL
