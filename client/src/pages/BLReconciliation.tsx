@@ -650,13 +650,12 @@ export default function BLReconciliation() {
 
   const handleEditReconciliation = (delivery: any) => {
     setSelectedDelivery(delivery);
-    // 🔧 CORRECTION FINALE - Ne pas remplir automatiquement les champs pour permettre l'effacement
-    // Les champs restent vides par défaut et l'utilisateur peut les remplir s'il le souhaite
+    // 🔧 CORRECTION FINALE - Afficher les vraies valeurs de la base de données dans le formulaire
     form.reset({
-      blNumber: "",
-      blAmount: "",
-      invoiceReference: "",
-      invoiceAmount: "",
+      blNumber: delivery.blNumber || "",
+      blAmount: delivery.blAmount || "",
+      invoiceReference: delivery.invoiceReference || "",
+      invoiceAmount: delivery.invoiceAmount || "",
     });
     setShowReconciliationModal(true);
   };

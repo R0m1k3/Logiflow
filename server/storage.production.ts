@@ -1512,10 +1512,10 @@ export class DatabaseStorage implements IStorage {
         // 🔧 CORRECTION CRITIQUE: Nettoyer les valeurs numériques vides avant insertion
         let cleanValue = value;
         
-        // Gérer les champs numériques qui peuvent être des chaînes vides
+        // 🔧 CORRECTION FINALE: Permettre l'effacement des champs en sauvegardant null explicitement
         if ((key === 'blAmount' || key === 'invoiceAmount' || key === 'quantity') && 
             (value === "" || value === null)) {
-          continue; // Skip ce champ s'il est vide
+          cleanValue = null; // Sauvegarder explicitement null au lieu de skip
         }
         
         const dbKey = key === 'orderId' ? 'order_id' :
