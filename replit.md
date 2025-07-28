@@ -133,6 +133,8 @@ The application uses a sophisticated dual authentication approach:
 ✓ FALLBACK INTELLIGENT MAINTENU - Si pas selectedGroupId fourni, système utilise encore premier groupe avec webhook (compatibilité)
 ✓ OVERLAY POSITIONNEMENT DÉFINITIF - Position fixed avec z-[9999] pour compatibilité cross-browser parfaite en production
 ✓ MULTI-TENANT WEBHOOK FONCTIONNEL - Utilisateur sélectionne groupe Houdemont, webhook utilise URL Houdemont (plus confusion Frouard/Houdemont)
+✓ PROBLÈME PRODUCTION "ECOUTE" DIAGNOSTIQUÉ - URL workflow.ffnancy.fr retourne 404, endpoint webhook non configuré sur serveur distant
+✓ SOLUTION TEMPORAIRE APPLIQUÉE - URL Houdemont changée vers URL de test fonctionnelle en attendant configuration serveur "ecoute"
 
 ### 2025-07-28 - WEBHOOK MODAL UX DÉFINITIVEMENT FINALISÉ : Messages Production et État Chargement Optimaux (PRÉCÉDENT)
 
