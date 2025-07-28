@@ -17,8 +17,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import { useInvoiceVerificationOptimizer } from "@/hooks/useInvoiceVerificationOptimizer";
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, Trash2, RefreshCw, Loader2, AlertTriangle, Send, Upload, Zap } from "lucide-react";
+
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
@@ -96,19 +96,7 @@ export default function BLReconciliation() {
   const [selectedWebhookDelivery, setSelectedWebhookDelivery] = useState<any>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   
-  // 🚀 PERFORMANCE OPTIMIZATION: Use invoice verification optimizer
-  const {
-    verifyBulkWithCache,
-    getCacheStats,
-    cleanupExpiredCache,
-    invalidateDeliveryCache
-  } = useInvoiceVerificationOptimizer();
-  
-  // Cache statistics for the selected store
-  const { data: cacheStats } = getCacheStats(selectedStoreId || undefined);
-  
-  // État pour afficher les stats de cache
-  const [showCacheStats, setShowCacheStats] = useState(false);
+
   
   // Form pour webhook
   const webhookForm = useForm<WebhookForm>({
@@ -159,81 +147,40 @@ export default function BLReconciliation() {
       // Ne filtrer que les livraisons livrées (status === 'delivered')
       // Toutes les livraisons livrées doivent apparaître, même sans BL encore saisi
       
-      // 🚀 PERFORMANCE OPTIMIZATION: Use cached verification system
+      // ✅ SYSTÈME SIMPLE DE VÉRIFICATION SANS CACHE
       if (filtered.length > 0) {
-        const deliveriesToVerify = filtered
-          .filter((delivery: any) => {
-            // Exclure les livraisons sans facture ou groupId
-            if (!delivery.invoiceReference || !delivery.groupId) return false;
-            
-            // ✅ CORRECTION INTELLIGENTE: Exclure les factures déjà vérifiées avec coche verte
-            const existingVerification = invoiceVerifications[delivery.id];
-            if (existingVerification && existingVerification.exists === true) {
-              console.log(`⏭️ Skipping already verified delivery ${delivery.id} (${delivery.invoiceReference}) - has green checkmark`);
-              return false;
-            }
-            
-            return true;
-          })
-          .map((delivery: any) => ({
-            id: delivery.id,
-            groupId: delivery.groupId,
-            invoiceReference: delivery.invoiceReference,
-            supplierName: delivery.supplier?.name,
-          }));
+        const deliveriesToVerify = filtered.filter((delivery: any) => {
+          return delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId;
+        });
         
-        console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries need verification (${filtered.length} total filtered, ${filtered.length - deliveriesToVerify.length} already verified with green checkmarks)`);
+        console.log(`🔍 BL Verification - ${deliveriesToVerify.length} deliveries to verify (${filtered.length} total filtered)`);
         
         if (Array.isArray(deliveriesToVerify) && deliveriesToVerify.length > 0) {
+          const invoiceReferencesToVerify = deliveriesToVerify.map((delivery: any) => ({
+            groupId: delivery.groupId,
+            invoiceReference: delivery.invoiceReference,
+            deliveryId: delivery.id,
+            supplierName: delivery.supplier?.name,
+          }));
+          
           try {
-            // Use optimized bulk verification with cache
-            const verificationResults = await verifyBulkWithCache.mutateAsync(deliveriesToVerify);
-            console.log('🚀 Optimized verification results:', verificationResults);
-            
-            // ✅ CORRECTION: Conserver les vérifications existantes et ajouter les nouvelles
-            const updatedVerifications = { ...invoiceVerifications };
-            verificationResults.forEach(result => {
-              updatedVerifications[result.deliveryId] = {
-                exists: result.exists,
-                cacheHit: result.cacheHit
-              };
+            const verificationResponse = await fetch('/api/verify-invoices', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ invoiceReferences: invoiceReferencesToVerify }),
             });
             
-            setInvoiceVerifications(updatedVerifications);
-            console.log('🔄 Cached invoice verifications state updated - total entries:', Object.keys(updatedVerifications).length);
-          } catch (error) {
-            console.error('❌ Error in optimized invoice verification:', error);
-            console.log('🔄 Falling back to traditional verification due to 404 or other error...');
-            
-            const fallbackReferences = deliveriesToVerify.map(d => ({
-              groupId: d.groupId,
-              invoiceReference: d.invoiceReference,
-              deliveryId: d.id,
-              supplierName: d.supplierName,
-            }));
-            
-            try {
-              const verificationResponse = await fetch('/api/verify-invoices', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ invoiceReferences: fallbackReferences }),
-              });
-              
-              if (verificationResponse.ok) {
-                const fallbackResults = await verificationResponse.json();
-                console.log('✅ Fallback verification results:', fallbackResults);
-                
-                // Conserver les vérifications existantes avec fallback
-                const updatedFallbackVerifications = { ...invoiceVerifications, ...fallbackResults };
-                setInvoiceVerifications(updatedFallbackVerifications);
-              }
-            } catch (fallbackError) {
-              console.error('❌ Both optimized and fallback verification failed:', fallbackError);
+            if (verificationResponse.ok) {
+              const verificationResults = await verificationResponse.json();
+              console.log('✅ Verification results:', verificationResults);
+              setInvoiceVerifications(verificationResults);
+            } else {
+              console.error('❌ Verification failed:', verificationResponse.status);
             }
+          } catch (error) {
+            console.error('❌ Error verifying invoices:', error);
           }
-        } else {
-          console.log('✅ All deliveries already verified - no API calls needed');
         }
       }
       
@@ -878,93 +825,12 @@ export default function BLReconciliation() {
               Vérifier factures
             </Button>
             
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCacheStats(!showCacheStats)}
-              className="h-9 px-3"
-              title="Afficher les statistiques de cache"
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              Cache
-            </Button>
+
           </div>
         </div>
       </div>
 
-      {/* 🚀 PERFORMANCE OPTIMIZATION: Cache Statistics Panel */}
-      {showCacheStats && (
-        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <Zap className="h-5 w-5 text-blue-600 mr-2" />
-              <h3 className="text-lg font-semibold text-blue-900">Optimisation des Vérifications</h3>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowCacheStats(false)}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div className="bg-white p-3 rounded-lg border border-blue-200">
-              <div className="text-sm text-gray-600">Entrées en cache</div>
-              <div className="text-xl font-bold text-blue-800">
-                {cacheStats?.totalEntries || 0}
-              </div>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-blue-200">
-              <div className="text-sm text-gray-600">Entrées valides</div>
-              <div className="text-xl font-bold text-green-600">
-                {cacheStats?.validEntries || 0}
-              </div>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-blue-200">
-              <div className="text-sm text-gray-600">Entrées expirées</div>
-              <div className="text-xl font-bold text-orange-600">
-                {cacheStats?.expiredEntries || 0}
-              </div>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-blue-200">
-              <div className="text-sm text-gray-600">Taux de réussite</div>
-              <div className="text-xl font-bold text-blue-600">
-                {cacheStats?.cacheHitRate ? `${Math.round(cacheStats.cacheHitRate * 100)}%` : '-'}
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => cleanupExpiredCache.mutate(selectedStoreId || undefined)}
-              disabled={cleanupExpiredCache.isPending}
-              className="h-8"
-            >
-              {cleanupExpiredCache.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4 mr-2" />
-              )}
-              Nettoyer cache expiré
-            </Button>
-            
-            <div className="text-sm text-gray-600">
-              Les résultats de vérification sont mis en cache pour améliorer les performances et réduire les appels à l'API NocoDB.
-            </div>
-          </div>
-          
-          {cleanupExpiredCache.isSuccess && (
-            <div className="mt-2 text-sm text-green-600">
-              ✅ {cleanupExpiredCache.data?.cleanedCount || 0} entrées expirées supprimées
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* Deliveries List */}
       {filteredDeliveries.length === 0 ? (
