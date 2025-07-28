@@ -179,6 +179,16 @@ export default function BLReconciliation() {
               const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
               
               console.log(`✅ Optimisation Cache: ${cacheHits} cache hits, ${newVerifications} nouvelles vérifications`);
+              
+              // Afficher un message informatif sur l'optimisation
+              if (deliveriesWithInvoices.length > 0) {
+                toast({
+                  title: "Vérification automatique terminée",
+                  description: `💾 ${cacheHits} factures depuis le cache, ⚡ ${newVerifications} nouvelles vérifications`,
+                  duration: 3000,
+                });
+              }
+              
               setInvoiceVerifications(verificationResults);
             } else {
               console.error('❌ Verification failed:', verificationResponse.status);
