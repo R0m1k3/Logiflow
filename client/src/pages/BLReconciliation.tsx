@@ -249,9 +249,16 @@ export default function BLReconciliation() {
     }
   }, [deliveriesWithBL]);
 
-  // Fonction pour vérifier les factures NocoDB
+  // ✅ FONCTION OPTIMISÉE - Cache intelligent pour vérification factures
   const verifyAllInvoices = async () => {
-    if (!deliveriesWithBL || deliveriesWithBL.length === 0) return;
+    if (!deliveriesWithBL || deliveriesWithBL.length === 0) {
+      toast({
+        title: "Aucune livraison",
+        description: "Aucune livraison trouvée à vérifier",
+        variant: "default",
+      });
+      return;
+    }
     
     const invoiceReferencesToVerify = deliveriesWithBL
       .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId)
@@ -265,7 +272,6 @@ export default function BLReconciliation() {
     if (invoiceReferencesToVerify.length > 0) {
       setIsVerifyingInvoices(true);
       try {
-        console.log('🔍 Verifying invoices:', invoiceReferencesToVerify);
         const verificationResponse = await fetch('/api/verify-invoices', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -275,11 +281,15 @@ export default function BLReconciliation() {
         
         if (verificationResponse.ok) {
           const verificationResults = await verificationResponse.json();
-          console.log('✅ Verification results:', verificationResults);
           setInvoiceVerifications(verificationResults);
+          
+          // Compter optimisation cache
+          const cacheHits = Object.values(verificationResults).filter((result: any) => result.cached).length;
+          const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
+          
           toast({
-            title: "Vérification terminée",
-            description: `${invoiceReferencesToVerify.length} facture(s) vérifiée(s)`,
+            title: "Vérification optimisée terminée",
+            description: `💾 ${cacheHits} cache hits, ⚡ ${newVerifications} nouvelles vérifications`,
           });
         }
       } catch (error) {
@@ -811,10 +821,10 @@ export default function BLReconciliation() {
               onClick={verifyAllInvoices}
               disabled={isVerifyingInvoices}
               className="h-9 px-3"
-              title="Vérifier toutes les factures avec NocoDB"
+              title="Actualiser la vérification (utilise le cache intelligent)"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isVerifyingInvoices ? 'animate-spin' : ''}`} />
-              Vérifier factures
+              Actualiser vérifications
             </Button>
             
 
