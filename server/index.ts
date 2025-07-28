@@ -156,10 +156,19 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     });
   });
 
-  // Setup routes - always use development routes in development mode
-  console.log('🔄 Loading development routes... (STORAGE_MODE=development)');
-  const { registerRoutes } = await import("./routes");
-  console.log('✅ Successfully loaded routes.ts');
+  // Setup routes based on environment
+  let registerRoutes;
+  if (process.env.NODE_ENV === 'production' || process.env.STORAGE_MODE === 'production') {
+    console.log('🚀 Loading production routes... (NODE_ENV=production)');
+    const productionRoutes = await import("./routes.production");
+    registerRoutes = productionRoutes.registerRoutes;
+    console.log('✅ Successfully loaded routes.production.ts');
+  } else {
+    console.log('🔄 Loading development routes... (NODE_ENV=development)');
+    const devRoutes = await import("./routes");
+    registerRoutes = devRoutes.registerRoutes;
+    console.log('✅ Successfully loaded routes.ts');
+  }
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -1186,8 +1186,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
 
-          // Verify invoice using production service
+          // Get nocodb config
+          const nocodbConfigs = await storage.getNocodbConfigs();
+          const nocodbConfig = nocodbConfigs.find(config => config.id === group.nocodbConfigId);
+          
+          if (!nocodbConfig) {
+            results.push({
+              deliveryId: delivery.id,
+              exists: false,
+              matchType: 'NO_NOCODB_CONFIG',
+              cacheHit: false
+            });
+            continue;
+          }
+
+          // Verify invoice using production service with correct parameters
           const verificationResult = await invoiceVerificationService.verifyInvoice(
+            delivery.invoiceReference, // invoiceRef
+            delivery.supplier?.name || '', // supplierName  
+            parseFloat((delivery.invoiceAmount?.toString() || delivery.blAmount?.toString()) || '0'), // amount
             {
               id: group.id,
               name: group.name,
@@ -1198,18 +1215,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
               nocodbBlColumnName: group.nocodbBlColumnName ?? undefined,
               nocodbAmountColumnName: group.nocodbAmountColumnName ?? undefined,
               nocodbSupplierColumnName: group.nocodbSupplierColumnName ?? undefined
-            },
+            }, // groupConfig
             {
-              // Get nocodb config
-              ...(await storage.getNocodbConfigs()).find(config => config.id === group.nocodbConfigId) || {},
-              isActive: true
-            },
-            delivery.id
+              ...nocodbConfig,
+              isActive: nocodbConfig.isActive ?? true
+            }, // nocodbConfig
+            delivery.id // excludeDeliveryId
           );
 
           results.push({
             deliveryId: delivery.id,
-            exists: verificationResult.exists || false,
+            exists: verificationResult.found || false, // Use 'found' property
             matchType: verificationResult.matchType || 'NO_MATCH',
             cacheHit: false // Production doesn't use cache optimizer
           });
