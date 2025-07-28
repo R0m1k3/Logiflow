@@ -1312,12 +1312,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Livraison non trouvée' });
       }
       
-      // Dévalider le rapprochement : vider les données BL/facture mais garder la livraison livrée
+      // Dévalider le rapprochement : remettre en mode éditable sans vider les données
       const updatedDelivery = await storage.updateDelivery(deliveryId, { 
-        blNumber: null,
-        blAmount: null,
-        invoiceReference: null,
-        invoiceAmount: null,
         reconciled: false
       });
       
@@ -1346,20 +1342,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results: Record<number, any> = {};
       const referencesToVerify: any[] = [];
 
-      // 1️⃣ FIRST: Check cache for existing verifications
+      // 1️⃣ FIRST: Check cache for existing verifications (by invoice reference)
       for (const ref of invoiceReferences) {
         try {
-          const cachedVerification = await storage.getInvoiceVerification(ref.deliveryId);
+          // Chercher d'abord par référence de facture pour partager le cache entre livraisons
+          const cacheKey = `${ref.groupId}_${ref.invoiceReference}`;
+          const cachedVerification = await storage.getInvoiceVerificationByReference(ref.invoiceReference, ref.groupId);
           
           if (cachedVerification && cachedVerification.isValid) {
-            console.log(`💾 [CACHE HIT] Delivery ${ref.deliveryId}: Using cached result (${cachedVerification.exists ? 'EXISTS' : 'NOT FOUND'})`);
+            console.log(`💾 [CACHE HIT] Delivery ${ref.deliveryId}: Using cached result for invoice ${ref.invoiceReference} (${cachedVerification.exists ? 'EXISTS' : 'NOT FOUND'})`);
             results[ref.deliveryId] = {
               exists: cachedVerification.exists,
               matchType: cachedVerification.matchType,
               cached: true
             };
           } else {
-            console.log(`🔍 [CACHE MISS] Delivery ${ref.deliveryId}: Need to verify with NocoDB`);
+            console.log(`🔍 [CACHE MISS] Delivery ${ref.deliveryId}: Need to verify invoice ${ref.invoiceReference} with NocoDB`);
             referencesToVerify.push(ref);
           }
         } catch (error) {

@@ -1894,6 +1894,20 @@ export class DatabaseStorage implements IStorage {
     return verification;
   }
 
+  async getInvoiceVerificationByReference(invoiceReference: string, groupId: number): Promise<InvoiceVerification | undefined> {
+    const [verification] = await db
+      .select()
+      .from(invoiceVerifications)
+      .where(
+        and(
+          eq(invoiceVerifications.invoiceReference, invoiceReference),
+          eq(invoiceVerifications.groupId, groupId)
+        )
+      )
+      .limit(1);
+    return verification;
+  }
+
   async createInvoiceVerification(verification: InsertInvoiceVerification): Promise<InvoiceVerification> {
     const [newVerification] = await db
       .insert(invoiceVerifications)
