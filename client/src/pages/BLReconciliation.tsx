@@ -18,13 +18,14 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
 
-import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload, Trash2, RotateCcw } from "lucide-react";
+import { Search, Plus, Edit, FileText, Euro, Calendar, Building2, CheckCircle, X, RefreshCw, Loader2, AlertTriangle, Send, Upload, Trash2, RotateCcw, Wand2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format as formatDate } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import WebhookWizard from "@/components/WebhookWizard";
 
 const reconciliationSchema = z.object({
   blNumber: z.string().optional(),
@@ -81,6 +82,7 @@ export default function BLReconciliation() {
   }
   
   const [searchTerm, setSearchTerm] = useState("");
+  const [isWebhookWizardOpen, setIsWebhookWizardOpen] = useState(false);
   const [showReconciliationModal, setShowReconciliationModal] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -825,6 +827,14 @@ export default function BLReconciliation() {
           <Badge variant="outline" className="text-sm border border-gray-300">
             {filteredDeliveries.length} bon(s) de livraison
           </Badge>
+          <Button
+            onClick={() => setIsWebhookWizardOpen(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            size="sm"
+          >
+            <Wand2 className="w-4 h-4 mr-2" />
+            Assistant Webhook
+          </Button>
         </div>
       </div>
 
@@ -1608,6 +1618,12 @@ export default function BLReconciliation() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Assistant Webhook Configuration */}
+      <WebhookWizard
+        open={isWebhookWizardOpen}
+        onOpenChange={setIsWebhookWizardOpen}
+      />
     </div>
   );
 }

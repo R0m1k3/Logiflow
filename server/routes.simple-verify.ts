@@ -10,10 +10,11 @@ export function setupSimpleVerify(app: Express, isAuthenticated: any, storage: a
     res.json({ success: true, message: 'Test route works!' });
   });
 
-  // Route ultra-simple pour vérifier les factures
+  // Route ultra-simple pour vérifier les factures - AVEC AUTHENTIFICATION RESTAURÉE
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
     console.log('🔍 SIMPLE VERIFY - Route called! URL:', req.url, 'Method:', req.method);
-    console.log('🔍 SIMPLE VERIFY - User authenticated:', !!req.user);
+    console.log('🔍 SIMPLE VERIFY - Headers:', req.headers);
+    console.log('🔍 SIMPLE VERIFY - Body:', req.body);
     try {
       console.log('🔍 SIMPLE VERIFY - Request received:', req.body);
       
@@ -71,11 +72,26 @@ export function setupSimpleVerify(app: Express, isAuthenticated: any, storage: a
             continue;
           }
 
+          // Récupérer la configuration NocoDB pour le token
+          const nocodbConfig = await storage.getNocodbConfigs();
+          const activeConfig = nocodbConfig.find((c: any) => c.isActive);
+          
+          if (!activeConfig) {
+            results[deliveryId || invoiceRef] = {
+              exists: false,
+              error: 'Pas de configuration NocoDB active',
+              cached: false,
+              matchType: 'CONFIG_ERROR'
+            };
+            continue;
+          }
+
           // Appel direct à NocoDB avec AbortController pour timeout
-          const nocodbUrl = `https://nocodb.ffnancy.fr/api/v1/db/data/noco/pcg4uw79ukvycxc/${group.nocodbTableId}`;
+          const nocodbUrl = `${activeConfig.baseUrl}/api/v1/db/data/noco/${activeConfig.projectId}/${group.nocodbTableId}`;
           
           console.log(`🌐 Calling NocoDB: ${nocodbUrl}`);
           console.log(`🔍 Searching for: ${invoiceRef}`);
+          console.log(`🔑 Using token: ***${activeConfig.apiToken.slice(-4)}`);
 
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -84,7 +100,7 @@ export function setupSimpleVerify(app: Express, isAuthenticated: any, storage: a
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'xc-token': 'raNDjQ_0OKEQeNWsqDwSu5jGBhIgjMfO7RFFHYID'
+              'xc-token': activeConfig.apiToken
             },
             signal: controller.signal
           });
