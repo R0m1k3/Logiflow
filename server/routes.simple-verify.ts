@@ -2,9 +2,18 @@ import type { Express } from "express";
 
 // Système de vérification simplifié et ultra-robuste
 export function setupSimpleVerify(app: Express, isAuthenticated: any, storage: any) {
+  console.log('🔧 SETUP SIMPLE VERIFY - Function called, registering route /api/verify-invoices');
   
+  // Test route pour debug
+  app.post('/api/verify-invoices-test', async (req: any, res) => {
+    console.log('🔍 TEST ROUTE - Called successfully!');
+    res.json({ success: true, message: 'Test route works!' });
+  });
+
   // Route ultra-simple pour vérifier les factures
   app.post('/api/verify-invoices', isAuthenticated, async (req: any, res) => {
+    console.log('🔍 SIMPLE VERIFY - Route called! URL:', req.url, 'Method:', req.method);
+    console.log('🔍 SIMPLE VERIFY - User authenticated:', !!req.user);
     try {
       console.log('🔍 SIMPLE VERIFY - Request received:', req.body);
       
@@ -19,11 +28,13 @@ export function setupSimpleVerify(app: Express, isAuthenticated: any, storage: a
       
       // Vérifier chaque facture une par une
       for (const invoice of invoicesToVerify) {
+        // Définir les variables dans la portée de la boucle pour le catch
+        let invoiceRef = typeof invoice === 'string' ? invoice : invoice.invoiceReference;
+        let groupId = typeof invoice === 'object' ? invoice.groupId : null;
+        let deliveryId = typeof invoice === 'object' ? invoice.deliveryId : null;
+        let supplierName = typeof invoice === 'object' ? invoice.supplierName : null;
+        
         try {
-          const invoiceRef = typeof invoice === 'string' ? invoice : invoice.invoiceReference;
-          const groupId = typeof invoice === 'object' ? invoice.groupId : null;
-          const deliveryId = typeof invoice === 'object' ? invoice.deliveryId : null;
-          const supplierName = typeof invoice === 'object' ? invoice.supplierName : null;
 
           console.log(`🔍 Vérifying invoice: ${invoiceRef} for group ${groupId}`);
 
@@ -154,4 +165,6 @@ export function setupSimpleVerify(app: Express, isAuthenticated: any, storage: a
       });
     }
   });
+  
+  console.log('✅ SETUP SIMPLE VERIFY - Route /api/verify-invoices registered successfully');
 }
