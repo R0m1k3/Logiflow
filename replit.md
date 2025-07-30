@@ -123,7 +123,16 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - NETTOYAGE COMPLET PROJET : Répertoire attached_assets Vidé et Fichiers Test Supprimés
+### 2025-07-30 - BUG CRITIQUE VÉRIFICATIONS FACTURES RÉSOLU : Coches Persistent Lors Changements Groupe
+
+✓ PROBLÈME ROOT CAUSE IDENTIFIÉ - État invoiceVerifications conservait anciens résultats lors changement groupe, masquant nouvelles vérifications
+✓ USEEFFECT RÉINITIALISATION AJOUTÉ - État invoiceVerifications automatiquement vidé quand selectedStoreId change
+✓ DUPLICATE USEEFFECT SUPPRIMÉ - Élimination useEffect redondant qui faisait même traitement  
+✓ COCHES VERTES PERSISTENT - Vérifications d'invoices s'affichent correctement après changement groupe sans clic manuel requis
+✓ INTERFACE UTILISATEUR FLUIDE - Plus besoin cliquer "Actualiser vérifications" quand on change groupe ou arrive sur page
+✓ ÉTAT LOCAL OPTIMISÉ - Réinitialisation propre des vérifications avec logs diagnostic pour traçabilité
+
+### 2025-07-30 - NETTOYAGE COMPLET PROJET : Répertoire attached_assets Vidé et Fichiers Test Supprimés (PRÉCÉDENT)
 
 ✓ RÉPERTOIRE ATTACHED_ASSETS VIDÉ - Suppression de tous les fichiers temporaires (images PNG, fichiers txt collés, captures debug)
 ✓ FICHIERS TEST SUPPRIMÉS - Élimination de tous les test-*.js et test_*.js inutiles pour production

@@ -98,8 +98,12 @@ export default function BLReconciliation() {
   const [selectedWebhookDelivery, setSelectedWebhookDelivery] = useState<any>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   
+  // 🔧 CORRECTION CRITIQUE : Réinitialiser les vérifications quand le groupe change
+  useEffect(() => {
+    console.log('🔄 BL Reconciliation - Changement de groupe détecté, réinitialisation des vérifications');
+    setInvoiceVerifications({});
+  }, [selectedStoreId]);
 
-  
   // Form pour webhook
   const webhookForm = useForm<WebhookForm>({
     resolver: zodResolver(webhookSchema),
@@ -194,6 +198,7 @@ export default function BLReconciliation() {
               
               console.log(`✅ Optimisation Cache: ${cacheHits} cache hits, ${newVerifications} nouvelles vérifications`);
               
+              // 🔧 CORRECTION : Mettre à jour les vérifications pour le groupe actuel
               setInvoiceVerifications(verificationResults);
             } else {
               console.error('❌ Verification failed:', verificationResponse.status);
@@ -328,12 +333,7 @@ export default function BLReconciliation() {
     }
   };
 
-  // ✅ OPTIMISÉ - Vider les vérifications lors du changement de magasin
-  // Plus de vérification automatique - seulement vider les anciennes données
-  useEffect(() => {
-    console.log('🔄 Store changed, clearing invoice verifications for fresh webhook icons');
-    setInvoiceVerifications({}); // Clear old verifications only
-  }, [selectedStoreId]);
+
 
   const form = useForm<ReconciliationForm>({
     resolver: zodResolver(reconciliationSchema),
