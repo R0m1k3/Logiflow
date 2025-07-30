@@ -1606,8 +1606,17 @@ export default function BLReconciliation() {
       />
 
       {/* Modal Webhook */}
-      <Dialog open={showWebhookModal} onOpenChange={setShowWebhookModal}>
-        <DialogContent className="sm:max-w-md z-[60]">
+      <Dialog open={showWebhookModal} onOpenChange={(open) => {
+        setShowWebhookModal(open);
+        if (!open) {
+          // Réinitialiser le formulaire quand on ferme le modal
+          webhookForm.reset({
+            type: "Facture",
+            pdfFile: undefined,
+          });
+        }
+      }}>
+        <DialogContent className="sm:max-w-md z-[60]" aria-describedby="webhook-modal-description">
           {/* Overlay de chargement */}
           {sendWebhookMutation.isPending && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[61] rounded-lg">
@@ -1623,6 +1632,9 @@ export default function BLReconciliation() {
               <Send className="w-5 h-5" />
               <span>Envoyer Facture/Avoir</span>
             </DialogTitle>
+            <p id="webhook-modal-description" className="text-sm text-gray-600 mt-1">
+              Sélectionner le type de document et uploader le fichier PDF à envoyer
+            </p>
           </DialogHeader>
           
           <Form {...webhookForm}>
@@ -1649,13 +1661,13 @@ export default function BLReconciliation() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} defaultValue="Facture">
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Sélectionner un type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="z-[70]" position="popper" sideOffset={4}>
                         <SelectItem value="Facture">Facture</SelectItem>
                         <SelectItem value="Avoir">Avoir</SelectItem>
                       </SelectContent>
