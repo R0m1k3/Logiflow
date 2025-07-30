@@ -6,7 +6,7 @@ console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
 // Auto-detect environment for production deployment
-if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app') {
+if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app' || process.env.FORCE_PRODUCTION === 'true') {
   console.log('🚀 PRODUCTION MODE DETECTED');
   process.env.NODE_ENV = 'production';
   process.env.STORAGE_MODE = 'production';
