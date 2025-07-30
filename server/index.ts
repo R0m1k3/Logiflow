@@ -5,16 +5,10 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// Auto-detect environment for production deployment
-if (process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app' || process.env.FORCE_PRODUCTION === 'true') {
-  console.log('🚀 PRODUCTION MODE DETECTED');
-  process.env.NODE_ENV = 'production';
-  process.env.STORAGE_MODE = 'production';
-} else {
-  console.log('🔧 DEVELOPMENT MODE');
-  process.env.NODE_ENV = 'development';
-  process.env.STORAGE_MODE = 'development';
-}
+// FORCE PRODUCTION STORAGE BUT KEEP DEV MODE FOR PORT 5000
+console.log('🔧 HYBRID MODE: DEV ENVIRONMENT + PRODUCTION STORAGE');
+process.env.NODE_ENV = 'development';
+process.env.STORAGE_MODE = 'production';
 
 // Enhanced environment detection
 const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
@@ -156,19 +150,11 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     });
   });
 
-  // Setup routes based on environment
-  let registerRoutes;
-  if (process.env.NODE_ENV === 'production' || process.env.STORAGE_MODE === 'production') {
-    console.log('🚀 Loading production routes... (NODE_ENV=production)');
-    const productionRoutes = await import("./routes.production");
-    registerRoutes = productionRoutes.registerRoutes;
-    console.log('✅ Successfully loaded routes.production.ts');
-  } else {
-    console.log('🔄 Loading development routes... (NODE_ENV=development)');
-    const devRoutes = await import("./routes");
-    registerRoutes = devRoutes.registerRoutes;
-    console.log('✅ Successfully loaded routes.ts');
-  }
+  // FORCE PRODUCTION ROUTES FOR VERIFICATION SYSTEM
+  console.log('🔄 FORCING production routes for NocoDB verification...');
+  const productionRoutes = await import("./routes.production");
+  const registerRoutes = productionRoutes.registerRoutes;
+  console.log('✅ Successfully loaded routes.production.ts');
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
