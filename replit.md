@@ -123,16 +123,15 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - WEBHOOK DONNÉES BL COMPLÈTES : Transmission Informations Livraison Enrichie
+### 2025-07-30 - WEBHOOK STRUCTURE SIMPLIFIÉE : Retour Structure Originale + Numéro BL
 
-✓ DONNÉES BL ÉTENDUES - Webhook transmet maintenant toutes les informations BL : numéro, montant, ID livraison, date de livraison, quantité, unité
-✓ DONNÉES FACTURE COMPLÈTES - Transmission référence facture ET montant facture pour traçabilité complète
-✓ STRUCTURE WEBHOOK ORGANISÉE - Données organisées en sections bl{} et invoice{} pour clarté côté récepteur
-✓ CLIENT-SERVEUR HARMONISÉS - BLReconciliation.tsx et routes.ts/routes.production.ts synchronisés pour transmission complète
-✓ DATES LIVRAISON PRIORISÉES - deliveredDate utilisée en priorité sur scheduledDate pour information précise
-✓ PRODUCTION/DÉVELOPPEMENT ALIGNÉS - Même structure de données transmise dans les deux environnements
-✓ FORMDATA ENRICHI - Tous les champs BL transmis via webhook : blNumber, blAmount, deliveryId, deliveryDate, quantity, unit, invoiceReference, invoiceAmount
-✓ WORKFLOW N8N OPTIMISÉ - Structure données webhook standardisée pour traitement externe facilité
+✓ STRUCTURE WEBHOOK SIMPLIFIÉE - Retour à la structure webhook originale en conservant seulement supplier, type, filename, size, timestamp, user
+✓ AJOUT NUMÉRO BL UNIQUE - Transmission du numéro BL (blNumber) comme seule donnée additionnelle selon demande utilisateur
+✓ CLIENT-SERVEUR HARMONISÉS - BLReconciliation.tsx et routes.ts/routes.production.ts synchronisés pour transmission minimale
+✓ FORMDATA ÉPURÉ - Webhook transmet uniquement : supplier, type, filename, size, timestamp, userId, userRole, groupId, blNumber + fichier PDF
+✓ PRODUCTION/DÉVELOPPEMENT ALIGNÉS - Même structure simple dans les deux environnements
+✓ WORKFLOW N8N OPTIMISÉ - Structure données webhook simplifiée pour traitement externe facilité
+✓ DONNÉES ESSENTIELLES PRÉSERVÉES - Conservation de toutes les données originales nécessaires au traitement N8N
 
 ### 2025-07-30 - TIMEOUT WEBHOOK MODAL CORRIGÉ : Envois Longs Maintenant Supportés (PRÉCÉDENT)
 

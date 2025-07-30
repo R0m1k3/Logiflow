@@ -704,16 +704,8 @@ export default function BLReconciliation() {
       formData.append('pdfFile', data.pdfFile[0]);
       // 🔧 CORRECTION CRITIQUE: Ajouter l'ID du groupe sélectionné
       formData.append('selectedGroupId', selectedStoreId.toString());
-      // Ajouter toutes les informations BL et facture pour webhook
+      // Ajouter seulement le numéro BL comme demandé
       formData.append('blNumber', selectedWebhookDelivery.blNumber || 'N/A');
-      formData.append('blAmount', selectedWebhookDelivery.blAmount || 'N/A');
-      formData.append('invoiceReference', selectedWebhookDelivery.invoiceReference || 'N/A');
-      formData.append('invoiceAmount', selectedWebhookDelivery.invoiceAmount || 'N/A');
-      // Ajouter informations livraison complémentaires
-      formData.append('deliveryId', selectedWebhookDelivery.id.toString());
-      formData.append('deliveryDate', selectedWebhookDelivery.deliveredDate || selectedWebhookDelivery.scheduledDate || 'N/A');
-      formData.append('quantity', selectedWebhookDelivery.quantity?.toString() || 'N/A');
-      formData.append('unit', selectedWebhookDelivery.unit || 'N/A');
       
       console.log('🚀 FormData contents:');
       for (let pair of formData.entries()) {

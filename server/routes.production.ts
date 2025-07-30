@@ -3228,23 +3228,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Aucun fichier PDF fourni" });
       }
 
-      const { 
-        supplier, 
-        type, 
-        blNumber, 
-        blAmount, 
-        invoiceReference, 
-        invoiceAmount, 
-        deliveryId, 
-        deliveryDate, 
-        quantity, 
-        unit, 
-        selectedGroupId 
-      } = req.body;
-      console.log('🔍 PRODUCTION WEBHOOK DEBUG - Request body:', { 
-        supplier, type, blNumber, blAmount, invoiceReference, invoiceAmount, 
-        deliveryId, deliveryDate, quantity, unit, selectedGroupId 
-      });
+      const { supplier, type, blNumber, selectedGroupId } = req.body;
+      console.log('🔍 PRODUCTION WEBHOOK DEBUG - Request body:', { supplier, type, blNumber, selectedGroupId });
       
       if (!supplier || !type) {
         return res.status(400).json({ 
@@ -3295,26 +3280,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookUrl = group.webhookUrl;
       console.log('🌐 Using webhook URL:', webhookUrl);
 
-      // Préparer les données webhook avec toutes les informations BL
+      // Préparer les données webhook (structure originale + numéro BL)
       const webhookData = {
         supplier: supplier,
         type: type,
         filename: req.file.originalname,
         size: req.file.size,
         timestamp: new Date().toISOString(),
-        // Informations BL et livraison complètes
-        bl: {
-          number: blNumber || 'N/A',
-          amount: blAmount || 'N/A',
-          deliveryId: deliveryId || 'N/A',
-          deliveryDate: deliveryDate || 'N/A',
-          quantity: quantity || 'N/A',
-          unit: unit || 'N/A'
-        },
-        invoice: {
-          reference: invoiceReference || 'N/A',
-          amount: invoiceAmount || 'N/A'
-        },
         user: {
           id: currentUserWithGroups?.id,
           role: currentUserWithGroups?.role,
@@ -3338,16 +3310,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       formData.append('userId', webhookData.user.id);
       formData.append('userRole', webhookData.user.role);
       formData.append('groupId', webhookData.user.groupId.toString());
-      // Informations BL complètes
-      formData.append('blNumber', webhookData.bl.number);
-      formData.append('blAmount', webhookData.bl.amount);
-      formData.append('deliveryId', webhookData.bl.deliveryId);
-      formData.append('deliveryDate', webhookData.bl.deliveryDate);
-      formData.append('quantity', webhookData.bl.quantity);
-      formData.append('unit', webhookData.bl.unit);
-      // Informations facture complètes
-      formData.append('invoiceReference', webhookData.invoice.reference);
-      formData.append('invoiceAmount', webhookData.invoice.amount);
+      // Ajout seulement du numéro BL comme demandé
+      formData.append('blNumber', blNumber || 'N/A');
       formData.append('pdfFile', req.file.buffer, {
         filename: webhookData.filename,
         contentType: 'application/pdf'
