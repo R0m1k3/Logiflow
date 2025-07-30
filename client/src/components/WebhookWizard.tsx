@@ -53,10 +53,19 @@ const WebhookWizard: React.FC<WebhookWizardProps> = ({ open, onOpenChange }) => 
   // Mutation pour sauvegarder la configuration webhook
   const saveWebhookMutation = useMutation({
     mutationFn: async ({ groupId, url }: { groupId: number; url: string }) => {
-      return apiRequest(`/api/groups/${groupId}`, {
+      const response = await fetch(`/api/groups/${groupId}`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ webhookUrl: url })
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save webhook configuration');
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
@@ -75,50 +84,23 @@ const WebhookWizard: React.FC<WebhookWizardProps> = ({ open, onOpenChange }) => 
     }
   });
 
-  // Mutation pour tester le webhook
+  // Mutation pour tester le webhook via le serveur (évite CORS)
   const testWebhookMutation = useMutation({
     mutationFn: async (url: string) => {
-      try {
-        const testData = {
-          test: true,
-          timestamp: new Date().toISOString(),
-          message: "Test depuis l'Assistant Webhook LogiFlow"
-        };
-        
-        // Créer un AbortController pour timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(testData),
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        return {
-          status: response.status,
-          statusText: response.statusText,
-          ok: response.ok
-        };
-      } catch (error: any) {
-        // Gestion des erreurs réseau, CORS, timeout, etc.
-        console.log('Webhook test error:', error);
-        
-        if (error.name === 'AbortError') {
-          throw new Error('Timeout: Le webhook n\'a pas répondu dans les 10 secondes');
-        } else if (error.message.includes('CORS')) {
-          throw new Error('Erreur CORS: Le serveur webhook doit autoriser les requêtes cross-origin');
-        } else if (error.message.includes('Failed to fetch')) {
-          throw new Error('Impossible de contacter l\'URL - Vérifiez que l\'URL est accessible');
-        } else {
-          throw new Error(`Erreur réseau: ${error.message}`);
-        }
+      const response = await fetch('/api/webhook/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur de test webhook');
       }
+      
+      return await response.json();
     },
     onSuccess: (result) => {
       setTestResult(result);

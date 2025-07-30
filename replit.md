@@ -123,7 +123,20 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - CONFIGURATION NOCODB HOUDEMONT DÉFINITIVEMENT CORRIGÉE : Système Multi-Magasin Opérationnel
+### 2025-07-30 - ASSISTANT WEBHOOK CONFIGURATION CRÉÉ : Interface Guidée et Tests Serveur-Side Opérationnels
+
+✓ ASSISTANT WEBHOOK WIZARD CRÉÉ - Interface guidée en 4 étapes pour configuration webhook intuitive
+✓ SÉLECTION MAGASIN INTELLIGENTE - Visualisation statut webhook avec codes couleur pour chaque magasin
+✓ CONFIGURATION URL GUIDÉE - Exemples d'URLs et structure données avec validation temps réel
+✓ TEST CONNEXION SERVEUR-SIDE - Endpoint `/api/webhook/test` évite problèmes CORS navigateur
+✓ GESTION ERREURS ROBUSTE - Messages explicatifs pour timeout, DNS, connexion refusée, erreurs réseau
+✓ INTÉGRATION BL RECONCILIATION - Bouton "Assistant Webhook" violet intégré dans page rapprochement
+✓ WORKFLOW VISUAL FLOW - Interface pas-à-pas avec progression claire et boutons navigation
+✓ SAUVEGARDE NON-BLOQUANTE - Configuration possible même si test connexion échoue (serveurs restrictifs)
+✓ ROUTES WEBHOOK TEST COMPLÈTES - Serveur proxy pour tests webhook depuis backend évitant limitations navigateur
+✓ EXPÉRIENCE UTILISATEUR OPTIMISÉE - Messages contextuels et explications pour problèmes techniques courants
+
+### 2025-07-30 - CONFIGURATION NOCODB HOUDEMONT DÉFINITIVEMENT CORRIGÉE : Système Multi-Magasin Opérationnel (PRÉCÉDENT)
 
 ✓ CONFIGURATION NOCODB HOUDEMONT COMPLÉTÉE - Table CommandesH (my7zunxprumahmm) configurée avec mapping correct
 ✓ SCRIPT CORRECTION PRODUCTION CRÉÉ - run_production_fix.js applique automatiquement configuration et nettoie cache  

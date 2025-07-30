@@ -29,6 +29,7 @@ import { requirePermission } from "./permissions";
 import { nocodbLogger } from "./services/nocodbLogger.js";
 import { invoiceVerificationService } from "./services/invoiceVerificationService.js";
 import { setupSimpleVerify } from "./routes.simple-verify.js";
+import { setupWebhookTest } from "./routes.webhook-test.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker
@@ -3454,6 +3455,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup nouveau système de vérification simple et robuste
   setupSimpleVerify(app, isAuthenticated, storage);
+  
+  // Setup webhook test routes - pour tester les webhooks côté serveur
+  setupWebhookTest(app);
   
   const server = createServer(app);
   return server;
