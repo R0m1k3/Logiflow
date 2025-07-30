@@ -104,17 +104,6 @@ export default function BLReconciliation() {
     setInvoiceVerifications({});
   }, [selectedStoreId]);
 
-  // 🚀 VÉRIFICATION AUTOMATIQUE : Déclencher les vérifications au chargement de la page
-  useEffect(() => {
-    if (!isLoading && deliveriesWithBL.length > 0 && !isVerifyingInvoices) {
-      console.log('🚀 Déclenchement automatique des vérifications au chargement de la page');
-      // Attendre un petit délai pour que l'interface soit prête
-      setTimeout(() => {
-        verifyAllInvoices();
-      }, 500);
-    }
-  }, [deliveriesWithBL, isLoading, selectedStoreId]);
-
   // Form pour webhook
   const webhookForm = useForm<WebhookForm>({
     resolver: zodResolver(webhookSchema),
@@ -253,6 +242,17 @@ export default function BLReconciliation() {
       return sorted;
     },
   });
+
+  // 🚀 VÉRIFICATION AUTOMATIQUE : Déclencher les vérifications au chargement de la page
+  useEffect(() => {
+    if (!isLoading && deliveriesWithBL.length > 0 && !isVerifyingInvoices) {
+      console.log('🚀 Déclenchement automatique des vérifications au chargement de la page');
+      // Attendre un petit délai pour que l'interface soit prête
+      setTimeout(() => {
+        verifyAllInvoices();
+      }, 500);
+    }
+  }, [deliveriesWithBL, isLoading, selectedStoreId]);
 
   // Fonction pour vérifier automatiquement les BL sans facture
   const checkPendingInvoices = async () => {

@@ -123,7 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - WEBHOOK STRUCTURE SIMPLIFIÉE : Retour Structure Originale + Numéro BL
+### 2025-07-30 - VÉRIFICATION AUTOMATIQUE FACTURES AU CHARGEMENT : Coches Vertes Apparaissent Sans Clic Manuel
+
+✓ USEEFFECT VÉRIFICATION AUTOMATIQUE AJOUTÉ - Déclenchement automatique verifyAllInvoices() au chargement de la page
+✓ ERREUR JAVASCRIPT INITIALIZATION CORRIGÉE - useEffect déplacé après déclaration deliveriesWithBL pour éviter "Cannot access before initialization"
+✓ SYSTÈME INTELLIGENT CONDITIONNEL - Vérification seulement si !isLoading && deliveriesWithBL.length > 0 && !isVerifyingInvoices
+✓ DÉCLENCHEMENT MULTI-CONDITIONS - Vérification lors changement deliveriesWithBL, isLoading, selectedStoreId
+✓ DÉLAI SÉCURISÉ 500MS - setTimeout pour s'assurer que l'interface est entièrement chargée
+✓ LOGS DIAGNOSTIC COMPLETS - "🚀 Déclenchement automatique des vérifications au chargement de la page"
+✓ COCHES VERTES AUTOMATIQUES - Plus besoin de cliquer "Vérifier factures", coches vertes apparaissent automatiquement
+✓ EXPÉRIENCE UTILISATEUR OPTIMISÉE - Interface immédiatement prête avec vérifications visibles dès l'arrivée sur la page
+
+### 2025-07-30 - WEBHOOK STRUCTURE SIMPLIFIÉE : Retour Structure Originale + Numéro BL (PRÉCÉDENT)
 
 ✓ STRUCTURE WEBHOOK SIMPLIFIÉE - Retour à la structure webhook originale en conservant seulement supplier, type, filename, size, timestamp, user
 ✓ AJOUT NUMÉRO BL UNIQUE - Transmission du numéro BL (blNumber) comme seule donnée additionnelle selon demande utilisateur
