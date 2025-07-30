@@ -271,7 +271,7 @@ export default function BLReconciliation() {
     }
   }, [deliveriesWithBL]);
 
-  // ✅ FONCTION OPTIMISÉE - Cache intelligent pour vérification factures
+  // ✅ FONCTION OPTIMISÉE - Cache intelligent pour vérification factures ET vérification BL automatique
   const verifyAllInvoices = async () => {
     if (!deliveriesWithBL || deliveriesWithBL.length === 0) {
       toast({
@@ -282,18 +282,23 @@ export default function BLReconciliation() {
       return;
     }
     
-    const invoiceReferencesToVerify = deliveriesWithBL
-      .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId)
-      .map((delivery: any) => ({
-        groupId: delivery.groupId,
-        invoiceReference: delivery.invoiceReference,
-        deliveryId: delivery.id,
-        supplierName: delivery.supplier?.name,
-      }));
+    setIsVerifyingInvoices(true);
+    let totalUpdatedDeliveries = 0;
     
-    if (invoiceReferencesToVerify.length > 0) {
-      setIsVerifyingInvoices(true);
-      try {
+    try {
+      // ÉTAPE 1: Vérifier les factures existantes
+      const invoiceReferencesToVerify = deliveriesWithBL
+        .filter((delivery: any) => delivery.invoiceReference && delivery.invoiceReference.trim() !== '' && delivery.groupId)
+        .map((delivery: any) => ({
+          groupId: delivery.groupId,
+          invoiceReference: delivery.invoiceReference,
+          deliveryId: delivery.id,
+          supplierName: delivery.supplier?.name,
+        }));
+      
+      let verificationResults = {};
+      
+      if (invoiceReferencesToVerify.length > 0) {
         const verificationResponse = await fetch('/api/verify-invoices', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -302,34 +307,121 @@ export default function BLReconciliation() {
         });
         
         if (verificationResponse.ok) {
-          const verificationResults = await verificationResponse.json();
+          verificationResults = await verificationResponse.json();
           setInvoiceVerifications(verificationResults);
           
           // Compter optimisation cache
           const cacheHits = Object.values(verificationResults).filter((result: any) => result.cached).length;
           const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
           
-          toast({
-            title: "Vérification optimisée terminée",
-            description: `💾 ${cacheHits} cache hits, ⚡ ${newVerifications} nouvelles vérifications`,
-          });
+          console.log(`📊 Vérification factures: ${cacheHits} cache hits, ${newVerifications} nouvelles vérifications`);
         }
-      } catch (error) {
-        console.error('Error verifying invoice references:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de vérifier les factures",
-          variant: "destructive",
-        });
-      } finally {
-        setIsVerifyingInvoices(false);
       }
-    } else {
+      
+      // ÉTAPE 2: Vérifier les BL sans facture et les compléter automatiquement
+      const deliveriesWithBLOnly = deliveriesWithBL.filter((delivery: any) => 
+        delivery.blNumber && 
+        delivery.blNumber.trim() !== '' && 
+        (!delivery.invoiceReference || delivery.invoiceReference.trim() === '') &&
+        delivery.groupId &&
+        delivery.supplier?.name
+      );
+      
+      console.log(`🔍 Trouvé ${deliveriesWithBLOnly.length} livraisons avec BL sans facture à compléter automatiquement`);
+      
+      for (const delivery of deliveriesWithBLOnly) {
+        try {
+          console.log(`🔍 Recherche automatique pour BL ${delivery.blNumber} - ${delivery.supplier.name}`);
+          
+          const blVerificationResponse = await fetch('/api/nocodb/verify-bl', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              blNumber: delivery.blNumber,
+              supplierName: delivery.supplier.name,
+              groupId: delivery.groupId
+            }),
+          });
+          
+          if (blVerificationResponse.ok) {
+            const blResult = await blVerificationResponse.json();
+            console.log(`✅ Résultat recherche BL ${delivery.blNumber}:`, blResult);
+            
+            if (blResult.found && blResult.verificationDetails?.invoiceRef && blResult.verificationDetails?.amount) {
+              const invoiceRef = blResult.verificationDetails.invoiceRef;
+              const invoiceAmount = blResult.verificationDetails.amount;
+              
+              console.log(`🎯 Mise à jour automatique livraison ${delivery.id}: Facture ${invoiceRef}, Montant ${invoiceAmount}`);
+              
+              // Mettre à jour la livraison avec les données trouvées
+              const updateResponse = await apiRequest(`/api/deliveries/${delivery.id}`, "PUT", {
+                invoiceReference: invoiceRef,
+                invoiceAmount: invoiceAmount.toString(),
+                blNumber: delivery.blNumber,
+                blAmount: delivery.blAmount
+              });
+              
+              if (updateResponse) {
+                totalUpdatedDeliveries++;
+                console.log(`✅ Livraison ${delivery.id} mise à jour automatiquement avec facture ${invoiceRef}`);
+                
+                // Ajouter à nos vérifications locales pour l'affichage
+                setInvoiceVerifications(prev => ({
+                  ...prev,
+                  [delivery.id]: {
+                    exists: true,
+                    cached: false,
+                    matchType: 'BL_AUTO_FILLED',
+                    supplier: delivery.supplier.name,
+                    foundData: blResult.invoice
+                  }
+                }));
+              }
+            }
+          }
+        } catch (blError) {
+          console.error(`❌ Erreur lors de la vérification BL ${delivery.blNumber}:`, blError);
+        }
+      }
+      
+      // ÉTAPE 3: Invalider le cache pour recharger les données mises à jour
+      if (totalUpdatedDeliveries > 0) {
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            query.queryKey[0] === '/api/deliveries/bl' || 
+            query.queryKey[0] === '/api/deliveries'
+        });
+      }
+      
+      // ÉTAPE 4: Message de synthèse
+      const invoiceVerificationsCount = Object.keys(verificationResults).length;
+      const cacheHits = Object.values(verificationResults).filter((result: any) => result.cached).length;
+      const newVerifications = Object.values(verificationResults).filter((result: any) => !result.cached).length;
+      
+      if (invoiceVerificationsCount > 0 || totalUpdatedDeliveries > 0) {
+        toast({
+          title: "Vérification et mise à jour automatique terminées",
+          description: `✅ ${invoiceVerificationsCount} factures vérifiées (${cacheHits} cache, ${newVerifications} nouvelles) • 🎯 ${totalUpdatedDeliveries} livraisons mises à jour automatiquement`,
+          duration: 6000,
+        });
+      } else {
+        toast({
+          title: "Aucune facture ou BL à traiter",
+          description: "Aucune référence facture ou BL à vérifier dans les livraisons",
+          variant: "default",
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error during verification and auto-update:', error);
       toast({
-        title: "Aucune facture à vérifier",
-        description: "Aucune référence facture trouvée dans les BL validés",
-        variant: "default",
+        title: "Erreur",
+        description: "Impossible de vérifier les factures et BL",
+        variant: "destructive",
       });
+    } finally {
+      setIsVerifyingInvoices(false);
     }
   };
 
@@ -887,10 +979,10 @@ export default function BLReconciliation() {
               onClick={verifyAllInvoices}
               disabled={isVerifyingInvoices}
               className="h-9 px-3"
-              title="Actualiser la vérification (utilise le cache intelligent)"
+              title="Vérifie les factures et complète automatiquement les BL manquants"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isVerifyingInvoices ? 'animate-spin' : ''}`} />
-              Actualiser vérifications
+              {isVerifyingInvoices ? 'Vérification et rapprochement...' : 'Vérifier factures et compléter BL'}
             </Button>
             
 

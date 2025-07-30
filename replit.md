@@ -123,7 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - BUG CRITIQUE VÉRIFICATIONS FACTURES RÉSOLU : Coches Persistent Lors Changements Groupe
+### 2025-07-30 - SYSTÈME RAPPROCHEMENT AUTOMATIQUE BL FINALISÉ : Vérification Factures + Auto-Complétion BL Opérationnelle
+
+✓ VÉRIFICATION DOUBLE ÉTAPES IMPLÉMENTÉE - Système vérifie factures existantes PUIS recherche automatiquement BL sans facture
+✓ AUTO-COMPLÉTION INTELLIGENTE - BL trouvés avec bon fournisseur remplissent automatiquement numéro facture et montant HT
+✓ WORKFLOW UNIFIÉ - Un seul bouton "Vérifier factures et compléter BL" déclenche processus complet optimisé
+✓ MISE À JOUR AUTOMATIQUE - Livraisons avec BL complétées automatiquement via API /api/nocodb/verify-bl
+✓ CACHE INVALIDATION - Recharge données mises à jour pour affichage immédiat résultats
+✓ MESSAGES INFORMATIFS - Toast détaillé indique nombre factures vérifiées ET livraisons mises à jour automatiquement
+✓ TRAÇABILITÉ COMPLÈTE - Logs diagnostic pour chaque étape : vérification factures, recherche BL, mise à jour livraisons
+✓ INTERFACE ÉPURÉE - Bouton avec titre explicatif "Vérifie les factures et complète automatiquement les BL manquants"
+
+### 2025-07-30 - BUG CRITIQUE VÉRIFICATIONS FACTURES RÉSOLU : Coches Persistent Lors Changements Groupe (PRÉCÉDENT)
 
 ✓ PROBLÈME ROOT CAUSE IDENTIFIÉ - État invoiceVerifications conservait anciens résultats lors changement groupe, masquant nouvelles vérifications
 ✓ USEEFFECT RÉINITIALISATION AJOUTÉ - État invoiceVerifications automatiquement vidé quand selectedStoreId change
