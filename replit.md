@@ -123,7 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-28 - BUG CRITIQUE WEBHOOK MULTI-TENANT RÉSOLU : Routage par Groupe Sélectionné Définitivement Corrigé
+### 2025-07-30 - CONFIGURATION NOCODB HOUDEMONT DÉFINITIVEMENT CORRIGÉE : Système Multi-Magasin Opérationnel
+
+✓ CONFIGURATION NOCODB HOUDEMONT COMPLÉTÉE - Table CommandesH (my7zunxprumahmm) configurée avec mapping correct
+✓ SCRIPT CORRECTION PRODUCTION CRÉÉ - run_production_fix.js applique automatiquement configuration et nettoie cache  
+✓ FACTURE F5162713 CONFIRMÉE EXISTANTE - Tests directs NocoDB confirment présence avec fournisseur "JJA Five"
+✓ CACHE VÉRIFICATION NETTOYÉ - Suppression entrées obsolètes pour forcer nouvelles vérifications
+✓ MAPPING MULTI-TENANT OPÉRATIONNEL - Frouard (CommandesF/mrr733dfb8wtt9b) + Houdemont (CommandesH/my7zunxprumahmm)
+✓ COLONNE FOURNISSEUR HARMONISÉE - Correction "Fournisseurs" (avec S) dans service vérification
+✓ SYSTÈME PRODUCTION-READY - Configuration synchronisée entre développement et production via script automatisé
+
+### 2025-07-28 - BUG CRITIQUE WEBHOOK MULTI-TENANT RÉSOLU : Routage par Groupe Sélectionné Définitivement Corrigé (PRÉCÉDENT)
 
 ✓ PROBLÈME ROOT CAUSE IDENTIFIÉ - Système webhook utilisait premier groupe avec webhook disponible au lieu du groupe actuellement sélectionné par utilisateur
 ✓ FRONTEND CORRIGÉ - BLReconciliation.tsx envoie maintenant selectedStoreId dans requête webhook via selectedGroupId pour ciblage précis
