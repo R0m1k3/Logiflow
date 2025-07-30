@@ -84,7 +84,7 @@ export async function verifyInvoiceReference(
         
         // If supplier name is provided, also check supplier match (case-insensitive)
         if (invoiceMatches && supplierName) {
-          const supplierColumn = record['Fournisseur'] || record['Supplier'] || record['fournisseur'] || record['supplier'];
+          const supplierColumn = record['Fournisseurs'] || record['Fournisseur'] || record['Supplier'] || record['fournisseur'] || record['supplier'];
           if (supplierColumn) {
             const normalizedRecordSupplier = supplierColumn.toString().toLowerCase();
             const normalizedSearchSupplier = supplierName.toLowerCase();
