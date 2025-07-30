@@ -19,35 +19,63 @@ export async function apiRequest(
   url: string,
   method: string = 'GET',
   body?: unknown,
-  headers: Record<string, string> = {}
+  headers: Record<string, string> = {},
+  timeoutMs: number = 30000 // 30 secondes par défaut
 ): Promise<any> {
-  console.log("🌐 API Request:", { url, method, body });
+  console.log("🌐 API Request:", { url, method, body, timeoutMs });
   
   // Détection si le body est un FormData
   const isFormData = body instanceof FormData;
   
-  const res = await fetch(url, {
-    method,
-    headers: {
-      // Ne pas ajouter Content-Type pour FormData (le navigateur le fait automatiquement)
-      ...(body && !isFormData ? { "Content-Type": "application/json" } : {}),
-      ...headers,
-    },
-    // Ne pas JSON.stringify pour FormData
-    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
-    credentials: "include",
-  });
+  // Créer un AbortController pour le timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    console.log(`⏰ Request timeout after ${timeoutMs}ms for ${url}`);
+    controller.abort();
+  }, timeoutMs);
+  
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        // Ne pas ajouter Content-Type pour FormData (le navigateur le fait automatiquement)
+        ...(body && !isFormData ? { "Content-Type": "application/json" } : {}),
+        ...headers,
+      },
+      // Ne pas JSON.stringify pour FormData
+      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
+      credentials: "include",
+      signal: controller.signal,
+    });
 
-  console.log("🌐 API Response:", { status: res.status, ok: res.ok });
-  
-  await throwIfResNotOk(res);
-  
-  // Return JSON response
-  if (res.headers.get('content-type')?.includes('application/json')) {
-    return await res.json();
+    console.log("🌐 API Response:", { status: res.status, ok: res.ok });
+    
+    await throwIfResNotOk(res);
+    
+    // Return JSON response
+    if (res.headers.get('content-type')?.includes('application/json')) {
+      return await res.json();
+    }
+    
+    return res;
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error(`La requête a expiré après ${timeoutMs/1000} secondes. Veuillez réessayer.`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  
-  return res;
+}
+
+// Version spécialisée pour les webhooks avec timeout étendu
+export async function apiRequestWebhook(
+  url: string,
+  method: string = 'GET',
+  body?: unknown,
+  headers: Record<string, string> = {}
+): Promise<any> {
+  return apiRequest(url, method, body, headers, 300000); // 5 minutes pour les webhooks
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

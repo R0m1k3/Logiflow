@@ -123,7 +123,17 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - SYSTÈME RAPPROCHEMENT AUTOMATIQUE BL FINALISÉ : Vérification Factures + Auto-Complétion BL Opérationnelle
+### 2025-07-30 - TIMEOUT WEBHOOK MODAL CORRIGÉ : Envois Longs Maintenant Supportés
+
+✓ TIMEOUT WEBHOOK ÉTENDU - Modal d'envoi facture ne timeout plus après 1 minute, limite portée à 5 minutes
+✓ FONCTION SPÉCIALISÉE CRÉÉE - apiRequestWebhook avec timeout 300 secondes au lieu de 30 par défaut
+✓ ABORTCONTROLLER IMPLÉMENTÉ - Gestion propre des timeouts avec messages d'erreur explicites en français
+✓ MUTATIONS WEBHOOK OPTIMISÉES - Envois longs via webhook N8N fonctionnent sans erreur timeout
+✓ MESSAGES TIMEOUT CLAIRS - "La requête a expiré après X secondes. Veuillez réessayer." au lieu d'erreurs techniques
+✓ LOGS DIAGNOSTIC AMÉLIORÉS - Traçabilité timeout avec URL et durée pour debugging
+✓ COMPATIBILITÉ PRESERVED - Fonction apiRequest standard garde timeout 30s, seuls webhooks utilisent 5min
+
+### 2025-07-30 - SYSTÈME RAPPROCHEMENT AUTOMATIQUE BL FINALISÉ : Vérification Factures + Auto-Complétion BL Opérationnelle (PRÉCÉDENT)
 
 ✓ VÉRIFICATION DOUBLE ÉTAPES IMPLÉMENTÉE - Système vérifie factures existantes PUIS recherche automatiquement BL sans facture
 ✓ AUTO-COMPLÉTION INTELLIGENTE - BL trouvés avec bon fournisseur remplissent automatiquement numéro facture et montant HT

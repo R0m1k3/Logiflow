@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, apiRequestWebhook } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useStore } from "@/components/Layout";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
@@ -713,8 +713,8 @@ export default function BLReconciliation() {
         console.log('🚀', pair[0], pair[1]);
       }
       
-      console.log('🌐 API Request:', { url: '/api/webhook/send', method: 'POST', formData: 'FormData object' });
-      await apiRequest('/api/webhook/send', 'POST', formData);
+      console.log('🌐 API Request:', { url: '/api/webhook/send', method: 'POST', formData: 'FormData object', timeout: '5 minutes' });
+      await apiRequestWebhook('/api/webhook/send', 'POST', formData);
     },
     onSuccess: () => {
       toast({
