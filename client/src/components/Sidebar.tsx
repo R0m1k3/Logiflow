@@ -21,7 +21,8 @@ import {
   ListTodo,
   Menu,
   ChevronLeft,
-  Search
+  Search,
+  Globe
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -153,6 +154,12 @@ export default function Sidebar() {
       path: "/database-backup", 
       label: "Sauvegarde BDD", 
       icon: Database, 
+      permission: "system_admin" 
+    },
+    { 
+      path: "/webhook-configuration", 
+      label: "Configuration Webhooks", 
+      icon: Globe, 
       permission: "system_admin" 
     },
     { 
