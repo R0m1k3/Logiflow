@@ -123,7 +123,18 @@ The application uses a sophisticated dual authentication approach:
 
 ## Recent Changes
 
-### 2025-07-30 - TIMEOUT WEBHOOK MODAL CORRIGÉ : Envois Longs Maintenant Supportés
+### 2025-07-30 - WEBHOOK DONNÉES BL COMPLÈTES : Transmission Informations Livraison Enrichie
+
+✓ DONNÉES BL ÉTENDUES - Webhook transmet maintenant toutes les informations BL : numéro, montant, ID livraison, date de livraison, quantité, unité
+✓ DONNÉES FACTURE COMPLÈTES - Transmission référence facture ET montant facture pour traçabilité complète
+✓ STRUCTURE WEBHOOK ORGANISÉE - Données organisées en sections bl{} et invoice{} pour clarté côté récepteur
+✓ CLIENT-SERVEUR HARMONISÉS - BLReconciliation.tsx et routes.ts/routes.production.ts synchronisés pour transmission complète
+✓ DATES LIVRAISON PRIORISÉES - deliveredDate utilisée en priorité sur scheduledDate pour information précise
+✓ PRODUCTION/DÉVELOPPEMENT ALIGNÉS - Même structure de données transmise dans les deux environnements
+✓ FORMDATA ENRICHI - Tous les champs BL transmis via webhook : blNumber, blAmount, deliveryId, deliveryDate, quantity, unit, invoiceReference, invoiceAmount
+✓ WORKFLOW N8N OPTIMISÉ - Structure données webhook standardisée pour traitement externe facilité
+
+### 2025-07-30 - TIMEOUT WEBHOOK MODAL CORRIGÉ : Envois Longs Maintenant Supportés (PRÉCÉDENT)
 
 ✓ TIMEOUT WEBHOOK ÉTENDU - Modal d'envoi facture ne timeout plus après 1 minute, limite portée à 5 minutes
 ✓ FONCTION SPÉCIALISÉE CRÉÉE - apiRequestWebhook avec timeout 300 secondes au lieu de 30 par défaut

@@ -3495,10 +3495,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      const { supplier, type, selectedGroupId, blNumber, invoiceReference } = req.body;
+      const { 
+        supplier, 
+        type, 
+        selectedGroupId, 
+        blNumber, 
+        blAmount, 
+        invoiceReference, 
+        invoiceAmount, 
+        deliveryId, 
+        deliveryDate, 
+        quantity, 
+        unit 
+      } = req.body;
       const pdfFile = req.file;
 
-      console.log('🔧 DEV WEBHOOK DEBUG - Extracted data:', { supplier, type, selectedGroupId, blNumber, invoiceReference, pdfFile: pdfFile ? 'FILE PRESENT' : 'NO FILE' });
+      console.log('🔧 DEV WEBHOOK DEBUG - Extracted data:', { 
+        supplier, type, selectedGroupId, blNumber, blAmount, invoiceReference, invoiceAmount, 
+        deliveryId, deliveryDate, quantity, unit, pdfFile: pdfFile ? 'FILE PRESENT' : 'NO FILE' 
+      });
       console.log('🔧 User data:', { id: user.id, role: user.role, userGroups: user.userGroups });
 
       if (!supplier || !type || !pdfFile) {
@@ -3555,7 +3570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No webhook URL configured for this group" });
       }
 
-      // Préparer les données du webhook
+      // Préparer les données du webhook avec toutes les informations BL
       const groupId = selectedGroup?.id || (user.role === 'admin' ? 1 : userGroups[0]?.group?.id);
         
       const webhookData = {
@@ -3564,6 +3579,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filename: pdfFile.originalname,
         size: pdfFile.size,
         timestamp: new Date().toISOString(),
+        // Informations BL et livraison complètes
+        bl: {
+          number: blNumber || 'N/A',
+          amount: blAmount || 'N/A',
+          deliveryId: deliveryId || 'N/A',
+          deliveryDate: deliveryDate || 'N/A',
+          quantity: quantity || 'N/A',
+          unit: unit || 'N/A'
+        },
+        invoice: {
+          reference: invoiceReference || 'N/A',
+          amount: invoiceAmount || 'N/A'
+        },
         user: {
           id: userId,
           role: user.role,
@@ -3643,11 +3671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Webhooks en méthode POST (avec fichier PDF)
         console.log('🌐 Sending POST webhook with PDF file transmission');
         
-        // Ajouter informations BL et référence facture depuis selectedWebhookDelivery
-        const blNumber = req.body.blNumber || 'N/A';
-        const invoiceReference = req.body.invoiceReference || 'N/A';
-        
-        // Créer FormData pour POST avec fichier
+        // Créer FormData pour POST avec fichier et toutes les données BL
         const FormDataClass = (await import('form-data')).default;
         const formData = new FormDataClass();
         formData.append('supplier', webhookData.supplier);
@@ -3658,8 +3682,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         formData.append('userId', webhookData.user.id);
         formData.append('userRole', webhookData.user.role);
         formData.append('groupId', webhookData.user.groupId.toString());
-        formData.append('blNumber', blNumber);
-        formData.append('invoiceReference', invoiceReference);
+        // Informations BL complètes
+        formData.append('blNumber', webhookData.bl.number);
+        formData.append('blAmount', webhookData.bl.amount);
+        formData.append('deliveryId', webhookData.bl.deliveryId);
+        formData.append('deliveryDate', webhookData.bl.deliveryDate);
+        formData.append('quantity', webhookData.bl.quantity);
+        formData.append('unit', webhookData.bl.unit);
+        // Informations facture complètes
+        formData.append('invoiceReference', webhookData.invoice.reference);
+        formData.append('invoiceAmount', webhookData.invoice.amount);
         formData.append('pdfFile', req.file.buffer, {
           filename: webhookData.filename,
           contentType: 'application/pdf'
