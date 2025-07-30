@@ -28,6 +28,7 @@ import { z } from "zod";
 import { requirePermission } from "./permissions";
 import { nocodbLogger } from "./services/nocodbLogger.js";
 import { invoiceVerificationService } from "./services/invoiceVerificationService.js";
+import { setupSimpleVerify } from "./routes.simple-verify.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker
@@ -2879,11 +2880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔧 DLC Data prepared:', dlcData);
       
       // Validate data with proper handling of name field
-      const validatedData = insertDlcProductFrontendSchema.parse({
-        ...dlcData,
-        // Ensure name is always present for validation
-        name: dlcData.name || dlcData.productName || 'Produit DLC'
-      });
+      const validatedData = insertDlcProductFrontendSchema.parse(dlcData);
 
       const dlcProduct = await storage.createDlcProduct(validatedData);
       console.log('✅ DLC Product created successfully:', dlcProduct.id);
@@ -3602,6 +3599,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Setup nouveau système de vérification simple et robuste
+  setupSimpleVerify(app, isAuthenticated, storage);
+  
   const server = createServer(app);
   return server;
 }
