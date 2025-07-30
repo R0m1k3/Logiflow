@@ -78,25 +78,47 @@ const WebhookWizard: React.FC<WebhookWizardProps> = ({ open, onOpenChange }) => 
   // Mutation pour tester le webhook
   const testWebhookMutation = useMutation({
     mutationFn: async (url: string) => {
-      const testData = {
-        test: true,
-        timestamp: new Date().toISOString(),
-        message: "Test depuis l'Assistant Webhook LogiFlow"
-      };
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(testData)
-      });
-      
-      return {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      };
+      try {
+        const testData = {
+          test: true,
+          timestamp: new Date().toISOString(),
+          message: "Test depuis l'Assistant Webhook LogiFlow"
+        };
+        
+        // Créer un AbortController pour timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(testData),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        return {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok
+        };
+      } catch (error: any) {
+        // Gestion des erreurs réseau, CORS, timeout, etc.
+        console.log('Webhook test error:', error);
+        
+        if (error.name === 'AbortError') {
+          throw new Error('Timeout: Le webhook n\'a pas répondu dans les 10 secondes');
+        } else if (error.message.includes('CORS')) {
+          throw new Error('Erreur CORS: Le serveur webhook doit autoriser les requêtes cross-origin');
+        } else if (error.message.includes('Failed to fetch')) {
+          throw new Error('Impossible de contacter l\'URL - Vérifiez que l\'URL est accessible');
+        } else {
+          throw new Error(`Erreur réseau: ${error.message}`);
+        }
+      }
     },
     onSuccess: (result) => {
       setTestResult(result);
@@ -373,9 +395,23 @@ const WebhookWizard: React.FC<WebhookWizardProps> = ({ open, onOpenChange }) => 
                   <Alert>
                     <Shield className="h-4 w-4" />
                     <AlertDescription>
-                      Test de connectivité vers : <code className="font-mono">{webhookUrl}</code>
+                      Test de connectivité vers : <code className="font-mono break-all">{webhookUrl}</code>
                     </AlertDescription>
                   </Alert>
+
+                  <div className="bg-blue-50 p-3 rounded-md text-sm">
+                    <div className="flex items-start space-x-2">
+                      <Shield className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-blue-800 mb-1">À propos du test</p>
+                        <p className="text-blue-700">
+                          Le test envoie une requête POST avec des données JSON de test. 
+                          Certains serveurs peuvent bloquer les requêtes directes depuis le navigateur (CORS). 
+                          Si le test échoue, vous pouvez toujours continuer la configuration.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="space-y-4">
                     <Button
@@ -411,9 +447,15 @@ const WebhookWizard: React.FC<WebhookWizardProps> = ({ open, onOpenChange }) => 
                           </div>
                           <div className="text-sm text-gray-600">
                             {testResult.error ? (
-                              <span>Erreur: {testResult.error}</span>
+                              <div className="space-y-1">
+                                <span className="text-red-600">Erreur: {testResult.error}</span>
+                                <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 rounded">
+                                  <strong>Note:</strong> Certaines URLs peuvent bloquer les tests directs depuis le navigateur (CORS). 
+                                  Vous pouvez continuer la configuration même si le test échoue.
+                                </div>
+                              </div>
                             ) : (
-                              <span>Statut HTTP: {testResult.status} {testResult.statusText}</span>
+                              <span className="text-green-600">Statut HTTP: {testResult.status} {testResult.statusText}</span>
                             )}
                           </div>
                         </CardContent>
@@ -437,7 +479,7 @@ const WebhookWizard: React.FC<WebhookWizardProps> = ({ open, onOpenChange }) => 
                           });
                         }
                       }}
-                      disabled={saveWebhookMutation.isPending || (!testResult?.ok && !testResult?.error)}
+                      disabled={saveWebhookMutation.isPending}
                       className="bg-purple-600 hover:bg-purple-700"
                     >
                       {saveWebhookMutation.isPending ? (
