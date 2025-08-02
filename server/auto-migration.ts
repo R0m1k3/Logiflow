@@ -58,7 +58,7 @@ async function addWebhookUrlColumnIfMissing(): Promise<void> {
       WHERE name = 'Frouard' AND (webhook_url = '' OR webhook_url IS NULL)
     `);
     
-    if (updateResult.rowCount > 0) {
+    if (updateResult.rowCount && updateResult.rowCount > 0) {
       console.log(`✅ Migration webhook_url: URL configurée pour ${updateResult.rowCount} groupe(s)`);
     }
     
