@@ -87,6 +87,7 @@ export default function BLReconciliation() {
   const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deliveryToDelete, setDeliveryToDelete] = useState<any>(null);
   const [invoiceVerifications, setInvoiceVerifications] = useState<Record<string, { exists: boolean; error?: string; isUsed?: boolean; usedBy?: any }>>({});
@@ -966,6 +967,8 @@ export default function BLReconciliation() {
                     setSelectedDate(date || null);
                     setIsDatePickerOpen(false);
                   }}
+                  month={currentMonth}
+                  onMonthChange={setCurrentMonth}
                   locale={fr}
                   className="rounded-md border"
                 />
