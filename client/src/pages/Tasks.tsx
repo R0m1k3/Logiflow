@@ -54,7 +54,7 @@ export default function Tasks() {
   const [taskToDelete, setTaskToDelete] = useState<TaskWithRelations | null>(null);
 
   // Fetch tasks
-  const { data: tasks = [], isLoading } = useQuery({
+  const { data: tasks = [], isLoading } = useQuery<TaskWithRelations[]>({
     queryKey: ["/api/tasks", selectedStoreId],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -171,7 +171,7 @@ export default function Tasks() {
   // Fonction pour vérifier si une tâche doit être visible selon les règles de date de début
   const isTaskVisible = (task: TaskWithRelations) => {
     // Admins et directeurs voient toutes les tâches
-    if (user?.role === 'admin' || user?.role === 'directeur') {
+    if ((user as any)?.role === 'admin' || (user as any)?.role === 'directeur') {
       return true;
     }
 
@@ -423,15 +423,15 @@ export default function Tasks() {
             ) : (
               <div className="space-y-4 flex-1 overflow-y-auto">
                 {/* Tâches en cours */}
-                {paginatedTasks.filter(task => task.status === 'pending').length > 0 && (
+                {paginatedTasks.filter((task: TaskWithRelations) => task.status === 'pending').length > 0 && (
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                      Tâches en cours ({paginatedTasks.filter(task => task.status === 'pending').length})
+                      Tâches en cours ({paginatedTasks.filter((task: TaskWithRelations) => task.status === 'pending').length})
                     </h4>
                     <div className="space-y-3">
                       {paginatedTasks
-                        .filter(task => task.status === 'pending')
-                        .map((task) => {
+                        .filter((task: TaskWithRelations) => task.status === 'pending')
+                        .map((task: TaskWithRelations) => {
                           const priorityConfig = getPriorityConfig(task.priority);
                           const PriorityIcon = priorityConfig.icon;
                           
@@ -469,18 +469,18 @@ export default function Tasks() {
                                         Assigné à: {task.assignedTo}
                                       </span>
                                       <span>
-                                        Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                                        Créée: {task.createdAt ? format(new Date(task.createdAt), 'dd MMMM yyyy à HH:mm', { locale: fr }) : 'Date inconnue'}
                                       </span>
                                       {task.startDate && (
                                         <span className="text-blue-600 font-medium">
                                           <Calendar className="w-3 h-3 inline mr-1" />
-                                          Début: {format(new Date(task.startDate), 'dd/MM/yyyy', { locale: fr })}
+                                          Début: {format(new Date(task.startDate), 'dd MMMM yyyy', { locale: fr })}
                                         </span>
                                       )}
                                       {task.dueDate && (
                                         <span className="text-orange-600 font-medium">
                                           <Clock className="w-3 h-3 inline mr-1" />
-                                          Échéance: {format(new Date(task.dueDate), 'dd/MM/yyyy', { locale: fr })}
+                                          Échéance: {format(new Date(task.dueDate), 'dd MMMM yyyy', { locale: fr })}
                                         </span>
                                       )}
                                     </div>
@@ -527,15 +527,15 @@ export default function Tasks() {
                 )}
 
                 {/* Tâches terminées */}
-                {paginatedTasks.filter(task => task.status === 'completed').length > 0 && (
+                {paginatedTasks.filter((task: TaskWithRelations) => task.status === 'completed').length > 0 && (
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-3 mt-8">
-                      Tâches terminées ({paginatedTasks.filter(task => task.status === 'completed').length})
+                      Tâches terminées ({paginatedTasks.filter((task: TaskWithRelations) => task.status === 'completed').length})
                     </h4>
                     <div className="space-y-3">
                       {paginatedTasks
-                        .filter(task => task.status === 'completed')
-                        .map((task) => {
+                        .filter((task: TaskWithRelations) => task.status === 'completed')
+                        .map((task: TaskWithRelations) => {
                           const priorityConfig = getPriorityConfig(task.priority);
                           const PriorityIcon = priorityConfig.icon;
                           
@@ -565,17 +565,18 @@ export default function Tasks() {
                                         Assigné à: {task.assignedTo}
                                       </span>
                                       <span>
-                                        Créée: {format(new Date(task.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                                        Créée: {task.createdAt ? format(new Date(task.createdAt), 'dd MMMM yyyy à HH:mm', { locale: fr }) : 'Date inconnue'}
                                       </span>
                                       {task.dueDate && (
                                         <span className="text-gray-400">
                                           <Clock className="w-3 h-3 inline mr-1" />
-                                          Échéance: {format(new Date(task.dueDate), 'dd/MM/yyyy', { locale: fr })}
+                                          Échéance: {format(new Date(task.dueDate), 'dd MMMM yyyy', { locale: fr })}
                                         </span>
                                       )}
                                       {task.completedAt && (
-                                        <span>
-                                          Terminée: {format(new Date(task.completedAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                                        <span className="text-green-600 font-medium">
+                                          <CheckCircle className="w-3 h-3 inline mr-1" />
+                                          Terminée: {format(new Date(task.completedAt), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                                         </span>
                                       )}
                                     </div>
