@@ -1,13 +1,16 @@
-# Déploiement Production LogiFlow (Sans Nginx)
+# Déploiement Production LogiFlow (Avec Nginx)
 
-## Configuration mise à jour
+## Configuration réseau externe
 
-L'application a été configurée pour un déploiement direct sans nginx.
+L'application utilise le réseau nginx_default externe pour s'intégrer avec nginx.
 
 ## Commandes de déploiement
 
 ### Option 1 : Déploiement principal (recommandé)
 ```bash
+# Créer le réseau nginx si nécessaire
+docker network create nginx_default
+
 # Arrêter l'ancienne version si elle existe
 docker-compose down
 
@@ -72,9 +75,20 @@ docker-compose -f docker-compose2.yml up -d --build
 - **URL alternative** : http://localhost:3001 (docker-compose2.yml)
 - **API Health Check** : http://localhost:3000/api/health
 
+## Résolution de l'erreur réseau
+
+**Erreur : network nginx_default not found**
+```bash
+# Créer le réseau externe requis
+docker network create nginx_default
+
+# Puis redéployer
+docker-compose down && docker-compose up -d --build
+```
+
 ## Notes importantes
 
-- ✅ Configuration réseau simplifiée (pas de nginx)
+- ✅ Configuration réseau nginx_default externe
 - ✅ Migrations automatiques désactivées
 - ✅ Base de données PostgreSQL incluse
 - ✅ Health checks configurés
