@@ -968,7 +968,8 @@ export default function BLReconciliation() {
                   }}
                   locale={fr}
                   className="rounded-md border"
-                  defaultMonth={new Date()}
+                  defaultMonth={selectedDate || new Date()}
+                  key={isDatePickerOpen ? 'open' : 'closed'}
                 />
               </PopoverContent>
             </Popover>
