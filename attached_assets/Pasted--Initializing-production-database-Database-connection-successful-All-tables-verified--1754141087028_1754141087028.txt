@@ -1,0 +1,136 @@
+🔧 Initializing production database...
+
+✅ Database connection successful
+
+✅ All tables verified/created successfully
+
+🔄 Running database migrations...
+
+🔧 CRITICAL FIX: Correcting deliveries status constraint...
+
+✅ CRITICAL FIX: Deliveries status constraint corrected to allow planned status
+
+✅ Updated name column with existing data
+
+🔧 CRITICAL FIX: Ensuring NocoDB BL columns exist...
+
+✅ Updated NocoDB BL column default values
+
+🔧 CRITICAL FIX v2: Forcing tasks table completed columns for production...
+
+📋 Current completed columns: [ { column_name: 'completed_at' }, { column_name: 'completed_by' } ]
+
+✅ Dropped constraints
+
+✅ Dropped old columns
+
+✅ Added new columns
+
+✅ Added constraints
+
+🎉 CRITICAL FIX v2 COMPLETED. Final structure: [
+
+  {
+
+    column_name: 'completed_at',
+
+    data_type: 'timestamp without time zone',
+
+    is_nullable: 'YES'
+
+  },
+
+  {
+
+    column_name: 'completed_by',
+
+    data_type: 'character varying',
+
+    is_nullable: 'YES'
+
+  }
+
+]
+
+✅ Removed old orders_status_check constraint
+
+✅ Added updated orders_status_check constraint
+
+✅ ALL tables created including CRITICAL user_roles table
+
+✅ All migrations completed successfully
+
+✅ System user already exists
+
+✅ Admin user exists with custom password - not resetting
+
+🎭 Initializing roles and permissions for production...
+
+🔒 Vérification du système de rôles fixes...
+
+✅ Rôle fixe existe: Administrateur
+
+✅ Rôle fixe existe: Manager
+
+✅ Rôle fixe existe: Employé
+
+✅ Rôle fixe existe: Directeur
+
+✅ Nettoyage des anciens rôles système terminé - rôles fixes préservés
+
+🔑 Assignment des permissions aux rôles fixes...
+
+✅ Admin: 54 permissions assignées
+
+✅ Manager: permissions assignées (tout sauf administration, avec validation livraisons)
+
+✅ Employee: 15 permissions de base assignées
+
+✅ Directeur: permissions assignées (tout sauf administration)
+
+👥 Assignment des utilisateurs aux rôles fixes...
+
+✅ admin_local assigné au rôle Administrateur
+
+❌ Nicolas introuvable avec ID _1753182518439
+
+✅ ff292 assigné au rôle Employé
+
+✅ Roles already exist, checking for missing DLC permissions...
+
+🔍 Checking for missing DLC permissions...
+
+✅ All DLC permissions already exist
+
+✅ Database initialization complete
+
+✅ Migrations automatiques ignorées - base de données déjà à jour
+
+✅ Local authentication configured
+
+🔧 Backup service using directory: /tmp/logiflow-backups (production storage: true)
+
+🔧 Backup service using directory: /tmp/logiflow-backups (production storage: true)
+
+✅ Scheduler service initialized successfully
+
+🔧 SETUP SIMPLE VERIFY - Function called, registering route /api/verify-invoices
+
+✅ SETUP SIMPLE VERIFY - Route /api/verify-invoices registered successfully
+
+🧪 Webhook test route registered
+
+✅ Serving static files from: /app/dist/public
+
+1:23:50 PM [express] Server running on port 3000
+
+✅ Backup service initialized successfully
+
+1:23:53 PM [express] HEAD /api/health 200 in 8ms
+
+1:24:23 PM [express] HEAD /api/health 200 in 1ms
+
+
+      
+      
+    

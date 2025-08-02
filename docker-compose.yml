@@ -18,7 +18,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - nginx_default
+      - logiflow_network
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,7 +40,7 @@ services:
     ports:
       - "5434:5432"
     networks:
-      - nginx_default
+      - logiflow_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
@@ -56,5 +56,5 @@ volumes:
     driver: local
 
 networks:
-  nginx_default:
-    external: true
+  logiflow_network:
+    driver: bridge

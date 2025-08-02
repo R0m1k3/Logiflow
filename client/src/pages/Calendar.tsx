@@ -47,7 +47,7 @@ export default function Calendar() {
         startDate: format(monthStart, 'yyyy-MM-dd'),
         endDate: format(monthEnd, 'yyyy-MM-dd')
       });
-      if (selectedStoreId && user?.role === 'admin') {
+      if (selectedStoreId && (user as any)?.role === 'admin') {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -55,7 +55,7 @@ export default function Calendar() {
       console.log('📅 Calendar fetching orders:', {
         url,
         selectedStoreId,
-        userRole: user?.role,
+        userRole: (user as any)?.role,
         params: params.toString()
       });
       
@@ -83,7 +83,7 @@ export default function Calendar() {
         startDate: format(monthStart, 'yyyy-MM-dd'),
         endDate: format(monthEnd, 'yyyy-MM-dd')
       });
-      if (selectedStoreId && user?.role === 'admin') {
+      if (selectedStoreId && (user as any)?.role === 'admin') {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -91,7 +91,7 @@ export default function Calendar() {
       console.log('📅 Calendar fetching deliveries:', {
         url,
         selectedStoreId,
-        userRole: user?.role,
+        userRole: (user as any)?.role,
         params: params.toString()
       });
       
@@ -116,7 +116,7 @@ export default function Calendar() {
       const params = new URLSearchParams({
         year: currentDate.getFullYear().toString()
       });
-      if (selectedStoreId && user?.role === 'admin') {
+      if (selectedStoreId && (user as any)?.role === 'admin') {
         params.append('storeId', selectedStoreId.toString());
       }
       
@@ -125,7 +125,7 @@ export default function Calendar() {
         url,
         year: currentDate.getFullYear(),
         selectedStoreId,
-        userRole: user?.role
+        userRole: (user as any)?.role
       });
       
       const response = await fetch(url, {
@@ -154,7 +154,7 @@ export default function Calendar() {
 
   const handleDateClick = (date: Date) => {
     console.log('📅 Date clicked:', format(date, 'yyyy-MM-dd'));
-    console.log('📅 Current user:', user?.username, 'Role:', user?.role);
+    console.log('📅 Current user:', (user as any)?.username, 'Role:', (user as any)?.role);
     console.log('📅 Permission check result:', hasPermission('calendar_read'));
     console.log('📅 All permissions available:', typeof hasPermission);
     
@@ -297,7 +297,7 @@ export default function Calendar() {
             orders={orders}
             deliveries={deliveries}
             publicities={publicities}
-            userRole={user?.role || 'employee'}
+            userRole={(user as any)?.role || 'employee'}
             userGroups={(user as any)?.userGroups || []}
             onDateClick={handleDateClick}
             onItemClick={handleItemClick}
