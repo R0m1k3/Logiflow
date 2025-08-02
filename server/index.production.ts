@@ -3,7 +3,7 @@ import { setupSecurityHeaders, setupRateLimiting, setupInputSanitization } from 
 import { setupCompression } from "./cache";
 import { monitor, setupMonitoringEndpoints } from "./monitoring";
 import { initDatabase } from "./initDatabase.production";
-// SUPPRIMÉ: import { runAutoMigrations } from "./auto-migration"; // Plus nécessaire
+import { runAutoMigrations } from "./auto-migration"; // Réactivé mais fonction désactivée
 import path from "path";
 import fs from "fs";
 
@@ -117,17 +117,13 @@ app.use((req, res, next) => {
     process.exit(1);
   }
 
-  // DÉSACTIVÉ: Migrations automatiques (webhook_url existe déjà)
-  // Les migrations automatiques causent des erreurs SSL en production
-  // La colonne webhook_url existe déjà dans la base de données
-  /*
+  // Exécuter les migrations automatiques (fonction désactivée mais import nécessaire)
   try {
     await runAutoMigrations();
   } catch (error) {
     console.error('⚠️  Migration automatique échouée (continuant quand même):', error);
     // Ne pas faire planter l'application pour des migrations
   }
-  */
 
   const { registerRoutes } = await import('./routes.production');
   const server = await registerRoutes(app);

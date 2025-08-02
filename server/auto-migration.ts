@@ -10,8 +10,12 @@ const pool = new Pool({
 });
 
 export async function runAutoMigrations(): Promise<void> {
-  console.log('🔄 Vérification des migrations automatiques...');
+  console.log('🔄 DÉSACTIVÉ: Migrations automatiques (webhook_url existe déjà en production)');
+  console.log('✅ Migrations ignorées - colonnes déjà présentes en base');
   
+  // DÉSACTIVÉ: Les migrations automatiques causent des erreurs SSL en production
+  // La colonne webhook_url existe déjà dans toutes les bases de données de production
+  /*
   try {
     // Migration 1: Ajouter la colonne webhook_url si elle n'existe pas
     await addWebhookUrlColumnIfMissing();
@@ -21,6 +25,7 @@ export async function runAutoMigrations(): Promise<void> {
     console.error('❌ Erreur lors des migrations automatiques:', error);
     // Ne pas faire planter l'application, juste loguer l'erreur
   }
+  */
 }
 
 async function addWebhookUrlColumnIfMissing(): Promise<void> {
