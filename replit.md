@@ -52,6 +52,7 @@ Preferred communication style: Simple, everyday language.
 - **Calendar Navigation Fixed**: Corrected date picker to open on current month (August) instead of staying on July. Added `defaultMonth={selectedDate || new Date()}` and forced component refresh with key prop.
 - **Production Migration Error Fixed**: Disabled automatic database migrations in `server/index.production.ts` that were causing SSL connection errors and 502 errors on startup. The webhook_url column already exists in production database.
 - **Modal Webhook Selector Fixed**: Resolved z-index issues with Facture/Avoir dropdown in webhook modal using `z-[70]`, `position="popper"`, and proper form reset.
+- **Production Deployment Success**: Completely removed problematic auto-migration imports and calls from production server. Application now starts successfully without 502 errors. All database columns exist and no migrations are needed.
 
 ## External Dependencies
 
