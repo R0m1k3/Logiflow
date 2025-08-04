@@ -3095,12 +3095,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return { isAdmin: false };
       }
 
-      // Check if user has the required permission via database
-      const userPermissions = await storage.getUserPermissions(userId);
-      const hasPermission = userPermissions.some(p => p.permission.name === permission);
-      
-      if (!hasPermission) {
-        res.status(403).json({ message: `Insufficient permissions - ${permission} required` });
+      // For system_admin permission, check if user is admin or directeur
+      if (permission === "system_admin" && user.role !== 'admin' && user.role !== 'directeur') {
+        res.status(403).json({ message: "Insufficient permissions - Admin or Directeur required" });
         return { isAdmin: false };
       }
 
