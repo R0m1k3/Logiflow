@@ -460,7 +460,7 @@ export default function Deliveries() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center">
                             <UserIcon className="w-4 h-4 text-gray-400 mr-2" />
-                            {delivery.creator?.firstName} {delivery.creator?.lastName}
+                            {delivery.creator?.username || delivery.creator?.name || `${delivery.creator?.firstName || ''} ${delivery.creator?.lastName || ''}`.trim() || delivery.createdBy}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

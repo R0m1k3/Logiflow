@@ -56,6 +56,7 @@ Preferred communication style: Simple, everyday language.
 - **French Date Localization in Tasks Module**: Corrected all date displays in the Tasks module to show in French format using date-fns French locale. Applied formats "dd MMMM yyyy à HH:mm" for creation/completion dates and "dd MMMM yyyy" for due dates. Fixed TypeScript errors and null date handling with "Date inconnue" fallback.
 - **Director Webhook Permissions Fixed**: Resolved production issue where directors couldn't send webhooks. Updated the hardcoded `checkPermission` function in `routes.production.ts` to allow both 'admin' and 'directeur' roles for `system_admin` permission. Directors now have full webhook access alongside admins using role-based authorization.
 - **French Date Localization in Orders and Deliveries**: Updated date formatting in Orders and Deliveries modules to display dates in French format. Centralized date formatting in `dateUtils.ts` with French locale (`date-fns/locale/fr`) and changed format from 'dd MMM yyyy' to 'dd MMMM yyyy' for better readability (e.g., "15 août 2025" instead of "15 Aug 2025").
+- **Username Display Fixed in Orders and Deliveries**: Corrected "Créé par" column regression where user IDs were displayed instead of usernames. Updated both Orders and Deliveries modules to properly display creator usernames with fallback hierarchy: username → name → firstName/lastName → createdBy ID. Added user icons for better visual consistency.
 
 ## External Dependencies
 
