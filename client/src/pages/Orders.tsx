@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, parseISO } from 'date-fns';
 import { 
   Plus, Package, Search, Filter, 
   Building, Calendar, Edit, Trash2, Eye, UserIcon 
@@ -25,18 +24,8 @@ import { useStore } from '@/components/Layout';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/ui/pagination';
 import { apiRequest } from '@/lib/queryClient';
+import { safeFormat } from '@/lib/dateUtils';
 import type { Order } from '@shared/schema';
-
-function safeFormat(date: string | Date | null | undefined, formatString: string): string {
-  if (!date) return 'N/A';
-  try {
-    const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    return format(dateObj, formatString);
-  } catch (error) {
-    console.error('Date formatting error:', error);
-    return 'N/A';
-  }
-}
 
 export default function Orders() {
   const queryClient = useQueryClient();
@@ -291,7 +280,7 @@ export default function Orders() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             <div className="flex items-center">
                               <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                              {safeFormat(order.plannedDate, 'dd MMM yyyy')}
+                              {safeFormat(order.plannedDate, 'dd MMMM yyyy')}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -399,7 +388,7 @@ export default function Orders() {
         onConfirm={confirmDeleteOrder}
         title="Supprimer la commande"
         description="Êtes-vous sûr de vouloir supprimer cette commande ?"
-        itemName={orderToDelete ? `${orderToDelete.supplier?.name} - ${safeFormat(orderToDelete.plannedDate, 'dd/MM/yyyy')}` : undefined}
+        itemName={orderToDelete ? `${orderToDelete.supplier?.name} - ${safeFormat(orderToDelete.plannedDate, 'dd MMMM yyyy')}` : undefined}
         isLoading={deleteMutation.isPending}
       />
     </div>

@@ -1,4 +1,5 @@
 import { format, parseISO, isValid } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 export function safeFormat(date: string | Date | null | undefined, formatString: string): string {
   if (!date) return 'N/A';
@@ -18,7 +19,7 @@ export function safeFormat(date: string | Date | null | undefined, formatString:
       return 'N/A';
     }
     
-    return format(dateObj, formatString);
+    return format(dateObj, formatString, { locale: fr });
   } catch (error) {
     console.error('Date formatting error:', error);
     return 'N/A';

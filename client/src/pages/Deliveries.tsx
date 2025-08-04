@@ -436,7 +436,7 @@ export default function Deliveries() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex items-center">
                             <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                            {safeFormat(delivery.scheduledDate, 'dd MMM yyyy')}
+                            {safeFormat(delivery.scheduledDate, 'dd MMMM yyyy')}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -562,7 +562,7 @@ export default function Deliveries() {
         onConfirm={confirmDeleteDelivery}
         title="Supprimer la livraison"
         description="Êtes-vous sûr de vouloir supprimer cette livraison ?"
-        itemName={deliveryToDelete ? `${deliveryToDelete.supplier?.name} - ${safeFormat(deliveryToDelete.scheduledDate, 'dd/MM/yyyy')}` : undefined}
+        itemName={deliveryToDelete ? `${deliveryToDelete.supplier?.name} - ${safeFormat(deliveryToDelete.scheduledDate, 'dd MMMM yyyy')}` : undefined}
         isLoading={deleteMutation.isPending}
       />
     </div>
