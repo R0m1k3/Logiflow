@@ -54,6 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Modal Webhook Selector Fixed**: Resolved z-index issues with Facture/Avoir dropdown in webhook modal using `z-[70]`, `position="popper"`, and proper form reset.
 - **Production Deployment Success**: Completely removed problematic auto-migration imports and calls from production server. Application now starts successfully without 502 errors. All database columns exist and no migrations are needed.
 - **French Date Localization in Tasks Module**: Corrected all date displays in the Tasks module to show in French format using date-fns French locale. Applied formats "dd MMMM yyyy à HH:mm" for creation/completion dates and "dd MMMM yyyy" for due dates. Fixed TypeScript errors and null date handling with "Date inconnue" fallback.
+- **CRITICAL Director Webhook Permissions Fixed**: Resolved production issue where directors couldn't send webhooks despite having correct database permissions. The `checkPermission` function in `routes.production.ts` was hardcoded to only allow admin users for `system_admin` permission, bypassing the database permission system. Replaced hardcoded role check with proper database permission verification using `getUserPermissions`. Directors now have full webhook access as intended.
 
 ## External Dependencies
 

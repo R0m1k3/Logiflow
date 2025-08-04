@@ -2736,7 +2736,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate data with proper handling of name field
       const validatedData = insertDlcProductFrontendSchema.parse(dlcData);
 
-      const dlcProduct = await storage.createDlcProduct(validatedData);
+      const dlcProduct = await storage.createDlcProduct({
+        ...validatedData,
+        dlcDate: validatedData.dlcDate || new Date()
+      });
       console.log('✅ DLC Product created successfully:', dlcProduct.id);
       
       res.status(201).json(dlcProduct);
@@ -3092,9 +3095,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return { isAdmin: false };
       }
 
-      // For system_admin permission, check if user is admin
-      if (permission === "system_admin" && user.role !== 'admin') {
-        res.status(403).json({ message: "Insufficient permissions - Admin required" });
+      // Check if user has the required permission via database
+      const userPermissions = await storage.getUserPermissions(userId);
+      const hasPermission = userPermissions.some(p => p.permission.name === permission);
+      
+      if (!hasPermission) {
+        res.status(403).json({ message: `Insufficient permissions - ${permission} required` });
         return { isAdmin: false };
       }
 
@@ -3234,7 +3240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!supplier || !type) {
         return res.status(400).json({ 
           message: "Fournisseur et type requis",
-          received: { supplier, type, blNumber, invoiceReference, selectedGroupId }
+          received: { supplier, type, blNumber, selectedGroupId }
         });
       }
 
