@@ -170,6 +170,17 @@ export async function initRolesAndPermissions() {
     await storage.setRolePermissions(employeeRole.id, employeePermissions);
     console.log(`Assigned ${employeePermissions.length} permissions to Employee role`);
 
+    // Directeur gets extended permissions including system admin and group management
+    const directeurPermissions = createdPermissions.filter(p => 
+      // Include all permissions except user/role management (but keep system_admin for webhooks)
+      !p.name.startsWith('users_') && 
+      !p.name.startsWith('roles_') ||
+      p.name === 'system_admin' || // Include system_admin for webhook management
+      p.name === 'nocodb_config'   // Include NocoDB config management
+    ).map(p => p.id);
+    await storage.setRolePermissions(directeurRole.id, directeurPermissions);
+    console.log(`Assigned ${directeurPermissions.length} permissions to Directeur role`);
+
     console.log("✅ Roles and permissions initialization completed successfully");
 
   } catch (error) {
