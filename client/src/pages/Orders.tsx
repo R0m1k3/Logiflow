@@ -287,7 +287,10 @@ export default function Orders() {
                             {getStatusBadge(order.status)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {order.createdBy}
+                            <div className="flex items-center">
+                              <UserIcon className="w-4 h-4 text-gray-400 mr-2" />
+                              {order.creator?.username || order.creator?.name || order.createdBy}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center justify-end gap-2">
