@@ -57,6 +57,7 @@ Preferred communication style: Simple, everyday language.
 - **Director Webhook Permissions Fixed**: Resolved production issue where directors couldn't send webhooks. Updated the hardcoded `checkPermission` function in `routes.production.ts` to allow both 'admin' and 'directeur' roles for `system_admin` permission. Directors now have full webhook access alongside admins using role-based authorization.
 - **French Date Localization in Orders and Deliveries**: Updated date formatting in Orders and Deliveries modules to display dates in French format. Centralized date formatting in `dateUtils.ts` with French locale (`date-fns/locale/fr`) and changed format from 'dd MMM yyyy' to 'dd MMMM yyyy' for better readability (e.g., "15 août 2025" instead of "15 Aug 2025").
 - **Username Display Fixed in Orders and Deliveries**: Corrected "Créé par" column regression where user IDs were displayed instead of usernames. Updated both Orders and Deliveries modules to properly display creator usernames with fallback hierarchy: username → name → firstName/lastName → createdBy ID. Added user icons for better visual consistency.
+- **DLC Print Lists Logic Fixed**: Corrected inconsistency between display badges and print functions in DLC module. Fixed products appearing in wrong print lists (expiring soon vs expired). Unified date calculation logic to use both dlcDate and expiryDate as fallback, ensuring consistent categorization across display and printing functions.
 
 ## External Dependencies
 

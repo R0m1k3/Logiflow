@@ -281,16 +281,22 @@ export default function DlcPage() {
 
   // Fonction pour déterminer si un produit doit afficher le bouton de validation
   const shouldShowValidateButton = (product: DlcProductWithRelations) => {
+    const effectiveDate = product.dlcDate || product.expiryDate;
+    if (!effectiveDate || product.status === "valides") return false;
+    
     const today = new Date();
-    const expiry = new Date(product.dlcDate || new Date());
+    const expiry = new Date(effectiveDate);
     const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     // Afficher le bouton si le produit expire dans 15 jours ou moins, ou est déjà expiré
-    return (daysUntilExpiry <= 15 && product.status !== "valide");
+    return daysUntilExpiry <= 15;
   };
 
-  const getStatusBadge = (status: string, dlcDate: string | null) => {
-    if (!dlcDate) return <Badge variant="outline">Non défini</Badge>;
+  const getStatusBadge = (status: string, dlcDate: string | null, expiryDate: string | null = null) => {
+    // Prendre dlcDate en priorité, sinon expiryDate
+    const effectiveDate = dlcDate || expiryDate;
+    
+    if (!effectiveDate) return <Badge variant="outline">Non défini</Badge>;
     
     // LOGIQUE SIMPLIFIÉE ET COHÉRENTE :
     // 1. Si le statut en base est "valides", afficher "Validé" (peu importe la date)
@@ -302,7 +308,7 @@ export default function DlcPage() {
     
     // Pour tous les autres statuts, calculer selon la date
     const today = new Date();
-    const expiry = new Date(dlcDate);
+    const expiry = new Date(effectiveDate);
     const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     if (daysUntilExpiry < 0) {
@@ -316,11 +322,13 @@ export default function DlcPage() {
 
   const printExpiringSoon = () => {
     const expiringSoon = filteredProducts.filter(product => {
+      if (product.status === "valides") return false;
+      const effectiveDate = product.dlcDate || product.expiryDate;
+      if (!effectiveDate) return false;
       const today = new Date();
-      const expiry = new Date(product.dlcDate || new Date());
-      const diffTime = expiry.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays > 0 && diffDays <= 15;
+      const expiry = new Date(effectiveDate);
+      const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return daysUntilExpiry >= 0 && daysUntilExpiry <= 15;
     });
 
     const printContent = `
@@ -381,9 +389,13 @@ export default function DlcPage() {
 
   const printExpired = () => {
     const expired = filteredProducts.filter(product => {
+      if (product.status === "valides") return false;
+      const effectiveDate = product.dlcDate || product.expiryDate;
+      if (!effectiveDate) return false;
       const today = new Date();
-      const expiry = new Date(product.dlcDate || new Date());
-      return expiry < today;
+      const expiry = new Date(effectiveDate);
+      const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return daysUntilExpiry < 0;
     });
 
     const printContent = `
@@ -791,7 +803,7 @@ export default function DlcPage() {
                           {product.dlcDate ? format(new Date(product.dlcDate), "dd/MM/yyyy", { locale: fr }) : 'Date non définie'}
                         </TableCell>
                         <TableCell>{product.supplier?.name || 'Non défini'}</TableCell>
-                        <TableCell>{getStatusBadge(product.status, product.dlcDate)}</TableCell>
+                        <TableCell>{getStatusBadge(product.status, product.dlcDate, product.expiryDate)}</TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button
