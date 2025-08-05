@@ -123,6 +123,18 @@ app.use((req, res, next) => {
   const { registerRoutes } = await import('./routes.production');
   const server = await registerRoutes(app);
 
+  // Initialiser et démarrer les tâches programmées (sauvegarde et rapprochement BL)
+  try {
+    const { SchedulerService } = await import('./schedulerService.production.js');
+    const scheduler = SchedulerService.getInstance();
+    
+    // Démarrer les tâches automatiques si elles sont activées
+    // Note: Les tâches seront activées/désactivées via l'API selon les préférences utilisateur
+    console.log('🚀 Services programmés initialisés et prêts à être activés');
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'initialisation des services programmés:', error);
+  }
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

@@ -2085,6 +2085,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { SchedulerService } = await import('./schedulerService.production.js');
       schedulerService = SchedulerService.getInstance();
       console.log('✅ Scheduler service initialized successfully');
+      
+      // Vérifier si les tâches automatiques doivent être activées au démarrage
+      // Par défaut, ne pas démarrer automatiquement - laisser l'utilisateur décider
+      console.log('📅 Services de planification prêts à être activés via l\'interface');
+      
       return true;
     } catch (error) {
       console.error('❌ Failed to initialize scheduler service:', error);

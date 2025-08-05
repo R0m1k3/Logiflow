@@ -1,4 +1,4 @@
-import { Pool } from '@neondatabase/serverless';
+import { Pool } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
 import { exec } from 'child_process';
