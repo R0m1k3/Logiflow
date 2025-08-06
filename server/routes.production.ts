@@ -2083,8 +2083,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const initializeSchedulerService = async () => {
     try {
       const { SchedulerService } = await import('./schedulerService.production.js');
-      schedulerService = SchedulerService.getInstance();
-      console.log('✅ Scheduler service initialized successfully');
+      // Passer le pool de production au SchedulerService
+      schedulerService = SchedulerService.getInstance(pool as any);
+      console.log('✅ Scheduler service initialized successfully with production database');
       
       // Vérifier si les tâches automatiques doivent être activées au démarrage
       // Par défaut, ne pas démarrer automatiquement - laisser l'utilisateur décider

@@ -9,22 +9,14 @@ export class SchedulerService {
   private dailyBackupTask: cron.ScheduledTask | null = null;
   private blReconciliationTask: cron.ScheduledTask | null = null;
 
-  private constructor() {
-    // Créer un pool directement
-    const pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: false, // Production PostgreSQL server ne supporte pas SSL
-      max: 5,
-      min: 1,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 20000
-    });
+  private constructor(pool: Pool) {
+    // Utiliser le pool de production fourni
     this.backupService = new BackupService(pool);
   }
 
-  public static getInstance(): SchedulerService {
-    if (!SchedulerService.instance) {
-      SchedulerService.instance = new SchedulerService();
+  public static getInstance(pool?: Pool): SchedulerService {
+    if (!SchedulerService.instance && pool) {
+      SchedulerService.instance = new SchedulerService(pool);
     }
     return SchedulerService.instance;
   }
