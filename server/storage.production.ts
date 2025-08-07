@@ -3921,7 +3921,6 @@ export class DatabaseStorage implements IStorage {
         storeId: row.store_id,
         createdBy: row.created_by,
         createdAt: row.created_at,
-        updatedAt: row.updated_at,
         store: row.store_id ? {
           id: row.store_id,
           name: row.store_name

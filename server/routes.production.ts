@@ -3504,28 +3504,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/dashboard-messages', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      console.log('📝 Dashboard message creation request:', { userId, body: req.body });
+      
       const user = await storage.getUser(userId);
+      console.log('👤 User found:', { id: user?.id, role: user?.role, username: user?.username });
       
       if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        console.log('❌ Access denied - role check failed:', { userRole: user?.role });
         return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent créer des messages" });
       }
 
+      console.log('🔍 Parsing message data...');
       const parsedMessage = insertDashboardMessageSchema.parse(req.body);
+      console.log('✅ Message parsed successfully:', parsedMessage);
       
       // Limit to 5 messages per store
+      console.log('📊 Checking existing messages for store:', parsedMessage.storeId);
       const existingMessages = await storage.getDashboardMessages(parsedMessage.storeId);
+      console.log('📋 Existing messages count:', existingMessages.length);
+      
       if (existingMessages.length >= 5) {
+        console.log('❌ Message limit reached:', { count: existingMessages.length, limit: 5 });
         return res.status(400).json({ message: "Maximum 5 messages autorisés par magasin" });
       }
 
+      console.log('💾 Creating message...');
       const message = await storage.createDashboardMessage({
         ...parsedMessage,
         createdBy: userId
       });
+      console.log('✅ Message created successfully:', { id: message.id, title: message.title });
 
       res.status(201).json(message);
     } catch (error) {
-      console.error("Error creating dashboard message:", error);
+      console.error("❌ Error creating dashboard message:", error);
+      if (error instanceof z.ZodError) {
+        console.error("❌ Validation errors:", error.errors);
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
       res.status(500).json({ message: "Failed to create dashboard message" });
     }
   });

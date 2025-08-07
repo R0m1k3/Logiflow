@@ -129,12 +129,16 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     next();
   });
 
-  // Initialize roles and permissions on startup
-  try {
-    await initRolesAndPermissions();
-  } catch (error) {
-    console.error("Failed to initialize roles and permissions:", error);
-    // Continue startup even if role initialization fails
+  // Initialize roles and permissions only in production mode
+  if (process.env.STORAGE_MODE === 'production') {
+    try {
+      await initRolesAndPermissions();
+    } catch (error) {
+      console.error("Failed to initialize roles and permissions:", error);
+      // Continue startup even if role initialization fails
+    }
+  } else {
+    console.log('🔧 Skipping roles and permissions initialization in development mode');
   }
 
   // Skip production database initialization in development mode

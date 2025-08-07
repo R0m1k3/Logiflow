@@ -296,10 +296,10 @@ export const dashboardMessages = pgTable("dashboard_messages", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
+  type: varchar("type").notNull().default("info"), // info, warning, success, error
   storeId: integer("store_id"), // null = all stores
   createdBy: varchar("created_by").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Invoice Verifications - Cache des vérifications NocoDB pour optimisation
@@ -657,7 +657,6 @@ export const insertInvoiceVerificationSchema = createInsertSchema(invoiceVerific
 export const insertDashboardMessageSchema = createInsertSchema(dashboardMessages).omit({
   id: true,
   createdAt: true,
-  updatedAt: true,
 });
 
 // Cache schema removed with table
@@ -695,7 +694,7 @@ export type InsertDashboardMessage = z.infer<typeof insertDashboardMessageSchema
 
 export type DashboardMessageWithRelations = DashboardMessage & {
   creator: User;
-  group?: Group | null;
+  store?: Group | null;
 };
 
 // Cache types removed with table
