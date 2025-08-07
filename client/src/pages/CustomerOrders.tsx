@@ -58,6 +58,7 @@ export default function CustomerOrders() {
   const [filterSupplier, setFilterSupplier] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showStatusBreakdown, setShowStatusBreakdown] = useState<boolean>(false);
+  const [showStatisticsCards, setShowStatisticsCards] = useState<boolean>(true);
 
   // Fetch groups for store filter
   const { data: groups = [] } = useQuery<Group[]>({
@@ -709,15 +710,37 @@ export default function CustomerOrders() {
               Gestion des commandes clients et étiquettes
             </p>
           </div>
-          <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvelle Commande
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowStatisticsCards(!showStatisticsCards)}
+              className="flex items-center gap-2"
+            >
+              {showStatisticsCards ? (
+                <>
+                  <Eye className="w-4 h-4" />
+                  Masquer Stats
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4" />
+                  Afficher Stats
+                </>
+              )}
+            </Button>
+            <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvelle Commande
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {showStatisticsCards && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -819,7 +842,9 @@ export default function CustomerOrders() {
             </div>
           </CardContent>
         )}
-      </Card>
+        </Card>
+        </>
+      )}
 
       {/* Search and Filters */}
       <Card className="flex-shrink-0">
