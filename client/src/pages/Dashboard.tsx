@@ -663,10 +663,21 @@ export default function Dashboard() {
                 <MessageCircle className="h-5 w-5 mr-3 text-blue-600" />
                 Messages & Informations
               </div>
-              {(user?.role === 'admin' || user?.role === 'directeur') && (
+              {(() => {
+                console.log('🔍 DASHBOARD DEBUG: User role check:', { user: user?.username, role: user?.role, shouldShowButton: (user?.role === 'admin' || user?.role === 'directeur') });
+                return (user?.role === 'admin' || user?.role === 'directeur');
+              })() && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-8 w-8 p-0"
+                      onClick={() => {
+                        console.log('🔍 DASHBOARD DEBUG: Create button clicked, opening dialog');
+                        setIsCreateDialogOpen(true);
+                      }}
+                    >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
@@ -675,7 +686,10 @@ export default function Dashboard() {
                       <DialogTitle>Créer un Message</DialogTitle>
                     </DialogHeader>
                     <Form {...messageForm}>
-                      <form onSubmit={messageForm.handleSubmit((data) => createMessageMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={messageForm.handleSubmit((data) => {
+                        console.log('🔍 DASHBOARD DEBUG: Form submitted with data:', data);
+                        createMessageMutation.mutate(data);
+                      })} className="space-y-4">
                         <FormField
                           control={messageForm.control}
                           name="title"
