@@ -772,7 +772,14 @@ export default function Dashboard() {
                           <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                             Annuler
                           </Button>
-                          <Button type="submit" disabled={createMessageMutation.isPending}>
+                          <Button 
+                            type="submit" 
+                            disabled={createMessageMutation.isPending}
+                            onClick={() => {
+                              console.log('🔍 DASHBOARD DEBUG: Create button clicked, form state:', messageForm.formState);
+                              console.log('🔍 DASHBOARD DEBUG: Form values:', messageForm.getValues());
+                            }}
+                          >
                             {createMessageMutation.isPending ? "Création..." : "Créer"}
                           </Button>
                         </div>
