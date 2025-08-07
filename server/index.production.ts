@@ -119,9 +119,8 @@ app.use((req, res, next) => {
     process.exit(1);
   }
 
-  // SUPPRIMÉ: Migrations automatiques complètement désactivées en production
-  // Les colonnes webhook_url existent déjà dans toutes les bases de données
-  console.log('✅ Migrations automatiques ignorées - base de données déjà à jour');
+  // MIGRATIONS DISABLED: Supprimé pour éviter les exécutions répétées à chaque mise à jour
+  console.log('⚠️ MIGRATIONS DISABLED: Automatic migrations completely disabled to prevent repeated execution');
 
   const { registerRoutes } = await import('./routes.production');
   const server = await registerRoutes(app);

@@ -22,10 +22,8 @@ export async function initDatabase() {
     // Check if tables exist, if not create them (first time setup)
     await createTablesIfNotExist();
     
-    // Run incremental migrations to update existing tables
-    console.log('📋 INIT DATABASE: About to call runMigrations() which includes dashboard messages migration');
-    await runMigrations();
-    console.log('✅ INIT DATABASE: runMigrations() completed successfully');
+    // MIGRATIONS DISABLED: Supprimé pour éviter les exécutions répétées à chaque mise à jour
+    console.log('⚠️ MIGRATIONS SKIPPED: Automatic migrations disabled to prevent repeated execution on updates');
     
     // Create system user first (required for role assignments)
     await createSystemUser();
@@ -550,36 +548,38 @@ async function createTablesIfNotExist() {
   console.log('✅ All tables verified/created successfully');
 }
 
-async function runMigrations() {
-  try {
-    console.log('🔄 Running database migrations...');
-    
-    // Migration 1: Add missing columns to existing tables
-    await addMissingColumns();
-    
-    // Migration 2: Update constraints
-    await updateConstraints();
-    
-    // Migration 3: Create new tables for roles/permissions if they don't exist
-    await createRolesTables();
-    
-    // Migration 4: Dashboard messages table migration
-    console.log('📋 VERIFICATION: Checking if migrateDashboardMessages function exists...');
-    if (typeof migrateDashboardMessages === 'function') {
-      console.log('✅ VERIFICATION: migrateDashboardMessages function exists and is callable');
-      await migrateDashboardMessages();
-    } else {
-      console.error('❌ VERIFICATION: migrateDashboardMessages function not found!');
-    }
-    
-    console.log('✅ All migrations completed successfully');
-  } catch (error) {
-    console.error('❌ Migration failed:', error);
-    // Don't throw error, continue with existing tables
-  }
-}
+// DISABLED: Migration function disabled to prevent repeated execution on updates
+// async function runMigrations() {
+//   try {
+//     console.log('🔄 Running database migrations...');
+//     
+//     // Migration 1: Add missing columns to existing tables
+//     await addMissingColumns();
+//     
+//     // Migration 2: Update constraints
+//     await updateConstraints();
+//     
+//     // Migration 3: Create new tables for roles/permissions if they don't exist
+//     await createRolesTables();
+//     
+//     // Migration 4: Dashboard messages table migration
+//     console.log('📋 VERIFICATION: Checking if migrateDashboardMessages function exists...');
+//     if (typeof migrateDashboardMessages === 'function') {
+//       console.log('✅ VERIFICATION: migrateDashboardMessages function exists and is callable');
+//       await migrateDashboardMessages();
+//     } else {
+//       console.error('❌ VERIFICATION: migrateDashboardMessages function not found!');
+//     }
+//     
+//     console.log('✅ All migrations completed successfully');
+//   } catch (error) {
+//     console.error('❌ Migration failed:', error);
+//     // Don't throw error, continue with existing tables
+//   }
+// }
 
-async function addMissingColumns() {
+// DISABLED: Migration function disabled to prevent repeated execution on updates
+/* async function addMissingColumns() {
   try {
     // Check and add delivered_date column to deliveries
     const deliveredDateExists = await pool.query(`
@@ -921,9 +921,10 @@ async function addMissingColumns() {
   } catch (error) {
     console.error('❌ Error adding missing columns:', error);
   }
-}
+} */
 
-async function updateConstraints() {
+// DISABLED: Migration function disabled to prevent repeated execution on updates
+/* async function updateConstraints() {
   try {
     // Check if orders_status_check constraint exists and needs updating
     const constraintExists = await pool.query(`
@@ -947,9 +948,10 @@ async function updateConstraints() {
   } catch (error) {
     console.error('❌ Error updating constraints:', error);
   }
-}
+} */
 
-async function createRolesTables() {
+// DISABLED: Migration function disabled to prevent repeated execution on updates
+/* async function createRolesTables() {
   try {
     // Create roles table avec colonnes manquantes
     await pool.query(`
@@ -1052,9 +1054,10 @@ async function createRolesTables() {
     console.error('❌ Error creating roles tables:', error);
     // Continue anyway, don't crash the app
   }
-}
+} */
 
-async function migrateDashboardMessages() {
+// DISABLED: Migration function disabled to prevent repeated execution on updates
+/* async function migrateDashboardMessages() {
   try {
     console.log('🔄 DASHBOARD MESSAGES MIGRATION: Starting migration process...');
     console.log('📋 DASHBOARD MESSAGES MIGRATION: Function successfully called from runMigrations()');
@@ -1147,7 +1150,7 @@ async function migrateDashboardMessages() {
     console.error('❌ Dashboard messages migration failed:', error);
     // Ne pas arrêter l'application si la migration échoue
   }
-}
+} */
 
 async function createSystemUser() {
   try {

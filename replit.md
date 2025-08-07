@@ -61,6 +61,7 @@ Preferred communication style: Simple, everyday language.
 - **Production Scheduler Services Fixed**: Resolved issue where automatic backup and BL reconciliation services weren't working in production. Fixed PostgreSQL type conflicts in SchedulerService and BackupService. Services are now properly initialized at server startup and ready to be activated via the admin interface.
 - **Customer Orders Statistics Dashboard Added**: Enhanced CustomerOrders module with comprehensive statistics dashboard above the filters. Added 4 main KPI cards (Total, Today, Pending, Available) and detailed status breakdown visualization. Statistics update in real-time as orders are filtered and provide instant overview of order management performance.
 - **Dashboard Messages Automatic Migration**: Implemented automatic migration system for dashboard_messages table during production deployment. Added `migrateDashboardMessages()` function in `initDatabase.production.ts` that creates/updates table structure, manages schema changes, and creates performance indexes. Migration runs automatically on every production startup ensuring database consistency.
+- **Automatic Migrations Disabled**: Removed automatic migration execution at startup to prevent repeated database schema changes on every deployment. Migrations are now disabled to ensure faster startup times and prevent unnecessary database operations during updates.
 
 ## External Dependencies
 
