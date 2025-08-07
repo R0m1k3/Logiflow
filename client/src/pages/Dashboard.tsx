@@ -536,6 +536,86 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Publicités à Venir */}
+        <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="pb-4 border-b border-gray-100">
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
+              <Megaphone className="h-5 w-5 mr-3 text-purple-600" />
+              Publicités à Venir
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 p-6">
+            {upcomingPublicities
+              .slice(0, 3)
+              .map((publicity: any) => {
+                const participatingStores = publicity.participations || [];
+                const isCurrentStoreParticipating = selectedStoreId && participatingStores.some((p: any) => p.groupId === parseInt(selectedStoreId));
+                
+                return (
+                  <div key={publicity.id} className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-purple-500">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-2 w-2 bg-purple-500"></div>
+                      <div>
+                        <p className="font-medium text-gray-900">{publicity.pubNumber}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-gray-600 flex-1">{publicity.designation}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="flex items-center gap-2 justify-end mb-1">
+                        {/* Magasins participants à gauche du badge */}
+                        {participatingStores.length > 0 && (
+                          <div className="flex gap-1 items-center">
+                            {participatingStores.slice(0, 2).map((participation: any) => {
+                              const groupColor = participation.group?.color || '#666666';
+                              const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
+                              
+                              return (
+                                <Badge 
+                                  key={participation.groupId} 
+                                  className={`text-xs border text-white px-1.5 py-0 h-4 min-w-0 ${isCurrentStore ? 'ring-1 ring-offset-1 ring-opacity-50' : ''}`}
+                                  style={{ 
+                                    backgroundColor: groupColor,
+                                    borderColor: groupColor,
+                                    color: 'white',
+                                    fontSize: '9px',
+                                    lineHeight: '1',
+                                    ...(isCurrentStore && { ringColor: groupColor })
+                                  }}
+                                >
+                                  {participation.group.name}
+                                </Badge>
+                              );
+                            })}
+                            {participatingStores.length > 2 && (
+                              <span className="text-xs text-gray-400 font-medium">+{participatingStores.length - 2}</span>
+                            )}
+                          </div>
+                        )}
+                        <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
+                          À venir
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {safeFormat(publicity.startDate, "d MMM")}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            {(!Array.isArray(upcomingPublicities) || upcomingPublicities.length === 0) && (
+              <div className="text-center py-8">
+                <p className="text-gray-600">Aucune publicité à venir</p>
+                <p className="text-xs text-gray-400 mt-1">(API: {Array.isArray(upcomingPublicities) ? upcomingPublicities.length : 'NOT_ARRAY'})</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Section Rapprochement BL */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Messages & Informations */}
         <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="pb-4 border-b border-gray-100">
@@ -694,56 +774,6 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-400 mt-1">Les messages d'information apparaîtront ici</p>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Section Rapprochement BL */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Statistiques des commandes clients */}
-        <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
-          <CardHeader className="pb-4 border-b border-gray-100">
-            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
-              <UserIcon className="h-5 w-5 mr-3 text-purple-600" />
-              Commandes Clients
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 p-6">
-            <div className="flex items-center justify-between p-3 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-red-500"></div>
-                <span className="text-sm font-medium text-gray-700">En attente</span>
-              </div>
-              <span className="font-semibold text-red-600 text-lg">{customerOrderStats.waiting}</span>
-            </div>
-            <div className="flex items-center justify-between p-3 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-orange-500"></div>
-                <span className="text-sm font-medium text-gray-700">En cours</span>
-              </div>
-              <span className="font-semibold text-orange-600 text-lg">{customerOrderStats.inProgress}</span>
-            </div>
-            <div className="flex items-center justify-between p-3 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-green-500"></div>
-                <span className="text-sm font-medium text-gray-700">Disponibles</span>
-              </div>
-              <span className="font-semibold text-green-600 text-lg">{customerOrderStats.available}</span>
-            </div>
-            <div className="flex items-center justify-between p-3 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-blue-500"></div>
-                <span className="text-sm font-medium text-gray-700">Retirées</span>
-              </div>
-              <span className="font-semibold text-blue-600 text-lg">{customerOrderStats.withdrawn}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-gray-200 pt-3 mt-3 p-3">
-              <div className="flex items-center space-x-3">
-                <div className="h-3 w-3 bg-gray-500"></div>
-                <span className="text-sm font-semibold text-gray-800">Total commandes</span>
-              </div>
-              <span className="font-bold text-xl text-gray-800">{customerOrderStats.total}</span>
-            </div>
           </CardContent>
         </Card>
 
