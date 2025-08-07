@@ -23,7 +23,9 @@ export async function initDatabase() {
     await createTablesIfNotExist();
     
     // Run incremental migrations to update existing tables
+    console.log('📋 INIT DATABASE: About to call runMigrations() which includes dashboard messages migration');
     await runMigrations();
+    console.log('✅ INIT DATABASE: runMigrations() completed successfully');
     
     // Create system user first (required for role assignments)
     await createSystemUser();
@@ -562,7 +564,13 @@ async function runMigrations() {
     await createRolesTables();
     
     // Migration 4: Dashboard messages table migration
-    await migrateDashboardMessages();
+    console.log('📋 VERIFICATION: Checking if migrateDashboardMessages function exists...');
+    if (typeof migrateDashboardMessages === 'function') {
+      console.log('✅ VERIFICATION: migrateDashboardMessages function exists and is callable');
+      await migrateDashboardMessages();
+    } else {
+      console.error('❌ VERIFICATION: migrateDashboardMessages function not found!');
+    }
     
     console.log('✅ All migrations completed successfully');
   } catch (error) {
@@ -1048,6 +1056,8 @@ async function createRolesTables() {
 
 async function migrateDashboardMessages() {
   try {
+    console.log('🔄 DASHBOARD MESSAGES MIGRATION: Starting migration process...');
+    console.log('📋 DASHBOARD MESSAGES MIGRATION: Function successfully called from runMigrations()');
     console.log('🔄 Running dashboard messages migration...');
     
     // 1. Vérifier si la table existe

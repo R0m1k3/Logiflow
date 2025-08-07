@@ -110,7 +110,10 @@ app.use((req, res, next) => {
 (async () => {
   // Initialiser la base de données en premier
   try {
+    console.log('🔄 SERVER STARTUP: Initializing database...');
+    console.log('📋 SERVER STARTUP: Dashboard messages migration should be included in database initialization');
     await initDatabase();
+    console.log('✅ SERVER STARTUP: Database initialization completed successfully');
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
     process.exit(1);
