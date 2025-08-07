@@ -4,7 +4,11 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual, pbkdf2Sync } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
+import { storage as devStorage } from "./storage";
+import { storage as prodStorage } from "./storage.production";
+
+// Choose storage based on environment
+const storage = process.env.STORAGE_MODE === 'production' ? prodStorage : devStorage;
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 
@@ -121,24 +125,42 @@ export function setupLocalAuth(app: Express) {
   // Create admin user on startup
   createDefaultAdminUser();
   
-  const PostgresSessionStore = connectPg(session);
-  const sessionStore = new PostgresSessionStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    tableName: 'session',
-  });
+  // Use memory store in development, PostgreSQL in production
+  let sessionSettings: session.SessionOptions;
+  
+  if (process.env.STORAGE_MODE === 'production' && process.env.DATABASE_URL) {
+    const PostgresSessionStore = connectPg(session);
+    const sessionStore = new PostgresSessionStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: false,
+      tableName: 'session',
+    });
 
-  const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || 'fallback-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    },
-  };
+    sessionSettings = {
+      secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+      resave: false,
+      saveUninitialized: false,
+      store: sessionStore,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      },
+    };
+  } else {
+    // Memory session store for development
+    console.log('🔧 Using memory session store for development');
+    sessionSettings = {
+      secret: process.env.SESSION_SECRET || 'dev-secret-key',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      },
+    };
+  }
 
   app.set("trust proxy", 1);
   app.use(session(sessionSettings));
