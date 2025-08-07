@@ -572,9 +572,7 @@ export const insertDeliverySchema = createInsertSchema(deliveries).omit({
   updatedAt: true,
 });
 
-export const insertUserGroupSchema = createInsertSchema(userGroups).omit({
-  createdAt: true,
-});
+export const insertUserGroupSchema = createInsertSchema(userGroups);
 
 export const insertPublicitySchema = createInsertSchema(publicities).omit({
   id: true,
@@ -657,6 +655,7 @@ export const insertInvoiceVerificationSchema = createInsertSchema(invoiceVerific
 export const insertDashboardMessageSchema = createInsertSchema(dashboardMessages).omit({
   id: true,
   createdAt: true,
+  createdBy: true, // Backend will set this automatically
 });
 
 // Cache schema removed with table

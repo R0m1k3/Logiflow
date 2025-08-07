@@ -199,9 +199,6 @@ export default function Dashboard() {
   // Mutation for creating messages
   const createMessageMutation = useMutation({
     mutationFn: async (data: InsertDashboardMessage) => {
-      console.log('🔄 DASHBOARD MUTATION: Creating message with data:', data);
-      console.log('👤 DASHBOARD MUTATION: Current user:', user);
-      
       const response = await fetch('/api/dashboard-messages', {
         method: 'POST',
         headers: {
@@ -219,25 +216,17 @@ export default function Dashboard() {
       return response.json();
     },
     onSuccess: (result) => {
-      console.log('✅ DASHBOARD MUTATION: Message created successfully:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages"] });
       setIsCreateDialogOpen(false);
       messageForm.reset();
       toast({ title: "Message créé", description: "Le message a été publié avec succès" });
     },
     onError: (error: any) => {
-      console.error('❌ DASHBOARD MUTATION: Failed to create message:', error);
-      console.error('❌ DASHBOARD MUTATION: Error details:', {
-        message: error.message,
-        status: error.status,
-        response: error.response
-      });
       toast({ 
         title: "Erreur", 
         description: error.message || "Impossible de créer le message",
         variant: "destructive"
       });
-      // IMPORTANT: Ne pas fermer le modal en cas d'erreur pour permettre à l'utilisateur de réessayer
     }
   });
 
@@ -663,20 +652,13 @@ export default function Dashboard() {
                 <MessageCircle className="h-5 w-5 mr-3 text-blue-600" />
                 Messages & Informations
               </div>
-              {(() => {
-                console.log('🔍 DASHBOARD DEBUG: User role check:', { user: user?.username, role: user?.role, shouldShowButton: (user?.role === 'admin' || user?.role === 'directeur') });
-                return (user?.role === 'admin' || user?.role === 'directeur');
-              })() && (
+              {(user?.role === 'admin' || user?.role === 'directeur') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
                       size="sm" 
                       variant="outline" 
                       className="h-8 w-8 p-0"
-                      onClick={() => {
-                        console.log('🔍 DASHBOARD DEBUG: Create button clicked, opening dialog');
-                        setIsCreateDialogOpen(true);
-                      }}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -686,10 +668,7 @@ export default function Dashboard() {
                       <DialogTitle>Créer un Message</DialogTitle>
                     </DialogHeader>
                     <Form {...messageForm}>
-                      <form onSubmit={messageForm.handleSubmit((data) => {
-                        console.log('🔍 DASHBOARD DEBUG: Form submitted with data:', data);
-                        createMessageMutation.mutate(data);
-                      })} className="space-y-4">
+                      <form onSubmit={messageForm.handleSubmit((data) => createMessageMutation.mutate(data))} className="space-y-4">
                         <FormField
                           control={messageForm.control}
                           name="title"
@@ -775,10 +754,6 @@ export default function Dashboard() {
                           <Button 
                             type="submit" 
                             disabled={createMessageMutation.isPending}
-                            onClick={() => {
-                              console.log('🔍 DASHBOARD DEBUG: Create button clicked, form state:', messageForm.formState);
-                              console.log('🔍 DASHBOARD DEBUG: Form values:', messageForm.getValues());
-                            }}
                           >
                             {createMessageMutation.isPending ? "Création..." : "Créer"}
                           </Button>
