@@ -742,7 +742,7 @@ export default function Dashboard() {
                                 </FormControl>
                                 <SelectContent>
                                   <SelectItem value="all">Tous les magasins</SelectItem>
-                                  {groups.map((group: any) => (
+                                  {groups && Array.isArray(groups) && groups.map((group: any) => (
                                     <SelectItem key={group.id} value={group.id.toString()}>
                                       {group.name}
                                     </SelectItem>
