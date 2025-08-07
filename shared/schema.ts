@@ -291,6 +291,17 @@ export const databaseBackups = pgTable("database_backups", {
   status: varchar("status").default("creating"), // 'creating', 'completed', 'failed'
 });
 
+// Messages for dashboard information card
+export const dashboardMessages = pgTable("dashboard_messages", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  storeId: integer("store_id"), // null = all stores
+  createdBy: varchar("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Invoice Verifications - Cache des vérifications NocoDB pour optimisation
 export const invoiceVerifications = pgTable("invoice_verifications", {
   id: serial("id").primaryKey(),
@@ -331,6 +342,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdTasks: many(tasks),
   assignedTasks: many(tasks),
   createdBackups: many(databaseBackups),
+  createdMessages: many(dashboardMessages),
 }));
 
 export const groupsRelations = relations(groups, ({ one, many }) => ({
@@ -341,6 +353,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   customerOrders: many(customerOrders),
   dlcProducts: many(dlcProducts),
   tasks: many(tasks),
+  messages: many(dashboardMessages),
   nocodbConfig: one(nocodbConfig, {
     fields: [groups.nocodbConfigId],
     references: [nocodbConfig.id],
@@ -510,6 +523,17 @@ export const invoiceVerificationsRelations = relations(invoiceVerifications, ({ 
   }),
 }));
 
+export const dashboardMessagesRelations = relations(dashboardMessages, ({ one }) => ({
+  creator: one(users, {
+    fields: [dashboardMessages.createdBy],
+    references: [users.id],
+  }),
+  group: one(groups, {
+    fields: [dashboardMessages.storeId],
+    references: [groups.id],
+  }),
+}));
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   id: true,
@@ -630,6 +654,12 @@ export const insertInvoiceVerificationSchema = createInsertSchema(invoiceVerific
   lastCheckedAt: true,
 });
 
+export const insertDashboardMessageSchema = createInsertSchema(dashboardMessages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Cache schema removed with table
 
 // Types
@@ -659,6 +689,14 @@ export type DatabaseBackupInsert = z.infer<typeof insertDatabaseBackupSchema>;
 
 export type InvoiceVerification = typeof invoiceVerifications.$inferSelect;
 export type InsertInvoiceVerification = z.infer<typeof insertInvoiceVerificationSchema>;
+
+export type DashboardMessage = typeof dashboardMessages.$inferSelect;
+export type InsertDashboardMessage = z.infer<typeof insertDashboardMessageSchema>;
+
+export type DashboardMessageWithRelations = DashboardMessage & {
+  creator: User;
+  group?: Group | null;
+};
 
 // Cache types removed with table
 

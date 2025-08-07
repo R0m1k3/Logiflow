@@ -34,7 +34,10 @@ import type {
   Task,
   InsertTask,
   InvoiceVerification,
-  InsertInvoiceVerification
+  InsertInvoiceVerification,
+  DashboardMessage,
+  InsertDashboardMessage,
+  DashboardMessageWithRelations
 } from "../shared/schema";
 
 // Production storage implementation using raw PostgreSQL queries
@@ -3882,6 +3885,95 @@ export class DatabaseStorage implements IStorage {
       };
     } catch (error) {
       console.error("Error updating invoice verification:", error);
+      throw error;
+    }
+  }
+
+  // ===== DASHBOARD MESSAGES METHODS =====
+
+  async getDashboardMessages(storeId?: number | null): Promise<DashboardMessageWithRelations[]> {
+    try {
+      let query = `
+        SELECT dm.*, 
+               g.name as store_name,
+               u.username, u.first_name, u.last_name, u.name as user_display_name
+        FROM dashboard_messages dm
+        LEFT JOIN groups g ON dm.store_id = g.id
+        LEFT JOIN users u ON dm.created_by = u.id
+      `;
+      
+      const params: any[] = [];
+      
+      if (storeId !== null && storeId !== undefined) {
+        query += ` WHERE (dm.store_id = $1 OR dm.store_id IS NULL)`;
+        params.push(storeId);
+      }
+      
+      query += ` ORDER BY dm.created_at DESC`;
+      
+      const result = await pool.query(query, params);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        type: row.type,
+        storeId: row.store_id,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        store: row.store_id ? {
+          id: row.store_id,
+          name: row.store_name
+        } : null,
+        creator: {
+          id: row.created_by,
+          username: row.username,
+          name: row.user_display_name || `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.username
+        }
+      }));
+    } catch (error) {
+      console.error("Error fetching dashboard messages:", error);
+      return [];
+    }
+  }
+
+  async getDashboardMessage(id: number): Promise<DashboardMessage | undefined> {
+    try {
+      const result = await pool.query('SELECT * FROM dashboard_messages WHERE id = $1', [id]);
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error("Error fetching dashboard message:", error);
+      return undefined;
+    }
+  }
+
+  async createDashboardMessage(message: InsertDashboardMessage): Promise<DashboardMessage> {
+    try {
+      const result = await pool.query(`
+        INSERT INTO dashboard_messages (title, content, type, store_id, created_by)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [
+        message.title,
+        message.content,
+        message.type || 'info',
+        message.storeId,
+        message.createdBy
+      ]);
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error("Error creating dashboard message:", error);
+      throw error;
+    }
+  }
+
+  async deleteDashboardMessage(id: number): Promise<void> {
+    try {
+      await pool.query('DELETE FROM dashboard_messages WHERE id = $1', [id]);
+    } catch (error) {
+      console.error("Error deleting dashboard message:", error);
       throw error;
     }
   }

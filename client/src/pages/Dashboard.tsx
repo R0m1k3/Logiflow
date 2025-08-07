@@ -1,13 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
-import type { User } from "@shared/schema";
+import type { User, DashboardMessageWithRelations, InsertDashboardMessage } from "@shared/schema";
 import { useStore } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare, Circle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare, Circle, Plus, MessageCircle, Trash2, Info } from "lucide-react";
 import { safeFormat, safeDate } from "@/lib/dateUtils";
 import type { PublicityWithRelations } from "@shared/schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertDashboardMessageSchema } from "@shared/schema";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Dashboard() {
   const { user } = useAuthUnified() as { user: User | null };
@@ -151,6 +162,90 @@ export default function Dashboard() {
     },
   });
 
+  // Fetch dashboard messages
+  const { data: dashboardMessages = [] } = useQuery<DashboardMessageWithRelations[]>({
+    queryKey: ["/api/dashboard-messages", selectedStoreId],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (selectedStoreId && user?.role === 'admin') params.append("storeId", selectedStoreId.toString());
+      return fetch(`/api/dashboard-messages?${params.toString()}`, {
+        credentials: 'include'
+      }).then(res => res.json());
+    },
+  });
+
+  // Fetch groups for message creation
+  const { data: groups = [] } = useQuery({
+    queryKey: ["/api/groups"],
+    queryFn: () => fetch("/api/groups", { credentials: 'include' }).then(res => res.json()),
+    enabled: (user?.role === 'admin' || user?.role === 'directeur')
+  });
+
+  // State for message creation dialog
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  // Form for creating new messages
+  const messageForm = useForm<InsertDashboardMessage>({
+    resolver: zodResolver(insertDashboardMessageSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      type: "info",
+      storeId: null
+    }
+  });
+
+  // Mutation for creating messages
+  const createMessageMutation = useMutation({
+    mutationFn: (data: InsertDashboardMessage) => apiRequest("/api/dashboard-messages", { method: "POST", body: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages"] });
+      setIsCreateDialogOpen(false);
+      messageForm.reset();
+      toast({ title: "Message créé", description: "Le message a été publié avec succès" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Erreur", 
+        description: error.message || "Impossible de créer le message",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation for deleting messages
+  const deleteMessageMutation = useMutation({
+    mutationFn: (messageId: number) => apiRequest(`/api/dashboard-messages/${messageId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages"] });
+      toast({ title: "Message supprimé", description: "Le message a été supprimé avec succès" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Erreur", 
+        description: error.message || "Impossible de supprimer le message",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Message type configuration
+  const getMessageTypeConfig = (type: string) => {
+    switch (type) {
+      case 'info':
+        return { color: 'bg-blue-50 border-blue-200 text-blue-800', icon: Info, label: 'Information' };
+      case 'warning':
+        return { color: 'bg-yellow-50 border-yellow-200 text-yellow-800', icon: AlertTriangle, label: 'Attention' };
+      case 'success':
+        return { color: 'bg-green-50 border-green-200 text-green-800', icon: CheckCircle, label: 'Succès' };
+      case 'error':
+        return { color: 'bg-red-50 border-red-200 text-red-800', icon: XCircle, label: 'Erreur' };
+      default:
+        return { color: 'bg-gray-50 border-gray-200 text-gray-800', icon: MessageCircle, label: 'Message' };
+    }
+  };
+
   // Fonction pour vérifier si une tâche est à venir (future)
   const isTaskUpcoming = (task: any) => {
     if (!task.startDate) {
@@ -275,6 +370,166 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Dashboard Messages */}
+      {(dashboardMessages.length > 0 || (user?.role === 'admin' || user?.role === 'directeur')) && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <MessageCircle className="h-5 w-5 mr-2 text-blue-600" />
+              Messages du Tableau de Bord
+            </h3>
+            {(user?.role === 'admin' || user?.role === 'directeur') && (
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nouveau Message
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Créer un Message</DialogTitle>
+                  </DialogHeader>
+                  <Form {...messageForm}>
+                    <form onSubmit={messageForm.handleSubmit((data) => createMessageMutation.mutate(data))} className="space-y-4">
+                      <FormField
+                        control={messageForm.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Titre</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Titre du message" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={messageForm.control}
+                        name="content"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Contenu</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Contenu du message" rows={3} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={messageForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Sélectionner un type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="info">Information</SelectItem>
+                                <SelectItem value="warning">Attention</SelectItem>
+                                <SelectItem value="success">Succès</SelectItem>
+                                <SelectItem value="error">Erreur</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={messageForm.control}
+                        name="storeId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Magasin Cible</FormLabel>
+                            <Select onValueChange={(value) => field.onChange(value === 'all' ? null : parseInt(value))} defaultValue={field.value?.toString() || 'all'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Sélectionner un magasin" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="all">Tous les magasins</SelectItem>
+                                {groups.map((group: any) => (
+                                  <SelectItem key={group.id} value={group.id.toString()}>
+                                    {group.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                          Annuler
+                        </Button>
+                        <Button type="submit" disabled={createMessageMutation.isPending}>
+                          {createMessageMutation.isPending ? "Création..." : "Créer"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+          
+          {dashboardMessages.length > 0 ? (
+            <div className="space-y-2">
+              {dashboardMessages.map((message) => {
+                const typeConfig = getMessageTypeConfig(message.type);
+                const TypeIcon = typeConfig.icon;
+                const canDelete = user?.role === 'admin' || (user?.role === 'directeur' && message.createdBy === user.id);
+                
+                return (
+                  <div key={message.id} className={`border-l-4 p-4 flex items-start justify-between shadow-sm ${typeConfig.color}`}>
+                    <div className="flex items-start space-x-3 flex-1">
+                      <TypeIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm">{message.title}</h4>
+                        <p className="text-sm mt-1 opacity-90">{message.content}</p>
+                        <div className="flex items-center space-x-4 mt-2 text-xs opacity-75">
+                          <span>Par {message.creator.name}</span>
+                          {message.store && <span>• {message.store.name}</span>}
+                          <span>• {safeFormat(message.createdAt, "d MMM à HH:mm")}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {canDelete && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteMessageMutation.mutate(message.id)}
+                        disabled={deleteMessageMutation.isPending}
+                        className="ml-2 h-8 w-8 p-0 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-gray-500 text-sm">
+              Aucun message publié pour le moment
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Alerts */}
       <div className="space-y-3">

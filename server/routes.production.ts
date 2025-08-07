@@ -22,7 +22,8 @@ import {
   insertUserRoleSchema,
   insertDlcProductSchema,
   insertDlcProductFrontendSchema,
-  insertTaskSchema
+  insertTaskSchema,
+  insertDashboardMessageSchema
 } from "../shared/schema";
 import { z } from "zod";
 import { requirePermission } from "./permissions";
@@ -3467,6 +3468,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup webhook test routes - pour tester les webhooks côté serveur
   setupWebhookTest(app);
+
+  // ===== DASHBOARD MESSAGES ROUTES =====
+  
+  // Get all dashboard messages (filtered by store if needed)
+  app.get('/api/dashboard-messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUserWithGroups(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get messages for current store context or all stores for admins
+      const storeId = req.query.storeId ? parseInt(req.query.storeId) : null;
+      
+      let messages;
+      if (user.role === 'admin') {
+        // Admin can see all messages or filter by store
+        messages = await storage.getDashboardMessages(storeId);
+      } else {
+        // Non-admin users see messages for their stores or global messages
+        const userStoreIds = user.userGroups.map((ug: any) => ug.group.id);
+        messages = await storage.getDashboardMessages(storeId || userStoreIds[0]);
+      }
+
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching dashboard messages:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard messages" });
+    }
+  });
+
+  // Create a new dashboard message (admin and directeur only)
+  app.post('/api/dashboard-messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent créer des messages" });
+      }
+
+      const parsedMessage = insertDashboardMessageSchema.parse(req.body);
+      
+      // Limit to 5 messages per store
+      const existingMessages = await storage.getDashboardMessages(parsedMessage.storeId);
+      if (existingMessages.length >= 5) {
+        return res.status(400).json({ message: "Maximum 5 messages autorisés par magasin" });
+      }
+
+      const message = await storage.createDashboardMessage({
+        ...parsedMessage,
+        createdBy: userId
+      });
+
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error creating dashboard message:", error);
+      res.status(500).json({ message: "Failed to create dashboard message" });
+    }
+  });
+
+  // Delete a dashboard message
+  app.delete('/api/dashboard-messages/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent supprimer des messages" });
+      }
+
+      const messageId = parseInt(req.params.id);
+      const message = await storage.getDashboardMessage(messageId);
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message non trouvé" });
+      }
+
+      // Directeurs cannot delete admin messages
+      if (user.role === 'directeur' && message.createdBy !== userId) {
+        const messageCreator = await storage.getUser(message.createdBy);
+        if (messageCreator?.role === 'admin') {
+          return res.status(403).json({ message: "Les directeurs ne peuvent pas supprimer les messages des administrateurs" });
+        }
+      }
+
+      await storage.deleteDashboardMessage(messageId);
+      res.json({ message: "Message supprimé avec succès" });
+    } catch (error) {
+      console.error("Error deleting dashboard message:", error);
+      res.status(500).json({ message: "Failed to delete dashboard message" });
+    }
+  });
   
   const server = createServer(app);
   return server;

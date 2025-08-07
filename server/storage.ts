@@ -60,6 +60,10 @@ import {
   type InsertTask,
   type InvoiceVerification,
   type InsertInvoiceVerification,
+  dashboardMessages,
+  type DashboardMessage,
+  type InsertDashboardMessage,
+  type DashboardMessageWithRelations,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, inArray, desc, sql, gte, lte } from "drizzle-orm";
@@ -212,6 +216,12 @@ export interface IStorage {
   updateInvoiceVerification(deliveryId: number, verification: Partial<InsertInvoiceVerification>): Promise<InvoiceVerification>;
   deleteInvoiceVerification(deliveryId: number): Promise<void>;
   getInvoiceVerificationsByGroup(groupId: number): Promise<InvoiceVerification[]>;
+
+  // Dashboard Message operations
+  getDashboardMessages(groupIds?: number[]): Promise<DashboardMessageWithRelations[]>;
+  getDashboardMessage(id: number): Promise<DashboardMessageWithRelations | undefined>;
+  createDashboardMessage(message: InsertDashboardMessage): Promise<DashboardMessage>;
+  deleteDashboardMessage(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1957,6 +1967,55 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(invoiceVerifications)
       .where(eq(invoiceVerifications.invoiceReference, invoiceRef));
+  }
+
+  // ===== DASHBOARD MESSAGE OPERATIONS =====
+
+  async getDashboardMessages(groupIds?: number[]): Promise<DashboardMessageWithRelations[]> {
+    const query = db.query.dashboardMessages.findMany({
+      with: {
+        creator: true,
+        store: true,
+      },
+      orderBy: [desc(dashboardMessages.createdAt)],
+      limit: 5,
+    });
+
+    let messages = await query;
+
+    // Filter by store if groupIds provided
+    if (groupIds && groupIds.length > 0) {
+      messages = messages.filter(message => 
+        !message.storeId || groupIds.includes(message.storeId)
+      );
+    }
+
+    return messages;
+  }
+
+  async getDashboardMessage(id: number): Promise<DashboardMessageWithRelations | undefined> {
+    return await db.query.dashboardMessages.findFirst({
+      where: eq(dashboardMessages.id, id),
+      with: {
+        creator: true,
+        store: true,
+      },
+    });
+  }
+
+  async createDashboardMessage(message: InsertDashboardMessage): Promise<DashboardMessage> {
+    const [newMessage] = await db
+      .insert(dashboardMessages)
+      .values({
+        ...message,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newMessage;
+  }
+
+  async deleteDashboardMessage(id: number): Promise<void> {
+    await db.delete(dashboardMessages).where(eq(dashboardMessages.id, id));
   }
 }
 
