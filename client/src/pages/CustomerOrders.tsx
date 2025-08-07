@@ -715,19 +715,10 @@ export default function CustomerOrders() {
               variant="outline"
               size="sm"
               onClick={() => setShowStatisticsCards(!showStatisticsCards)}
-              className="flex items-center gap-2"
+              className="h-8 w-8 p-0"
+              title={showStatisticsCards ? "Masquer les statistiques" : "Afficher les statistiques"}
             >
-              {showStatisticsCards ? (
-                <>
-                  <Eye className="w-4 h-4" />
-                  Masquer Stats
-                </>
-              ) : (
-                <>
-                  <Eye className="w-4 h-4" />
-                  Afficher Stats
-                </>
-              )}
+              <Eye className="w-4 h-4" />
             </Button>
             <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
               <Plus className="w-4 h-4 mr-2" />
