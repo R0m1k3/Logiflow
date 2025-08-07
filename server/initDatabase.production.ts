@@ -561,6 +561,9 @@ async function runMigrations() {
     // Migration 3: Create new tables for roles/permissions if they don't exist
     await createRolesTables();
     
+    // Migration 4: Dashboard messages table migration
+    await migrateDashboardMessages();
+    
     console.log('✅ All migrations completed successfully');
   } catch (error) {
     console.error('❌ Migration failed:', error);
@@ -1040,6 +1043,99 @@ async function createRolesTables() {
   } catch (error) {
     console.error('❌ Error creating roles tables:', error);
     // Continue anyway, don't crash the app
+  }
+}
+
+async function migrateDashboardMessages() {
+  try {
+    console.log('🔄 Running dashboard messages migration...');
+    
+    // 1. Vérifier si la table existe
+    const tableExists = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'dashboard_messages'
+      )
+    `);
+    
+    if (!tableExists.rows[0].exists) {
+      console.log('📋 Creating dashboard_messages table...');
+      await pool.query(`
+        CREATE TABLE dashboard_messages (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          content TEXT NOT NULL,
+          type VARCHAR(50) NOT NULL DEFAULT 'info',
+          store_id INTEGER REFERENCES groups(id),
+          created_by VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ Dashboard messages table created');
+    } else {
+      console.log('📋 Dashboard messages table already exists');
+    }
+    
+    // 2. Vérifier et ajouter la colonne type si elle manque
+    const typeColumnExists = await pool.query(`
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_name = 'dashboard_messages' AND column_name = 'type'
+    `);
+    
+    if (typeColumnExists.rows.length === 0) {
+      await pool.query(`
+        ALTER TABLE dashboard_messages 
+        ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'info'
+      `);
+      console.log('✅ Added type column to dashboard_messages');
+    }
+    
+    // 3. Supprimer la colonne updated_at si elle existe (pour correspondre au nouveau schéma)
+    const updatedAtExists = await pool.query(`
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_name = 'dashboard_messages' AND column_name = 'updated_at'
+    `);
+    
+    if (updatedAtExists.rows.length > 0) {
+      await pool.query('ALTER TABLE dashboard_messages DROP COLUMN updated_at');
+      console.log('✅ Removed updated_at column from dashboard_messages');
+    }
+    
+    // 4. Créer des index pour améliorer les performances
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_dashboard_messages_store_id 
+      ON dashboard_messages(store_id)
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_dashboard_messages_created_at 
+      ON dashboard_messages(created_at)
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_dashboard_messages_type 
+      ON dashboard_messages(type)
+    `);
+    console.log('✅ Performance indexes created for dashboard_messages');
+    
+    // 5. Vérifier la structure finale
+    const columns = await pool.query(`
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'dashboard_messages'
+      ORDER BY ordinal_position
+    `);
+    
+    console.log('📋 Dashboard messages table structure:');
+    columns.rows.forEach(col => {
+      console.log(`  - ${col.column_name}: ${col.data_type} ${col.is_nullable === 'NO' ? 'NOT NULL' : 'NULL'} ${col.column_default ? `DEFAULT ${col.column_default}` : ''}`);
+    });
+    
+    console.log('✅ Dashboard messages migration completed successfully');
+    
+  } catch (error) {
+    console.error('❌ Dashboard messages migration failed:', error);
+    // Ne pas arrêter l'application si la migration échoue
   }
 }
 

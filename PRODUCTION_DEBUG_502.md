@@ -85,8 +85,20 @@ ORDER BY ordinal_position;
 
 #### Immediate (Database Admin Required)
 1. **Enable Neon Database Endpoint** or switch to alternative database
-2. **Run SQL Migration** above to ensure table exists with correct structure
+2. **Deploy to Production** - Migration happens automatically
 3. **Test Message Creation** in production
+
+#### Automatic Migration Implemented ✅
+- **Location**: `server/initDatabase.production.ts` - function `migrateDashboardMessages()`
+- **Triggered**: Automatically during production startup
+- **Features**: Complete table creation, column validation, performance indexes
+- **Safe**: Uses IF NOT EXISTS and conditional column operations
+- **Logging**: Detailed console output for monitoring migration progress
+
+#### Manual Migration Script Available ✅
+- **File**: `migration_dashboard_messages.sql`
+- **Usage**: Can be run manually if needed: `psql -d your_database -f migration_dashboard_messages.sql`
+- **Backup option**: Use if automatic migration fails
 
 #### Development Testing ✅
 - Dashboard messages fully functional in development

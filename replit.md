@@ -60,6 +60,7 @@ Preferred communication style: Simple, everyday language.
 - **DLC Print Lists Logic Fixed**: Corrected inconsistency between display badges and print functions in DLC module. Fixed products appearing in wrong print lists (expiring soon vs expired). Unified date calculation logic to use both dlcDate and expiryDate as fallback, ensuring consistent categorization across display and printing functions.
 - **Production Scheduler Services Fixed**: Resolved issue where automatic backup and BL reconciliation services weren't working in production. Fixed PostgreSQL type conflicts in SchedulerService and BackupService. Services are now properly initialized at server startup and ready to be activated via the admin interface.
 - **Customer Orders Statistics Dashboard Added**: Enhanced CustomerOrders module with comprehensive statistics dashboard above the filters. Added 4 main KPI cards (Total, Today, Pending, Available) and detailed status breakdown visualization. Statistics update in real-time as orders are filtered and provide instant overview of order management performance.
+- **Dashboard Messages Automatic Migration**: Implemented automatic migration system for dashboard_messages table during production deployment. Added `migrateDashboardMessages()` function in `initDatabase.production.ts` that creates/updates table structure, manages schema changes, and creates performance indexes. Migration runs automatically on every production startup ensuring database consistency.
 
 ## External Dependencies
 
