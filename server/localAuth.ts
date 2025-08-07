@@ -7,8 +7,9 @@ import { promisify } from "util";
 import { storage as devStorage } from "./storage";
 import { storage as prodStorage } from "./storage.production";
 
-// Choose storage based on environment
-const storage = process.env.STORAGE_MODE === 'production' ? prodStorage : devStorage;
+// Choose storage based on environment - but skip if no DATABASE_URL
+const hasDatabase = !!process.env.DATABASE_URL;
+const storage = hasDatabase ? (process.env.STORAGE_MODE === 'production' ? prodStorage : devStorage) : null;
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 
@@ -89,6 +90,12 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 async function createDefaultAdminUser() {
+  // Skip admin user creation if no database storage available
+  if (!storage) {
+    console.log('🔧 Skipping admin user creation - no database storage in development mode');
+    return;
+  }
+
   try {
     const existingAdmin = await storage.getUserByUsername('admin');
     if (!existingAdmin) {
@@ -175,6 +182,12 @@ export function setupLocalAuth(app: Express) {
       },
       async (username, password, done) => {
         try {
+          // If no database, skip authentication - this is development mode with Replit Auth
+          if (!storage) {
+            console.log('🔧 No database storage - skipping local auth for development');
+            return done(null, false, { message: 'Use Replit authentication in development mode' });
+          }
+
           const user = await storage.getUserByUsername(username);
           if (!user || !user.password) {
             return done(null, false, { message: 'Identifiant ou mot de passe incorrect' });
@@ -196,6 +209,18 @@ export function setupLocalAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: string, done) => {
     try {
+      if (!storage) {
+        // In development mode without database, create a mock user
+        const mockUser = {
+          id: id,
+          username: 'dev-user',
+          email: 'dev@replit.com',
+          name: 'Dev User',
+          role: 'admin',
+          groups: []
+        };
+        return done(null, mockUser);
+      }
       const user = await storage.getUserWithGroups(id);
       done(null, user);
     } catch (error) {

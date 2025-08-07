@@ -12,8 +12,8 @@ console.log('🔍 DIAGNOSTIC - DATABASE_URL:', process.env.DATABASE_URL ? 'SET' 
 // Use development mode in routes.ts - this file is for development
 const hasProductionDB = process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgresql');
 const isProduction = false; // Force development mode for routes.ts
-const storage = isProduction ? prodStorage : devStorage;
-console.log('🔍 DIAGNOSTIC - Using storage:', isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
+const storage = hasProductionDB ? (isProduction ? prodStorage : devStorage) : null;
+console.log('🔍 DIAGNOSTIC - Using storage:', storage ? (isProduction ? 'PRODUCTION' : 'DEVELOPMENT') : 'NONE (Replit Auth Mode)');
 console.log('🔍 DIAGNOSTIC - Database URL exists:', hasProductionDB ? 'YES' : 'NO');
 
 
@@ -65,6 +65,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Development mode - use development storage with simplified permissions
       try {
+        if (!storage) {
+          // In Replit Auth mode, create a mock admin user
+          console.log('🔧 DEV - No storage, using Replit Auth mode for user:', userId);
+          const allPermissions = [
+            { id: 1, name: 'read_orders', displayName: 'Lire les commandes', description: 'Voir les commandes', category: 'orders', action: 'read', resource: 'order', isSystem: false },
+            { id: 2, name: 'create_orders', displayName: 'Créer les commandes', description: 'Créer de nouvelles commandes', category: 'orders', action: 'create', resource: 'order', isSystem: false },
+            { id: 3, name: 'update_orders', displayName: 'Modifier les commandes', description: 'Modifier les commandes existantes', category: 'orders', action: 'update', resource: 'order', isSystem: false },
+            { id: 4, name: 'delete_orders', displayName: 'Supprimer les commandes', description: 'Supprimer les commandes', category: 'orders', action: 'delete', resource: 'order', isSystem: false },
+            { id: 5, name: 'admin_panel', displayName: 'Panneau Admin', description: 'Accès au panneau d\'administration', category: 'admin', action: 'access', resource: 'admin_panel', isSystem: true }
+          ];
+          return res.json(allPermissions);
+        }
+
         const user = await storage.getUser(userId);
         if (!user) {
           console.log('❌ DEV - User not found:', userId);

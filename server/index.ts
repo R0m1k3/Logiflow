@@ -5,10 +5,12 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// TEMPORARY: FORCE DEV MODE WITH MEMORY STORAGE DUE TO NEON ISSUES
-console.log('🔧 TEMP MODE: DEV ENVIRONMENT + MEMORY STORAGE (Neon endpoint disabled)');
+// TEMPORARY: FORCE DEV MODE WITH REPLIT AUTH DUE TO NEON ISSUES
+console.log('🔧 TEMP MODE: DEV ENVIRONMENT + REPLIT AUTH (Neon endpoint disabled)');
 process.env.NODE_ENV = 'development';
 process.env.STORAGE_MODE = 'development';
+// Disable DATABASE_URL to force Replit auth mode
+delete process.env.DATABASE_URL;
 
 // Enhanced environment detection
 const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
