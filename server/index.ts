@@ -5,10 +5,10 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// FORCE PRODUCTION STORAGE BUT KEEP DEV MODE FOR PORT 5000
-console.log('🔧 HYBRID MODE: DEV ENVIRONMENT + PRODUCTION STORAGE');
+// TEMPORARY: FORCE DEV MODE WITH MEMORY STORAGE DUE TO NEON ISSUES
+console.log('🔧 TEMP MODE: DEV ENVIRONMENT + MEMORY STORAGE (Neon endpoint disabled)');
 process.env.NODE_ENV = 'development';
-process.env.STORAGE_MODE = 'production';
+process.env.STORAGE_MODE = 'development';
 
 // Enhanced environment detection
 const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
@@ -150,12 +150,21 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     });
   });
 
-  // FORCE PRODUCTION ROUTES FOR VERIFICATION SYSTEM
-  console.log('🔄 FORCING production routes for NocoDB verification...');
-  const productionRoutes = await import("./routes.production");
-  const registerRoutes = productionRoutes.registerRoutes;
-  console.log('✅ Successfully loaded routes.production.ts');
-  const server = await registerRoutes(app);
+  // Use development routes due to Neon database issues
+  let server;
+  if (process.env.STORAGE_MODE === 'development') {
+    console.log('🔄 Using development routes due to database connection issues...');
+    const devRoutes = await import("./routes");
+    const registerRoutes = devRoutes.registerRoutes;
+    console.log('✅ Successfully loaded routes.ts (development)');
+    server = await registerRoutes(app);
+  } else {
+    console.log('🔄 FORCING production routes for NocoDB verification...');
+    const productionRoutes = await import("./routes.production");
+    const registerRoutes = productionRoutes.registerRoutes;
+    console.log('✅ Successfully loaded routes.production.ts');
+    server = await registerRoutes(app);
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
