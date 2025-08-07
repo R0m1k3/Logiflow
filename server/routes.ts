@@ -3029,6 +3029,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== DASHBOARD MESSAGES ROUTES (DEVELOPMENT) =====
+  
+  // Mock storage pour les messages en développement
+  let mockDashboardMessages: any[] = [];
+  let nextMessageId = 1;
+
+  // Get dashboard messages
+  app.get('/api/dashboard-messages', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log('📋 DEV: Fetching dashboard messages');
+      
+      const storeId = req.query.storeId ? parseInt(req.query.storeId) : null;
+      
+      // Filtrer par store si spécifié
+      let messages = mockDashboardMessages;
+      if (storeId) {
+        messages = messages.filter(m => m.storeId === storeId);
+      }
+      
+      console.log(`✅ DEV: Returning ${messages.length} messages`);
+      res.json(messages);
+    } catch (error) {
+      console.error("DEV Error fetching dashboard messages:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard messages" });
+    }
+  });
+
+  // Create dashboard message
+  app.post('/api/dashboard-messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims ? req.user.claims.sub : req.user.id;
+      console.log('📝 DEV: Creating dashboard message for user:', userId);
+      console.log('📝 DEV: Message data:', req.body);
+      
+      // En développement, permettre à tous les utilisateurs authentifiés
+      const { title, content, type = 'info', storeId } = req.body;
+      
+      if (!title || !content) {
+        return res.status(400).json({ message: "Titre et contenu requis" });
+      }
+      
+      const newMessage = {
+        id: nextMessageId++,
+        title,
+        content,
+        type,
+        storeId: storeId || null,
+        createdBy: userId,
+        createdAt: new Date().toISOString()
+      };
+      
+      mockDashboardMessages.push(newMessage);
+      console.log('✅ DEV: Message created:', newMessage);
+      
+      res.status(201).json(newMessage);
+    } catch (error) {
+      console.error("DEV Error creating dashboard message:", error);
+      res.status(500).json({ message: "Failed to create dashboard message" });
+    }
+  });
+
+  // Delete dashboard message
+  app.delete('/api/dashboard-messages/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const index = mockDashboardMessages.findIndex(m => m.id === messageId);
+      
+      if (index === -1) {
+        return res.status(404).json({ message: "Message non trouvé" });
+      }
+      
+      mockDashboardMessages.splice(index, 1);
+      console.log('✅ DEV: Message deleted:', messageId);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("DEV Error deleting dashboard message:", error);
+      res.status(500).json({ message: "Failed to delete dashboard message" });
+    }
+  });
+
   // ===== DATABASE BACKUP ROUTES =====
   
   // Initialiser le service de sauvegarde

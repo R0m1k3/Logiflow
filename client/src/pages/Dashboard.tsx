@@ -198,25 +198,64 @@ export default function Dashboard() {
 
   // Mutation for creating messages
   const createMessageMutation = useMutation({
-    mutationFn: (data: InsertDashboardMessage) => apiRequest("/api/dashboard-messages", { method: "POST", body: data }),
-    onSuccess: () => {
+    mutationFn: async (data: InsertDashboardMessage) => {
+      console.log('🔄 DASHBOARD MUTATION: Creating message with data:', data);
+      console.log('👤 DASHBOARD MUTATION: Current user:', user);
+      
+      const response = await fetch('/api/dashboard-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (result) => {
+      console.log('✅ DASHBOARD MUTATION: Message created successfully:', result);
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages"] });
       setIsCreateDialogOpen(false);
       messageForm.reset();
       toast({ title: "Message créé", description: "Le message a été publié avec succès" });
     },
     onError: (error: any) => {
+      console.error('❌ DASHBOARD MUTATION: Failed to create message:', error);
+      console.error('❌ DASHBOARD MUTATION: Error details:', {
+        message: error.message,
+        status: error.status,
+        response: error.response
+      });
       toast({ 
         title: "Erreur", 
         description: error.message || "Impossible de créer le message",
         variant: "destructive"
       });
+      // IMPORTANT: Ne pas fermer le modal en cas d'erreur pour permettre à l'utilisateur de réessayer
     }
   });
 
   // Mutation for deleting messages
   const deleteMessageMutation = useMutation({
-    mutationFn: (messageId: number) => apiRequest(`/api/dashboard-messages/${messageId}`, { method: "DELETE" }),
+    mutationFn: async (messageId: number) => {
+      const response = await fetch(`/api/dashboard-messages/${messageId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages"] });
       toast({ title: "Message supprimé", description: "Le message a été supprimé avec succès" });
