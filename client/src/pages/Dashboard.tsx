@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare, Circle, Plus, MessageCircle, Trash2, Info } from "lucide-react";
+import { Calendar, Package, ShoppingCart, TrendingUp, Clock, MapPin, Building, User as UserIcon, AlertTriangle, CheckCircle, Truck, FileText, BarChart3, Megaphone, Shield, XCircle, CheckSquare, Circle, Plus, MessageCircle, Trash2, Info } from "lucide-react";
 import { safeFormat, safeDate } from "@/lib/dateUtils";
 import type { PublicityWithRelations } from "@shared/schema";
 import { useForm } from "react-hook-form";
@@ -178,7 +178,7 @@ export default function Dashboard() {
   const { data: groups = [] } = useQuery({
     queryKey: ["/api/groups"],
     queryFn: () => fetch("/api/groups", { credentials: 'include' }).then(res => res.json()),
-    enabled: (user?.role === 'admin' || user?.role === 'directeur')
+    enabled: user?.role === 'admin'
   });
 
   // State for message creation dialog
@@ -652,7 +652,7 @@ export default function Dashboard() {
                 <MessageCircle className="h-5 w-5 mr-3 text-blue-600" />
                 Messages & Informations
               </div>
-              {(user?.role === 'admin' || user?.role === 'directeur') && (
+              {user?.role === 'admin' && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -771,19 +771,36 @@ export default function Dashboard() {
                 {dashboardMessages.map((message) => {
                   const typeConfig = getMessageTypeConfig(message.type);
                   const TypeIcon = typeConfig.icon;
-                  const canDelete = user?.role === 'admin' || (user?.role === 'directeur' && message.createdBy === user.id);
+                  const canDelete = user?.role === 'admin';
                   
                   return (
-                    <div key={message.id} className={`border-l-3 p-3 flex items-start justify-between ${typeConfig.color} rounded-r border-l-4`}>
-                      <div className="flex items-start space-x-2 flex-1">
-                        <TypeIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm">{message.title}</h4>
-                          <p className="text-xs mt-1 opacity-90">{message.content}</p>
-                          <div className="flex items-center space-x-2 mt-1 text-xs opacity-75">
-                            <span>{message.creator?.name || message.createdBy || 'Utilisateur'}</span>
-                            {message.store && <span>• {message.store.name}</span>}
-                            <span>• {safeFormat(message.createdAt, "d MMM")}</span>
+                    <div key={message.id} className="flex items-start justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-blue-500">
+                      <div className="flex items-start space-x-3 flex-1 min-w-0">
+                        <TypeIcon className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-600" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-gray-900 truncate">{message.title}</p>
+                            <Badge className={`${typeConfig.color} border text-xs flex items-center gap-1`}>
+                              <TypeIcon className="w-2.5 h-2.5" />
+                              {typeConfig.label}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{message.content}</p>
+                          <div className="flex items-center gap-3 text-xs text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <UserIcon className="w-3 h-3" />
+                              <span>{message.creator?.name || message.createdBy || 'Utilisateur'}</span>
+                            </div>
+                            {message.store && (
+                              <div className="flex items-center gap-1">
+                                <Building className="w-3 h-3" />
+                                <span>{message.store.name}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>{safeFormat(message.createdAt, "d MMM")}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
