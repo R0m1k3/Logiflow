@@ -371,165 +371,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Dashboard Messages */}
-      {(dashboardMessages.length > 0 || (user?.role === 'admin' || user?.role === 'directeur')) && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <MessageCircle className="h-5 w-5 mr-2 text-blue-600" />
-              Messages du Tableau de Bord
-            </h3>
-            {(user?.role === 'admin' || user?.role === 'directeur') && (
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nouveau Message
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Créer un Message</DialogTitle>
-                  </DialogHeader>
-                  <Form {...messageForm}>
-                    <form onSubmit={messageForm.handleSubmit((data) => createMessageMutation.mutate(data))} className="space-y-4">
-                      <FormField
-                        control={messageForm.control}
-                        name="title"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Titre</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Titre du message" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={messageForm.control}
-                        name="content"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Contenu</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Contenu du message" rows={3} {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={messageForm.control}
-                        name="type"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Type</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Sélectionner un type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="info">Information</SelectItem>
-                                <SelectItem value="warning">Attention</SelectItem>
-                                <SelectItem value="success">Succès</SelectItem>
-                                <SelectItem value="error">Erreur</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={messageForm.control}
-                        name="storeId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Magasin Cible</FormLabel>
-                            <Select onValueChange={(value) => field.onChange(value === 'all' ? null : parseInt(value))} defaultValue={field.value?.toString() || 'all'}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Sélectionner un magasin" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="all">Tous les magasins</SelectItem>
-                                {groups.map((group: any) => (
-                                  <SelectItem key={group.id} value={group.id.toString()}>
-                                    {group.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                          Annuler
-                        </Button>
-                        <Button type="submit" disabled={createMessageMutation.isPending}>
-                          {createMessageMutation.isPending ? "Création..." : "Créer"}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-          
-          {dashboardMessages.length > 0 ? (
-            <div className="space-y-2">
-              {dashboardMessages.map((message) => {
-                const typeConfig = getMessageTypeConfig(message.type);
-                const TypeIcon = typeConfig.icon;
-                const canDelete = user?.role === 'admin' || (user?.role === 'directeur' && message.createdBy === user.id);
-                
-                return (
-                  <div key={message.id} className={`border-l-4 p-4 flex items-start justify-between shadow-sm ${typeConfig.color}`}>
-                    <div className="flex items-start space-x-3 flex-1">
-                      <TypeIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm">{message.title}</h4>
-                        <p className="text-sm mt-1 opacity-90">{message.content}</p>
-                        <div className="flex items-center space-x-4 mt-2 text-xs opacity-75">
-                          <span>Par {message.creator.name}</span>
-                          {message.store && <span>• {message.store.name}</span>}
-                          <span>• {safeFormat(message.createdAt, "d MMM à HH:mm")}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {canDelete && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteMessageMutation.mutate(message.id)}
-                        disabled={deleteMessageMutation.isPending}
-                        className="ml-2 h-8 w-8 p-0 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-4 text-gray-500 text-sm">
-              Aucun message publié pour le moment
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* Alerts */}
       <div className="space-y-3">
@@ -694,78 +536,162 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Publicités à Venir */}
+        {/* Messages & Informations */}
         <Card className="bg-white border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="pb-4 border-b border-gray-100">
-            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center">
-              <Megaphone className="h-5 w-5 mr-3 text-purple-600" />
-              Publicités à Venir
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center justify-between">
+              <div className="flex items-center">
+                <MessageCircle className="h-5 w-5 mr-3 text-blue-600" />
+                Messages & Informations
+              </div>
+              {(user?.role === 'admin' || user?.role === 'directeur') && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Créer un Message</DialogTitle>
+                    </DialogHeader>
+                    <Form {...messageForm}>
+                      <form onSubmit={messageForm.handleSubmit((data) => createMessageMutation.mutate(data))} className="space-y-4">
+                        <FormField
+                          control={messageForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Titre</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Titre du message" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={messageForm.control}
+                          name="content"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Contenu</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Contenu du message" rows={3} {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={messageForm.control}
+                          name="type"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Type</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner un type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="info">Information</SelectItem>
+                                  <SelectItem value="warning">Attention</SelectItem>
+                                  <SelectItem value="success">Succès</SelectItem>
+                                  <SelectItem value="error">Erreur</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={messageForm.control}
+                          name="storeId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Magasin Cible</FormLabel>
+                              <Select onValueChange={(value) => field.onChange(value === 'all' ? null : parseInt(value))} defaultValue={field.value?.toString() || 'all'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner un magasin" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="all">Tous les magasins</SelectItem>
+                                  {groups.map((group: any) => (
+                                    <SelectItem key={group.id} value={group.id.toString()}>
+                                      {group.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="flex justify-end space-x-2">
+                          <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                            Annuler
+                          </Button>
+                          <Button type="submit" disabled={createMessageMutation.isPending}>
+                            {createMessageMutation.isPending ? "Création..." : "Créer"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 p-6">
-            {upcomingPublicities
-              .slice(0, 3)
-              .map((publicity: any) => {
-                const participatingStores = publicity.participations || [];
-                const isCurrentStoreParticipating = selectedStoreId && participatingStores.some((p: any) => p.groupId === parseInt(selectedStoreId));
-                
-                return (
-                  <div key={publicity.id} className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors border-l-3 border-purple-500">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-2 w-2 bg-purple-500"></div>
-                      <div>
-                        <p className="font-medium text-gray-900">{publicity.pubNumber}</p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-gray-600 flex-1">{publicity.designation}</p>
+            {dashboardMessages.length > 0 ? (
+              <div className="space-y-2">
+                {dashboardMessages.map((message) => {
+                  const typeConfig = getMessageTypeConfig(message.type);
+                  const TypeIcon = typeConfig.icon;
+                  const canDelete = user?.role === 'admin' || (user?.role === 'directeur' && message.createdBy === user.id);
+                  
+                  return (
+                    <div key={message.id} className={`border-l-3 p-3 flex items-start justify-between ${typeConfig.color} rounded-r border-l-4`}>
+                      <div className="flex items-start space-x-2 flex-1">
+                        <TypeIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm">{message.title}</h4>
+                          <p className="text-xs mt-1 opacity-90">{message.content}</p>
+                          <div className="flex items-center space-x-2 mt-1 text-xs opacity-75">
+                            <span>{message.creator.name}</span>
+                            {message.store && <span>• {message.store.name}</span>}
+                            <span>• {safeFormat(message.createdAt, "d MMM")}</span>
+                          </div>
                         </div>
                       </div>
+                      
+                      {canDelete && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteMessageMutation.mutate(message.id)}
+                          disabled={deleteMessageMutation.isPending}
+                          className="ml-2 h-6 w-6 p-0 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-3 w-3 text-red-600" />
+                        </Button>
+                      )}
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="flex items-center gap-2 justify-end mb-1">
-                        {/* Magasins participants à gauche du badge */}
-                        {participatingStores.length > 0 && (
-                          <div className="flex gap-1 items-center">
-                            {participatingStores.slice(0, 2).map((participation: any) => {
-                              const groupColor = participation.group?.color || '#666666';
-                              const isCurrentStore = selectedStoreId && participation.groupId === parseInt(selectedStoreId);
-                              
-                              return (
-                                <Badge 
-                                  key={participation.groupId} 
-                                  className={`text-xs border text-white px-1.5 py-0 h-4 min-w-0 ${isCurrentStore ? 'ring-1 ring-offset-1 ring-opacity-50' : ''}`}
-                                  style={{ 
-                                    backgroundColor: groupColor,
-                                    borderColor: groupColor,
-                                    color: 'white',
-                                    fontSize: '9px',
-                                    lineHeight: '1',
-                                    ...(isCurrentStore && { ringColor: groupColor })
-                                  }}
-                                >
-                                  {participation.group.name}
-                                </Badge>
-                              );
-                            })}
-                            {participatingStores.length > 2 && (
-                              <span className="text-xs text-gray-400 font-medium">+{participatingStores.length - 2}</span>
-                            )}
-                          </div>
-                        )}
-                        <Badge className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap">
-                          À venir
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {safeFormat(publicity.startDate, "d MMM")}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            {(!Array.isArray(upcomingPublicities) || upcomingPublicities.length === 0) && (
+                  );
+                })}
+              </div>
+            ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">Aucune publicité à venir</p>
-                <p className="text-xs text-gray-400 mt-1">(API: {Array.isArray(upcomingPublicities) ? upcomingPublicities.length : 'NOT_ARRAY'})</p>
+                <p className="text-gray-600">Aucun message publié</p>
+                <p className="text-xs text-gray-400 mt-1">Les messages d'information apparaîtront ici</p>
               </div>
             )}
           </CardContent>

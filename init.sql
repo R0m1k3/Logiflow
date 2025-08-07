@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS publicities CASCADE;
 DROP TABLE IF EXISTS sessions CASCADE;
 DROP TABLE IF EXISTS invoice_verification_cache CASCADE;
+DROP TABLE IF EXISTS dashboard_messages CASCADE;
 
 -- Create users table
 CREATE TABLE users (
@@ -396,6 +397,22 @@ WHERE p.category NOT IN ('administration');
 INSERT INTO suppliers (name, contact, phone, has_dlc) VALUES
 ('Fournisseur Test 1', 'Jean Dupont', '01 23 45 67 89', TRUE),
 ('Fournisseur Test 2', 'Marie Martin', '01 23 45 67 90', FALSE);
+
+-- Create dashboard_messages table
+CREATE TABLE dashboard_messages (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL DEFAULT 'info',
+    store_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    created_by VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for dashboard_messages
+CREATE INDEX idx_dashboard_messages_store_id ON dashboard_messages(store_id);
+CREATE INDEX idx_dashboard_messages_created_by ON dashboard_messages(created_by);
+CREATE INDEX idx_dashboard_messages_created_at ON dashboard_messages(created_at DESC);
 
 -- Insert admin user (password will be set programmatically)
 INSERT INTO users (id, username, email, name, first_name, last_name, role, password_changed) VALUES
