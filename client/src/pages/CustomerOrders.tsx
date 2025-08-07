@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Pagination, usePagination } from "@/components/ui/pagination";
-import { Plus, Edit, Trash2, Phone, PhoneCall, Printer, Eye, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Phone, PhoneCall, Printer, Eye, Package, ChevronDown, ChevronUp } from "lucide-react";
 import JsBarcode from 'jsbarcode';
 import { safeFormat, safeDate } from "@/lib/dateUtils";
 import { format } from "date-fns";
@@ -57,6 +57,7 @@ export default function CustomerOrders() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterSupplier, setFilterSupplier] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [showStatusBreakdown, setShowStatusBreakdown] = useState<boolean>(false);
 
   // Fetch groups for store filter
   const { data: groups = [] } = useQuery<Group[]>({
@@ -780,28 +781,44 @@ export default function CustomerOrders() {
         </Card>
       </div>
 
-      {/* Status Breakdown */}
+      {/* Status Breakdown - Collapsible */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center">
-            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Répartition par Statut
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {statusOptions.map((status) => (
-              <div key={status} className="text-center">
-                <div className={`p-3 rounded-lg border-2 ${getStatusColor(status)}`}>
-                  <p className="text-lg font-bold">{stats.byStatus[status] || 0}</p>
-                </div>
-                <p className="text-xs text-gray-600 mt-1">{status}</p>
-              </div>
-            ))}
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Répartition par Statut
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowStatusBreakdown(!showStatusBreakdown)}
+              className="h-8 w-8 p-0"
+            >
+              {showStatusBreakdown ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-        </CardContent>
+        </CardHeader>
+        {showStatusBreakdown && (
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {statusOptions.map((status) => (
+                <div key={status} className="text-center">
+                  <div className={`p-3 rounded-lg border-2 ${getStatusColor(status)}`}>
+                    <p className="text-lg font-bold">{stats.byStatus[status] || 0}</p>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">{status}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       {/* Search and Filters */}
