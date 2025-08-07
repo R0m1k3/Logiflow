@@ -163,7 +163,7 @@ export default function Dashboard() {
   });
 
   // Fetch dashboard messages
-  const { data: dashboardMessages = [] } = useQuery<DashboardMessageWithRelations[]>({
+  const { data: dashboardMessages = [] } = useQuery<any[]>({
     queryKey: ["/api/dashboard-messages", selectedStoreId],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -216,7 +216,7 @@ export default function Dashboard() {
       return response.json();
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard-messages", selectedStoreId] });
       setIsCreateDialogOpen(false);
       messageForm.reset();
       toast({ title: "Message créé", description: "Le message a été publié avec succès" });
@@ -781,7 +781,7 @@ export default function Dashboard() {
                           <h4 className="font-medium text-sm">{message.title}</h4>
                           <p className="text-xs mt-1 opacity-90">{message.content}</p>
                           <div className="flex items-center space-x-2 mt-1 text-xs opacity-75">
-                            <span>{message.creator.name}</span>
+                            <span>{message.creator?.name || message.createdBy || 'Utilisateur'}</span>
                             {message.store && <span>• {message.store.name}</span>}
                             <span>• {safeFormat(message.createdAt, "d MMM")}</span>
                           </div>
