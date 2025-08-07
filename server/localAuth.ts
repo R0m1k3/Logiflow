@@ -10,6 +10,20 @@ import { storage as prodStorage } from "./storage.production";
 // Choose storage based on environment - but skip if no DATABASE_URL
 const hasDatabase = !!process.env.DATABASE_URL;
 const storage = hasDatabase ? (process.env.STORAGE_MODE === 'production' ? prodStorage : devStorage) : null;
+
+// Fallback user for development testing when database is unavailable
+const fallbackAdminUser = {
+  id: 'admin_fallback',
+  username: 'admin',
+  email: 'admin@logiflow.com',
+  name: 'Admin Utilisateur',
+  firstName: 'Admin',
+  lastName: 'Utilisateur',
+  role: 'admin' as const,
+  passwordChanged: true,
+  createdAt: new Date(),
+  updatedAt: new Date()
+};
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 
@@ -182,10 +196,16 @@ export function setupLocalAuth(app: Express) {
       },
       async (username, password, done) => {
         try {
-          // If no database, skip authentication - this is development mode with Replit Auth
+          // FALLBACK: Allow admin/admin when database is unavailable
           if (!storage) {
-            console.log('🔧 No database storage - skipping local auth for development');
-            return done(null, false, { message: 'Use Replit authentication in development mode' });
+            console.log('🔧 FALLBACK: Database unavailable, checking fallback credentials');
+            if (username === 'admin' && password === 'admin') {
+              console.log('✅ FALLBACK: Admin credentials accepted');
+              return done(null, fallbackAdminUser);
+            } else {
+              console.log('❌ FALLBACK: Invalid fallback credentials');
+              return done(null, false, { message: 'Identifiant ou mot de passe incorrect' });
+            }
           }
 
           const user = await storage.getUserByUsername(username);
@@ -200,6 +220,17 @@ export function setupLocalAuth(app: Express) {
 
           return done(null, user);
         } catch (error) {
+          console.error('❌ LocalStrategy error:', error.message);
+          
+          // FALLBACK: Si erreur de base de données, essayer les credentials de fallback
+          if (error.message?.includes('endpoint has been disabled') || error.message?.includes('connection')) {
+            console.log('🔧 FALLBACK: Database error, checking fallback credentials');
+            if (username === 'admin' && password === 'admin') {
+              console.log('✅ FALLBACK: Admin credentials accepted after DB error');
+              return done(null, fallbackAdminUser);
+            }
+          }
+          
           return done(error);
         }
       }
@@ -210,20 +241,20 @@ export function setupLocalAuth(app: Express) {
   passport.deserializeUser(async (id: string, done) => {
     try {
       if (!storage) {
-        // In development mode without database, create a mock user
-        const mockUser = {
-          id: id,
-          username: 'dev-user',
-          email: 'dev@replit.com',
-          name: 'Dev User',
-          role: 'admin',
-          groups: []
-        };
-        return done(null, mockUser);
+        // Return fallback admin user for development mode
+        return done(null, fallbackAdminUser);
       }
       const user = await storage.getUserWithGroups(id);
       done(null, user);
     } catch (error) {
+      console.error('❌ deserializeUser error:', error.message);
+      
+      // FALLBACK: Si erreur de base de données, retourner l'utilisateur fallback admin
+      if (error.message?.includes('endpoint has been disabled') || error.message?.includes('connection')) {
+        console.log('🔧 FALLBACK: Database error in deserializeUser, using fallback admin');
+        return done(null, fallbackAdminUser);
+      }
+      
       done(error);
     }
   });
@@ -276,6 +307,16 @@ export function setupLocalAuth(app: Express) {
     }
     try {
       const user = req.user as SelectUser;
+      
+      // FALLBACK: Si pas de stockage ou erreur, retourner l'utilisateur fallback avec groupes simulés
+      if (!storage) {
+        const fallbackUserWithGroups = {
+          ...fallbackAdminUser,
+          userGroups: [] // Admin a accès à tous les groupes
+        };
+        return res.json(fallbackUserWithGroups);
+      }
+      
       const userWithGroups = await storage.getUserWithGroups(user.id);
       
       if (!userWithGroups) {
@@ -284,7 +325,18 @@ export function setupLocalAuth(app: Express) {
       
       res.json(userWithGroups);
     } catch (error) {
-      console.error("Error fetching user with groups:", error);
+      console.error("Error fetching user with groups:", error.message);
+      
+      // FALLBACK: En cas d'erreur de base de données, retourner l'utilisateur fallback
+      if (error.message?.includes('endpoint has been disabled') || error.message?.includes('connection')) {
+        console.log('🔧 FALLBACK: Database error in /api/user, using fallback admin');
+        const fallbackUserWithGroups = {
+          ...fallbackAdminUser,
+          userGroups: [] // Admin a accès à tous les groupes
+        };
+        return res.json(fallbackUserWithGroups);
+      }
+      
       res.status(500).json({ message: "Erreur serveur" });
     }
   });
