@@ -667,6 +667,33 @@ export default function CustomerOrders() {
     totalItems
   } = usePagination(sortedOrders, 10);
 
+  // Calculate statistics
+  const calculateStats = () => {
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    const stats = {
+      total: customerOrders.length,
+      todayOrders: customerOrders.filter(order => {
+        const orderDate = safeDate(order.createdAt);
+        return orderDate && orderDate >= todayStart;
+      }).length,
+      byStatus: customerOrders.reduce((acc, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>),
+      pending: customerOrders.filter(order => 
+        order.status === "En attente de Commande" || order.status === "Commande en Cours"
+      ).length,
+      available: customerOrders.filter(order => order.status === "Disponible").length,
+      completed: customerOrders.filter(order => order.status === "Retiré").length
+    };
+    
+    return stats;
+  };
+
+  const stats = calculateStats();
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -687,6 +714,95 @@ export default function CustomerOrders() {
           </Button>
         </div>
       </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Commandes</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              </div>
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Package className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Aujourd'hui</p>
+                <p className="text-2xl font-bold text-green-600">{stats.todayOrders}</p>
+              </div>
+              <div className="p-2 bg-green-50 rounded-lg">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">En Attente</p>
+                <p className="text-2xl font-bold text-orange-600">{stats.pending}</p>
+              </div>
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Disponibles</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.available}</p>
+              </div>
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Status Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center">
+            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Répartition par Statut
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {statusOptions.map((status) => (
+              <div key={status} className="text-center">
+                <div className={`p-3 rounded-lg border-2 ${getStatusColor(status)}`}>
+                  <p className="text-lg font-bold">{stats.byStatus[status] || 0}</p>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">{status}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Search and Filters */}
       <Card className="flex-shrink-0">

@@ -59,6 +59,7 @@ Preferred communication style: Simple, everyday language.
 - **Username Display Fixed in Orders and Deliveries**: Corrected "Créé par" column regression where user IDs were displayed instead of usernames. Updated both Orders and Deliveries modules to properly display creator usernames with fallback hierarchy: username → name → firstName/lastName → createdBy ID. Added user icons for better visual consistency.
 - **DLC Print Lists Logic Fixed**: Corrected inconsistency between display badges and print functions in DLC module. Fixed products appearing in wrong print lists (expiring soon vs expired). Unified date calculation logic to use both dlcDate and expiryDate as fallback, ensuring consistent categorization across display and printing functions.
 - **Production Scheduler Services Fixed**: Resolved issue where automatic backup and BL reconciliation services weren't working in production. Fixed PostgreSQL type conflicts in SchedulerService and BackupService. Services are now properly initialized at server startup and ready to be activated via the admin interface.
+- **Customer Orders Statistics Dashboard Added**: Enhanced CustomerOrders module with comprehensive statistics dashboard above the filters. Added 4 main KPI cards (Total, Today, Pending, Available) and detailed status breakdown visualization. Statistics update in real-time as orders are filtered and provide instant overview of order management performance.
 
 ## External Dependencies
 
