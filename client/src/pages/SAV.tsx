@@ -245,7 +245,7 @@ export default function SAV() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* En-tête avec titre et bouton d'action */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
