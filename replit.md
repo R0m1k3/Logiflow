@@ -40,6 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Invoice Verification**: Automated system for verifying invoices against delivery notes, including reconciliation and duplicate prevention.
 - **Task Management**: Simplified task creation, assignment, and validation with status tracking and calendar integration.
 - **DLC Management**: Comprehensive management of products with use-by dates, including status tracking, validation, and alerts.
+- **SAV Management**: Comprehensive Service Après-Vente (after-sales service) ticket system for tracking customer service issues with suppliers. Features role-based access controls, automatic ticket numbering, supplier integration, and complete audit trail with status history.
 - **Database Backup**: Automated daily backups and manual backup/restore capabilities with versioning.
 - **Permission System**: Hardcoded 4-role system (Admin, Manager, Employee, Directeur) with granular permissions and dynamic sidebar based on user roles.
 
@@ -65,6 +66,7 @@ Preferred communication style: Simple, everyday language.
 - **Supplier Automatic Reconciliation Feature**: Implemented automatic reconciliation system for trusted suppliers. Added `automaticReconciliation` boolean column to suppliers table with production-ready migration (migration_automatic_reconciliation.sql). When a supplier has this option enabled, delivery validation automatically marks the reconciliation as complete, eliminating manual reconciliation steps for trusted vendors. Enhanced storage methods (getSuppliers, createSupplier, updateSupplier, validateDelivery) to support the new workflow. Feature fully deployed with schema updates, migration files, and production compatibility.
 - **Calendar UI Improvement**: Changed linked order colors from orange to light yellow (`bg-yellow-200 text-yellow-800`) for better visual comfort while maintaining visibility.
 - **Automatic Logout Security Feature**: Implemented automatic user logout after 20 minutes of inactivity for all users except administrators. The system monitors user activity (mouse movement, clicks, keyboard input, scroll, touch) and displays a warning notification 2 minutes before logout. Admin users are completely excluded from this security timeout. The feature is integrated into the main Layout component using the `useAutoLogout` hook.
+- **SAV Module Implementation**: Created complete standalone Service Après-Vente (after-sales service) module for managing customer service tickets with suppliers. Implemented full CRUD operations with role-based permissions (admin/directeur can delete, manager can create/update, employee read-only), automatic ticket numbering (format: SAV20250808-001), supplier integration with existing supplier data, complete audit trail with status history, and comprehensive filtering/search capabilities. Database schema includes sav_tickets and sav_ticket_history tables with proper relations. Frontend features include statistics dashboard, modal forms, and French localization.
 
 ## External Dependencies
 

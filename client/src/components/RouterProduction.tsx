@@ -21,6 +21,7 @@ import Tasks from "@/pages/Tasks";
 import TasksSimplified from "@/pages/TasksSimplified";
 import DatabaseBackup from "@/pages/DatabaseBackup";
 import WebhookConfiguration from "@/pages/WebhookConfiguration";
+import SAV from "@/pages/SAV";
 import Layout from "@/components/Layout";
 
 function RouterProduction() {
@@ -63,6 +64,7 @@ function RouterProduction() {
           <Route path="/customer-orders" component={CustomerOrders} />
           <Route path="/dlc" component={DlcPage} />
           <Route path="/tasks" component={Tasks} />
+          <Route path="/sav" component={SAV} />
           <Route path="/database-backup" component={DatabaseBackup} />
           <Route path="/webhook-configuration" component={WebhookConfiguration} />
           <Route path="/nocodb-config" component={NocoDBConfig} />

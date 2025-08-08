@@ -64,6 +64,14 @@ import {
   type DashboardMessage,
   type InsertDashboardMessage,
   type DashboardMessageWithRelations,
+  savTickets,
+  savTicketHistory,
+  type SavTicket,
+  type InsertSavTicket,
+  type SavTicketHistory,
+  type InsertSavTicketHistory,
+  type SavTicketWithRelations,
+  type SavTicketHistoryWithRelations,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, inArray, desc, sql, gte, lte } from "drizzle-orm";
@@ -222,6 +230,17 @@ export interface IStorage {
   getDashboardMessage(id: number): Promise<DashboardMessageWithRelations | undefined>;
   createDashboardMessage(message: InsertDashboardMessage): Promise<DashboardMessage>;
   deleteDashboardMessage(id: number): Promise<void>;
+
+  // SAV Ticket operations
+  getSavTickets(groupIds?: number[]): Promise<SavTicketWithRelations[]>;
+  getSavTicket(id: number): Promise<SavTicketWithRelations | undefined>;
+  createSavTicket(ticket: InsertSavTicket): Promise<SavTicket>;
+  updateSavTicket(id: number, ticket: Partial<InsertSavTicket>): Promise<SavTicket>;
+  deleteSavTicket(id: number): Promise<void>;
+
+  // SAV Ticket History operations
+  getSavTicketHistory(ticketId: number): Promise<SavTicketHistoryWithRelations[]>;
+  createSavTicketHistory(history: InsertSavTicketHistory): Promise<SavTicketHistory>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2016,6 +2035,189 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDashboardMessage(id: number): Promise<void> {
     await db.delete(dashboardMessages).where(eq(dashboardMessages.id, id));
+  }
+
+  // ===== SAV TICKET OPERATIONS =====
+
+  async getSavTickets(groupIds?: number[]): Promise<SavTicketWithRelations[]> {
+    let query = db.query.savTickets.findMany({
+      with: {
+        supplier: true,
+        group: true,
+        creator: true,
+        history: {
+          with: {
+            creator: true,
+          },
+          orderBy: [desc(savTicketHistory.createdAt)],
+        },
+      },
+      orderBy: [desc(savTickets.createdAt)],
+    });
+
+    let tickets = await query;
+
+    // Filter by groupIds if provided
+    if (groupIds && groupIds.length > 0) {
+      tickets = tickets.filter(ticket => groupIds.includes(ticket.groupId));
+    }
+
+    return tickets;
+  }
+
+  async getSavTicket(id: number): Promise<SavTicketWithRelations | undefined> {
+    return await db.query.savTickets.findFirst({
+      where: eq(savTickets.id, id),
+      with: {
+        supplier: true,
+        group: true,
+        creator: true,
+        history: {
+          with: {
+            creator: true,
+          },
+          orderBy: [desc(savTicketHistory.createdAt)],
+        },
+      },
+    });
+  }
+
+  async createSavTicket(ticket: InsertSavTicket): Promise<SavTicket> {
+    // Generate ticket number
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    
+    // Get today's ticket count for sequential numbering
+    const startOfDay = new Date(year, currentDate.getMonth(), currentDate.getDate());
+    const endOfDay = new Date(year, currentDate.getMonth(), currentDate.getDate() + 1);
+    
+    const todayTicketsCount = await db
+      .select({ count: sql`count(*)` })
+      .from(savTickets)
+      .where(
+        and(
+          gte(savTickets.createdAt, startOfDay),
+          lte(savTickets.createdAt, endOfDay),
+          eq(savTickets.groupId, ticket.groupId)
+        )
+      );
+    
+    const sequentialNumber = String(Number(todayTicketsCount[0]?.count || 0) + 1).padStart(3, '0');
+    const ticketNumber = `SAV${year}${month}${day}-${sequentialNumber}`;
+
+    const now = new Date();
+    const [newTicket] = await db
+      .insert(savTickets)
+      .values({
+        ...ticket,
+        ticketNumber,
+        status: ticket.status || 'nouveau',
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+
+    // Create initial history entry
+    await this.createSavTicketHistory({
+      ticketId: newTicket.id,
+      action: 'created',
+      description: 'Ticket créé',
+      createdBy: ticket.createdBy,
+    });
+
+    return newTicket;
+  }
+
+  async updateSavTicket(id: number, updates: Partial<InsertSavTicket>): Promise<SavTicket> {
+    const currentTicket = await this.getSavTicket(id);
+    if (!currentTicket) {
+      throw new Error(`Ticket SAV ${id} not found`);
+    }
+
+    const now = new Date();
+    const statusChanged = updates.status && updates.status !== currentTicket.status;
+
+    // Handle status changes with timestamps
+    const updateData: any = {
+      ...updates,
+      updatedAt: now,
+    };
+
+    if (statusChanged) {
+      switch (updates.status) {
+        case 'resolu':
+          updateData.resolvedAt = now;
+          break;
+        case 'ferme':
+          updateData.closedAt = now;
+          break;
+      }
+    }
+
+    const [updatedTicket] = await db
+      .update(savTickets)
+      .set(updateData)
+      .where(eq(savTickets.id, id))
+      .returning();
+
+    // Create history entry for significant changes
+    if (statusChanged || updates.resolutionDescription) {
+      let description = '';
+      if (statusChanged) {
+        const statusLabels = {
+          nouveau: 'Nouveau',
+          en_cours: 'En cours',
+          resolu: 'Résolu',
+          ferme: 'Fermé',
+        };
+        description = `Statut changé vers: ${statusLabels[updates.status as keyof typeof statusLabels] || updates.status}`;
+      }
+      if (updates.resolutionDescription) {
+        description += (description ? ' - ' : '') + 'Résolution mise à jour';
+      }
+
+      await this.createSavTicketHistory({
+        ticketId: id,
+        action: statusChanged ? 'status_changed' : 'updated',
+        description,
+        createdBy: updates.createdBy || currentTicket.createdBy,
+      });
+    }
+
+    return updatedTicket;
+  }
+
+  async deleteSavTicket(id: number): Promise<void> {
+    // Delete associated history first
+    await db.delete(savTicketHistory).where(eq(savTicketHistory.ticketId, id));
+    // Delete the ticket
+    await db.delete(savTickets).where(eq(savTickets.id, id));
+  }
+
+  // ===== SAV TICKET HISTORY OPERATIONS =====
+
+  async getSavTicketHistory(ticketId: number): Promise<SavTicketHistoryWithRelations[]> {
+    return await db.query.savTicketHistory.findMany({
+      where: eq(savTicketHistory.ticketId, ticketId),
+      with: {
+        ticket: true,
+        creator: true,
+      },
+      orderBy: [desc(savTicketHistory.createdAt)],
+    });
+  }
+
+  async createSavTicketHistory(history: InsertSavTicketHistory): Promise<SavTicketHistory> {
+    const [newHistory] = await db
+      .insert(savTicketHistory)
+      .values({
+        ...history,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newHistory;
   }
 }
 

@@ -3134,6 +3134,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== SAV TICKET ROUTES =====
+
+  app.get('/api/sav-tickets', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUserWithGroups(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Get user's group IDs
+      const groupIds = user.userGroups.map(ug => ug.groupId);
+      
+      const tickets = await storage.getSavTickets(groupIds);
+      res.json(tickets);
+    } catch (error) {
+      console.error("Error fetching SAV tickets:", error);
+      res.status(500).json({ message: "Failed to fetch SAV tickets" });
+    }
+  });
+
+  app.get('/api/sav-tickets/:id', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUserWithGroups(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      const ticketId = parseInt(req.params.id);
+      const ticket = await storage.getSavTicket(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket SAV non trouvé" });
+      }
+
+      // Check if user has access to this ticket's group
+      const groupIds = user.userGroups.map(ug => ug.groupId);
+      if (!groupIds.includes(ticket.groupId)) {
+        return res.status(403).json({ message: "Accès refusé à ce ticket" });
+      }
+
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error fetching SAV ticket:", error);
+      res.status(500).json({ message: "Failed to fetch SAV ticket" });
+    }
+  });
+
+  app.post('/api/sav-tickets', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUserWithGroups(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      // Parse the JSON body
+      let ticketData;
+      if (typeof req.body === 'string') {
+        ticketData = JSON.parse(req.body);
+      } else {
+        ticketData = req.body;
+      }
+
+      // Validate required fields
+      const { 
+        supplierId, 
+        productGencode, 
+        productDesignation, 
+        problemType, 
+        problemDescription,
+        groupId
+      } = ticketData;
+
+      if (!supplierId || !productGencode || !productDesignation || !problemType || !problemDescription || !groupId) {
+        return res.status(400).json({ 
+          message: "Champs obligatoires manquants: supplierId, productGencode, productDesignation, problemType, problemDescription, groupId" 
+        });
+      }
+
+      // Check if user has access to this group
+      const groupIds = user.userGroups.map(ug => ug.groupId);
+      if (!groupIds.includes(groupId)) {
+        return res.status(403).json({ message: "Accès refusé à ce magasin" });
+      }
+
+      // Set the creator
+      const ticketToCreate = {
+        ...ticketData,
+        createdBy: req.user.claims ? req.user.claims.sub : req.user.id,
+      };
+
+      const newTicket = await storage.createSavTicket(ticketToCreate);
+      res.status(201).json(newTicket);
+    } catch (error) {
+      console.error("Error creating SAV ticket:", error);
+      res.status(500).json({ message: "Failed to create SAV ticket" });
+    }
+  });
+
+  app.patch('/api/sav-tickets/:id', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUserWithGroups(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      const ticketId = parseInt(req.params.id);
+      const existingTicket = await storage.getSavTicket(ticketId);
+      
+      if (!existingTicket) {
+        return res.status(404).json({ message: "Ticket SAV non trouvé" });
+      }
+
+      // Check if user has access to this ticket's group
+      const groupIds = user.userGroups.map(ug => ug.groupId);
+      if (!groupIds.includes(existingTicket.groupId)) {
+        return res.status(403).json({ message: "Accès refusé à ce ticket" });
+      }
+
+      // Parse the JSON body
+      let updates;
+      if (typeof req.body === 'string') {
+        updates = JSON.parse(req.body);
+      } else {
+        updates = req.body;
+      }
+
+      // Add the updater info
+      updates.createdBy = req.user.claims ? req.user.claims.sub : req.user.id;
+
+      const updatedTicket = await storage.updateSavTicket(ticketId, updates);
+      res.json(updatedTicket);
+    } catch (error) {
+      console.error("Error updating SAV ticket:", error);
+      res.status(500).json({ message: "Failed to update SAV ticket" });
+    }
+  });
+
+  app.delete('/api/sav-tickets/:id', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUserWithGroups(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      const ticketId = parseInt(req.params.id);
+      const existingTicket = await storage.getSavTicket(ticketId);
+      
+      if (!existingTicket) {
+        return res.status(404).json({ message: "Ticket SAV non trouvé" });
+      }
+
+      // Check if user has access to this ticket's group
+      const groupIds = user.userGroups.map(ug => ug.groupId);
+      if (!groupIds.includes(existingTicket.groupId)) {
+        return res.status(403).json({ message: "Accès refusé à ce ticket" });
+      }
+
+      // Check if user has delete permission (only admin and directeur)
+      const userRole = user.role || 'employee';
+      if (!['admin', 'directeur'].includes(userRole)) {
+        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent supprimer les tickets SAV" });
+      }
+
+      await storage.deleteSavTicket(ticketId);
+      res.json({ success: true, message: "Ticket SAV supprimé avec succès" });
+    } catch (error) {
+      console.error("Error deleting SAV ticket:", error);
+      res.status(500).json({ message: "Failed to delete SAV ticket" });
+    }
+  });
+
+  app.get('/api/sav-tickets/:id/history', requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUserWithGroups(req.user.claims ? req.user.claims.sub : req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      const ticketId = parseInt(req.params.id);
+      const ticket = await storage.getSavTicket(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket SAV non trouvé" });
+      }
+
+      // Check if user has access to this ticket's group
+      const groupIds = user.userGroups.map(ug => ug.groupId);
+      if (!groupIds.includes(ticket.groupId)) {
+        return res.status(403).json({ message: "Accès refusé à ce ticket" });
+      }
+
+      const history = await storage.getSavTicketHistory(ticketId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching SAV ticket history:", error);
+      res.status(500).json({ message: "Failed to fetch SAV ticket history" });
+    }
+  });
+
   // ===== DATABASE BACKUP ROUTES =====
   
   // Initialiser le service de sauvegarde

@@ -22,7 +22,8 @@ import {
   Menu,
   ChevronLeft,
   Search,
-  Globe
+  Globe,
+  Wrench
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -125,6 +126,12 @@ export default function Sidebar() {
       label: "Tâches", 
       icon: ListTodo, 
       permission: "tasks_read" 
+    },
+    { 
+      path: "/sav", 
+      label: "SAV", 
+      icon: Wrench, 
+      permission: "sav_read" 
     },
   ];
 

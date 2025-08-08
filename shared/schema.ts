@@ -328,6 +328,45 @@ export const invoiceVerifications = pgTable("invoice_verifications", {
   invoiceRefIdx: index("invoice_verifications_invoice_ref_idx").on(table.invoiceReference, table.groupId),
 }));
 
+// SAV Tickets
+export const savTickets = pgTable("sav_tickets", {
+  id: serial("id").primaryKey(),
+  ticketNumber: varchar("ticket_number").notNull().unique(), // Numéro de référence auto-généré
+  supplierId: integer("supplier_id").notNull(), // Fournisseur lié
+  groupId: integer("group_id").notNull(), // Magasin/groupe
+  
+  // Informations produit
+  productGencode: varchar("product_gencode").notNull(), // Code à barres
+  productReference: varchar("product_reference"), // Référence produit (optionnel)
+  productDesignation: text("product_designation").notNull(), // Désignation du produit
+  
+  // Informations du problème
+  problemType: varchar("problem_type").notNull(), // Type de problème (défaut_produit, erreur_livraison, produit_manquant, etc.)
+  problemDescription: text("problem_description").notNull(), // Description du problème
+  resolutionDescription: text("resolution_description"), // Description de la résolution
+  
+  // Statut et métadonnées
+  status: varchar("status").notNull().default("nouveau"), // nouveau, en_cours, resolu, ferme
+  createdBy: varchar("created_by").notNull(), // Utilisateur créateur
+  resolvedAt: timestamp("resolved_at"), // Date de résolution
+  closedAt: timestamp("closed_at"), // Date de fermeture
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SAV Ticket History (Historique des actions sur les tickets)
+export const savTicketHistory = pgTable("sav_ticket_history", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull(), // Référence vers le ticket
+  action: varchar("action").notNull(), // creation, status_change, comment, resolution, closure
+  oldValue: text("old_value"), // Ancienne valeur (pour les changements)
+  newValue: text("new_value"), // Nouvelle valeur (pour les changements)
+  comment: text("comment"), // Commentaire libre
+  createdBy: varchar("created_by").notNull(), // Utilisateur qui a fait l'action
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ===== CACHE SYSTEM REMOVED =====
 // Complex cache table removed for simplified architecture
 
@@ -344,6 +383,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   assignedTasks: many(tasks),
   createdBackups: many(databaseBackups),
   createdMessages: many(dashboardMessages),
+  createdSavTickets: many(savTickets),
+  savTicketHistories: many(savTicketHistory),
 }));
 
 export const groupsRelations = relations(groups, ({ one, many }) => ({
@@ -355,6 +396,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   dlcProducts: many(dlcProducts),
   tasks: many(tasks),
   messages: many(dashboardMessages),
+  savTickets: many(savTickets),
   nocodbConfig: one(nocodbConfig, {
     fields: [groups.nocodbConfigId],
     references: [nocodbConfig.id],
@@ -376,6 +418,7 @@ export const suppliersRelations = relations(suppliers, ({ many }) => ({
   orders: many(orders),
   deliveries: many(deliveries),
   dlcProducts: many(dlcProducts),
+  savTickets: many(savTickets),
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
@@ -535,6 +578,33 @@ export const dashboardMessagesRelations = relations(dashboardMessages, ({ one })
   }),
 }));
 
+export const savTicketsRelations = relations(savTickets, ({ one, many }) => ({
+  supplier: one(suppliers, {
+    fields: [savTickets.supplierId],
+    references: [suppliers.id],
+  }),
+  group: one(groups, {
+    fields: [savTickets.groupId],
+    references: [groups.id],
+  }),
+  creator: one(users, {
+    fields: [savTickets.createdBy],
+    references: [users.id],
+  }),
+  history: many(savTicketHistory),
+}));
+
+export const savTicketHistoryRelations = relations(savTicketHistory, ({ one }) => ({
+  ticket: one(savTickets, {
+    fields: [savTicketHistory.ticketId],
+    references: [savTickets.id],
+  }),
+  creator: one(users, {
+    fields: [savTicketHistory.createdBy],
+    references: [users.id],
+  }),
+}));
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   id: true,
@@ -657,6 +727,20 @@ export const insertDashboardMessageSchema = createInsertSchema(dashboardMessages
   id: true,
   createdAt: true,
   createdBy: true, // Backend will set this automatically
+});
+
+export const insertSavTicketSchema = createInsertSchema(savTickets).omit({
+  id: true,
+  ticketNumber: true, // Auto-generated
+  createdAt: true,
+  updatedAt: true,
+  resolvedAt: true,
+  closedAt: true,
+});
+
+export const insertSavTicketHistorySchema = createInsertSchema(savTicketHistory).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Cache schema removed with table
@@ -788,4 +872,23 @@ export type DlcProductWithRelations = DlcProductFrontend & {
   group: Group;
   creator: User;
   validator?: User | null;
+};
+
+// SAV Types
+export type SavTicket = typeof savTickets.$inferSelect;
+export type InsertSavTicket = z.infer<typeof insertSavTicketSchema>;
+
+export type SavTicketHistory = typeof savTicketHistory.$inferSelect;
+export type InsertSavTicketHistory = z.infer<typeof insertSavTicketHistorySchema>;
+
+export type SavTicketWithRelations = SavTicket & {
+  supplier: Supplier;
+  group: Group;
+  creator: User;
+  history?: SavTicketHistory[];
+};
+
+export type SavTicketHistoryWithRelations = SavTicketHistory & {
+  ticket: SavTicket;
+  creator: User;
 };
