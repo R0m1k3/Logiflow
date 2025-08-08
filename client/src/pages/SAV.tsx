@@ -88,14 +88,25 @@ export default function SAV() {
   const canUpdate = checkSavPermission(userRole, 'update');
   const canDelete = checkSavPermission(userRole, 'delete');
 
+  // Build query URL with store filter like Orders module
+  const queryUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (selectedStoreId && selectedStoreId !== 'all' && user?.role === 'admin') {
+      params.append('storeId', selectedStoreId);
+    }
+    return `/api/sav-tickets${params.toString() ? `?${params.toString()}` : ''}`;
+  }, [selectedStoreId, user?.role]);
+
   // Récupération des données
   const { data: savTickets = [], isLoading: ticketsLoading } = useQuery<SavTicketWithRelations[]>({
     queryKey: ['/api/sav-tickets', selectedStoreId],
+    queryFn: () => apiRequest(queryUrl),
     enabled: !!user,
   });
 
   const { data: suppliers = [] } = useQuery<Supplier[]>({
     queryKey: ['/api/suppliers'],
+    queryFn: () => apiRequest('/api/suppliers'),
     enabled: !!user,
   });
 

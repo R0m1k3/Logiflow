@@ -3865,7 +3865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ferme: 0
         };
 
-        return res.json({ tickets: mockTickets, stats });
+        return res.json(mockTickets);
       }
 
       const user = await storage.getUserWithGroups(userId);
@@ -3909,7 +3909,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ferme: tickets.filter(t => t.status === 'ferme').length
       };
 
-      res.json({ tickets, stats });
+      // Ensure tickets is always an array
+      const safeTickets = Array.isArray(tickets) ? tickets : [];
+      res.json(safeTickets);
     } catch (error) {
       console.error("Error fetching SAV tickets:", error);
       res.status(500).json({ message: "Failed to fetch SAV tickets" });
