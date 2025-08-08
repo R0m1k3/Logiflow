@@ -290,7 +290,7 @@ export default function CalendarGrid({
                             const colorClass = order.status === 'delivered' 
                               ? 'bg-delivered text-white' 
                               : order.status === 'planned'
-                              ? 'bg-orange-500 text-white border-2 border-orange-300'
+                              ? 'bg-yellow-200 text-yellow-800 border-2 border-yellow-300'
                               : 'bg-primary text-white';
                             
                             return (
@@ -338,7 +338,7 @@ export default function CalendarGrid({
                               </span>
                               <div className="flex items-center ml-1 flex-shrink-0">
                                 {delivery.status === 'pending' && (
-                                  <span className="w-2 h-2 bg-orange-300 mr-1" title="En attente de validation" />
+                                  <span className="w-2 h-2 bg-yellow-400 mr-1" title="En attente de validation" />
                                 )}
                                 {delivery.status === 'delivered' && (
                                   <Check className="w-3 h-3" />
@@ -372,7 +372,7 @@ export default function CalendarGrid({
                           const colorClass = order.status === 'delivered' 
                             ? 'bg-delivered text-white' 
                             : order.status === 'planned'
-                            ? 'bg-orange-500 text-white border-2 border-orange-300'
+                            ? 'bg-yellow-200 text-yellow-800 border-2 border-yellow-300'
                             : 'bg-primary text-white';
                           
                           return (
@@ -438,7 +438,7 @@ export default function CalendarGrid({
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
                     size="sm"
-                    className="w-6 h-6 bg-accent text-white rounded-full p-0 hover:bg-orange-600"
+                    className="w-6 h-6 bg-accent text-white rounded-full p-0 hover:bg-yellow-400"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDateClick(date);
