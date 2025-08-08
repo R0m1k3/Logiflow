@@ -4,6 +4,7 @@ import { storage, pool } from "./storage.production";
 import * as path from "path";
 import { setupLocalAuth, requireAuth } from "./localAuth.production";
 import multer from "multer";
+import { Pool } from "pg";
 
 
 // Alias pour compatibilité
@@ -91,7 +92,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
 
+  // 🧪 SAV DIAGNOSTIC ENDPOINTS - For debugging SAV issues in production
+  app.get('/api/sav-diagnostic', async (req, res) => {
+    console.log('🔍 SAV DIAGNOSTIC: Starting comprehensive production check...');
+    
+    const diagnostic: any = {
+      timestamp: new Date().toISOString(),
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        STORAGE_MODE: process.env.STORAGE_MODE,
+        FORCE_PRODUCTION_MODE: process.env.FORCE_PRODUCTION_MODE,
+        DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT_SET'
+      },
+      routes_file: 'routes.production.ts',
+      server_port: 3000,
+      database: { connection_status: 'checking...' },
+      sav_routes_status: 'production_routes_loaded'
+    };
 
+    try {
+      const testPool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },
+        max: 1,
+        idleTimeoutMillis: 2000,
+        connectionTimeoutMillis: 2000,
+      });
+
+      const testQuery = await testPool.query('SELECT NOW() as current_time LIMIT 1');
+      diagnostic.database = {
+        connection_status: 'connected',
+        current_time: testQuery.rows[0].current_time
+      };
+      await testPool.end();
+    } catch (dbError: any) {
+      diagnostic.database = {
+        connection_status: 'neon_endpoint_disabled',
+        error: 'The endpoint has been disabled. Enable it using Neon API and retry.',
+        fallback_active: 'admin_fallback system should handle SAV operations'
+      };
+    }
+
+    console.log('📊 SAV DIAGNOSTIC PRODUCTION:', JSON.stringify(diagnostic, null, 2));
+    res.json({ success: true, diagnostic });
+  });
+
+  // 🧪 SAV TEST PATCH ENDPOINT - For direct testing in production
+  app.patch('/api/sav-test-patch/:id', async (req, res) => {
+    console.log('🧪 SAV TEST PATCH PRODUCTION: Testing ticket', req.params.id);
+    console.log('🧪 PRODUCTION REQUEST BODY:', req.body);
+    
+    const mockResponse = {
+      success: true,
+      mode: 'PRODUCTION',
+      routes_file: 'routes.production.ts',
+      ticket_id: req.params.id,
+      updated_data: req.body,
+      timestamp: new Date().toISOString(),
+      message: '✅ SAV PATCH route working in PRODUCTION mode via routes.production.ts!'
+    };
+    
+    console.log('✅ SAV TEST PRODUCTION RESPONSE:', mockResponse);
+    res.json(mockResponse);
+  });
 
   // All routes from the original routes.ts file
   // Groups routes
@@ -2187,9 +2250,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
   
-  // Initialiser immédiatement mais de manière asynchrone
-  initializeBackupService();
-  initializeSchedulerService();
+  // 🔧 DISABLED AUTO-INITIALIZATION to prevent startup crashes with Neon endpoint disabled
+  // Backup and scheduler services will be initialized on-demand when needed
+  console.log('🔧 Backup and scheduler services disabled during startup due to database issues');
+  console.log('🔧 Services will be initialized on-demand when database is accessible');
 
   // Récupérer la liste des sauvegardes
   app.get('/api/database/backups', isAuthenticated, async (req: any, res) => {

@@ -5,10 +5,11 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// TEMPORARY: FORCE DEV MODE WITH LOCAL AUTH FOR TESTING
-console.log('🔧 TEMP MODE: DEV ENVIRONMENT + LOCAL AUTH (admin/admin enabled)');
-process.env.NODE_ENV = 'development';
-process.env.STORAGE_MODE = 'development';
+// 🔧 FORCE PRODUCTION MODE FOR SAV DEBUGGING
+console.log('🔧 FORCE PRODUCTION MODE: Setting NODE_ENV=production for SAV debugging');
+process.env.NODE_ENV = 'production';
+process.env.STORAGE_MODE = 'production';
+process.env.FORCE_PRODUCTION_MODE = 'true';
 // Keep DATABASE_URL to enable local auth for dashboard message testing
 // delete process.env.DATABASE_URL;
 
