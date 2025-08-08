@@ -3755,7 +3755,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
-
+      // Handle temporary admin user during database unavailability
+      if (userId === 'temp_admin') {
+        console.log('🔄 SAV: Temporary admin user accessing SAV tickets');
+        const mockTickets = [{
+          id: 1,
+          ticketNumber: 'SAV20250808-001',
+          supplierId: 1,
+          groupId: 4,
+          productGencode: '1234567890123',
+          productReference: 'REF-001',
+          productDesignation: 'Produit de test',
+          problemType: 'defaut_produit',
+          problemDescription: 'Accès temporaire pendant indisponibilité base',
+          status: 'nouveau',
+          createdBy: 'temp_admin',
+          createdAt: new Date(),
+          supplier: { id: 1, name: 'Fournisseur Test' },
+          group: { id: 4, name: 'Store Test' },
+          creator: { id: 'temp_admin', username: 'admin', name: 'Admin Temporaire' }
+        }];
+        return res.json(mockTickets);
+      }
 
       const user = await storage.getUserWithGroups(userId);
       
