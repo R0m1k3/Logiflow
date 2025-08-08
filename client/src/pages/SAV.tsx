@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Plus, Search, Eye, Edit, Trash2, User, Package, Calendar, AlertTriangle } from "lucide-react";
+import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { SavTicketWithRelations, Supplier, InsertSavTicket } from "@shared/schema";
@@ -210,9 +211,20 @@ export default function SAV() {
     setIsEditDialogOpen(true);
   };
 
+  // États pour les modals
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<SavTicketWithRelations | null>(null);
+
   const handleDelete = (ticket: SavTicketWithRelations) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le ticket ${ticket.ticketNumber} ?`)) {
-      deleteTicketMutation.mutate(ticket.id);
+    setTicketToDelete(ticket);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTicket = () => {
+    if (ticketToDelete) {
+      deleteTicketMutation.mutate(ticketToDelete.id);
+      setShowDeleteModal(false);
+      setTicketToDelete(null);
     }
   };
 
@@ -233,18 +245,18 @@ export default function SAV() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* En-tête et statistiques */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      {/* En-tête avec titre et bouton d'action */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Service Après-Vente</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Service Après-Vente</h1>
           <p className="text-gray-600 mt-1">Gestion des tickets SAV et suivi des résolutions</p>
         </div>
         {canCreate && (
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
+              <Button className="w-fit">
+                <Plus className="h-4 w-4 mr-2" />
                 Nouveau Ticket
               </Button>
             </DialogTrigger>
@@ -264,81 +276,84 @@ export default function SAV() {
         )}
       </div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+      {/* Statistiques dans une seule carte */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium">Statistiques SAV</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50">
+              <div className="p-2 bg-blue-100 rounded-full">
+                <Package className="h-5 w-5 text-blue-600" />
               </div>
-              <Package className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Nouveau</p>
+                <p className="text-sm font-medium text-gray-900">Total</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50">
+              <div className="p-2 bg-blue-100 rounded-full">
+                <AlertTriangle className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Nouveau</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.nouveau}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-blue-600" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-yellow-50">
+              <div className="p-2 bg-yellow-100 rounded-full">
+                <Calendar className="h-5 w-5 text-yellow-600" />
+              </div>
               <div>
-                <p className="text-sm text-gray-600">En cours</p>
+                <p className="text-sm font-medium text-gray-900">En cours</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.en_cours}</p>
               </div>
-              <Calendar className="h-8 w-8 text-yellow-600" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-green-50">
+              <div className="p-2 bg-green-100 rounded-full">
+                <Package className="h-5 w-5 text-green-600" />
+              </div>
               <div>
-                <p className="text-sm text-gray-600">Résolu</p>
+                <p className="text-sm font-medium text-gray-900">Résolu</p>
                 <p className="text-2xl font-bold text-green-600">{stats.resolu}</p>
               </div>
-              <Package className="h-8 w-8 text-green-600" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
+              <div className="p-2 bg-gray-100 rounded-full">
+                <Package className="h-5 w-5 text-gray-600" />
+              </div>
               <div>
-                <p className="text-sm text-gray-600">Fermé</p>
+                <p className="text-sm font-medium text-gray-900">Fermé</p>
                 <p className="text-2xl font-bold text-gray-600">{stats.ferme}</p>
               </div>
-              <Package className="h-8 w-8 text-gray-600" />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filtres et recherche */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            Recherche et filtres
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative md:col-span-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Rechercher par numéro, produit, code-barres ou fournisseur..."
+                placeholder="Rechercher un ticket..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Statut" />
+              <SelectTrigger>
+                <SelectValue placeholder="Tous les statuts" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
@@ -349,8 +364,8 @@ export default function SAV() {
               </SelectContent>
             </Select>
             <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Fournisseur" />
+              <SelectTrigger>
+                <SelectValue placeholder="Tous les fournisseurs" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les fournisseurs</SelectItem>
@@ -366,97 +381,122 @@ export default function SAV() {
       </Card>
 
       {/* Liste des tickets */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Tickets SAV ({filteredTickets.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {filteredTickets.length === 0 ? (
-            <div className="text-center py-8">
-              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Aucun ticket SAV trouvé</p>
-              {canCreate && (
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => setIsCreateDialogOpen(true)}
-                >
-                  Créer le premier ticket
-                </Button>
-              )}
+      <div className="bg-white rounded-lg border">
+        {ticketsLoading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement des tickets SAV...</p>
+          </div>
+        ) : filteredTickets.length === 0 ? (
+          <div className="p-8 text-center">
+            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun ticket SAV</h3>
+            <p className="text-gray-600 mb-4">
+              {searchTerm || statusFilter !== 'all' || supplierFilter !== 'all'
+                ? "Aucun ticket ne correspond aux critères de recherche"
+                : "Commencez par créer votre premier ticket SAV"}
+            </p>
+            {canCreate && !searchTerm && statusFilter === 'all' && supplierFilter === 'all' && (
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Créer le premier ticket
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Tickets SAV ({filteredTickets.length})
+              </h2>
             </div>
-          ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>N° Ticket</TableHead>
-                    <TableHead>Fournisseur</TableHead>
-                    <TableHead>Produit</TableHead>
-                    <TableHead>Problème</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Créé par</TableHead>
-                    <TableHead>Date création</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      N° Ticket
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fournisseur
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Produit
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Problème
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Créé par
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date création
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredTickets.map((ticket) => (
-                    <TableRow key={ticket.id}>
-                      <TableCell className="font-mono font-medium">
-                        {ticket.ticketNumber}
-                      </TableCell>
-                      <TableCell>{ticket.supplier.name}</TableCell>
-                      <TableCell>
+                    <tr key={ticket.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="font-mono text-sm font-medium text-gray-900">
+                          {ticket.ticketNumber}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {ticket.supplier.name}
+                      </td>
+                      <td className="px-6 py-4">
                         <div>
-                          <div className="font-medium">{ticket.productDesignation}</div>
+                          <div className="text-sm font-medium text-gray-900">{ticket.productDesignation}</div>
                           <div className="text-sm text-gray-500">
                             {ticket.productGencode}
                             {ticket.productReference && ` • ${ticket.productReference}`}
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {PROBLEM_TYPES.find(pt => pt.value === ticket.problemType)?.label || ticket.problemType}
-                        </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {PROBLEM_TYPES.find(pt => pt.value === ticket.problemType)?.label || ticket.problemType}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <Badge className={STATUS_COLORS[ticket.status as keyof typeof STATUS_COLORS]}>
                           {STATUS_LABELS[ticket.status as keyof typeof STATUS_LABELS]}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 text-gray-400 mr-2" />
+                          <span className="text-sm text-gray-900">
                             {ticket.creator.username || ticket.creator.name || ticket.createdBy}
                           </span>
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {ticket.createdAt ? format(new Date(ticket.createdAt), "dd MMMM yyyy à HH:mm", { locale: fr }) : 'Date inconnue'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDetail(ticket)}
-                            title="Voir détails"
+                            className="text-blue-600 hover:text-blue-700"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="w-4 h-4" />
                           </Button>
                           {canUpdate && (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(ticket)}
-                              title="Modifier"
+                              className="text-gray-600 hover:text-gray-700"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="w-4 h-4" />
                             </Button>
                           )}
                           {canDelete && (
@@ -464,22 +504,21 @@ export default function SAV() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDelete(ticket)}
-                              title="Supprimer"
                               className="text-red-600 hover:text-red-700"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           )}
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
       {/* Dialog de détail */}
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
@@ -508,6 +547,20 @@ export default function SAV() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Modal de confirmation de suppression */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setTicketToDelete(null);
+        }}
+        onConfirm={confirmDeleteTicket}
+        title="Supprimer le ticket SAV"
+        description="Êtes-vous sûr de vouloir supprimer ce ticket SAV ?"
+        itemName={ticketToDelete ? `${ticketToDelete.ticketNumber} - ${ticketToDelete.productDesignation}` : undefined}
+        isLoading={deleteTicketMutation.isPending}
+      />
     </div>
   );
 }
