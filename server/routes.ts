@@ -3395,14 +3395,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const ticketId = parseInt(req.params.id);
-      const existingTicket = await storage.getSavTicket(ticketId);
       
-      if (!existingTicket) {
-        return res.status(404).json({ message: "Ticket SAV non trouvé" });
+      let existingTicket;
+      try {
+        existingTicket = await storage!.getSavTicket(ticketId);
+        if (!existingTicket) {
+          return res.status(404).json({ message: "Ticket SAV non trouvé" });
+        }
+      } catch (dbError) {
+        console.error('❌ SAV PATCH: Database error getting ticket:', dbError);
+        return res.status(500).json({ message: "Database error - unable to find ticket" });
       }
 
       // Check if user has access to this ticket's group
-      const groupIds = user.userGroups.map(ug => ug.groupId);
+      const groupIds = user.userGroups?.map((ug: any) => ug.groupId) || [];
       if (!groupIds.includes(existingTicket.groupId)) {
         return res.status(403).json({ message: "Accès refusé à ce ticket" });
       }
@@ -3418,10 +3424,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add the updater info
       updates.createdBy = userId;
 
-      const updatedTicket = await storage.updateSavTicket(ticketId, updates);
+      let updatedTicket;
+      try {
+        updatedTicket = await storage!.updateSavTicket(ticketId, updates);
+        console.log(`✅ SAV PATCH: Successfully updated ticket ${ticketId}`);
+      } catch (dbError) {
+        console.error('❌ SAV PATCH: Database error updating ticket:', dbError);
+        return res.status(500).json({ message: "Database error - unable to update ticket" });
+      }
       res.json(updatedTicket);
     } catch (error) {
-      console.error("Error updating SAV ticket:", error);
+      console.error("❌ SAV PATCH: Unexpected error:", error);
       res.status(500).json({ message: "Failed to update SAV ticket" });
     }
   });
