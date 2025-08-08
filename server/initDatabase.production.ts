@@ -28,6 +28,9 @@ export async function initDatabase() {
     // Migration spécifique pour la colonne automatic_reconciliation (seulement si nécessaire)
     await migrateSupplierAutomaticReconciliation();
     
+    // Migration spécifique pour les tables SAV (seulement si nécessaire)
+    await migrateSavTables();
+    
     // Create system user first (required for role assignments)
     await createSystemUser();
     
@@ -468,20 +471,32 @@ async function createTablesIfNotExist() {
   const createSavTicketsTable = `
     CREATE TABLE IF NOT EXISTS sav_tickets (
       id SERIAL PRIMARY KEY,
-      ticket_number VARCHAR(255) UNIQUE NOT NULL,
-      customer_name VARCHAR(255) NOT NULL,
-      customer_contact VARCHAR(255),
+      ticket_number VARCHAR(50) NOT NULL UNIQUE,
+      supplier_id INTEGER NOT NULL REFERENCES suppliers(id) ON DELETE CASCADE,
+      group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      product_gencode VARCHAR(255) NOT NULL,
       product_reference VARCHAR(255),
-      issue_description TEXT NOT NULL,
-      status VARCHAR(50) DEFAULT 'open',
-      priority VARCHAR(50) DEFAULT 'medium',
-      resolution TEXT,
-      resolved_by VARCHAR(255) REFERENCES users(id),
-      resolved_at TIMESTAMP,
-      group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
-      created_by VARCHAR(255) REFERENCES users(id),
+      product_designation VARCHAR(500) NOT NULL,
+      problem_type VARCHAR(100) NOT NULL,
+      problem_description TEXT NOT NULL,
+      resolution_description TEXT,
+      status VARCHAR(50) DEFAULT 'nouveau' NOT NULL,
+      created_by VARCHAR(255) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      resolved_at TIMESTAMP,
+      closed_at TIMESTAMP
+    );
+  `;
+
+  const createSavTicketHistoryTable = `
+    CREATE TABLE IF NOT EXISTS sav_ticket_history (
+      id SERIAL PRIMARY KEY,
+      ticket_id INTEGER NOT NULL REFERENCES sav_tickets(id) ON DELETE CASCADE,
+      action VARCHAR(100) NOT NULL,
+      description TEXT,
+      created_by VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `;
 
@@ -541,6 +556,7 @@ async function createTablesIfNotExist() {
     createDeliveryItemsTable,
     createInvoicesTable,
     createSavTicketsTable,
+    createSavTicketHistoryTable,
     createSessionsTable,
     createStoresTable
   ];
@@ -1801,4 +1817,197 @@ async function migrateSupplierAutomaticReconciliation() {
   }
 }
 
-export { pool, ensureEmployeePermissions, ensureCorrectNocodbConfig, migrateSupplierAutomaticReconciliation };
+async function migrateSavTables() {
+  try {
+    console.log('🔧 SAV TABLES MIGRATION: Starting migration process...');
+    
+    const client = await pool.connect();
+    
+    try {
+      // 1. Vérifier si la table sav_tickets existe
+      const tableExistsResult = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'sav_tickets'
+        )
+      `);
+      
+      if (tableExistsResult.rows[0].exists) {
+        // 2. Vérifier si la table a l'ancien schema (customer-focused)
+        const oldSchemaResult = await client.query(`
+          SELECT column_name 
+          FROM information_schema.columns 
+          WHERE table_name = 'sav_tickets' 
+          AND column_name IN ('customer_name', 'customer_contact', 'issue_description')
+        `);
+        
+        if (oldSchemaResult.rows.length > 0) {
+          console.log('🔄 SAV TABLES: Old schema detected, recreating with new supplier-focused schema...');
+          
+          // Supprimer les anciennes tables (avec CASCADE pour les foreign keys)
+          await client.query('DROP TABLE IF EXISTS sav_ticket_history CASCADE');
+          await client.query('DROP TABLE IF EXISTS sav_tickets CASCADE');
+          
+          console.log('✅ SAV TABLES: Old tables dropped');
+        } else {
+          // Vérifier si nous avons le nouveau schema
+          const newSchemaResult = await client.query(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'sav_tickets' 
+            AND column_name IN ('supplier_id', 'product_gencode', 'problem_type')
+          `);
+          
+          if (newSchemaResult.rows.length >= 3) {
+            console.log('✅ SAV TABLES: New schema already exists, checking history table...');
+            
+            // Vérifier si la table sav_ticket_history existe
+            const historyExistsResult = await client.query(`
+              SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'sav_ticket_history'
+              )
+            `);
+            
+            if (!historyExistsResult.rows[0].exists) {
+              console.log('🔧 SAV TABLES: Creating missing sav_ticket_history table...');
+              
+              await client.query(`
+                CREATE TABLE sav_ticket_history (
+                  id SERIAL PRIMARY KEY,
+                  ticket_id INTEGER NOT NULL REFERENCES sav_tickets(id) ON DELETE CASCADE,
+                  action VARCHAR(100) NOT NULL,
+                  description TEXT,
+                  created_by VARCHAR(255) NOT NULL,
+                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+              `);
+              
+              console.log('✅ SAV TABLES: History table created');
+            }
+            
+            // Créer les index et contraintes si manquants
+            await createSavIndexesAndConstraints(client);
+            console.log('✅ SAV TABLES: Migration completed (tables already exist with correct schema)');
+            return;
+          }
+        }
+      }
+      
+      // 3. Créer les nouvelles tables avec le bon schema
+      console.log('🔧 SAV TABLES: Creating new tables with supplier-focused schema...');
+      
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sav_tickets (
+          id SERIAL PRIMARY KEY,
+          ticket_number VARCHAR(50) NOT NULL UNIQUE,
+          supplier_id INTEGER NOT NULL REFERENCES suppliers(id) ON DELETE CASCADE,
+          group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+          product_gencode VARCHAR(255) NOT NULL,
+          product_reference VARCHAR(255),
+          product_designation VARCHAR(500) NOT NULL,
+          problem_type VARCHAR(100) NOT NULL,
+          problem_description TEXT NOT NULL,
+          resolution_description TEXT,
+          status VARCHAR(50) DEFAULT 'nouveau' NOT NULL,
+          created_by VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          resolved_at TIMESTAMP,
+          closed_at TIMESTAMP
+        )
+      `);
+      
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sav_ticket_history (
+          id SERIAL PRIMARY KEY,
+          ticket_id INTEGER NOT NULL REFERENCES sav_tickets(id) ON DELETE CASCADE,
+          action VARCHAR(100) NOT NULL,
+          description TEXT,
+          created_by VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      
+      console.log('✅ SAV TABLES: Tables created successfully');
+      
+      // 4. Créer les index et contraintes
+      await createSavIndexesAndConstraints(client);
+      
+      console.log('✅ SAV TABLES MIGRATION: Migration completed successfully');
+      
+    } finally {
+      client.release();
+    }
+    
+  } catch (error) {
+    console.error('❌ SAV TABLES MIGRATION failed:', error);
+    // Ne pas faire échouer l'initialisation pour cette migration
+  }
+}
+
+async function createSavIndexesAndConstraints(client: any) {
+  try {
+    // Créer les index pour améliorer les performances
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_tickets_group_id ON sav_tickets(group_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_tickets_supplier_id ON sav_tickets(supplier_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_tickets_status ON sav_tickets(status)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_tickets_created_at ON sav_tickets(created_at)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_tickets_ticket_number ON sav_tickets(ticket_number)
+    `);
+    
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_ticket_history_ticket_id ON sav_ticket_history(ticket_id)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_sav_ticket_history_created_at ON sav_ticket_history(created_at)
+    `);
+    
+    // Ajouter les contraintes de validation
+    await client.query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.check_constraints 
+          WHERE constraint_name = 'chk_sav_tickets_status'
+        ) THEN
+          ALTER TABLE sav_tickets 
+          ADD CONSTRAINT chk_sav_tickets_status 
+          CHECK (status IN ('nouveau', 'en_cours', 'resolu', 'ferme'));
+        END IF;
+      END $$;
+    `);
+    
+    await client.query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.check_constraints 
+          WHERE constraint_name = 'chk_sav_history_action'
+        ) THEN
+          ALTER TABLE sav_ticket_history 
+          ADD CONSTRAINT chk_sav_history_action 
+          CHECK (action IN ('created', 'updated', 'status_changed', 'resolved', 'closed'));
+        END IF;
+      END $$;
+    `);
+    
+    console.log('✅ SAV TABLES: Performance indexes and constraints created');
+    
+  } catch (error) {
+    console.error('❌ Error creating SAV indexes and constraints:', error);
+  }
+}
+
+export { pool, ensureEmployeePermissions, ensureCorrectNocodbConfig, migrateSupplierAutomaticReconciliation, migrateSavTables };
