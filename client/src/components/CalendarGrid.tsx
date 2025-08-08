@@ -287,8 +287,14 @@ export default function CalendarGrid({
                         <>
                           {/* Afficher les commandes visibles */}
                           {visibleOrders.map((order) => {
-                            const colorClass = order.status === 'delivered' 
-                              ? 'bg-delivered text-white' 
+                            // Vérifier si cette commande planifiée est liée à une livraison validée
+                            const isLinkedToDeliveredDelivery = order.status === 'planned' && 
+                              deliveries.some(delivery => 
+                                delivery.orderId === order.id && delivery.status === 'delivered'
+                              );
+                            
+                            const colorClass = order.status === 'delivered' || isLinkedToDeliveredDelivery
+                              ? 'bg-gray-400 text-gray-600 line-through' // Grisé avec barre
                               : order.status === 'planned'
                               ? 'bg-yellow-200 text-yellow-800 border-2 border-yellow-300'
                               : 'bg-primary text-white';
@@ -369,8 +375,14 @@ export default function CalendarGrid({
                     return (
                       <>
                         {dayOrders.map((order) => {
-                          const colorClass = order.status === 'delivered' 
-                            ? 'bg-delivered text-white' 
+                          // Vérifier si cette commande planifiée est liée à une livraison validée
+                          const isLinkedToDeliveredDelivery = order.status === 'planned' && 
+                            deliveries.some(delivery => 
+                              delivery.orderId === order.id && delivery.status === 'delivered'
+                            );
+                          
+                          const colorClass = order.status === 'delivered' || isLinkedToDeliveredDelivery
+                            ? 'bg-gray-400 text-gray-600 line-through' // Grisé avec barre
                             : order.status === 'planned'
                             ? 'bg-yellow-200 text-yellow-800 border-2 border-yellow-300'
                             : 'bg-primary text-white';
