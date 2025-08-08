@@ -20,7 +20,8 @@ import {
   Package,
   Truck,
   CheckCircle,
-  XCircle
+  XCircle,
+  Zap
 } from "lucide-react";
 import type { Supplier } from "@shared/schema";
 
@@ -38,6 +39,7 @@ export default function Suppliers() {
     contact: "",
     phone: "",
     hasDlc: false,
+    automaticReconciliation: false,
   });
 
   const { data: suppliers = [], isLoading } = useQuery<Supplier[]>({
@@ -69,7 +71,7 @@ export default function Suppliers() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/suppliers'] });
       setShowCreateModal(false);
-      setFormData({ name: "", contact: "", phone: "", hasDlc: false });
+      setFormData({ name: "", contact: "", phone: "", hasDlc: false, automaticReconciliation: false });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -217,7 +219,7 @@ export default function Suppliers() {
   };
 
   const handleCreate = () => {
-    setFormData({ name: "", contact: "", phone: "", hasDlc: false });
+    setFormData({ name: "", contact: "", phone: "", hasDlc: false, automaticReconciliation: false });
     setShowCreateModal(true);
   };
 
@@ -228,6 +230,7 @@ export default function Suppliers() {
       contact: supplier.contact || "",
       phone: supplier.phone || "",
       hasDlc: supplier.hasDlc || false,
+      automaticReconciliation: supplier.automaticReconciliation || false,
     });
     setShowEditModal(true);
   };
@@ -403,18 +406,33 @@ export default function Suppliers() {
                           {supplier.phone}
                         </div>
                       )}
-                      <div className="flex items-center text-sm">
-                        {supplier.hasDlc ? (
-                          <div className="flex items-center text-green-600">
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            DLC activé
-                          </div>
-                        ) : (
-                          <div className="flex items-center text-gray-400">
-                            <XCircle className="w-4 h-4 mr-2" />
-                            DLC désactivé
-                          </div>
-                        )}
+                      <div className="space-y-1">
+                        <div className="flex items-center text-sm">
+                          {supplier.hasDlc ? (
+                            <div className="flex items-center text-green-600">
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              DLC activé
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-gray-400">
+                              <XCircle className="w-4 h-4 mr-2" />
+                              DLC désactivé
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center text-sm">
+                          {supplier.automaticReconciliation ? (
+                            <div className="flex items-center text-blue-600">
+                              <Zap className="w-4 h-4 mr-2" />
+                              Rapprochement auto
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-gray-400">
+                              <XCircle className="w-4 h-4 mr-2" />
+                              Rapprochement manuel
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -456,7 +474,7 @@ export default function Suppliers() {
         setShowCreateModal(false);
         setShowEditModal(false);
         setSelectedSupplier(null);
-        setFormData({ name: "", contact: "", phone: "", hasDlc: false });
+        setFormData({ name: "", contact: "", phone: "", hasDlc: false, automaticReconciliation: false });
       }}>
         <DialogContent className="sm:max-w-md" aria-describedby="supplier-modal-description">
           <DialogHeader>
@@ -511,6 +529,17 @@ export default function Suppliers() {
               </Label>
             </div>
 
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="automaticReconciliation"
+                checked={formData.automaticReconciliation}
+                onCheckedChange={(checked) => handleChange('automaticReconciliation', checked === true)}
+              />
+              <Label htmlFor="automaticReconciliation" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Rapprochement automatique
+              </Label>
+            </div>
+
             <div className="flex items-center space-x-3 pt-4">
               <Button 
                 type="button" 
@@ -519,7 +548,7 @@ export default function Suppliers() {
                   setShowCreateModal(false);
                   setShowEditModal(false);
                   setSelectedSupplier(null);
-                  setFormData({ name: "", contact: "", phone: "", hasDlc: false });
+                  setFormData({ name: "", contact: "", phone: "", hasDlc: false, automaticReconciliation: false });
                 }}
               >
                 Annuler
