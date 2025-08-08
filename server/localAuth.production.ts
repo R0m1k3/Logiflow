@@ -3,9 +3,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import session from 'express-session';
 import { pool } from './initDatabase.production';
 import type { Express } from 'express';
-
-// Import connect-pg-simple using ES6 import
-import MemoryStore from 'memorystore';
+import connectPg from 'connect-pg-simple';
 
 interface User {
   id: string;
@@ -22,28 +20,39 @@ interface User {
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User {
+      id: string;
+      username: string;
+      email: string;
+      name: string;
+      firstName: string;
+      lastName: string;
+      profileImageUrl?: string;
+      role: string;
+      passwordChanged: boolean;
+    }
   }
 }
 
 import { hashPassword, comparePasswords } from './auth-utils.production';
 
 export function setupLocalAuth(app: Express) {
-  // Configure session with memory store (no database dependency)
-  console.log('🔧 PRODUCTION FALLBACK: Using memory store for sessions');
-  const sessionStore = MemoryStore(session);
+  // Always use memory store for sessions when database is unavailable  
+  console.log('⚠️ Database unavailable, using memory store for sessions');
+  const MemoryStore = require('memorystore')(session);
+  
   app.use(session({
-    store: new sessionStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
+    store: new MemoryStore({
+      checkPeriod: 86400000
     }),
     secret: process.env.SESSION_SECRET || 'LogiFlow_Super_Secret_Session_Key_2025_Production',
     resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      secure: false, // Set to true if using HTTPS
+      secure: false,
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax'
     }
   }));
@@ -56,28 +65,52 @@ export function setupLocalAuth(app: Express) {
     usernameField: 'username',
     passwordField: 'password'
   }, async (username, password, done) => {
-    // Simple fallback authentication when database is unavailable
-    console.log('🔐 PRODUCTION AUTH: Attempting authentication for:', username);
-    
-    // Check for default admin credentials
-    if (username === 'admin' && password === 'admin') {
-      const adminUser = {
-        id: 'admin_fallback',
-        username: 'admin',
-        email: 'admin@logiflow.fr',
-        name: 'Admin Utilisateur',
-        firstName: 'Admin',
-        lastName: 'Utilisateur',
-        role: 'admin',
-        passwordChanged: true
-      };
-      console.log('✅ PRODUCTION AUTH: Admin authenticated successfully');
-      return done(null, adminUser);
-    }
+    try {
+      // Try database authentication first
+      const result = await pool.query(
+        'SELECT * FROM users WHERE username = $1',
+        [username]
+      );
 
-    // Return authentication failure for any other credentials
-    console.log('❌ Login failed: Invalid credentials for:', username);
-    return done(null, false, { message: 'Invalid username or password.' });
+      const user = result.rows[0];
+      if (!user) {
+        console.log('❌ Login failed: User not found:', username);
+        return done(null, false, { message: 'Invalid username or password.' });
+      }
+
+      // Use comparePasswords for consistent hashing with same salt
+      const isValidPassword = await comparePasswords(password, user.password);
+      if (!isValidPassword) {
+        console.log('❌ Login failed: Invalid password for user:', username);
+        return done(null, false, { message: 'Invalid username or password.' });
+      }
+
+      console.log('✅ Login successful for user:', username, 'Role:', user.role);
+      
+      // Remove password from user object before returning
+      const { password: _, ...userWithoutPassword } = user;
+      return done(null, userWithoutPassword);
+    } catch (error) {
+      console.error('❌ Database authentication failed:', error);
+      
+      // Temporary fallback for when database is unavailable - only for admin
+      if (username === 'admin' && password === 'admin') {
+        console.log('⚠️ Using temporary admin access while database is unavailable');
+        const tempAdmin = {
+          id: 'temp_admin',
+          username: 'admin',
+          email: 'admin@logiflow.fr',
+          name: 'Admin Temporaire',
+          firstName: 'Admin',
+          lastName: 'Temporaire',
+          role: 'admin',
+          passwordChanged: false
+        };
+        return done(null, tempAdmin);
+      }
+      
+      return done(null, false, { message: 'Service temporarily unavailable' });
+    }
   }));
 
   passport.serializeUser((user: any, done) => {
@@ -86,52 +119,48 @@ export function setupLocalAuth(app: Express) {
 
   passport.deserializeUser(async (id: string, done) => {
     try {
-      // Handle fallback admin user
-      if (id === 'admin_fallback') {
-        const adminUser = {
-          id: 'admin_fallback',
+      // Handle temporary admin user
+      if (id === 'temp_admin') {
+        const tempAdmin = {
+          id: 'temp_admin',
           username: 'admin',
           email: 'admin@logiflow.fr',
-          name: 'Admin Utilisateur',
+          name: 'Admin Temporaire',
           firstName: 'Admin',
-          lastName: 'Utilisateur',
+          lastName: 'Temporaire',
           role: 'admin',
-          passwordChanged: true
+          passwordChanged: false
         };
-        return done(null, adminUser);
+        return done(null, tempAdmin);
       }
 
       // Try database user retrieval
-      try {
-        const result = await pool.query(
-          'SELECT * FROM users WHERE id = $1',
-          [id]
-        );
+      const result = await pool.query(
+        'SELECT * FROM users WHERE id = $1',
+        [id]
+      );
 
-        const user = result.rows[0];
-        if (!user) {
-          return done(null, false);
-        }
-
-        // Return user object without password
-        done(null, {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          profileImageUrl: user.profile_image_url,
-          role: user.role,
-          passwordChanged: user.password_changed
-        });
-      } catch (dbError) {
-        console.log('⚠️ Database unavailable for user deserialization:', id);
+      const user = result.rows[0];
+      if (!user) {
         return done(null, false);
       }
+
+      // Return user object without password
+      const userWithoutPassword = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        profileImageUrl: user.profile_image_url,
+        role: user.role,
+        passwordChanged: user.password_changed
+      };
+      done(null, userWithoutPassword);
     } catch (error) {
       console.error('❌ Error deserializing user:', error);
-      done(error);
+      done(null, false);
     }
   });
 
@@ -213,7 +242,8 @@ export function setupLocalAuth(app: Express) {
       res.json({ showDefault: !!showDefault });
     } catch (error) {
       console.error('Error checking default credentials:', error);
-      res.json({ showDefault: true }); // Default to showing credentials if error
+      // When database is unavailable, show default credentials
+      res.json({ showDefault: true });
     }
   });
 
