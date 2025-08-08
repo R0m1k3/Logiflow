@@ -98,7 +98,7 @@ export default function BLReconciliation() {
   const [showWebhookModal, setShowWebhookModal] = useState(false);
   const [selectedWebhookDelivery, setSelectedWebhookDelivery] = useState<any>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>("manual");
   
   // 🔧 CORRECTION CRITIQUE : Réinitialiser les vérifications quand le groupe change
   useEffect(() => {
@@ -1021,6 +1021,16 @@ export default function BLReconciliation() {
       {/* Onglets pour filtrer les types de rapprochement */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+          <TabsTrigger value="manual" className="flex items-center gap-2">
+            <Edit className="w-4 h-4" />
+            Rapprochement Manuel
+            <Badge variant="secondary" className="ml-1">
+              {Array.isArray(deliveriesWithBL) ? deliveriesWithBL.filter((d: any) => {
+                const supplier = suppliers.find(s => s.id === d.supplierId);
+                return !supplier?.automaticReconciliation;
+              }).length : 0}
+            </Badge>
+          </TabsTrigger>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Tous les rapprochements
@@ -1032,16 +1042,6 @@ export default function BLReconciliation() {
               {Array.isArray(deliveriesWithBL) ? deliveriesWithBL.filter((d: any) => {
                 const supplier = suppliers.find(s => s.id === d.supplierId);
                 return supplier?.automaticReconciliation;
-              }).length : 0}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="manual" className="flex items-center gap-2">
-            <Edit className="w-4 h-4" />
-            Rapprochement Manuel
-            <Badge variant="secondary" className="ml-1">
-              {Array.isArray(deliveriesWithBL) ? deliveriesWithBL.filter((d: any) => {
-                const supplier = suppliers.find(s => s.id === d.supplierId);
-                return !supplier?.automaticReconciliation;
               }).length : 0}
             </Badge>
           </TabsTrigger>
