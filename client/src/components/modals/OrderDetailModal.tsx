@@ -222,7 +222,7 @@ export function OrderDetailModal({
                   Date prévue
                 </label>
                 <p className="text-gray-900">
-                  {safeFormat(isDelivery ? item.scheduledDate : item.plannedDate, 'dd MMMM yyyy')}
+                  {safeFormat(isDelivery ? item.scheduledDate : item.plannedDate, 'dd MMMM yyyy') || 'Non définie'}
                 </p>
               </div>
               {/* Afficher la quantité seulement pour les livraisons */}
@@ -267,7 +267,7 @@ export function OrderDetailModal({
                   Créé par
                 </label>
                 <p className="text-gray-900">
-                  {item.creator?.firstName} {item.creator?.lastName}
+                  {item.creator?.username || item.creator?.name || item.creator?.firstName || item.creator?.lastName || item.createdBy || 'Utilisateur inconnu'}
                 </p>
               </div>
             </div>

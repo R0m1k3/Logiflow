@@ -25,6 +25,7 @@ import { format as formatDate } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 const reconciliationSchema = z.object({
@@ -97,6 +98,7 @@ export default function BLReconciliation() {
   const [showWebhookModal, setShowWebhookModal] = useState(false);
   const [selectedWebhookDelivery, setSelectedWebhookDelivery] = useState<any>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("all");
   
   // 🔧 CORRECTION CRITIQUE : Réinitialiser les vérifications quand le groupe change
   useEffect(() => {
@@ -884,7 +886,21 @@ export default function BLReconciliation() {
     reconcileMutation.mutate(delivery.id);
   };
 
+  // Filtrer par onglet et recherche
   const filteredDeliveries = Array.isArray(deliveriesWithBL) ? deliveriesWithBL.filter((delivery: any) => {
+    // Filtre par onglet
+    if (activeTab === "auto") {
+      // Montrer seulement les livraisons de fournisseurs en rapprochement automatique
+      const supplier = suppliers.find(s => s.id === delivery.supplierId);
+      if (!supplier?.automaticReconciliation) return false;
+    } else if (activeTab === "manual") {
+      // Montrer seulement les livraisons de fournisseurs en rapprochement manuel
+      const supplier = suppliers.find(s => s.id === delivery.supplierId);
+      if (supplier?.automaticReconciliation) return false;
+    }
+    // "all" montre tout
+    
+    // Filtre par recherche
     if (!searchTerm) return true;
     return (
       delivery.supplier?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -919,7 +935,7 @@ export default function BLReconciliation() {
         <div>
           <h2 className="text-2xl font-semibold text-gray-900 flex items-center">
             <FileText className="w-6 h-6 mr-3 text-blue-600" />
-            Rapprochement
+            Rapprochement BL/Factures
           </h2>
           <p className="text-gray-600 mt-1">
             Rapprochement des bons de livraison et factures
@@ -1002,10 +1018,77 @@ export default function BLReconciliation() {
         </div>
       </div>
 
+      {/* Onglets pour filtrer les types de rapprochement */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Tous les rapprochements
+          </TabsTrigger>
+          <TabsTrigger value="auto" className="flex items-center gap-2">
+            <Wand2 className="w-4 h-4" />
+            Rapprochement Auto
+            <Badge variant="secondary" className="ml-1">
+              {Array.isArray(deliveriesWithBL) ? deliveriesWithBL.filter((d: any) => {
+                const supplier = suppliers.find(s => s.id === d.supplierId);
+                return supplier?.automaticReconciliation;
+              }).length : 0}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="manual" className="flex items-center gap-2">
+            <Edit className="w-4 h-4" />
+            Rapprochement Manuel
+            <Badge variant="secondary" className="ml-1">
+              {Array.isArray(deliveriesWithBL) ? deliveriesWithBL.filter((d: any) => {
+                const supplier = suppliers.find(s => s.id === d.supplierId);
+                return !supplier?.automaticReconciliation;
+              }).length : 0}
+            </Badge>
+          </TabsTrigger>
+        </TabsList>
 
+        <TabsContent value={activeTab} className="mt-6">
+          {/* Information sur l'onglet actif */}
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              {activeTab === "auto" && (
+                <>
+                  <Wand2 className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <h3 className="font-medium text-blue-900">Fournisseurs en Rapprochement Automatique</h3>
+                    <p className="text-sm text-blue-700">
+                      Ces fournisseurs sont configurés pour validation automatique lors de la livraison.
+                      Les rapprochements se font automatiquement sans intervention manuelle.
+                    </p>
+                  </div>
+                </>
+              )}
+              {activeTab === "manual" && (
+                <>
+                  <Edit className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <h3 className="font-medium text-blue-900">Fournisseurs en Rapprochement Manuel</h3>
+                    <p className="text-sm text-blue-700">
+                      Ces fournisseurs nécessitent une validation manuelle des données BL et facture.
+                    </p>
+                  </div>
+                </>
+              )}
+              {activeTab === "all" && (
+                <>
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <h3 className="font-medium text-blue-900">Tous les Rapprochements</h3>
+                    <p className="text-sm text-blue-700">
+                      Vue d'ensemble de tous les rapprochements BL/Factures, automatiques et manuels.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
-      {/* Deliveries List */}
-      {filteredDeliveries.length === 0 ? (
+          {filteredDeliveries.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500">
           <FileText className="w-16 h-16 mb-4 text-gray-300" />
           <h3 className="text-lg font-medium mb-2">Aucun BL trouvé</h3>
@@ -1725,7 +1808,8 @@ export default function BLReconciliation() {
         </DialogContent>
       </Dialog>
 
-
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

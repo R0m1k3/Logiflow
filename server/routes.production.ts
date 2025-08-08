@@ -32,6 +32,49 @@ import { invoiceVerificationService } from "./services/invoiceVerificationServic
 import { setupSimpleVerify } from "./routes.simple-verify.js";
 import { setupWebhookTest } from "./routes.webhook-test.js";
 
+// Fonction pour valider automatiquement les rapprochements existants d'un fournisseur
+async function validateExistingReconciliations(supplierId: number) {
+  try {
+    console.log('🤖 Début de la validation automatique des rapprochements existants pour le fournisseur:', supplierId);
+    
+    // Récupérer toutes les livraisons de ce fournisseur qui sont livrées mais pas encore rapprochées
+    const deliveries = await storage.getDeliveries();
+    const supplierDeliveries = deliveries.filter(delivery => 
+      delivery.supplierId === supplierId && 
+      delivery.status === 'delivered' && 
+      delivery.blNumber && 
+      delivery.blAmount && 
+      !delivery.reconciled
+    );
+    
+    console.log(`🔍 Trouvé ${supplierDeliveries.length} livraisons non rapprochées pour le fournisseur ${supplierId}`);
+    
+    let validatedCount = 0;
+    
+    for (const delivery of supplierDeliveries) {
+      try {
+        // Marquer cette livraison comme rapprochée automatiquement
+        await pool.query(`
+          UPDATE deliveries 
+          SET reconciled = true, updated_at = CURRENT_TIMESTAMP 
+          WHERE id = $1
+        `, [delivery.id]);
+        
+        validatedCount++;
+        console.log(`✅ Livraison ${delivery.id} marquée comme rapprochée automatiquement`);
+      } catch (error) {
+        console.error(`❌ Erreur lors de la validation de la livraison ${delivery.id}:`, error);
+      }
+    }
+    
+    console.log(`🎯 Validation automatique terminée: ${validatedCount}/${supplierDeliveries.length} livraisons rapprochées`);
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la validation automatique des rapprochements existants:', error);
+    throw error;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker
   app.get('/api/health', (req, res) => {
@@ -237,6 +280,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const supplier = await storage.updateSupplier(id, result.data);
+      
+      // Si le rapprochement automatique est activé, valider automatiquement les rapprochements existants
+      if (result.data.automaticReconciliation === true) {
+        try {
+          console.log('🤖 Activation du rapprochement automatique - validation des livraisons existantes pour le fournisseur:', id);
+          await validateExistingReconciliations(id);
+        } catch (validationError) {
+          console.error('❌ Erreur lors de la validation automatique des rapprochements existants:', validationError);
+          // Ne pas faire échouer la mise à jour du fournisseur pour cette erreur
+        }
+      }
+      
       res.json(supplier);
     } catch (error) {
       console.error("Error updating supplier:", error);
