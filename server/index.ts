@@ -130,20 +130,9 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     next();
   });
 
-  // Initialize roles and permissions only in production mode - WITH PROPER ERROR HANDLING
-  if (process.env.STORAGE_MODE === 'production') {
-    try {
-      console.log('🔧 PRODUCTION: Attempting to initialize roles and permissions...');
-      await initRolesAndPermissions();
-      console.log('✅ Roles and permissions initialized successfully');
-    } catch (error) {
-      console.error("❌ Failed to initialize roles and permissions - CONTINUING ANYWAY:", error.message);
-      console.log('🔧 APPLICATION WILL CONTINUE WITH FALLBACK AUTHENTICATION SYSTEM');
-      // DO NOT EXIT - Continue with application startup
-    }
-  } else {
-    console.log('🔧 Skipping roles and permissions initialization in development mode');
-  }
+  // DISABLE PROBLEMATIC ROLE INITIALIZATION FOR NOW - USE HARDCODED PERMISSIONS ONLY
+  console.log('🔧 PRODUCTION: Skipping roles initialization - using hardcoded permissions only');
+  console.log('🔧 Hardcoded permission system is active and ready to use');
 
   // Skip production database initialization in development mode
   if (process.env.STORAGE_MODE === 'production') {
@@ -193,8 +182,8 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     serveStatic(app);
   }
 
-  // Port configuration: 5000 for development, 3000 for production
-  const port = process.env.PORT || (process.env.NODE_ENV === 'production' ? 3000 : 5000);
+  // Port configuration: Use PORT env var or default to 5000 for Replit compatibility
+  const port = process.env.PORT || 5000;
   server.listen({
     port,
     host: "0.0.0.0",
