@@ -114,6 +114,12 @@ app.use((req, res, next) => {
     console.log('📋 SERVER STARTUP: Dashboard messages migration should be included in database initialization');
     await initDatabase();
     console.log('✅ SERVER STARTUP: Database initialization completed successfully');
+    
+    // Run SAV tables migration
+    console.log('🔄 SERVER STARTUP: Running SAV tables migration...');
+    const { migrateSavTables } = await import('./initDatabase.production');
+    await migrateSavTables();
+    console.log('✅ SERVER STARTUP: SAV tables migration completed');
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
     process.exit(1);
