@@ -78,6 +78,7 @@ export const suppliers = pgTable("suppliers", {
   contact: varchar("contact"),
   phone: varchar("phone"),
   hasDlc: boolean("has_dlc").default(false), // Coche DLC pour la gestion DLC
+  automaticReconciliation: boolean("automatic_reconciliation").default(false), // Rapprochement automatique lors de la validation
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -901,6 +901,7 @@ export class DatabaseStorage implements IStorage {
       contact: row.contact,
       phone: row.phone,
       hasDlc: row.has_dlc, // Convert snake_case to camelCase
+      automaticReconciliation: row.automatic_reconciliation, // Convert snake_case to camelCase
       createdAt: row.created_at,
       updatedAt: row.updated_at
     }));
@@ -916,11 +917,33 @@ export class DatabaseStorage implements IStorage {
     });
     
     try {
-      const result = await pool.query(`
-        INSERT INTO suppliers (name, contact, phone, has_dlc) 
-        VALUES ($1, $2, $3, $4) 
-        RETURNING *
-      `, [supplier.name, supplier.contact || '', supplier.phone || '', supplier.hasDlc || false]);
+      // Vérifier si la colonne automatic_reconciliation existe
+      const columnsCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'suppliers' AND table_schema = 'public'
+      `);
+      
+      const existingColumns = columnsCheck.rows.map(row => row.column_name);
+      
+      let query, params;
+      if (existingColumns.includes('automatic_reconciliation')) {
+        query = `
+          INSERT INTO suppliers (name, contact, phone, has_dlc, automatic_reconciliation) 
+          VALUES ($1, $2, $3, $4, $5) 
+          RETURNING *
+        `;
+        params = [supplier.name, supplier.contact || '', supplier.phone || '', supplier.hasDlc || false, supplier.automaticReconciliation || false];
+      } else {
+        query = `
+          INSERT INTO suppliers (name, contact, phone, has_dlc) 
+          VALUES ($1, $2, $3, $4) 
+          RETURNING *
+        `;
+        params = [supplier.name, supplier.contact || '', supplier.phone || '', supplier.hasDlc || false];
+      }
+      
+      const result = await pool.query(query, params);
       
       const createdSupplier = result.rows[0];
       
@@ -931,6 +954,7 @@ export class DatabaseStorage implements IStorage {
         contact: createdSupplier.contact,
         phone: createdSupplier.phone,
         hasDlc: createdSupplier.has_dlc, // Convert snake_case to camelCase
+        automaticReconciliation: createdSupplier.automatic_reconciliation || false, // Convert snake_case to camelCase
         createdAt: createdSupplier.created_at,
         updatedAt: createdSupplier.updated_at
       };
@@ -982,6 +1006,11 @@ export class DatabaseStorage implements IStorage {
         values.push(supplier.hasDlc);
       }
       
+      if (supplier.automaticReconciliation !== undefined) {
+        fields.push(`automatic_reconciliation = $${paramIndex++}`);
+        values.push(supplier.automaticReconciliation);
+      }
+      
       // Always update the updated_at field
       fields.push(`updated_at = CURRENT_TIMESTAMP`);
       values.push(id);
@@ -1004,6 +1033,7 @@ export class DatabaseStorage implements IStorage {
         contact: updatedSupplier.contact,
         phone: updatedSupplier.phone,
         hasDlc: updatedSupplier.has_dlc, // Convert snake_case to camelCase
+        automaticReconciliation: updatedSupplier.automatic_reconciliation || false, // Convert snake_case to camelCase
         createdAt: updatedSupplier.created_at,
         updatedAt: updatedSupplier.updated_at
       };
@@ -1635,6 +1665,19 @@ export class DatabaseStorage implements IStorage {
       const existingColumns = columnsCheck.rows.map(row => row.column_name);
       console.log('🔍 validateDelivery - Available columns:', existingColumns);
       
+      // Récupérer les informations de la livraison et du fournisseur pour le rapprochement automatique
+      const deliveryResult = await pool.query(`
+        SELECT d.*, s.automatic_reconciliation
+        FROM deliveries d
+        LEFT JOIN suppliers s ON d.supplier_id = s.id
+        WHERE d.id = $1
+      `, [id]);
+      
+      const delivery = deliveryResult.rows[0];
+      if (!delivery) {
+        throw new Error('Livraison non trouvée');
+      }
+      
       // Construire la requête en fonction des colonnes disponibles
       const updates = ['status = $2', 'updated_at = CURRENT_TIMESTAMP'];
       const params = [id, 'delivered'];
@@ -1664,13 +1707,35 @@ export class DatabaseStorage implements IStorage {
         paramIndex++;
       }
       
+      // RAPPROCHEMENT AUTOMATIQUE: Si le fournisseur a automatic_reconciliation = true
+      if (delivery.automatic_reconciliation === true && existingColumns.includes('reconciled')) {
+        updates.push(`reconciled = $${paramIndex}`);
+        params.push(true);
+        paramIndex++;
+        console.log('🤖 Rapprochement automatique activé pour le fournisseur:', delivery.supplier_id);
+      }
+      
       const result = await pool.query(`
         UPDATE deliveries SET ${updates.join(', ')}
         WHERE id = $1
         RETURNING *
       `, params);
       
-      console.log('✅ validateDelivery success:', { id, blData, updatedColumns: updates.length });
+      console.log('✅ validateDelivery success:', { 
+        id, 
+        blData, 
+        updatedColumns: updates.length,
+        automaticReconciliation: delivery.automatic_reconciliation === true 
+      });
+      
+      // Log du rapprochement automatique pour traçabilité
+      if (delivery.automatic_reconciliation === true) {
+        console.log('✅ Rapprochement automatique effectué lors de la validation de la livraison:', {
+          deliveryId: id,
+          supplierId: delivery.supplier_id,
+          reconciled: true
+        });
+      }
       
       // Mettre à jour le statut de la commande liée si elle existe
       if (result.rows[0]?.order_id) {

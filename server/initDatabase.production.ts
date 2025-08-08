@@ -81,6 +81,7 @@ async function createTablesIfNotExist() {
       contact VARCHAR(255),
       phone VARCHAR(255),
       has_dlc BOOLEAN DEFAULT FALSE,
+      automatic_reconciliation BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
