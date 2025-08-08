@@ -37,22 +37,22 @@ declare global {
 import { hashPassword, comparePasswords } from './auth-utils.production';
 
 export function setupLocalAuth(app: Express) {
-  // Always use memory store for sessions when database is unavailable  
-  console.log('⚠️ Database unavailable, using memory store for sessions');
-  const MemoryStore = require('memorystore')(session);
-  
+  // Configure session with PostgreSQL store
+  const PgSession = connectPg(session);
   app.use(session({
-    store: new MemoryStore({
-      checkPeriod: 86400000
+    store: new PgSession({
+      pool: pool,
+      tableName: 'session',
+      createTableIfMissing: true
     }),
     secret: process.env.SESSION_SECRET || 'LogiFlow_Super_Secret_Session_Key_2025_Production',
     resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      secure: false,
+      secure: false, // Set to true if using HTTPS
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax'
     }
   }));
@@ -66,7 +66,6 @@ export function setupLocalAuth(app: Express) {
     passwordField: 'password'
   }, async (username, password, done) => {
     try {
-      // Try database authentication first
       const result = await pool.query(
         'SELECT * FROM users WHERE username = $1',
         [username]
@@ -91,25 +90,8 @@ export function setupLocalAuth(app: Express) {
       const { password: _, ...userWithoutPassword } = user;
       return done(null, userWithoutPassword);
     } catch (error) {
-      console.error('❌ Database authentication failed:', error);
-      
-      // Temporary fallback for when database is unavailable - only for admin
-      if (username === 'admin' && password === 'admin') {
-        console.log('⚠️ Using temporary admin access while database is unavailable');
-        const tempAdmin = {
-          id: 'temp_admin',
-          username: 'admin',
-          email: 'admin@logiflow.fr',
-          name: 'Admin Temporaire',
-          firstName: 'Admin',
-          lastName: 'Temporaire',
-          role: 'admin',
-          passwordChanged: false
-        };
-        return done(null, tempAdmin);
-      }
-      
-      return done(null, false, { message: 'Service temporarily unavailable' });
+      console.error('❌ Authentication error:', error);
+      return done(error);
     }
   }));
 
@@ -119,22 +101,6 @@ export function setupLocalAuth(app: Express) {
 
   passport.deserializeUser(async (id: string, done) => {
     try {
-      // Handle temporary admin user
-      if (id === 'temp_admin') {
-        const tempAdmin = {
-          id: 'temp_admin',
-          username: 'admin',
-          email: 'admin@logiflow.fr',
-          name: 'Admin Temporaire',
-          firstName: 'Admin',
-          lastName: 'Temporaire',
-          role: 'admin',
-          passwordChanged: false
-        };
-        return done(null, tempAdmin);
-      }
-
-      // Try database user retrieval
       const result = await pool.query(
         'SELECT * FROM users WHERE id = $1',
         [id]
@@ -160,7 +126,7 @@ export function setupLocalAuth(app: Express) {
       done(null, userWithoutPassword);
     } catch (error) {
       console.error('❌ Error deserializing user:', error);
-      done(null, false);
+      done(error);
     }
   });
 
@@ -242,8 +208,7 @@ export function setupLocalAuth(app: Express) {
       res.json({ showDefault: !!showDefault });
     } catch (error) {
       console.error('Error checking default credentials:', error);
-      // When database is unavailable, show default credentials
-      res.json({ showDefault: true });
+      res.json({ showDefault: true }); // Default to showing credentials if error
     }
   });
 
