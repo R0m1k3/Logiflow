@@ -3790,7 +3790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== SAV TICKETS ROUTES =====
   
   // Get SAV tickets with filters and statistics
-  app.get('/api/sav-tickets', isAuthenticated, async (req: any, res) => {
+  app.get('/api/sav-tickets', isAuthenticated, requirePermission('sav_read'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       
@@ -3917,7 +3917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get SAV ticket by ID
-  app.get('/api/sav-tickets/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/sav-tickets/:id', isAuthenticated, requirePermission('sav_read'), async (req: any, res) => {
     try {
       const ticketId = parseInt(req.params.id);
       const ticket = await storage.getSavTicket(ticketId);
@@ -3948,7 +3948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new SAV ticket
-  app.post('/api/sav-tickets', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sav-tickets', isAuthenticated, requirePermission('sav_create'), async (req: any, res) => {
     try {
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
@@ -3957,10 +3957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Validate permissions - managers and above can create tickets
-      if (!['admin', 'directeur', 'manager'].includes(user.role)) {
-        return res.status(403).json({ message: "Insufficient permissions to create SAV tickets" });
-      }
+      // Permission validation is now handled by requirePermission('sav_create') middleware
 
       const parsedTicket = insertSavTicketSchema.parse(req.body);
       
@@ -3995,7 +3992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update SAV ticket by ID (PATCH - missing route!)
-  app.patch('/api/sav-tickets/:id', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/sav-tickets/:id', isAuthenticated, requirePermission('sav_update'), async (req: any, res) => {
     try {
       const ticketId = parseInt(req.params.id);
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
@@ -4149,15 +4146,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete SAV ticket (admin and directeur only)
-  app.delete('/api/sav-tickets/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/sav-tickets/:id', isAuthenticated, requirePermission('sav_delete'), async (req: any, res) => {
     try {
       const ticketId = parseInt(req.params.id);
       const userId = req.user.claims ? req.user.claims.sub : req.user.id;
       const user = await storage.getUser(userId);
       
-      if (!user || (user.role !== 'admin' && user.role !== 'directeur')) {
-        return res.status(403).json({ message: "Seuls les administrateurs et directeurs peuvent supprimer des tickets SAV" });
-      }
+      // Permission validation is now handled by requirePermission('sav_delete') middleware
 
       const ticket = await storage.getSavTicket(ticketId);
       if (!ticket) {

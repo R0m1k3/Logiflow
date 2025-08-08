@@ -130,13 +130,16 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
     next();
   });
 
-  // Initialize roles and permissions only in production mode
+  // Initialize roles and permissions only in production mode - WITH PROPER ERROR HANDLING
   if (process.env.STORAGE_MODE === 'production') {
     try {
+      console.log('🔧 PRODUCTION: Attempting to initialize roles and permissions...');
       await initRolesAndPermissions();
+      console.log('✅ Roles and permissions initialized successfully');
     } catch (error) {
-      console.error("Failed to initialize roles and permissions:", error);
-      // Continue startup even if role initialization fails
+      console.error("❌ Failed to initialize roles and permissions - CONTINUING ANYWAY:", error.message);
+      console.log('🔧 APPLICATION WILL CONTINUE WITH FALLBACK AUTHENTICATION SYSTEM');
+      // DO NOT EXIT - Continue with application startup
     }
   } else {
     console.log('🔧 Skipping roles and permissions initialization in development mode');
