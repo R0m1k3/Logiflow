@@ -329,7 +329,7 @@ export default function CalendarGrid({
                               key={`delivery-${delivery.id}`}
                               className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${
                                 delivery.status === 'delivered' 
-                                  ? 'bg-delivered text-white' 
+                                  ? 'bg-gray-400 text-gray-600 line-through' 
                                   : delivery.status === 'pending'
                                   ? 'bg-yellow-500 text-white border-2 border-yellow-300'
                                   : 'bg-secondary text-white'
@@ -416,7 +416,7 @@ export default function CalendarGrid({
                             key={`delivery-${delivery.id}`}
                             className={`text-xs px-2 py-1 flex items-center justify-between cursor-pointer ${
                               delivery.status === 'delivered' 
-                                ? 'bg-delivered text-white' 
+                                ? 'bg-gray-400 text-gray-600 line-through' 
                                 : delivery.status === 'pending'
                                 ? 'bg-yellow-500 text-white border-2 border-yellow-300'
                                 : 'bg-secondary text-white'
