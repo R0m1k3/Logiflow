@@ -25,6 +25,9 @@ export async function initDatabase() {
     // MIGRATIONS DISABLED: Supprimé pour éviter les exécutions répétées à chaque mise à jour
     console.log('⚠️ MIGRATIONS SKIPPED: Automatic migrations disabled to prevent repeated execution on updates');
     
+    // Migration spécifique pour la colonne automatic_reconciliation (seulement si nécessaire)
+    await migrateSupplierAutomaticReconciliation();
+    
     // Create system user first (required for role assignments)
     await createSystemUser();
     
@@ -1759,4 +1762,43 @@ async function ensureCorrectNocodbConfig() {
   }
 }
 
-export { pool, ensureEmployeePermissions, ensureCorrectNocodbConfig };
+async function migrateSupplierAutomaticReconciliation() {
+  try {
+    console.log('🔧 Checking automatic_reconciliation column in suppliers table...');
+    
+    const client = await pool.connect();
+    
+    try {
+      // Vérifier si la colonne existe déjà
+      const checkColumnResult = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'suppliers' 
+        AND column_name = 'automatic_reconciliation'
+      `);
+      
+      if (checkColumnResult.rows.length === 0) {
+        // La colonne n'existe pas, on l'ajoute
+        console.log('🔧 Adding automatic_reconciliation column to suppliers table...');
+        
+        await client.query(`
+          ALTER TABLE suppliers 
+          ADD COLUMN automatic_reconciliation BOOLEAN DEFAULT FALSE
+        `);
+        
+        console.log('✅ Column automatic_reconciliation added successfully to suppliers table');
+      } else {
+        console.log('✅ Column automatic_reconciliation already exists in suppliers table');
+      }
+      
+    } finally {
+      client.release();
+    }
+    
+  } catch (error) {
+    console.error('❌ Failed to migrate automatic_reconciliation column:', error);
+    // Ne pas faire échouer l'initialisation pour cette migration
+  }
+}
+
+export { pool, ensureEmployeePermissions, ensureCorrectNocodbConfig, migrateSupplierAutomaticReconciliation };

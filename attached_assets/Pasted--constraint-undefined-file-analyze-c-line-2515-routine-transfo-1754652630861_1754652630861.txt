@@ -1,0 +1,203 @@
+
+      
+  constraint: undefined,
+
+  file: 'analyze.c',
+
+  line: '2515',
+
+  routine: 'transformUpdateTargetList'
+
+}
+
+11:29:49 AM [express] PUT /api/suppliers/11 500 in 8ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/suppliers/11',
+
+  method: 'PUT',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: 'admin_local',
+
+  username: 'admin',
+
+  sessionId: '1MjiqmTKDIQoS6p5eQDlakb7qk5bL2mk',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🔧 Updating supplier with data: {
+
+
+
+,
+
+  supplier: {
+
+    name: 'Depot',
+
+    contact: '',
+
+    phone: '',
+
+    hasDlc: true,
+
+    automaticReconciliation: true
+
+  },
+
+  fieldsToUpdate: [ 'name', 'contact', 'phone', 'hasDlc', 'automaticReconciliation' ]
+
+}
+
+🔧 SQL Query: {
+
+  query: '\n' +
+
+    '        UPDATE suppliers SET name = $1, contact = $2, phone = $3, has_dlc = $4, automatic_reconciliation = $5, updated_at = CURRENT_TIMESTAMP\n' +
+
+    '        WHERE id = $6\n' +
+
+    '        RETURNING *\n' +
+
+    '      ',
+
+  values: [ 'Depot', '', '', true, true, 11 ]
+
+}
+
+❌ Failed to update supplier: error: column "automatic_reconciliation" of relation "suppliers" does not exist
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async DatabaseStorage.updateSupplier (file:///app/dist/index.js:2676:26)
+
+    at async file:///app/dist/index.js:9292:24 {
+
+  length: 148,
+
+  severity: 'ERROR',
+
+  code: '42703',
+
+  detail: undefined,
+
+  hint: undefined,
+
+  position: '82',
+
+  internalPosition: undefined,
+
+  internalQuery: undefined,
+
+  where: undefined,
+
+  schema: undefined,
+
+  table: undefined,
+
+  column: undefined,
+
+  dataType: undefined,
+
+  constraint: undefined,
+
+  file: 'analyze.c',
+
+  line: '2515',
+
+  routine: 'transformUpdateTargetList'
+
+}
+
+📊 Error details: {
+
+  message: 'column "automatic_reconciliation" of relation "suppliers" does not exist',
+
+  code: '42703',
+
+  detail: undefined,
+
+  constraint: undefined,
+
+  supplierData: {
+
+    name: 'Depot',
+
+    contact: '',
+
+    phone: '',
+
+    hasDlc: true,
+
+    automaticReconciliation: true
+
+  },
+
+  supplierId: 11
+
+}
+
+Error updating supplier: error: column "automatic_reconciliation" of relation "suppliers" does not exist
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async DatabaseStorage.updateSupplier (file:///app/dist/index.js:2676:26)
+
+    at async file:///app/dist/index.js:9292:24 {
+
+  length: 148,
+
+  severity: 'ERROR',
+
+  code: '42703',
+
+  detail: undefined,
+
+  hint: undefined,
+
+  position: '82',
+
+  internalPosition: undefined,
+
+  internalQuery: undefined,
+
+  where: undefined,
+
+  schema: undefined,
+
+  table: undefined,
+
+  column: undefined,
+
+  dataType: undefined,
+
+  constraint: undefined,
+
+  file: 'analyze.c',
+
+  line: '2515',
+
+  routine: 'transformUpdateTargetList'
+
+}
+
+11:29:56 AM [express] PUT /api/suppliers/11 500 in 28ms
+
+11:30:16 AM [express] HEAD /api/health 200 in 1ms
