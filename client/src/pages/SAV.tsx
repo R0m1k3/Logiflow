@@ -117,11 +117,7 @@ export default function SAV() {
   // Mutations
   const createTicketMutation = useMutation({
     mutationFn: (data: InsertSavTicket) =>
-      apiRequest('/api/sav-tickets', {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      }),
+      apiRequest('/api/sav-tickets', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/sav-tickets'] });
       setIsCreateDialogOpen(false);
@@ -131,11 +127,7 @@ export default function SAV() {
 
   const updateTicketMutation = useMutation({
     mutationFn: (data: { id: number; updates: Partial<InsertSavTicket> }) =>
-      apiRequest(`/api/sav-tickets/${data.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data.updates),
-        headers: { 'Content-Type': 'application/json' },
-      }),
+      apiRequest(`/api/sav-tickets/${data.id}`, 'PATCH', data.updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/sav-tickets'] });
       setIsEditDialogOpen(false);
@@ -146,9 +138,7 @@ export default function SAV() {
 
   const deleteTicketMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest(`/api/sav-tickets/${id}`, {
-        method: "DELETE",
-      }),
+      apiRequest(`/api/sav-tickets/${id}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/sav-tickets'] });
     },

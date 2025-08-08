@@ -13,6 +13,12 @@ export async function hasPermission(userId: string, permissionName: string): Pro
     console.log(`🔍 [PERMISSION CHECK] Checking "${permissionName}" for user ${userId}`);
     console.log(`🔍 [PERMISSION CHECK] Storage mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
     
+    // FALLBACK: If user is admin_fallback, grant all permissions (database unavailable fallback)
+    if (userId === 'admin_fallback') {
+      console.log(`✅ [PERMISSION CHECK] Admin fallback user - granting permission: ${permissionName}`);
+      return true;
+    }
+    
     const user = await storage.getUser(userId);
     if (!user) {
       console.log(`❌ [PERMISSION CHECK] User ${userId} not found`);
