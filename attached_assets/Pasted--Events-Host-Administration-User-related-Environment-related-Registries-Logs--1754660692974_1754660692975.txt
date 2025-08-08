@@ -1,0 +1,243 @@
+
+Events
+
+Host
+
+Administration
+
+User-related
+
+
+Environment-related
+
+Registries
+
+Logs
+
+Notifications
+
+Settings
+
+New version available 2.27.9
+DismissSee what's new
+Community Edition
+2.27.6 LTS
+Containers>logiflow-app>Logs
+Container logs
+
+
+admin
+Log viewer settings
+Auto-refresh logs
+Wrap lines
+Display timestamps
+Fetch
+All logs
+Search
+Filter...
+Lines
+100
+Actions
+ 
+ 
+ 
+      
+    nocodbSupplierColumnName: 'Fournisseurs',
+
+    webhookUrl: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a'
+
+  }
+
+}
+
+Error fetching SAV tickets: TypeError: storage.getSavTickets is not a function
+
+    at file:///app/dist/index.js:12524:37
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+1:43:55 PM [express] GET /api/sav-tickets 500 in 89ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/sav-tickets',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: 'admin_local',
+
+  username: 'admin',
+
+  sessionId: 'k7VsXT5F1K-bv3qHTg5GSwqhnZFrc_JM',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🏪 PRODUCTION getGroups called
+
+🔍 PRODUCTION getGroups - webhook_url column exists: true
+
+Error fetching SAV tickets: TypeError: storage.getSavTickets is not a function
+
+    at file:///app/dist/index.js:12524:37
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+🏪 PRODUCTION getGroups result: {
+
+  count: 2,
+
+  sample: {
+
+    id: 1,
+
+    name: 'Frouard',
+
+    color: '#00796B',
+
+    nocodb_config_id: 1,
+
+    nocodb_table_id: 'mrr733dfb8wtt9b',
+
+    nocodb_table_name: 'CommandeF',
+
+    invoice_column_name: 'RefFacture',
+
+    created_at: 2025-07-22T11:08:59.497Z,
+
+    updated_at: 2025-08-04T12:59:31.264Z,
+
+    nocodb_bl_column_name: 'Numero_BL',
+
+    nocodb_amount_column_name: 'Montant HT',
+
+    nocodb_supplier_column_name: 'Fournisseurs',
+
+    webhook_url: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a',
+
+    nocodbConfigId: 1,
+
+    nocodbTableId: 'mrr733dfb8wtt9b',
+
+    nocodbTableName: 'CommandeF',
+
+    invoiceColumnName: 'RefFacture',
+
+    nocodbBlColumnName: 'Numero_BL',
+
+    nocodbAmountColumnName: 'Montant HT',
+
+    nocodbSupplierColumnName: 'Fournisseurs',
+
+    webhookUrl: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a'
+
+  }
+
+}
+
+1:43:56 PM [express] GET /api/sav-tickets 500 in 15ms
+
+🔍 PRODUCTION AUTH DEBUG: {
+
+  url: '/api/sav-tickets',
+
+  method: 'GET',
+
+  isAuthenticated: true,
+
+  hasUser: true,
+
+  userId: 'admin_local',
+
+  username: 'admin',
+
+  sessionId: 'k7VsXT5F1K-bv3qHTg5GSwqhnZFrc_JM',
+
+  hasSession: true,
+
+  sessionData: [ 'cookie', 'passport' ],
+
+  cookies: 'HAS_COOKIES'
+
+}
+
+✅ PRODUCTION AUTH: User authenticated, proceeding
+
+🏪 PRODUCTION getGroups called
+
+🔍 PRODUCTION getGroups - webhook_url column exists: true
+
+🏪 PRODUCTION getGroups result: {
+
+  count: 2,
+
+  sample: {
+
+    id: 1,
+
+    name: 'Frouard',
+
+    color: '#00796B',
+
+    nocodb_config_id: 1,
+
+    nocodb_table_id: 'mrr733dfb8wtt9b',
+
+    nocodb_table_name: 'CommandeF',
+
+    invoice_column_name: 'RefFacture',
+
+    created_at: 2025-07-22T11:08:59.497Z,
+
+    updated_at: 2025-08-04T12:59:31.264Z,
+
+    nocodb_bl_column_name: 'Numero_BL',
+
+    nocodb_amount_column_name: 'Montant HT',
+
+    nocodb_supplier_column_name: 'Fournisseurs',
+
+    webhook_url: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a',
+
+    nocodbConfigId: 1,
+
+    nocodbTableId: 'mrr733dfb8wtt9b',
+
+    nocodbTableName: 'CommandeF',
+
+    invoiceColumnName: 'RefFacture',
+
+    nocodbBlColumnName: 'Numero_BL',
+
+    nocodbAmountColumnName: 'Montant HT',
+
+    nocodbSupplierColumnName: 'Fournisseurs',
+
+    webhookUrl: 'https://workflow.ffnancy.fr/webhook/acf9cbf7-040a-4cf5-a43d-80210420d30a'
+
+  }
+
+}
+
+Error fetching SAV tickets: TypeError: storage.getSavTickets is not a function
+
+    at file:///app/dist/index.js:12524:37
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+1:43:58 PM [express] GET /api/sav-tickets 500 in 12ms
+
+1:44:01 PM [express] HEAD /api/health 200 in 2ms
+
+1:44:32 PM [express] HEAD /api/health 200 in 1ms

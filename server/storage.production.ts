@@ -37,7 +37,13 @@ import type {
   InsertInvoiceVerification,
   DashboardMessage,
   InsertDashboardMessage,
-  DashboardMessageWithRelations
+  DashboardMessageWithRelations,
+  SavTicket,
+  InsertSavTicket,
+  SavTicketWithRelations,
+  SavTicketHistory,
+  InsertSavTicketHistory,
+  SavTicketHistoryWithRelations
 } from "../shared/schema";
 
 // Production storage implementation using raw PostgreSQL queries
@@ -4052,6 +4058,383 @@ export class DatabaseStorage implements IStorage {
       await pool.query('DELETE FROM dashboard_messages WHERE id = $1', [id]);
     } catch (error) {
       console.error("Error deleting dashboard message:", error);
+      throw error;
+    }
+  }
+
+  // ===== SAV TICKET OPERATIONS =====
+
+  async getSavTickets(groupIds?: number[]): Promise<SavTicketWithRelations[]> {
+    try {
+      let query = `
+        SELECT 
+          st.id, st.ticket_number, st.supplier_id, st.group_id, 
+          st.product_gencode, st.product_reference, st.product_designation,
+          st.problem_type, st.problem_description, st.resolution_description,
+          st.status, st.created_by, st.created_at, st.updated_at,
+          st.resolved_at, st.closed_at,
+          s.id as supplier_id_rel, s.name as supplier_name, s.contact as supplier_contact,
+          g.id as group_id_rel, g.name as group_name, g.color as group_color,
+          u.id as creator_id, u.username as creator_username, u.name as creator_name
+        FROM sav_tickets st
+        LEFT JOIN suppliers s ON st.supplier_id = s.id
+        LEFT JOIN groups g ON st.group_id = g.id
+        LEFT JOIN users u ON st.created_by = u.id
+      `;
+      
+      const params: any[] = [];
+      
+      if (groupIds && groupIds.length > 0) {
+        query += ` WHERE st.group_id = ANY($1)`;
+        params.push(groupIds);
+      }
+      
+      query += ` ORDER BY st.created_at DESC`;
+      
+      const result = await pool.query(query, params);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        ticketNumber: row.ticket_number,
+        supplierId: row.supplier_id,
+        groupId: row.group_id,
+        productGencode: row.product_gencode,
+        productReference: row.product_reference,
+        productDesignation: row.product_designation,
+        problemType: row.problem_type,
+        problemDescription: row.problem_description,
+        resolutionDescription: row.resolution_description,
+        status: row.status,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+        closedAt: row.closed_at,
+        supplier: {
+          id: row.supplier_id_rel,
+          name: row.supplier_name,
+          contact: row.supplier_contact
+        },
+        group: {
+          id: row.group_id_rel,
+          name: row.group_name,
+          color: row.group_color
+        },
+        creator: {
+          id: row.creator_id,
+          username: row.creator_username,
+          name: row.creator_name
+        }
+      }));
+    } catch (error) {
+      console.error("Error fetching SAV tickets:", error);
+      throw error;
+    }
+  }
+
+  async getSavTicket(id: number): Promise<SavTicketWithRelations | undefined> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          st.id, st.ticket_number, st.supplier_id, st.group_id, 
+          st.product_gencode, st.product_reference, st.product_designation,
+          st.problem_type, st.problem_description, st.resolution_description,
+          st.status, st.created_by, st.created_at, st.updated_at,
+          st.resolved_at, st.closed_at,
+          s.id as supplier_id_rel, s.name as supplier_name, s.contact as supplier_contact,
+          g.id as group_id_rel, g.name as group_name, g.color as group_color,
+          u.id as creator_id, u.username as creator_username, u.name as creator_name
+        FROM sav_tickets st
+        LEFT JOIN suppliers s ON st.supplier_id = s.id
+        LEFT JOIN groups g ON st.group_id = g.id
+        LEFT JOIN users u ON st.created_by = u.id
+        WHERE st.id = $1
+      `, [id]);
+      
+      if (result.rows.length === 0) return undefined;
+      
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        ticketNumber: row.ticket_number,
+        supplierId: row.supplier_id,
+        groupId: row.group_id,
+        productGencode: row.product_gencode,
+        productReference: row.product_reference,
+        productDesignation: row.product_designation,
+        problemType: row.problem_type,
+        problemDescription: row.problem_description,
+        resolutionDescription: row.resolution_description,
+        status: row.status,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+        closedAt: row.closed_at,
+        supplier: {
+          id: row.supplier_id_rel,
+          name: row.supplier_name,
+          contact: row.supplier_contact
+        },
+        group: {
+          id: row.group_id_rel,
+          name: row.group_name,
+          color: row.group_color
+        },
+        creator: {
+          id: row.creator_id,
+          username: row.creator_username,
+          name: row.creator_name
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching SAV ticket:", error);
+      throw error;
+    }
+  }
+
+  async createSavTicket(ticket: InsertSavTicket): Promise<SavTicket> {
+    try {
+      const now = new Date();
+      
+      const result = await pool.query(`
+        INSERT INTO sav_tickets (
+          ticket_number, supplier_id, group_id, 
+          product_gencode, product_reference, product_designation,
+          problem_type, problem_description, resolution_description,
+          status, created_by, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING *
+      `, [
+        ticket.ticketNumber,
+        ticket.supplierId,
+        ticket.groupId,
+        ticket.productGencode,
+        ticket.productReference,
+        ticket.productDesignation,
+        ticket.problemType,
+        ticket.problemDescription,
+        ticket.resolutionDescription,
+        ticket.status || 'nouveau',
+        ticket.createdBy,
+        now,
+        now
+      ]);
+      
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        ticketNumber: row.ticket_number,
+        supplierId: row.supplier_id,
+        groupId: row.group_id,
+        productGencode: row.product_gencode,
+        productReference: row.product_reference,
+        productDesignation: row.product_designation,
+        problemType: row.problem_type,
+        problemDescription: row.problem_description,
+        resolutionDescription: row.resolution_description,
+        status: row.status,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+        closedAt: row.closed_at
+      };
+    } catch (error) {
+      console.error("Error creating SAV ticket:", error);
+      throw error;
+    }
+  }
+
+  async updateSavTicket(id: number, updates: Partial<InsertSavTicket>): Promise<SavTicket> {
+    try {
+      const setParts = [];
+      const values = [];
+      let paramCount = 1;
+
+      // Dynamically build update query based on provided fields
+      if (updates.productGencode !== undefined) {
+        setParts.push(`product_gencode = $${paramCount}`);
+        values.push(updates.productGencode);
+        paramCount++;
+      }
+      if (updates.productReference !== undefined) {
+        setParts.push(`product_reference = $${paramCount}`);
+        values.push(updates.productReference);
+        paramCount++;
+      }
+      if (updates.productDesignation !== undefined) {
+        setParts.push(`product_designation = $${paramCount}`);
+        values.push(updates.productDesignation);
+        paramCount++;
+      }
+      if (updates.problemType !== undefined) {
+        setParts.push(`problem_type = $${paramCount}`);
+        values.push(updates.problemType);
+        paramCount++;
+      }
+      if (updates.problemDescription !== undefined) {
+        setParts.push(`problem_description = $${paramCount}`);
+        values.push(updates.problemDescription);
+        paramCount++;
+      }
+      if (updates.resolutionDescription !== undefined) {
+        setParts.push(`resolution_description = $${paramCount}`);
+        values.push(updates.resolutionDescription);
+        paramCount++;
+      }
+      if (updates.status !== undefined) {
+        setParts.push(`status = $${paramCount}`);
+        values.push(updates.status);
+        paramCount++;
+        
+        // Handle status-specific timestamps
+        if (updates.status === 'resolu') {
+          setParts.push(`resolved_at = CURRENT_TIMESTAMP`);
+        } else if (updates.status === 'ferme') {
+          setParts.push(`closed_at = CURRENT_TIMESTAMP`);
+        }
+      }
+
+      setParts.push(`updated_at = CURRENT_TIMESTAMP`);
+      values.push(id);
+
+      const result = await pool.query(`
+        UPDATE sav_tickets 
+        SET ${setParts.join(', ')}
+        WHERE id = $${paramCount}
+        RETURNING *
+      `, values);
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        ticketNumber: row.ticket_number,
+        supplierId: row.supplier_id,
+        groupId: row.group_id,
+        productGencode: row.product_gencode,
+        productReference: row.product_reference,
+        productDesignation: row.product_designation,
+        problemType: row.problem_type,
+        problemDescription: row.problem_description,
+        resolutionDescription: row.resolution_description,
+        status: row.status,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+        closedAt: row.closed_at
+      };
+    } catch (error) {
+      console.error("Error updating SAV ticket:", error);
+      throw error;
+    }
+  }
+
+  async deleteSavTicket(id: number): Promise<void> {
+    try {
+      // Delete history first due to foreign key constraint
+      await pool.query('DELETE FROM sav_ticket_history WHERE ticket_id = $1', [id]);
+      // Delete the ticket
+      await pool.query('DELETE FROM sav_tickets WHERE id = $1', [id]);
+    } catch (error) {
+      console.error("Error deleting SAV ticket:", error);
+      throw error;
+    }
+  }
+
+  async getSavTicketHistory(ticketId: number): Promise<SavTicketHistoryWithRelations[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          sth.id, sth.ticket_id, sth.action, sth.description, 
+          sth.created_by, sth.created_at,
+          u.id as creator_id, u.username as creator_username, u.name as creator_name
+        FROM sav_ticket_history sth
+        LEFT JOIN users u ON sth.created_by = u.id
+        WHERE sth.ticket_id = $1
+        ORDER BY sth.created_at DESC
+      `, [ticketId]);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        ticketId: row.ticket_id,
+        action: row.action,
+        description: row.description,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        creator: {
+          id: row.creator_id,
+          username: row.creator_username,
+          name: row.creator_name
+        }
+      }));
+    } catch (error) {
+      console.error("Error fetching SAV ticket history:", error);
+      throw error;
+    }
+  }
+
+  async createSavTicketHistory(history: InsertSavTicketHistory): Promise<SavTicketHistory> {
+    try {
+      const result = await pool.query(`
+        INSERT INTO sav_ticket_history (
+          ticket_id, action, description, created_by, created_at
+        ) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+        RETURNING *
+      `, [
+        history.ticketId,
+        history.action,
+        history.description,
+        history.createdBy
+      ]);
+      
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        ticketId: row.ticket_id,
+        action: row.action,
+        description: row.description,
+        createdBy: row.created_by,
+        createdAt: row.created_at
+      };
+    } catch (error) {
+      console.error("Error creating SAV ticket history:", error);
+      throw error;
+    }
+  }
+
+  async getSavTicketsByDate(date: Date): Promise<SavTicket[]> {
+    try {
+      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+      
+      const result = await pool.query(`
+        SELECT * FROM sav_tickets 
+        WHERE created_at >= $1 AND created_at < $2
+        ORDER BY created_at DESC
+      `, [startOfDay, endOfDay]);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        ticketNumber: row.ticket_number,
+        supplierId: row.supplier_id,
+        groupId: row.group_id,
+        productGencode: row.product_gencode,
+        productReference: row.product_reference,
+        productDesignation: row.product_designation,
+        problemType: row.problem_type,
+        problemDescription: row.problem_description,
+        resolutionDescription: row.resolution_description,
+        status: row.status,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at,
+        closedAt: row.closed_at
+      }));
+    } catch (error) {
+      console.error("Error fetching SAV tickets by date:", error);
       throw error;
     }
   }
