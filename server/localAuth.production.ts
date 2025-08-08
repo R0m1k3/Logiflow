@@ -8,6 +8,9 @@ import type { Express } from 'express';
 import connectPgSimple from 'connect-pg-simple';
 const PgSession = connectPgSimple(session);
 
+// Import memory store for fallback when database is unavailable
+const MemoryStore = require('memorystore')(session);
+
 interface User {
   id: string;
   username: string;
