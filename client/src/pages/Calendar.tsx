@@ -360,41 +360,55 @@ export default function Calendar() {
                     Commandes ({selectedDayItems.orders.length})
                   </h3>
                   <div className="space-y-2">
-                    {selectedDayItems.orders.map((order: any) => (
-                      <div
-                        key={order.id}
-                        className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setShowDayDetail(false);
-                          handleItemClick(order, 'order');
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: order.group?.color }}
-                            />
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {order.supplier?.name || 'Fournisseur inconnu'}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {order.group?.name} • {order.quantity} {order.unit}
-                              </p>
+                    {selectedDayItems.orders.map((order: any) => {
+                      // Vérifier si cette commande planifiée est liée à une livraison validée
+                      const isLinkedToDeliveredDelivery = order.status === 'planned' && 
+                        selectedDayItems.deliveries.some((delivery: any) => 
+                          delivery.orderId === order.id && delivery.status === 'delivered'
+                        );
+                      
+                      const cardBgClass = order.status === 'delivered' || isLinkedToDeliveredDelivery
+                        ? 'bg-gray-100' // Fond gris très clair
+                        : order.status === 'planned'
+                        ? 'bg-yellow-50' // Fond jaune très clair
+                        : 'bg-blue-50'; // Fond bleu très clair
+                      
+                      return (
+                        <div
+                          key={order.id}
+                          className={`p-3 border rounded-lg hover:bg-gray-100 cursor-pointer transition-colors ${cardBgClass}`}
+                          onClick={() => {
+                            setShowDayDetail(false);
+                            handleItemClick(order, 'order');
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: order.group?.color }}
+                              />
+                              <div className={order.status === 'delivered' || isLinkedToDeliveredDelivery ? 'line-through text-gray-600' : ''}>
+                                <p className="font-medium">
+                                  {order.supplier?.name || 'Fournisseur inconnu'}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  {order.group?.name} • {order.quantity} {order.unit}
+                                </p>
+                              </div>
                             </div>
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              order.status === 'delivered' || isLinkedToDeliveredDelivery ? 'bg-gray-200 text-gray-600' :
+                              order.status === 'planned' ? 'bg-yellow-200 text-yellow-800' :
+                              'bg-blue-200 text-blue-800'
+                            }`}>
+                              {order.status === 'delivered' || isLinkedToDeliveredDelivery ? 'Livré' :
+                               order.status === 'planned' ? 'Planifié' : 'En attente'}
+                            </span>
                           </div>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                            order.status === 'planned' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {order.status === 'delivered' ? 'Livré' :
-                             order.status === 'planned' ? 'Planifié' : 'En attente'}
-                          </span>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -407,46 +421,54 @@ export default function Calendar() {
                     Livraisons ({selectedDayItems.deliveries.length})
                   </h3>
                   <div className="space-y-2">
-                    {selectedDayItems.deliveries.map((delivery: any) => (
-                      <div
-                        key={delivery.id}
-                        className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setShowDayDetail(false);
-                          handleItemClick(delivery, 'delivery');
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: delivery.group?.color }}
-                            />
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {delivery.supplier?.name || 'Fournisseur inconnu'}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {delivery.group?.name} • {delivery.quantity} {delivery.unit}
-                              </p>
-                              {delivery.order && (
-                                <p className="text-xs text-blue-600">
-                                  Liée à la commande #{delivery.order.id}
+                    {selectedDayItems.deliveries.map((delivery: any) => {
+                      const cardBgClass = delivery.status === 'delivered' 
+                        ? 'bg-gray-100' // Fond gris très clair
+                        : delivery.status === 'pending'
+                        ? 'bg-yellow-50' // Fond jaune très clair 
+                        : 'bg-blue-50'; // Fond bleu très clair
+                      
+                      return (
+                        <div
+                          key={delivery.id}
+                          className={`p-3 border rounded-lg hover:bg-gray-100 cursor-pointer transition-colors ${cardBgClass}`}
+                          onClick={() => {
+                            setShowDayDetail(false);
+                            handleItemClick(delivery, 'delivery');
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: delivery.group?.color }}
+                              />
+                              <div className={delivery.status === 'delivered' ? 'line-through text-gray-600' : ''}>
+                                <p className="font-medium">
+                                  {delivery.supplier?.name || 'Fournisseur inconnu'}
                                 </p>
-                              )}
+                                <p className="text-sm text-gray-600">
+                                  {delivery.group?.name} • {delivery.quantity} {delivery.unit}
+                                </p>
+                                {delivery.order && (
+                                  <p className="text-xs text-blue-600">
+                                    Liée à la commande #{delivery.order.id}
+                                  </p>
+                                )}
+                              </div>
                             </div>
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              delivery.status === 'delivered' ? 'bg-gray-200 text-gray-600' :
+                              delivery.status === 'pending' ? 'bg-yellow-200 text-yellow-800' :
+                              'bg-blue-200 text-blue-800'
+                            }`}>
+                              {delivery.status === 'delivered' ? 'Livré' :
+                               delivery.status === 'pending' ? 'En attente' : 'Planifié'}
+                            </span>
                           </div>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            delivery.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                            delivery.status === 'planned' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {delivery.status === 'delivered' ? 'Livré' :
-                             delivery.status === 'planned' ? 'Planifié' : 'En attente'}
-                          </span>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
