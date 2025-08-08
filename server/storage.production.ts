@@ -4064,7 +4064,7 @@ export class DatabaseStorage implements IStorage {
 
   // ===== SAV TICKET OPERATIONS =====
 
-  async getSavTickets(groupIds?: number[]): Promise<SavTicketWithRelations[]> {
+  async getSavTickets(groupIds?: number[]): Promise<any[]> {
     try {
       let query = `
         SELECT 
@@ -4093,7 +4093,7 @@ export class DatabaseStorage implements IStorage {
       
       const result = await pool.query(query, params);
       
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         ticketNumber: row.ticket_number,
         supplierId: row.supplier_id,
@@ -4113,17 +4113,41 @@ export class DatabaseStorage implements IStorage {
         supplier: {
           id: row.supplier_id_rel,
           name: row.supplier_name,
-          contact: row.supplier_contact
+          contact: row.supplier_contact,
+          createdAt: null,
+          updatedAt: null,
+          phone: null,
+          hasDlc: null,
+          automaticReconciliation: null
         },
         group: {
           id: row.group_id_rel,
           name: row.group_name,
-          color: row.group_color
+          color: row.group_color,
+          createdAt: null,
+          updatedAt: null,
+          nocodbConfigId: null,
+          nocodbTableId: null,
+          nocodbTableName: null,
+          invoiceColumnName: null,
+          nocodbBlColumnName: null,
+          nocodbAmountColumnName: null,
+          nocodbSupplierColumnName: null,
+          webhookUrl: null
         },
         creator: {
           id: row.creator_id,
           username: row.creator_username,
-          name: row.creator_name
+          name: row.creator_name,
+          email: null,
+          firstName: null,
+          lastName: null,
+          profileImageUrl: null,
+          password: null,
+          role: 'employee',
+          passwordChanged: null,
+          createdAt: null,
+          updatedAt: null
         }
       }));
     } catch (error) {
@@ -4132,7 +4156,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSavTicket(id: number): Promise<SavTicketWithRelations | undefined> {
+  async getSavTicket(id: number): Promise<any | undefined> {
     try {
       const result = await pool.query(`
         SELECT 
@@ -4174,17 +4198,41 @@ export class DatabaseStorage implements IStorage {
         supplier: {
           id: row.supplier_id_rel,
           name: row.supplier_name,
-          contact: row.supplier_contact
+          contact: row.supplier_contact,
+          createdAt: null,
+          updatedAt: null,
+          phone: null,
+          hasDlc: null,
+          automaticReconciliation: null
         },
         group: {
           id: row.group_id_rel,
           name: row.group_name,
-          color: row.group_color
+          color: row.group_color,
+          createdAt: null,
+          updatedAt: null,
+          nocodbConfigId: null,
+          nocodbTableId: null,
+          nocodbTableName: null,
+          invoiceColumnName: null,
+          nocodbBlColumnName: null,
+          nocodbAmountColumnName: null,
+          nocodbSupplierColumnName: null,
+          webhookUrl: null
         },
         creator: {
           id: row.creator_id,
           username: row.creator_username,
-          name: row.creator_name
+          name: row.creator_name,
+          email: null,
+          firstName: null,
+          lastName: null,
+          profileImageUrl: null,
+          password: null,
+          role: 'employee',
+          passwordChanged: null,
+          createdAt: null,
+          updatedAt: null
         }
       };
     } catch (error) {
@@ -4193,7 +4241,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createSavTicket(ticket: InsertSavTicket): Promise<SavTicket> {
+  async createSavTicket(ticket: any): Promise<any> {
     try {
       const now = new Date();
       
@@ -4246,7 +4294,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateSavTicket(id: number, updates: Partial<InsertSavTicket>): Promise<SavTicket> {
+  async updateSavTicket(id: number, updates: any): Promise<any> {
     try {
       const setParts = [];
       const values = [];
@@ -4343,7 +4391,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSavTicketHistory(ticketId: number): Promise<SavTicketHistoryWithRelations[]> {
+  async getSavTicketHistory(ticketId: number): Promise<any[]> {
     try {
       const result = await pool.query(`
         SELECT 
@@ -4356,7 +4404,7 @@ export class DatabaseStorage implements IStorage {
         ORDER BY sth.created_at DESC
       `, [ticketId]);
       
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         ticketId: row.ticket_id,
         action: row.action,
@@ -4366,7 +4414,16 @@ export class DatabaseStorage implements IStorage {
         creator: {
           id: row.creator_id,
           username: row.creator_username,
-          name: row.creator_name
+          name: row.creator_name,
+          email: null,
+          firstName: null,
+          lastName: null,
+          profileImageUrl: null,
+          password: null,
+          role: 'employee',
+          passwordChanged: null,
+          createdAt: null,
+          updatedAt: null
         }
       }));
     } catch (error) {
@@ -4375,7 +4432,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createSavTicketHistory(history: InsertSavTicketHistory): Promise<SavTicketHistory> {
+  async createSavTicketHistory(history: any): Promise<any> {
     try {
       const result = await pool.query(`
         INSERT INTO sav_ticket_history (
@@ -4404,7 +4461,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSavTicketsByDate(date: Date): Promise<SavTicket[]> {
+  async getSavTicketsByDate(date: Date): Promise<any[]> {
     try {
       const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
@@ -4415,7 +4472,7 @@ export class DatabaseStorage implements IStorage {
         ORDER BY created_at DESC
       `, [startOfDay, endOfDay]);
       
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         ticketNumber: row.ticket_number,
         supplierId: row.supplier_id,
