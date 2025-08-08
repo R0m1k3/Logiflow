@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { LogOut, Store } from "lucide-react";
 import { useAuthUnified } from "@/hooks/useAuthUnified";
+import { useAutoLogout } from "@/hooks/useAutoLogout";
 import Sidebar from "./Sidebar";
 import type { Group } from "@shared/schema";
 
@@ -30,6 +31,9 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { user } = useAuthUnified();
   const queryClient = useQueryClient();
+  
+  // Activer la déconnexion automatique pour les non-admin
+  useAutoLogout();
   const [selectedStoreId, setSelectedStoreId] = useState<number | null>(() => {
     // Restaurer le selectedStoreId depuis localStorage si disponible
     const saved = localStorage.getItem('selectedStoreId');
