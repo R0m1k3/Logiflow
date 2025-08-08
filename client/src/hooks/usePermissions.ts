@@ -1,4 +1,4 @@
-import React from "react";
+import { useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthUnified } from "./useAuthUnified";
 
@@ -15,14 +15,14 @@ export function usePermissions() {
   });
 
   // Force refresh permissions if none are detected
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && !permissionsLoading && Array.isArray(userPermissions) && userPermissions.length === 0) {
       refetch();
     }
   }, [user, permissionsLoading, userPermissions, refetch]);
 
   // 🔧 FIX PERMISSIONS - Extraire les noms des permissions (PRODUCTION FORMAT)
-  const permissionNames = React.useMemo(() => {
+  const permissionNames = useMemo(() => {
     if (!Array.isArray(userPermissions)) return [];
     
     // Format production : objets avec propriété 'name'
