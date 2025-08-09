@@ -94,11 +94,11 @@ export default function SAV() {
   // Build query URL with store filter like Orders module
   const queryUrl = useMemo(() => {
     const params = new URLSearchParams();
-    if (selectedStoreId && selectedStoreId !== 'all' && user?.role === 'admin') {
-      params.append('storeId', selectedStoreId);
+    if (selectedStoreId && selectedStoreId !== 'all' && (user as any)?.role === 'admin') {
+      params.append('storeId', selectedStoreId.toString());
     }
     return `/api/sav-tickets${params.toString() ? `?${params.toString()}` : ''}`;
-  }, [selectedStoreId, user?.role]);
+  }, [selectedStoreId, (user as any)?.role]);
 
   // Récupération des données
   const { data: savTickets = [], isLoading: ticketsLoading } = useQuery<SavTicketWithRelations[]>({
