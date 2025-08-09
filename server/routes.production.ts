@@ -3772,8 +3772,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           problemDescription: 'Accès temporaire pendant indisponibilité base',
           status: 'nouveau',
           createdBy: 'temp_admin',
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
           supplier: { id: 1, name: 'Fournisseur Test' },
+          group: { id: 4, name: 'Store Test' },
+          creator: { id: 'temp_admin', username: 'admin', name: 'Admin Temporaire' }
+        }, {
+          id: 2,
+          ticketNumber: 'SAV20250808-002',
+          supplierId: 2,
+          groupId: 4,
+          clientName: 'Marie Martin',
+          clientPhone: '06 11 22 33 44',
+          productGencode: '9876543210987',
+          productReference: 'REF-002',
+          productDesignation: 'Autre produit test',
+          problemType: 'casse_transport',
+          problemDescription: 'Produit cassé lors du transport',
+          status: 'en_cours',
+          createdBy: 'temp_admin',
+          createdAt: new Date().toISOString(),
+          supplier: { id: 2, name: 'Autre Fournisseur' },
           group: { id: 4, name: 'Store Test' },
           creator: { id: 'temp_admin', username: 'admin', name: 'Admin Temporaire' }
         }];
@@ -3913,9 +3931,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔄 SAV PATCH: Starting update for ticket ${ticketId} by user ${userId}`);
       
-      // FALLBACK PRODUCTION: Handle admin_fallback user when database is unavailable
-      if (userId === 'admin_fallback') {
-        console.log('🔄 PRODUCTION FALLBACK: Simulating SAV ticket update for admin_fallback');
+      // FALLBACK PRODUCTION: Handle temp_admin user when database is unavailable
+      if (userId === 'temp_admin') {
+        console.log('🔄 PRODUCTION FALLBACK: Simulating SAV ticket update for temp_admin');
         
         // Parse the JSON body
         let updates;
@@ -3925,14 +3943,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updates = req.body;
         }
 
-        // Return mock updated ticket
+        // Return mock updated ticket with client info preserved
         const mockUpdatedTicket = {
           id: ticketId,
           ticketNumber: 'SAV20250808-001',
-          clientName: 'Marie Dubois',
-          clientPhone: '06 98 76 54 32',
-          ...updates,
-          updatedAt: new Date(),
+          supplierId: updates.supplierId || 1,
+          groupId: 4,
+          clientName: updates.clientName || 'Jean Dupont',
+          clientPhone: updates.clientPhone || '06 12 34 56 78',
+          productGencode: updates.productGencode || '1234567890123',
+          productReference: updates.productReference || 'REF-001',
+          productDesignation: updates.productDesignation || 'Produit de test',
+          problemType: updates.problemType || 'defaut_produit',
+          problemDescription: updates.problemDescription || 'Description du problème',
+          resolutionDescription: updates.resolutionDescription || '',
+          status: updates.status || 'nouveau',
+          createdBy: 'temp_admin',
+          createdAt: '2025-08-09T04:49:29.213Z',
+          updatedAt: new Date().toISOString(),
           supplier: {
             id: updates.supplierId || 1,
             name: 'Fournisseur Test',

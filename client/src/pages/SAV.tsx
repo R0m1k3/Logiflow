@@ -201,15 +201,22 @@ export default function SAV() {
   };
 
   const handleEdit = (ticket: SavTicketWithRelations) => {
-    console.log('🔧 DEBUG SAV Edit - ticket data:', ticket);
-    console.log('🔧 DEBUG SAV Edit - clientName:', ticket.clientName);
-    console.log('🔧 DEBUG SAV Edit - clientPhone:', ticket.clientPhone);
+    console.log('🔧 DEBUG SAV Edit - Full ticket object:', JSON.stringify(ticket, null, 2));
+    console.log('🔧 DEBUG SAV Edit - clientName value:', ticket.clientName);
+    console.log('🔧 DEBUG SAV Edit - clientPhone value:', ticket.clientPhone);
+    console.log('🔧 DEBUG SAV Edit - clientName type:', typeof ticket.clientName);
+    console.log('🔧 DEBUG SAV Edit - clientPhone type:', typeof ticket.clientPhone);
     
     setSelectedTicket(ticket);
+    
+    // Ensure client fields are properly handled
+    const clientName = ticket.clientName || "";
+    const clientPhone = ticket.clientPhone || "";
+    
     const resetData = {
       supplierId: ticket.supplierId,
-      clientName: ticket.clientName || "",
-      clientPhone: ticket.clientPhone || "",
+      clientName: clientName,
+      clientPhone: clientPhone,
       productGencode: ticket.productGencode,
       productReference: ticket.productReference || "",
       productDesignation: ticket.productDesignation,
@@ -219,8 +226,19 @@ export default function SAV() {
       status: ticket.status,
     };
     
-    console.log('🔧 DEBUG SAV Edit - reset data:', resetData);
+    console.log('🔧 DEBUG SAV Edit - final reset data:', JSON.stringify(resetData, null, 2));
+    console.log('🔧 DEBUG SAV Edit - clientName in resetData:', resetData.clientName);
+    console.log('🔧 DEBUG SAV Edit - clientPhone in resetData:', resetData.clientPhone);
+    
     form.reset(resetData);
+    
+    // Force field updates after a short delay
+    setTimeout(() => {
+      form.setValue('clientName', clientName);
+      form.setValue('clientPhone', clientPhone);
+      console.log('🔧 DEBUG SAV Edit - Force setValue completed');
+    }, 100);
+    
     setIsEditDialogOpen(true);
   };
 
