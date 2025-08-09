@@ -5,18 +5,18 @@ console.log('🔍 DIAGNOSTIC - DOCKER_ENV:', process.env.DOCKER_ENV);
 console.log('🔍 DIAGNOSTIC - PWD:', process.cwd());
 console.log('🔍 DIAGNOSTIC - __dirname:', import.meta.dirname);
 
-// 🔧 FORCE PRODUCTION MODE FOR SAV DEBUGGING
-console.log('🔧 FORCE PRODUCTION MODE: Setting NODE_ENV=production for SAV debugging');
-process.env.NODE_ENV = 'production';
-process.env.STORAGE_MODE = 'production';
-process.env.FORCE_PRODUCTION_MODE = 'true';
-// Keep DATABASE_URL to enable local auth for dashboard message testing
-// delete process.env.DATABASE_URL;
+// Auto-detect production mode based on environment
+const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production' || isDocker;
+
+if (isProduction) {
+  process.env.STORAGE_MODE = 'production';
+} else {
+  process.env.STORAGE_MODE = 'development';
+}
 
 // Enhanced environment detection
-const isDocker = process.cwd() === '/app' || process.env.DOCKER_ENV === 'production';
 const isReplit = process.cwd().includes('/home/runner/workspace');
-const isProduction = process.env.NODE_ENV === 'production' || process.env.DOCKER_ENV === 'production' || process.cwd() === '/app';
 
 console.log('🔍 Environment Analysis:', {
   cwd: process.cwd(),

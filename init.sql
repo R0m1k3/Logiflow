@@ -19,6 +19,8 @@ DROP TABLE IF EXISTS publicities CASCADE;
 DROP TABLE IF EXISTS sessions CASCADE;
 DROP TABLE IF EXISTS invoice_verification_cache CASCADE;
 DROP TABLE IF EXISTS dashboard_messages CASCADE;
+DROP TABLE IF EXISTS sav_ticket_history CASCADE;
+DROP TABLE IF EXISTS sav_tickets CASCADE;
 
 -- Create users table
 CREATE TABLE users (
@@ -418,6 +420,63 @@ CREATE INDEX idx_dashboard_messages_created_at ON dashboard_messages(created_at 
 -- Insert admin user (password will be set programmatically)
 INSERT INTO users (id, username, email, name, first_name, last_name, role, password_changed) VALUES
 ('1', 'admin', 'admin@logiflow.com', 'Admin System', 'Admin', 'System', 'admin', FALSE);
+
+-- Create SAV tickets table
+CREATE TABLE sav_tickets (
+    id SERIAL PRIMARY KEY,
+    ticket_number VARCHAR(255) NOT NULL UNIQUE,
+    supplier_id INTEGER NOT NULL,
+    group_id INTEGER NOT NULL,
+    
+    -- Client information
+    client_name VARCHAR(255),
+    client_phone VARCHAR(255),
+    
+    -- Product information
+    product_gencode VARCHAR(255) NOT NULL,
+    product_reference VARCHAR(255),
+    product_designation TEXT NOT NULL,
+    
+    -- Problem information
+    problem_type VARCHAR(255) NOT NULL,
+    problem_description TEXT NOT NULL,
+    resolution_description TEXT,
+    
+    -- Status and metadata
+    status VARCHAR(50) NOT NULL DEFAULT 'nouveau',
+    created_by VARCHAR(255) NOT NULL,
+    resolved_at TIMESTAMP,
+    closed_at TIMESTAMP,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    FOREIGN KEY (group_id) REFERENCES groups(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+-- Create SAV ticket history table
+CREATE TABLE sav_ticket_history (
+    id SERIAL PRIMARY KEY,
+    ticket_id INTEGER NOT NULL,
+    action VARCHAR(255) NOT NULL,
+    old_value TEXT,
+    new_value TEXT,
+    comment TEXT,
+    created_by VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (ticket_id) REFERENCES sav_tickets(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+-- Create indexes for SAV tables
+CREATE INDEX idx_sav_tickets_supplier_id ON sav_tickets(supplier_id);
+CREATE INDEX idx_sav_tickets_group_id ON sav_tickets(group_id);
+CREATE INDEX idx_sav_tickets_status ON sav_tickets(status);
+CREATE INDEX idx_sav_tickets_created_by ON sav_tickets(created_by);
+CREATE INDEX idx_sav_ticket_history_ticket_id ON sav_ticket_history(ticket_id);
 
 -- Success message
 SELECT 'Database initialization completed successfully!' as message;
