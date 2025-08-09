@@ -3763,6 +3763,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ticketNumber: 'SAV20250808-001',
           supplierId: 1,
           groupId: 4,
+          clientName: 'Jean Dupont',
+          clientPhone: '06 12 34 56 78',
           productGencode: '1234567890123',
           productReference: 'REF-001',
           productDesignation: 'Produit de test',

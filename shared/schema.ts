@@ -335,6 +335,10 @@ export const savTickets = pgTable("sav_tickets", {
   supplierId: integer("supplier_id").notNull(), // Fournisseur lié
   groupId: integer("group_id").notNull(), // Magasin/groupe
   
+  // Informations client
+  clientName: varchar("client_name"), // Nom du client (optionnel)
+  clientPhone: varchar("client_phone"), // Numéro de téléphone du client (optionnel)
+  
   // Informations produit
   productGencode: varchar("product_gencode").notNull(), // Code à barres
   productReference: varchar("product_reference"), // Référence produit (optionnel)

@@ -16,7 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Search, Eye, Edit, Trash2, User, Package, Calendar, AlertTriangle } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, User, Package, Calendar, AlertTriangle, Phone } from "lucide-react";
 import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -24,6 +24,8 @@ import type { SavTicketWithRelations, Supplier, InsertSavTicket } from "@shared/
 
 const ticketFormSchema = z.object({
   supplierId: z.number().min(1, "Veuillez sélectionner un fournisseur"),
+  clientName: z.string().optional().nullable(),
+  clientPhone: z.string().optional().nullable(),
   productGencode: z.string().min(1, "Le code-barres est obligatoire"),
   productReference: z.string().optional().nullable(),
   productDesignation: z.string().min(1, "La désignation est obligatoire"),
@@ -116,6 +118,8 @@ export default function SAV() {
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
       supplierId: 0,
+      clientName: "",
+      clientPhone: "",
       productGencode: "",
       productReference: "",
       productDesignation: "",
@@ -200,6 +204,8 @@ export default function SAV() {
     setSelectedTicket(ticket);
     form.reset({
       supplierId: ticket.supplierId,
+      clientName: ticket.clientName || "",
+      clientPhone: ticket.clientPhone || "",
       productGencode: ticket.productGencode,
       productReference: ticket.productReference || "",
       productDesignation: ticket.productDesignation,
@@ -421,7 +427,7 @@ export default function SAV() {
                       Fournisseur
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Produit
+                      Client & Produit
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Problème
@@ -453,6 +459,18 @@ export default function SAV() {
                       </td>
                       <td className="px-6 py-4">
                         <div>
+                          {ticket.clientName && (
+                            <div className="text-sm font-medium text-gray-900 mb-1">
+                              <User className="h-3 w-3 inline mr-1" />
+                              {ticket.clientName}
+                              {ticket.clientPhone && (
+                                <span className="text-gray-500 ml-2">
+                                  <Phone className="h-3 w-3 inline mr-1" />
+                                  {ticket.clientPhone}
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <div className="text-sm font-medium text-gray-900">{ticket.productDesignation}</div>
                           <div className="text-sm text-gray-500">
                             {ticket.productGencode}
@@ -606,6 +624,36 @@ function TicketForm({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="clientName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom du client</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nom du client (optionnel)" {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="clientPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone du client</FormLabel>
+                <FormControl>
+                  <Input placeholder="Numéro de téléphone (optionnel)" {...field} value={field.value || ""} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -789,6 +837,27 @@ function TicketDetail({
           <p>{PROBLEM_TYPES.find(pt => pt.value === ticket.problemType)?.label || ticket.problemType}</p>
         </div>
       </div>
+
+      {/* Informations client */}
+      {(ticket.clientName || ticket.clientPhone) && (
+        <div>
+          <Label className="text-sm font-medium text-gray-500">Informations client</Label>
+          <div className="mt-1 space-y-1">
+            {ticket.clientName && (
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-gray-400" />
+                <span>{ticket.clientName}</span>
+              </div>
+            )}
+            {ticket.clientPhone && (
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-400" />
+                <span>{ticket.clientPhone}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div>
         <Label className="text-sm font-medium text-gray-500">Produit</Label>
