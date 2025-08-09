@@ -4069,6 +4069,7 @@ export class DatabaseStorage implements IStorage {
       let query = `
         SELECT 
           st.id, st.ticket_number, st.supplier_id, st.group_id, 
+          st.client_name, st.client_phone,
           st.product_gencode, st.product_reference, st.product_designation,
           st.problem_type, st.problem_description, st.resolution_description,
           st.status, st.created_by, st.created_at, st.updated_at,
@@ -4098,6 +4099,8 @@ export class DatabaseStorage implements IStorage {
         ticketNumber: row.ticket_number,
         supplierId: row.supplier_id,
         groupId: row.group_id,
+        clientName: row.client_name,
+        clientPhone: row.client_phone,
         productGencode: row.product_gencode,
         productReference: row.product_reference,
         productDesignation: row.product_designation,
@@ -4161,6 +4164,7 @@ export class DatabaseStorage implements IStorage {
       const result = await pool.query(`
         SELECT 
           st.id, st.ticket_number, st.supplier_id, st.group_id, 
+          st.client_name, st.client_phone,
           st.product_gencode, st.product_reference, st.product_designation,
           st.problem_type, st.problem_description, st.resolution_description,
           st.status, st.created_by, st.created_at, st.updated_at,
@@ -4183,6 +4187,8 @@ export class DatabaseStorage implements IStorage {
         ticketNumber: row.ticket_number,
         supplierId: row.supplier_id,
         groupId: row.group_id,
+        clientName: row.client_name,
+        clientPhone: row.client_phone,
         productGencode: row.product_gencode,
         productReference: row.product_reference,
         productDesignation: row.product_designation,
@@ -4248,15 +4254,18 @@ export class DatabaseStorage implements IStorage {
       const result = await pool.query(`
         INSERT INTO sav_tickets (
           ticket_number, supplier_id, group_id, 
+          client_name, client_phone,
           product_gencode, product_reference, product_designation,
           problem_type, problem_description, resolution_description,
           status, created_by, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING *
       `, [
         ticket.ticketNumber,
         ticket.supplierId,
         ticket.groupId,
+        ticket.clientName || null,
+        ticket.clientPhone || null,
         ticket.productGencode,
         ticket.productReference,
         ticket.productDesignation,
@@ -4275,6 +4284,8 @@ export class DatabaseStorage implements IStorage {
         ticketNumber: row.ticket_number,
         supplierId: row.supplier_id,
         groupId: row.group_id,
+        clientName: row.client_name,
+        clientPhone: row.client_phone,
         productGencode: row.product_gencode,
         productReference: row.product_reference,
         productDesignation: row.product_designation,
