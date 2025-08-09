@@ -3929,6 +3929,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const mockUpdatedTicket = {
           id: ticketId,
           ticketNumber: 'SAV20250808-001',
+          clientName: 'Marie Dubois',
+          clientPhone: '06 98 76 54 32',
           ...updates,
           updatedAt: new Date(),
           supplier: {
