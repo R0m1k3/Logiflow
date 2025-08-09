@@ -95,7 +95,7 @@ export default function SAV() {
   const queryUrl = useMemo(() => {
     const params = new URLSearchParams();
     if (selectedStoreId && selectedStoreId !== 'all' && (user as any)?.role === 'admin') {
-      params.append('storeId', selectedStoreId.toString());
+      params.append('storeId', String(selectedStoreId));
     }
     return `/api/sav-tickets${params.toString() ? `?${params.toString()}` : ''}`;
   }, [selectedStoreId, (user as any)?.role]);
@@ -201,8 +201,12 @@ export default function SAV() {
   };
 
   const handleEdit = (ticket: SavTicketWithRelations) => {
+    console.log('🔧 DEBUG SAV Edit - ticket data:', ticket);
+    console.log('🔧 DEBUG SAV Edit - clientName:', ticket.clientName);
+    console.log('🔧 DEBUG SAV Edit - clientPhone:', ticket.clientPhone);
+    
     setSelectedTicket(ticket);
-    form.reset({
+    const resetData = {
       supplierId: ticket.supplierId,
       clientName: ticket.clientName || "",
       clientPhone: ticket.clientPhone || "",
@@ -213,7 +217,10 @@ export default function SAV() {
       problemDescription: ticket.problemDescription,
       resolutionDescription: ticket.resolutionDescription || "",
       status: ticket.status,
-    });
+    };
+    
+    console.log('🔧 DEBUG SAV Edit - reset data:', resetData);
+    form.reset(resetData);
     setIsEditDialogOpen(true);
   };
 
@@ -259,7 +266,25 @@ export default function SAV() {
           <p className="text-gray-600 mt-1">Gestion des tickets SAV et suivi des résolutions</p>
         </div>
         {canCreate && (
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+            setIsCreateDialogOpen(open);
+            if (open) {
+              // Reset form when opening create dialog
+              setSelectedTicket(null);
+              form.reset({
+                supplierId: 0,
+                clientName: "",
+                clientPhone: "",
+                productGencode: "",
+                productReference: "",
+                productDesignation: "",
+                problemType: "",
+                problemDescription: "",
+                resolutionDescription: "",
+                status: "nouveau",
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button className="w-fit">
                 <Plus className="h-4 w-4 mr-2" />
