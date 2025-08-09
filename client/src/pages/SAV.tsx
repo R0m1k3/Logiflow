@@ -484,10 +484,10 @@ export default function SAV() {
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          {ticket.clientName && (
+                          {(ticket.clientName || ticket.clientPhone) && (
                             <div className="text-sm font-medium text-gray-900 mb-1">
                               <User className="h-3 w-3 inline mr-1" />
-                              {ticket.clientName}
+                              {ticket.clientName || 'Client non renseigné'}
                               {ticket.clientPhone && (
                                 <span className="text-gray-500 ml-2">
                                   <Phone className="h-3 w-3 inline mr-1" />
@@ -837,6 +837,10 @@ function TicketDetail({
   ticket: SavTicketWithRelations;
   onClose: () => void;
 }) {
+  console.log('🔍 DEBUG TicketDetail - ticket object:', ticket);
+  console.log('🔍 DEBUG TicketDetail - clientName:', ticket.clientName);
+  console.log('🔍 DEBUG TicketDetail - clientPhone:', ticket.clientPhone);
+  
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -863,26 +867,34 @@ function TicketDetail({
         </div>
       </div>
 
-      {/* Informations client */}
-      {(ticket.clientName || ticket.clientPhone) && (
-        <div>
-          <Label className="text-sm font-medium text-gray-500">Informations client</Label>
-          <div className="mt-1 space-y-1">
-            {ticket.clientName && (
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-400" />
-                <span>{ticket.clientName}</span>
-              </div>
-            )}
-            {ticket.clientPhone && (
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-gray-400" />
-                <span>{ticket.clientPhone}</span>
-              </div>
-            )}
-          </div>
+      {/* Informations client - Always show section */}
+      <div>
+        <Label className="text-sm font-medium text-gray-500">Informations client</Label>
+        <div className="mt-1 space-y-1">
+          {ticket.clientName ? (
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-gray-400" />
+              <span>{ticket.clientName}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-500 italic">Nom non renseigné</span>
+            </div>
+          )}
+          {ticket.clientPhone ? (
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-gray-400" />
+              <span>{ticket.clientPhone}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-500 italic">Téléphone non renseigné</span>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div>
         <Label className="text-sm font-medium text-gray-500">Produit</Label>
